@@ -1,4 +1,4 @@
-def run_preAFQ(dwi_file, bvec_file, working_dir, sink_dir):
+def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
     import nipype.interfaces.fsl as fsl
     from nipype.interfaces.fsl.utils import AvScale
     import nipype.pipeline.engine as pe
@@ -103,21 +103,29 @@ def run_preAFQ(dwi_file, bvec_file, working_dir, sink_dir):
 
     datasink = pe.Node(nio.DataSink(),name="sinker")
     datasink.inputs.base_directory = sink_dir
-    datasink.inputs.substitutions = [("vol0000_flirt_merged.nii.gz", dwi_filename+'_corrected.nii.gz'),
-                                     ("stats.vol0000_flirt_merged.txt", dwi_filename+".motion.txt"),
-                                     ("derivatives/dti", "derivatives/{}/dti".format(bids_subject_name))]
+    datasink.inputs.substitutions = [("vol0000_flirt_merged.nii.gz", dwi_filename+'.nii.gz'),
+                                     ("stats.vol0000_flirt_merged.txt", dwi_filename+".art.json"),
+                                     ("motion_parameters.par", dwi_filename+".motion.txt"),
+                                     ("_rotated.bvec ", ".bvec"),
+                                     ("derivatives/dwi", "derivatives/{}/dwi".format(bids_subject_name))]
 
-    wf.connect(art, "statistic_files", datasink, "dti.@artstat")
-    wf.connect(outputspec, "dmri_corrected", datasink, "dti.@corrected")
-    wf.connect(outputspec,"bvec_rotated", datasink, "dti.@rotated")
+    wf.connect(art, "statistic_files", datasink, "dwi.@artstat")
+    wf.connect(outputspec, "dmri_corrected", datasink, "dwi.@corrected")
+    wf.connect(outputspec,"bvec_rotated", datasink, "dwi.@rotated")
+    wf.connect(getmotion, "motion_params", datasink, "dwi.@motion")
 
     wf.base_dir = working_dir
     wf.run()
 
     from glob import glob 
     import os
+    from shutil import copyfile
+
+    copyfile(bval_file, os.path.join(sink_dir, bids_subject_name, "dwi", os.path.split(bval_file)[1]))
     
-    dmri_corrected = glob(os.path.join(sink_dir, 'dti', '*.nii.gz'))[0]
-    bvec_rotated = glob(os.path.join(sink_dir, 'dti', '*.bvec'))[0]
-    motion_outliers = glob(os.path.join(sink_dir, 'dti', '*.txt'))[0]
-    return dmri_corrected, bvec_rotated, motion_outliers
+    dmri_corrected = glob(os.path.join(sink_dir, '*/dwi', '*.nii.gz'))[0]
+    bvec_rotated = glob(os.path.join(sink_dir, '*/dwi', '*.bvec'))[0]
+    bval_file = glob(os.path.join(sink_dir, '*/dwi', '*.bval'))[0]
+    art_file = glob(os.path.join(sink_dir, '*/dwi', '*.art.json'))[0]
+    motion_file = glob(os.path.join(sink_dir, '*/dwi', '*.motion.txt'))[0]
+    return dmri_corrected, bvec_rotated, art_file, motion_file
