@@ -106,7 +106,7 @@ def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
     datasink.inputs.substitutions = [("vol0000_flirt_merged.nii.gz", dwi_filename+'.nii.gz'),
                                      ("stats.vol0000_flirt_merged.txt", dwi_filename+".art.json"),
                                      ("motion_parameters.par", dwi_filename+".motion.txt"),
-                                     ("_rotated.bvec ", ".bvec"),
+                                     ("_rotated.bvec", ".bvec"),
                                      ("derivatives/dwi", "derivatives/{}/dwi".format(bids_subject_name))]
 
     wf.connect(art, "statistic_files", datasink, "dwi.@artstat")
