@@ -98,6 +98,41 @@ RUN conda install -y -q --name preafq \
 
 RUN sed -i '$isource activate preafq' $ND_ENTRYPOINT 
 
+
+ENV FREESURFER_HOME="/opt/freesurfer-6.0.0" \
+    PATH="/opt/freesurfer-6.0.0/bin:$PATH"
+
+RUN apt-get update -qq \
+    && apt-get install -y -q --no-install-recommends \
+           bc \
+           libgomp1 \
+           libxmu6 \
+           libxt6 \
+           perl \
+           tcsh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && echo "Downloading FreeSurfer ..." \
+    && mkdir -p /opt/freesurfer-6.0.0 \
+    && curl -fsSL --retry 5 ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz \
+    | tar -xz -C /opt/freesurfer-6.0.0 --strip-components 1 \
+         --exclude='freesurfer/average/mult-comp-cor' \
+         --exclude='freesurfer/lib/cuda' \
+         --exclude='freesurfer/lib/qt' \
+         --exclude='freesurfer/subjects/V1_average' \
+         --exclude='freesurfer/subjects/bert' \
+         --exclude='freesurfer/subjects/cvs_avg35' \
+         --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
+         --exclude='freesurfer/subjects/fsaverage3' \
+         --exclude='freesurfer/subjects/fsaverage4' \
+         --exclude='freesurfer/subjects/fsaverage5' \
+         --exclude='freesurfer/subjects/fsaverage6' \
+         --exclude='freesurfer/subjects/fsaverage_sym' \
+         --exclude='freesurfer/trctrain' \
+    && sed -i '$isource "/opt/freesurfer-6.0.0/SetUpFreeSurfer.sh"' "$ND_ENTRYPOINT"
+
+COPY ./license.txt /opt/freesurfer-6.0.0/license.txt
+
 RUN echo '{ \
     \n  "pkg_manager": "apt", \
     \n  "instructions": [ \

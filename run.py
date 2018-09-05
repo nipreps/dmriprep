@@ -1,4 +1,5 @@
-def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
+def run_preAFQ(dwi_file, bvec_file, bval_file, subjects_dir, working_dir, sink_dir):
+    import nipype.interfaces.freesurfer as fs
     import nipype.interfaces.fsl as fsl
     from nipype.interfaces.fsl.utils import AvScale
     import nipype.pipeline.engine as pe
@@ -8,6 +9,8 @@ def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
     from nipype.interfaces.dipy import DTI
     from nipype.utils.filemanip import fname_presuffix
     import os
+    from nipype.interfaces.dipy import DTI
+    from nipype.interfaces.c3 import C3dAffineTool
 
     wf = create_dmri_preprocessing(name='preAFQ', 
                                 use_fieldmap=False,
@@ -26,6 +29,73 @@ def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
     #QC: FLIRT translation and rotation parameters
     flirt = wf.get_node("motion_correct.coregistration")
     #flirt.inputs.save_mats = True
+
+    get_tensor = pe.Node(DTI(), name="dipy_tensor")
+    wf.connect(outputspec, "dmri_corrected",get_tensor,"in_file")
+    #wf.connect(inputspec2,"bvals", get_tensor, "in_bval")
+    get_tensor.inputs.in_bval = bval_file
+    wf.connect(outputspec, "bvec_rotated", get_tensor, "in_bvec")
+
+    scale_tensor = pe.Node(name='scale_tensor', interface=fsl.BinaryMaths())
+    scale_tensor.inputs.operation = 'mul'
+    scale_tensor.inputs.operand_value = 1000
+    wf.connect(get_tensor, 'out_file', scale_tensor, 'in_file')
+
+    fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
+    wf.connect(outputspec, "dmri_corrected", fslroi, "in_file")
+
+    bbreg = pe.Node(fs.BBRegister(contrast_type="t2", init="fsl", out_fsl_file=True,
+                                  subjects_dir=subjects_dir,
+                                  epi_mask=True),
+                    name="bbreg")
+    #wf.connect(inputspec2,"fsid", bbreg,"subject_id")
+    bbreg.inputs.subject_id = 'freesurfer' #bids_subject_name
+    wf.connect(fslroi,"roi_file", bbreg, "source_file")
+
+    voltransform = pe.Node(fs.ApplyVolTransform(inverse=True),
+                              iterfield=['source_file', 'reg_file'],
+                              name='transform')
+    voltransform.inputs.subjects_dir = subjects_dir
+
+    vt2 = voltransform.clone("transform_aparcaseg")
+    vt2.inputs.interp = "nearest"
+
+    def binarize_aparc(aparc_aseg):
+        import nibabel as nib
+        from nipype.utils.filemanip import fname_presuffix
+        import os
+        img = nib.load(aparc_aseg)
+        data, aff = img.get_data(), img.affine
+        outfile = fname_presuffix(aparc_aseg, suffix="bin.nii.gz", newpath=os.path.abspath("."), use_ext=False)
+        nib.Nifti1Image((data > 0).astype(float), aff).to_filename(outfile)
+        return outfile
+
+    #wf.connect(inputspec2, "mask_nii", voltransform, "target_file")
+    create_mask = pe.Node(niu.Function(input_names=["aparc_aseg"], 
+                                       output_names=["outfile"], 
+                                       function=binarize_aparc),
+                  name="bin_aparc")
+
+    def get_aparc_aseg(subjects_dir, sub):
+        return os.path.join(subjects_dir, sub, "mri", "aparc+aseg.mgz")
+
+    create_mask.inputs.aparc_aseg = get_aparc_aseg(subjects_dir, 'freesurfer')
+    wf.connect(create_mask, "outfile", voltransform, "target_file")
+
+    wf.connect(fslroi, "roi_file", voltransform, "source_file")
+    wf.connect(bbreg, "out_reg_file", voltransform, "reg_file")
+
+    vt2.inputs.target_file = get_aparc_aseg(subjects_dir, 'freesurfer')
+    #wf.connect(inputspec2, "aparc_aseg", vt2, "target_file")
+    wf.connect(fslroi, "roi_file", vt2, "source_file")
+    wf.connect(bbreg, "out_reg_file", vt2, "reg_file")
+
+    # AK (2017): THIS NODE MIGHT NOT BE NECESSARY 
+    # AK (2018) doesn't know why she said that above..
+    threshold2 = pe.Node(fs.Binarize(min=0.5, out_type='nii.gz', dilate=1),
+                            iterfield=['in_file'],
+                            name='threshold2')
+    wf.connect(voltransform, "transformed_file", threshold2, "in_file")
 
 
     #wf.connect(getmotion, "motion_params", datasink, "dti.@motparams")
@@ -107,12 +177,35 @@ def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
                                      ("stats.vol0000_flirt_merged.txt", dwi_filename+".art.json"),
                                      ("motion_parameters.par", dwi_filename+".motion.txt"),
                                      ("_rotated.bvec", ".bvec"),
-                                     ("derivatives/dwi", "derivatives/{}/dwi".format(bids_subject_name))]
+                                     ("aparc+aseg_warped_out", dwi_filename.replace("_dwi", "_aparc+aseg")),
+                                     ("art.vol0000_flirt_merged_outliers.txt", dwi_filename+ ".outliers.txt"),
+                                     ("vol0000_flirt_merged", dwi_filename),
+                                     ("_roi_bbreg_freesurfer", "_register"),
+                                     ("aparc+asegbin_warped_thresh", dwi_filename.replace("_dwi", "_mask")),
+                                     ("derivatives/preafq", "derivatives/{}/preafq".format(bids_subject_name))]
 
-    wf.connect(art, "statistic_files", datasink, "dwi.@artstat")
-    wf.connect(outputspec, "dmri_corrected", datasink, "dwi.@corrected")
-    wf.connect(outputspec,"bvec_rotated", datasink, "dwi.@rotated")
-    wf.connect(getmotion, "motion_params", datasink, "dwi.@motion")
+    wf.connect(art, "statistic_files", datasink, "preafq.art.@artstat")
+    wf.connect(art, "outlier_files", datasink, "preafq.art.@artoutlier")
+    wf.connect(outputspec, "dmri_corrected", datasink, "preafq.dwi.@corrected")
+    wf.connect(outputspec,"bvec_rotated", datasink, "preafq.dwi.@rotated")
+    wf.connect(getmotion, "motion_params", datasink, "preafq.art.@motion")
+    
+    wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@tensor")
+    wf.connect(get_tensor, "fa_file", datasink, "preafq.dti.@fa")
+    wf.connect(get_tensor, "md_file", datasink, "preafq.dti.@md")
+    wf.connect(get_tensor, "ad_file", datasink, "preafq.dti.@ad")
+    wf.connect(get_tensor, "rd_file", datasink, "preafq.dti.@rd")
+    wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@scaled_tensor")
+
+    wf.connect(bbreg, "min_cost_file", datasink, "preafq.reg.@mincost")
+    wf.connect(bbreg,"out_fsl_file", datasink, "preafq.reg.@fslfile")
+    wf.connect(bbreg, "out_reg_file", datasink, "preafq.reg.@reg")
+    wf.connect(threshold2, "binary_file", datasink, "preafq.anat.@mask")
+    #wf.connect(vt2, "transformed_file", datasink, "dwi.@aparc_aseg")
+
+    convert = pe.Node(fs.MRIConvert(out_type="niigz"), name="convert2nii")
+    wf.connect(vt2, "transformed_file", convert, "in_file")
+    wf.connect(convert, "out_file", datasink, "preafq.anat.@aparc_aseg")
 
     wf.base_dir = working_dir
     wf.run()
@@ -121,11 +214,12 @@ def run_preAFQ(dwi_file, bvec_file, bval_file, working_dir, sink_dir):
     import os
     from shutil import copyfile
 
-    copyfile(bval_file, os.path.join(sink_dir, bids_subject_name, "dwi", os.path.split(bval_file)[1]))
+    copyfile(bval_file, os.path.join(sink_dir, bids_subject_name, "preafq", "dwi", os.path.split(bval_file)[1]))
     
-    dmri_corrected = glob(os.path.join(sink_dir, '*/dwi', '*.nii.gz'))[0]
-    bvec_rotated = glob(os.path.join(sink_dir, '*/dwi', '*.bvec'))[0]
-    bval_file = glob(os.path.join(sink_dir, '*/dwi', '*.bval'))[0]
-    art_file = glob(os.path.join(sink_dir, '*/dwi', '*.art.json'))[0]
-    motion_file = glob(os.path.join(sink_dir, '*/dwi', '*.motion.txt'))[0]
-    return dmri_corrected, bvec_rotated, art_file, motion_file
+    dmri_corrected = glob(os.path.join(sink_dir, '*/preafq/dwi', '*.nii.gz'))[0]
+    bvec_rotated = glob(os.path.join(sink_dir, '*/preafq/dwi', '*.bvec'))[0]
+    bval_file = glob(os.path.join(sink_dir, '*/preafq/dwi', '*.bval'))[0]
+    art_file = glob(os.path.join(sink_dir, '*/preafq/art', '*.art.json'))[0]
+    motion_file = glob(os.path.join(sink_dir, '*/preafq/art', '*.motion.txt'))[0]
+    outlier_file = glob(os.path.join(sink_dir, '*/preafq/art', '*.outliers.txt'))[0]
+    return dmri_corrected, bvec_rotated, art_file, motion_file, outlier_file
