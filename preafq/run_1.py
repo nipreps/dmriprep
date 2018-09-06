@@ -69,6 +69,12 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     # prep.inputs.inputnode.alt_file = dwi_file_PA
     prep.inputs.inputnode.in_bvec = bvec_file
     prep.inputs.inputnode.in_bval = bval_file
+    eddy = prep.get_node('fsl_eddy')
+    eddy.inputs.repol = True
+    eddy.inputs.niter = 1
+
+
+
     # print(prep.inputs)
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
@@ -78,7 +84,7 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
     wf.connect(prep, "outputnode.out_file", fslroi, "in_file")
 
-    bbreg = pe.Node(fs.BBRegister(contrast_type="t2", init="fsl",
+    bbreg = pe.Node(fs.BBRegister(contrast_type="t2", init="coreg",
                                   out_fsl_file=True,
                                   subjects_dir=subjects_dir,
                                   epi_mask=True),
@@ -151,27 +157,6 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                          name='threshold2')
     wf.connect(voltransform, "transformed_file", threshold2, "in_file")
 
-    # art detect stuff
-
-    motion = pe.Node(niu.Function(input_names=['eddy_params'],
-                                  output_names=['motion_file'],
-                                  function=get_flirt_motion_parameters),
-                     name="reformat_motion")
-
-    wf.connect(prep, "fsl_eddy.out_parameter", motion, "eddy_params")
-
-    art = pe.Node(interface=ArtifactDetect(), name="art")
-    art.inputs.use_differences = [True, True]
-    art.inputs.save_plot = False
-    art.inputs.use_norm = True
-    art.inputs.norm_threshold = 3
-    art.inputs.zintensity_threshold = 9
-    art.inputs.mask_type = 'spm_global'
-    art.inputs.parameter_source = 'FSL'
-
-    wf.connect(motion, "motion_file", art, "realignment_parameters")
-    wf.connect(prep, "outputnode.out_file", art, "realigned_files")
-
     datasink = pe.Node(nio.DataSink(), name="sinker")
     datasink.inputs.base_directory = out_dir
     datasink.inputs.substitutions = [
@@ -193,16 +178,23 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         # ("eddy_corrected_", dwi_fname.replace("dwi", "")),
         ("stats.eddy_corrected", dwi_fname.replace("dwi", "artStats")),
         ("eddy_corrected.eddy_parameters", dwi_fname+".eddy_parameters"),
+        ("qc/eddy_corrected", "qc/"+dwi_fname),
         ("derivatives/preafq", "derivatives/{}/preafq".format(bids_sub_name))
     ]
-
-    wf.connect(art, "statistic_files", datasink, "preafq.qc.@artstat")
-    wf.connect(art, "outlier_files", datasink, "preafq.qc.@artoutlier")
 
     wf.connect(prep, "outputnode.out_file", datasink, "preafq.dwi.@corrected")
     wf.connect(prep, "outputnode.out_bvec", datasink, "preafq.dwi.@rotated")
     wf.connect(prep, "fsl_eddy.out_parameter",
                datasink, "preafq.qc.@eddyparams")
+
+    wf.connect(prep, "fsl_eddy.out_movement_rms",
+               datasink, "preafq.qc.@eddyparamsrms")
+    wf.connect(prep, "fsl_eddy.out_outlier_report",
+               datasink, "preafq.qc.@eddyparamsreport")        
+    wf.connect(prep, "fsl_eddy.out_restricted_movement_rms",
+               datasink, "preafq.qc.@eddyparamsrestrictrms")   
+    wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
+            datasink, "preafq.qc.@eddyparamsshellalign")                  
 
     wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@tensor")
     wf.connect(get_tensor, "fa_file", datasink, "preafq.dti.@fa")
