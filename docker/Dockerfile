@@ -94,6 +94,7 @@ RUN conda install -y -q --name preafq \
            python=3.6 \
            nipype \
            dipy \
+           boto3 \
     && sync && conda clean -tipsy && sync
 
 RUN sed -i '$isource activate preafq' $ND_ENTRYPOINT 

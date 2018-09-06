@@ -2,20 +2,19 @@ import os.path as op
 from glob import glob
 from shutil import copyfile
 
-import nibabel as nib
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
-import numpy as np
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.interfaces.dipy import DTI
-from nipype.utils.filemanip import fname_presuffix
 from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
 
 
 def get_flirt_motion_parameters(eddy_params):
+    import numpy as np
+    import os.path as op
     data = np.genfromtxt(eddy_params)
     translations = data[:, :3]
     rotations = data[:, 3:6]
@@ -108,6 +107,9 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     vt3 = voltransform.clone("transform_orig")
 
     def binarize_aparc(aparc_aseg):
+        import nibabel as nib
+        from nipype.utils.filemanip import fname_presuffix
+        import os.path as op
         img = nib.load(aparc_aseg)
         data, aff = img.get_data(), img.affine
         outfile = fname_presuffix(
