@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""Functions to fetch BIDS compliant data from HBN dataset"""
+
 import os.path as op
 import re
 
