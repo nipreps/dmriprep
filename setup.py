@@ -11,7 +11,12 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=6.0', ]
+requirements = [
+    'Click>=6.0',
+    'nipype',
+    'dipy',
+    'boto3',
+]
 
 setup_requirements = ['pytest-runner', ]
 
@@ -19,7 +24,7 @@ test_requirements = ['pytest', ]
 
 setup(
     author="Anisha Keshavan",
-    author_email='anishakeshavan@gmail.com',
+    author_email='keshavan@berkeley.edu',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -47,7 +52,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/akeshavan/preafq',
+    url='https://github.com/akeshavan/preAFQ',
     version='0.1.0',
     zip_safe=False,
 )
