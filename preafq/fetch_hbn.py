@@ -2,7 +2,6 @@
 
 """Functions to fetch BIDS compliant data from HBN dataset"""
 
-import os.path as op
 import re
 
 import boto3

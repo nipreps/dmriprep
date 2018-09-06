@@ -12,4 +12,3 @@ InputS3Keys = namedtuple(
 
 # Input files namedtuple
 InputFiles = namedtuple('InputFiles', ['subject', 'site', 'files'])
-

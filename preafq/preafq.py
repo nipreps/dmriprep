@@ -7,6 +7,9 @@ from pathlib import Path
 
 import boto3
 
+from .base import InputFiles
+
+
 def download_prereqs(subject_keys, bucket='fcp-indi', directory='./input'):
     """
     Parameters
