@@ -1,5 +1,4 @@
 import os.path as op
-from glob import glob
 from shutil import copyfile
 
 import nipype.interfaces.freesurfer as fs
@@ -7,7 +6,6 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
-from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.interfaces.dipy import DTI
 from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
 
@@ -39,7 +37,7 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     prep.inputs.inputnode.in_bval = bval_file
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = 1 # TODO: change back to 5 when running for real
+    eddy.inputs.niter = 1  # TODO: change back to 5 when running for real
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
@@ -154,11 +152,11 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(prep, "fsl_eddy.out_movement_rms",
                datasink, "preafq.qc.@eddyparamsrms")
     wf.connect(prep, "fsl_eddy.out_outlier_report",
-               datasink, "preafq.qc.@eddyparamsreport")        
+               datasink, "preafq.qc.@eddyparamsreport")
     wf.connect(prep, "fsl_eddy.out_restricted_movement_rms",
-               datasink, "preafq.qc.@eddyparamsrestrictrms")   
+               datasink, "preafq.qc.@eddyparamsrestrictrms")
     wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
-            datasink, "preafq.qc.@eddyparamsshellalign")                  
+               datasink, "preafq.qc.@eddyparamsshellalign")
 
     wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@tensor")
     wf.connect(get_tensor, "fa_file", datasink, "preafq.dti.@fa")
@@ -181,21 +179,22 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(vt3, "transformed_file", convert1, "in_file")
     wf.connect(convert1, "out_file", datasink, "preafq.anat.@anat")
 
-    def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report, 
+    def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report,
                        color_fa_file, anat_mask_file):
         from preafq.qc import create_report_json
 
-        report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report, 
-                       color_fa_file, anat_mask_file)
+        report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
+                                    color_fa_file, anat_mask_file)
         return report
-    
-    reportNode = pe.Node(niu.Function(input_names=['dwi_corrected_file', 'eddy_rms', 
-                                                   'eddy_report', 'color_fa_file', 
-                                                   'anat_mask_file'], 
-                                      output_names=['report'], 
-                                      function=reportNodeFunc),
-                         name="reportJSON")
-    
+
+    reportNode = pe.Node(niu.Function(
+        input_names=['dwi_corrected_file', 'eddy_rms',
+                     'eddy_report', 'color_fa_file',
+                     'anat_mask_file'],
+        output_names=['report'],
+        function=reportNodeFunc
+    ), name="reportJSON")
+
     wf.connect(prep, "outputnode.out_file", reportNode, 'dwi_corrected_file')
     wf.connect(prep, "fsl_eddy.out_movement_rms", reportNode, 'eddy_rms')
     wf.connect(prep, "fsl_eddy.out_outlier_report", reportNode, 'eddy_report')
