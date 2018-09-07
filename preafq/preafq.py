@@ -30,7 +30,7 @@ def move_t1_to_freesurfer(t1_file):
     """
     freesurfer_path = op.join(op.dirname(t1_file), 'freesurfer')
 
-    convert_cmd = 'mriconvert {in_:s} {out_:s}'.format(
+    convert_cmd = 'mri_convert {in_:s} {out_:s}'.format(
         in_=t1_file, out_=op.join(freesurfer_path, 'mri', 'orig.mgz')
     )
 
@@ -104,12 +104,12 @@ def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
     out_dir = op.join(workdir, 'output')
 
     run_preAFQ(
-        dwi_file=input_files.files['dwi'],
-        dwi_file_AP=input_files.files['epi_ap'],
-        dwi_file_PA=input_files.files['epi_pa'],
-        bvec_file=input_files.files['bvec'],
-        bval_file=input_files.files['bval'],
-        subjects_dir=op.dirname(input_files.files['t1w']),
+        dwi_file=input_files.files['dwi'][0],
+        dwi_file_AP=input_files.files['epi_ap'][0],
+        dwi_file_PA=input_files.files['epi_pa'][0],
+        bvec_file=input_files.files['bvec'][0],
+        bval_file=input_files.files['bval'][0],
+        subjects_dir=op.dirname(input_files.files['t1w'][0]),
         working_dir=scratch_dir,
         out_dir=out_dir,
     )

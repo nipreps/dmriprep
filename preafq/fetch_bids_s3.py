@@ -11,7 +11,7 @@ from pathlib import Path
 
 import boto3
 
-from .base import InputFiles, InputFilesWithSession
+from .base import InputFiles, InputFilesWithSession, s3_client
 
 
 mod_logger = logging.getLogger(__name__)
@@ -108,12 +108,10 @@ def get_s3_keys(prefix, site, bucket='fcp-indi'):
     list
         All the keys matching the prefix and site in the S3 bucket
     """
-    s3 = boto3.client('s3')
-
     # Avoid duplicate trailing slash in prefix
     prefix = prefix.rstrip('/')
 
-    response = s3.list_objects_v2(
+    response = s3_client.list_objects_v2(
         Bucket=bucket,
         Prefix=prefix + '/' + site + '/',
     )
@@ -127,7 +125,7 @@ def get_s3_keys(prefix, site, bucket='fcp-indi'):
         )
 
     while response['IsTruncated']:
-        response = s3.list_objects_v2(
+        response = s3_client.list_objects_v2(
             Bucket=bucket,
             Prefix=prefix + '/' + site + '/',
             ContinuationToken=response['NextContinuationToken']
@@ -230,7 +228,8 @@ def keys_to_subject_register(keys, prefix, site):
     return s3_registers
 
 
-def download_register(subject_keys, bucket='fcp-indi', directory='./input'):
+def download_register(subject_keys, bucket='fcp-indi', directory='./input',
+                      overwrite=False):
     """
     Parameters
     ----------
@@ -246,6 +245,9 @@ def download_register(subject_keys, bucket='fcp-indi', directory='./input'):
     directory : string
         Local directory to which to save files
 
+    overwrite : bool
+        Flag to overwrite existing files
+
     Returns
     -------
     files : InputFiles namedtuple
@@ -256,7 +258,6 @@ def download_register(subject_keys, bucket='fcp-indi', directory='./input'):
         'files' : local file paths,
         'file_type' : 'local',
     """
-    s3 = boto3.client('s3')
     subject = subject_keys.subject
     site = subject_keys.site
 
@@ -275,10 +276,13 @@ def download_register(subject_keys, bucket='fcp-indi', directory='./input'):
     def download_from_s3(fname_, bucket_, key_):
         # Create the directory and file if necessary
         Path(op.dirname(fname_)).mkdir(parents=True, exist_ok=True)
-        Path(fname_).touch(exist_ok=True)
+        try:
+            Path(fname_).touch(exist_ok=overwrite)
 
-        # Download the file
-        s3.download_file(Bucket=bucket_, Key=key_, Filename=fname_)
+            # Download the file
+            s3_client.download_file(Bucket=bucket_, Key=key_, Filename=fname_)
+        except FileExistsError:
+            mod_logger.info('File {fname:s} already exists. Continuing...')
 
     s3keys = subject_keys.files
     files = input_files.files
@@ -366,14 +370,12 @@ def determine_directions(input_files,
                 ''.format(files=required_json - set(json_files))
             )
 
-        s3 = boto3.client('s3')
-
         def get_json(json_file):
             if input_type == 'local':
                 with open(json_file, 'r') as fp:
                     meta = json.load(fp)
             else:
-                response = s3.get_object(
+                response = s3_client.get_object(
                     Bucket=bucket,
                     Key=json_file,
                 )
