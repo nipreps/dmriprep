@@ -14,7 +14,7 @@ before_script:
 - cd preafqViewer
 - npm prune
 script:
-- npm install chalk
+- npm install
 - npm run build
 #- npm test
 after_success:
