@@ -3,15 +3,18 @@
       <img class="logo" src="../assets/logo.svg" />
       <h1>preAFQ Viewer</h1>
       <p class="lead">Upload your report.json file from preAFQ</p>
-      <b-form-file class="mt-3" v-model="file" :state="Boolean(file)" placeholder="Choose a file..."></b-form-file>
-      
+      <b-form-file class="mt-3" v-model="file"
+       :state="Boolean(file)" placeholder="Choose a file...">
+     </b-form-file>
       <div v-if="report.b0" class="mt-3">
         <h2 class="mt-3 pt-3">Corrected dwi</h2>
         <p class="lead">Result of eddy</p>
-        <vue-slider ref="timeSlider" v-model="time" :min="0" :max="report.dwi_corrected[0].num_slices-1"></vue-slider>
-        <sprite4d v-for="view in report.dwi_corrected" 
+        <vue-slider ref="timeSlider" v-model="time"
+         :min="0" :max="report.dwi_corrected[0].num_slices-1">
+       </vue-slider>
+        <sprite4d v-for="view in report.dwi_corrected"
                   :key="view.orientation"
-                  :M="view.M" 
+                  :M="view.M"
                   :N="view.N"
                   :img="view.img"
                   :num_slices="view.num_slices"
@@ -24,21 +27,21 @@
         </sprite4d>
 
         <h2 class="mt-3 pt-3">Eddy Report</h2>
-        <p class="lead"> <b-btn v-b-toggle.collapse1 variant="primary">Outliers ({{report.eddy_report.length}})</b-btn> </p>
-          
+        <p class="lead"> <b-btn v-b-toggle.collapse1 variant="primary">
+          Outliers ({{report.eddy_report.length}})</b-btn> </p>
           <b-collapse id="collapse1" class="mt-2">
             <b-card>
 
               <p v-for="e in report.eddy_report" :key="e">{{e}}</p>
-                
+
             </b-card>
           </b-collapse>
 
           <div style="height: 200px; width: 100%; display: inline-flex;">
-            <line-chart id="motion_params" 
-             :data="report.eddy_params" 
-             xlabel="TR" 
-             ylabel="RMS" 
+            <line-chart id="motion_params"
+             :data="report.eddy_params"
+             xlabel="TR"
+             ylabel="RMS"
              :highlightIdx="time"
             >
             </line-chart>
@@ -70,7 +73,9 @@
           :overlayMode="true"
           opacity="1"
         ></sprite4d>
-        <vue-slider ref="timeSlider" v-model="spriteSlice" :min="0" :max="report.b0.num_slices-1"></vue-slider>
+        <vue-slider ref="timeSlider"
+         v-model="spriteSlice" :min="0"
+         :max="report.b0.num_slices-1"></vue-slider>
 
         <h2 class="mt-3 pt-3">DTI: ColorFA</h2>
         <p class="lead">Color FA mapped on B0</p>
@@ -104,8 +109,8 @@
 </template>
 
 <script>
-import vueSlider from 'vue-slider-component'
-import sprite4d from './sprite4D';
+import vueSlider from 'vue-slider-component';
+import sprite4d from './Sprite4D';
 import lineChart from './LineChart';
 
 export default {
@@ -127,17 +132,17 @@ export default {
   methods: {
     get_mid_slice() {
       return Math.floor(this.report.b0.num_slices / 2);
-    }
+    },
   },
   watch: {
     file() {
       if (this.file) {
         const reader = new FileReader();
         const self = this;
-        reader.onload = function(e) {
-          var contents = e.target.result;
-          self.report = JSON.parse(contents)
-          console.log(self.report)
+        reader.onload = function Load(e) {
+          const contents = e.target.result;
+          self.report = JSON.parse(contents);
+          // console.log(self.report);
         };
         reader.readAsText(this.file);
       }
@@ -147,7 +152,7 @@ export default {
         this.spriteSlice = this.get_mid_slice();
       }
     },
-  }
+  },
 };
 </script>
 
