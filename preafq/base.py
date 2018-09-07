@@ -5,10 +5,13 @@
 from collections import namedtuple
 
 # Define the different namedtuple return types
-InputS3Keys = namedtuple(
-    'InputS3Keys',
-    ['subject', 'site', 'valid', 's3_keys']
+InputFiles = namedtuple(
+    'InputFiles',
+    ['subject', 'site', 'valid', 'files', 'file_type']
 )
 
-# Input files namedtuple
-InputFiles = namedtuple('InputFiles', ['subject', 'site', 'files'])
+# Input files (one type with session info and one without)
+InputFilesWithSession = namedtuple(
+    'InputFilesWithSession',
+    ['subject', 'site', 'session', 'files', 'file_type']
+)
