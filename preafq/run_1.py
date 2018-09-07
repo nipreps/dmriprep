@@ -12,20 +12,6 @@ from nipype.interfaces.dipy import DTI
 from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
 
 
-def get_flirt_motion_parameters(eddy_params):
-    import numpy as np
-    import os.path as op
-    data = np.genfromtxt(eddy_params)
-    translations = data[:, :3]
-    rotations = data[:, 3:6]
-    rigid = np.hstack((rotations, translations))
-
-    motion_params = op.abspath('motion_parameters.par')
-    np.savetxt(motion_params, rigid)
-
-    return motion_params
-
-
 def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                subjects_dir, working_dir, out_dir):
     """This is for HBN diffusion data
@@ -42,28 +28,10 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     epi_AP = {'echospacing': 66.5e-3, 'enc_dir': 'y-'}
     epi_PA = {'echospacing': 66.5e-3, 'enc_dir': 'y'}
     prep = all_fsl_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
-    # prep_inputspec = prep.get_node('inputnode')
-    # prep_outputspec = prep.get_node('outputnode')
-    # print(prep_inputspec, prep_outputspec)
 
     # initialize an overall workflow
     wf = pe.Workflow(name="preAFQ")
     wf.base_dir = op.abspath(working_dir)
-
-    # wf.connect([
-    #     (infosource, datasource, [('subject_id', 'subject_id')]),
-    #     (datasource, prep, [
-    #         ('dwi', 'inputnode.in_file'), ('dwi_rev', 'inputnode.alt_file'),
-    #         ('bvals', 'inputnode.in_bval'), ('bvecs', 'inputnode.in_bvec')
-    #     ]),
-    #     (prep, bias, [('outputnode.out_file', 'inputnode.in_file'),
-    #                   ('outputnode.out_mask', 'inputnode.in_mask')]),
-    #     (datasource, bias, [('bvals', 'inputnode.in_bval')])
-    # ])
-
-    # wf = create_dmri_preprocessing(name='preAFQ',
-    #                             use_fieldmap=False,
-    #                             fieldmap_registration=False)
 
     prep.inputs.inputnode.in_file = dwi_file
     # prep.inputs.inputnode.alt_file = dwi_file_PA
@@ -71,11 +39,7 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     prep.inputs.inputnode.in_bval = bval_file
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = 1
-
-
-
-    # print(prep.inputs)
+    eddy.inputs.niter = 1 # TODO: change back to 5 when running for real
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
@@ -217,20 +181,31 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(vt3, "transformed_file", convert1, "in_file")
     wf.connect(convert1, "out_file", datasink, "preafq.anat.@anat")
 
-    # wf.base_dir = working_dir
-    # wf.write_graph()
+    def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report, 
+                       color_fa_file, anat_mask_file):
+        from preafq.qc import create_report_json
+
+        report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report, 
+                       color_fa_file, anat_mask_file)
+        return report
+    
+    reportNode = pe.Node(niu.Function(input_names=['dwi_corrected_file', 'eddy_rms', 
+                                                   'eddy_report', 'color_fa_file', 
+                                                   'anat_mask_file'], 
+                                      output_names=['report'], 
+                                      function=reportNodeFunc),
+                         name="reportJSON")
+    
+    wf.connect(prep, "outputnode.out_file", reportNode, 'dwi_corrected_file')
+    wf.connect(prep, "fsl_eddy.out_movement_rms", reportNode, 'eddy_rms')
+    wf.connect(prep, "fsl_eddy.out_outlier_report", reportNode, 'eddy_report')
+    wf.connect(threshold2, "binary_file", reportNode, 'anat_mask_file')
+    wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
+
+    wf.connect(reportNode, 'report', datasink, 'preafq.report.@report')
+
     wf.run()
 
     copyfile(bval_file, op.join(
         out_dir, bids_sub_name, "preafq", "dwi", op.split(bval_file)[1]
     ))
-
-    # dmri_corrected = glob(op.join(out_dir, '*/preafq/dwi', '*.nii.gz'))[0]
-    # bvec_rotated = glob(op.join(out_dir, '*/preafq/dwi', '*.bvec'))[0]
-    # bval_file = glob(op.join(out_dir, '*/preafq/dwi', '*.bval'))[0]
-    # art_file = glob(op.join(out_dir, '*/preafq/art', '*.art.json'))[0]
-    # motion_file = glob(op.join(out_dir, '*/preafq/art', '*.motion.txt'))[0]
-    # outlier_file = glob(op.join(out_dir, '*/preafq/art',
-    #                             '*.outliers.txt'))[0]
-
-    # return dmri_corrected, bvec_rotated, #art_file, motion_file, outlier_file
