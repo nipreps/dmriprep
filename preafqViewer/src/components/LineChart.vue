@@ -100,7 +100,7 @@ export default {
       d3.select(`#${this.id} .dot-series-2`)
         .attr('r', 7)
         .attr('cx', () => self.x(self.highlightIdx))
-        .attr('cy', () => self.y(self.data[self.highlightIdx][0]))
+        .attr('cy', () => self.y(self.data[self.highlightIdx][1]))
         .attr('fill', 'red');
     },
     plotData() {
