@@ -85,17 +85,24 @@ RUN export PATH="/opt/miniconda-latest/bin:$PATH" \
     && conda config --system --prepend channels conda-forge \
     && conda config --system --set auto_update_conda false \
     && conda config --system --set show_channel_urls true \
-    && sync && conda clean -tipsy && sync \
-    && conda create -y -q --name preafq
+    && sync && conda clean -tipsy && sync 
+#    && conda create -y -q --name preafq
 
-RUN conda install -y -q --name preafq \
-           -c \
-           conda-forge \
-           python=3.6 \
-           nipype \
-           dipy \
-           boto3 \
-    && sync && conda clean -tipsy && sync
+# RUN conda install -y -q --name preafq \
+#            -c \
+#            conda-forge \
+#            python=3.6 \
+#            nipype \
+#            dipy \
+#            boto3 \
+#     && sync && conda clean -tipsy && sync
+
+ADD environment.yml environment.yml
+RUN apt-get update && apt-get install -y git gcc
+RUN conda env create -f environment.yml 
+
+#&& sync && conda clean -tipsy && sync
+
 
 RUN sed -i '$isource activate preafq' $ND_ENTRYPOINT 
 
