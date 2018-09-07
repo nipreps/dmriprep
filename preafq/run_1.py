@@ -1,14 +1,6 @@
 import os.path as op
 from shutil import copyfile
 
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.io as nio
-import nipype.interfaces.utility as niu
-import nipype.pipeline.engine as pe
-from nipype.interfaces.dipy import DTI
-from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
-
 
 def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                subjects_dir, working_dir, out_dir):
@@ -16,6 +8,15 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
 
     Assuming phase-encode direction is AP/PA for topup
     """
+
+    import nipype.interfaces.freesurfer as fs
+    import nipype.interfaces.fsl as fsl
+    import nipype.interfaces.io as nio
+    import nipype.interfaces.utility as niu
+    import nipype.pipeline.engine as pe
+    from nipype.interfaces.dipy import DTI
+    from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
+
     # some bookkeeping (getting the filename, gettings the BIDS subject name)
     dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
     bids_sub_name = dwi_fname.split("_")[0]

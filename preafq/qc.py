@@ -1,4 +1,6 @@
 import matplotlib
+matplotlib.use('agg')
+
 import nibabel as nib
 
 import matplotlib.pyplot as plt
@@ -9,7 +11,7 @@ from io import BytesIO
 from nipype.utils.filemanip import save_json
 import base64
 
-matplotlib.use('agg')
+
 
 
 def reorient_array(data, aff):
