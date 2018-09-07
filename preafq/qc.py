@@ -1,22 +1,27 @@
-import nibabel as nib
 import matplotlib
-matplotlib.use('agg')
+import nibabel as nib
+
 import matplotlib.pyplot as plt
 import numpy as np
-from nipype.utils.filemanip import fname_presuffix
 import os.path as op
 from dipy.segment.mask import median_otsu
 from io import BytesIO
 from nipype.utils.filemanip import save_json
 import base64
 
+matplotlib.use('agg')
+
+
 def reorient_array(data, aff):
     # rearrange the matrix to RAS orientation
     orientation = nib.orientations.io_orientation(aff)
     data_RAS = nib.orientations.apply_orientation(data, orientation)
     # In RAS
-    return nib.orientations.apply_orientation(data_RAS,
-                                    nib.orientations.axcodes2ornt("IPL"))
+    return nib.orientations.apply_orientation(
+        data_RAS,
+        nib.orientations.axcodes2ornt("IPL")
+    )
+
 
 def mplfig(data, outfile=None, as_bytes=False):
     fig = plt.figure(frameon=False, dpi=data.shape[0])
@@ -24,7 +29,7 @@ def mplfig(data, outfile=None, as_bytes=False):
     ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.set_axis_off()
     fig.add_axes(ax)
-    ax.imshow(data, aspect=1, cmap=plt.cm.Greys_r)  # used to be aspect="normal"
+    ax.imshow(data, aspect=1, cmap=plt.cm.Greys_r)  # previous aspect="normal"
     if outfile:
         fig.savefig(outfile, dpi=data.shape[0], transparent=True)
         plt.close()
@@ -43,7 +48,7 @@ def mplfigcontour(data, outfile=None, as_bytes=False):
     ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.set_axis_off()
     fig.add_axes(ax)
-    
+
     bg = np.zeros(data.shape)
     bg[:] = np.nan
     ax.imshow(bg, aspect=1, cmap=plt.cm.Greys_r)  # used to be aspect="normal"
@@ -59,23 +64,41 @@ def mplfigcontour(data, outfile=None, as_bytes=False):
         base64_jpgData = base64.b64encode(IObytes.read())
         return base64_jpgData.decode("ascii")
 
+
 def load_and_reorient(filename):
     img = nib.load(filename)
     data, aff = img.get_data(), img.affine
     data = reorient_array(data, aff)
     return data
 
+
 def reshape3D(data, n=256):
-    return np.pad(data, (((n-data.shape[0])//2, ((n-data.shape[0]) + (data.shape[0]%2 >0))//2), 
-                             ((n-data.shape[1])//2, ((n-data.shape[1]) + (data.shape[1]%2 >0))//2),
-                        (0,0)), 
-                      "constant", constant_values = (0,0))
+    return np.pad(data, (
+        (
+            (n-data.shape[0]) // 2,
+            ((n-data.shape[0]) + (data.shape[0] % 2 > 0)) // 2
+        ),
+        (
+            (n-data.shape[1]) // 2,
+            ((n-data.shape[1]) + (data.shape[1] % 2 > 0)) // 2
+        ),
+        (0, 0)
+    ), "constant", constant_values=(0, 0))
+
 
 def reshape4D(data, n=256):
-    return np.pad(data, (((n-data.shape[0])//2, ((n-data.shape[0]) + (data.shape[0]%2 >0))//2), 
-                             ((n-data.shape[1])//2, ((n-data.shape[1]) + (data.shape[1]%2 >0))//2),
-                        (0,0), (0,0)), 
-                      "constant", constant_values = (0,0))
+    return np.pad(data, (
+        (
+            (n-data.shape[0]) // 2,
+            ((n-data.shape[0]) + (data.shape[0] % 2 > 0)) // 2
+        ),
+        (
+            (n-data.shape[1]) // 2,
+            ((n-data.shape[1]) + (data.shape[1] % 2 > 0)) // 2
+        ),
+        (0, 0), (0, 0)
+    ), "constant", constant_values=(0, 0))
+
 
 def get_middle_slices(data, slice_direction):
     slicer = {"ax": 0, "cor": 1, "sag": 2}
@@ -84,12 +107,13 @@ def get_middle_slices(data, slice_direction):
     slice_num = int(num_slices / 2)
     all_data_slicer[slicer[slice_direction]] = slice_num
     tile = data[tuple(all_data_slicer)]
-    
+
     # make it a square
     N = max(tile.shape[:2])
     tile = reshape3D(tile, N)
-    
+
     return tile
+
 
 def nearest_square(limit):
     answer = 0
@@ -100,7 +124,8 @@ def nearest_square(limit):
     else:
         return answer + 1
 
-def create_sprite_from_tiles(tile, out_file = None, as_bytes=False):
+
+def create_sprite_from_tiles(tile, out_file=None, as_bytes=False):
     num_slices = tile.shape[-1]
     N = nearest_square(num_slices)
     M = int(np.ceil(num_slices/N))
@@ -109,24 +134,24 @@ def create_sprite_from_tiles(tile, out_file = None, as_bytes=False):
 
     if len(tile.shape) == 3:
         mosaic = np.zeros((N*tile.shape[0], M*tile.shape[0]))
-    else: 
+    else:
         mosaic = np.zeros((N*tile.shape[0], M*tile.shape[0], tile.shape[-2]))
-    
+
     mosaic[:] = np.nan
     helper = np.arange(N*M).reshape((N, M))
-    
+
     for t in range(num_slices):
         x, y = np.nonzero(helper == t)
         xmin = x[0] * pix
         xmax = (x[0] + 1) * pix
         ymin = y[0] * pix
         ymax = (y[0] + 1) * pix
-        
+
         if len(tile.shape) == 3:
-            mosaic[xmin:xmax, ymin:ymax] = tile[:,:,t]
+            mosaic[xmin:xmax, ymin:ymax] = tile[:, :, t]
         else:
-            mosaic[xmin:xmax, ymin:ymax, :] = tile[:,:,:,t]
-    
+            mosaic[xmin:xmax, ymin:ymax, :] = tile[:, :, :, t]
+
     if as_bytes:
         img = mplfig(mosaic, out_file, as_bytes=as_bytes)
         return dict(img=img, N=N, M=M, pix=pix, num_slices=num_slices)
@@ -138,18 +163,18 @@ def create_sprite_from_tiles(tile, out_file = None, as_bytes=False):
 
 
 def createSprite4D(dwi_file):
-    
+
     # initialize output dict
     output = []
 
     # load the file
-    dwi = load_and_reorient(dwi_file)[:,:,:,1:]
+    dwi = load_and_reorient(dwi_file)[:, :, :, 1:]
 
     # create tiles from center slice on each orientation
     for orient in ['sag', 'ax', 'cor']:
         tile = get_middle_slices(dwi, orient)
 
-        # create sprite images for each 
+        # create sprite images for each
         results = create_sprite_from_tiles(tile, as_bytes=True)
         results['img_type'] = '4dsprite'
         results['orientation'] = orient
@@ -157,11 +182,11 @@ def createSprite4D(dwi_file):
 
     return output
 
+
 def createB0_ColorFA_Mask_Sprites(b0_file, colorFA_file, mask_file):
     colorfa = load_and_reorient(colorFA_file)
-    b0 = load_and_reorient(b0_file)[:,:,:,0]
+    b0 = load_and_reorient(b0_file)[:, :, :, 0]
     anat_mask = load_and_reorient(mask_file)
-
 
     N = max(*b0.shape[:2])
 
@@ -173,7 +198,7 @@ def createB0_ColorFA_Mask_Sprites(b0_file, colorFA_file, mask_file):
 
     # make a colorFA sprite, masked by b0
     Q = reshape4D(colorfa, N)
-    Q[mask == False] = np.nan
+    Q[np.logical_not(mask)] = np.nan
     Q = np.moveaxis(Q,  -2, -1)
     outcolorFA = create_sprite_from_tiles(Q, as_bytes=True)
     outcolorFA['img_type'] = 'brainsprite'
@@ -186,23 +211,23 @@ def createB0_ColorFA_Mask_Sprites(b0_file, colorFA_file, mask_file):
     return outb0, outcolorFA, outmask
 
 
-def create_report_json(dwi_corrected_file, eddy_rms, eddy_report, 
-                       color_fa_file, anat_mask_file, 
+def create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
+                       color_fa_file, anat_mask_file,
                        outpath=op.abspath('./report.json')):
 
     report = {}
     report['dwi_corrected'] = createSprite4D(dwi_corrected_file)
 
-    b0, colorFA, mask = createB0_ColorFA_Mask_Sprites(dwi_corrected_file, 
-                                                     color_fa_file, 
-                                                     anat_mask_file)
+    b0, colorFA, mask = createB0_ColorFA_Mask_Sprites(dwi_corrected_file,
+                                                      color_fa_file,
+                                                      anat_mask_file)
     report['b0'] = b0
     report['colorFA'] = colorFA
     report['anat_mask'] = mask
 
     with open(eddy_report, 'r') as f:
         report['eddy_report'] = f.readlines()
-    
+
     report['eddy_params'] = np.genfromtxt(eddy_rms).tolist()
 
     save_json(outpath, report)
