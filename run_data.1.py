@@ -11,7 +11,7 @@ output = run_preAFQ(
     abspath("./sub-NDARBA507GCT/dwi/sub-NDARBA507GCT_acq-64dir_dwi.bvec"),
     abspath("./sub-NDARBA507GCT/dwi/sub-NDARBA507GCT_acq-64dir_dwi.bval"),
     abspath("./derivatives/sub-NDARBA507GCT"),
-    abspath("./scratch1"),
+    abspath("./scratch2"),
     abspath("./derivatives")
 )
 
