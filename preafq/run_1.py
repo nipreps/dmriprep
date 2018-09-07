@@ -207,5 +207,5 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.run()
 
     copyfile(bval_file, op.join(
-        out_dir, bids_sub_name, "preafq", "dwi", op.split(bval_file)[1]
+        out_dir, "preafq", "dwi", op.split(bval_file)[1]
     ))

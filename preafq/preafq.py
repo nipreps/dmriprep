@@ -40,7 +40,7 @@ def move_t1_to_freesurfer(t1_file):
                           stderr=subprocess.STDOUT)
 
 
-def upload_to_s3(output_files, bucket, prefix, site, session, subject):
+def upload_to_s3(output_files, outdir, bucket, prefix, site, session, subject):
     """Upload output files to S3, using key format specified by input params
 
     Parameters
@@ -49,6 +49,9 @@ def upload_to_s3(output_files, bucket, prefix, site, session, subject):
         Output files to transfer to S3. Assume that the user has passed in
         relative paths that are appropriate to fill in after the 'preAFQ'
         directory.
+
+    outdir : string
+        a path to the root of the data
 
     bucket : string
         Output S3 bucket
@@ -80,7 +83,7 @@ def upload_to_s3(output_files, bucket, prefix, site, session, subject):
         ])
 
     for file in output_files:
-        with open(file, 'rb') as fp:
+        with open(op.abspath(op.join(outdir, file)), 'rb') as fp:
             s3.put_object(
                 Bucket=bucket,
                 Body=fp,
@@ -91,7 +94,7 @@ def upload_to_s3(output_files, bucket, prefix, site, session, subject):
 
 
 def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
-                       in_bucket='fcp-indi', workdir='.'):
+                       in_bucket='fcp-indi', workdir=op.abspath('.')):
     input_files = fetch.download_register(
         subject_keys=input_s3_keys,
         bucket=in_bucket,
@@ -122,6 +125,7 @@ def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
                 out_files.append(rel_path.replace(out_dir + '/', '', 1))
 
     s3_output = upload_to_s3(output_files=out_files,
+                             outdir=out_dir,
                              bucket=out_bucket,
                              prefix=s3_prefix,
                              site=input_s3_keys.site,
