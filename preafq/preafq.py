@@ -5,6 +5,7 @@
 import logging
 import os
 import os.path as op
+import subprocess
 
 import boto3
 import nibabel as nib
@@ -29,8 +30,14 @@ def move_t1_to_freesurfer(t1_file):
     """
     freesurfer_path = op.join(op.dirname(t1_file), 'freesurfer')
 
-    img = nib.load(t1_file)
-    img.to_filename(op.join(freesurfer_path, 'mri', 'orig.mgz'))
+    convert_cmd = 'mriconvert {in_:s} {out_:s}'.format(
+        in_=t1_file, out_=op.join(freesurfer_path, 'mri', 'orig.mgz')
+    )
+
+    fnull = open(os.devnull, 'w')
+    cmd = subprocess.call(convert_cmd.split(),
+                          stdout=fnull,
+                          stderr=subprocess.STDOUT)
 
 
 def upload_to_s3(output_files, bucket, prefix, site, session, subject):
@@ -60,9 +67,8 @@ def upload_to_s3(output_files, bucket, prefix, site, session, subject):
 
     Returns
     -------
-    dict
-        S3 keys for each output file. The dict keys are the same as the keys
-        for the input parameter `output_files`
+    list
+        S3 keys for each output file
     """
     s3 = boto3.client('s3')
 
@@ -81,7 +87,7 @@ def upload_to_s3(output_files, bucket, prefix, site, session, subject):
                 Key=filename2s3key(file),
             )
 
-    return {k: filename2s3key(v) for k, v in output_files.items()}
+    return [filename2s3key(f) for f in output_files]
 
 
 def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
@@ -91,6 +97,8 @@ def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
         bucket=in_bucket,
         directory=op.abspath(op.join(workdir, 'input')),
     )
+
+    move_t1_to_freesurfer(input_files.files['t1w'][0])
 
     scratch_dir = op.join(workdir, 'scratch')
     out_dir = op.join(workdir, 'output')
@@ -113,9 +121,11 @@ def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
             if op.isfile(rel_path):
                 out_files.append(rel_path.replace(out_dir + '/', '', 1))
 
-    upload_to_s3(output_files=out_files,
-                 bucket=out_bucket,
-                 prefix=s3_prefix,
-                 site=input_s3_keys.site,
-                 session=input_s3_keys.session,
-                 subject=input_s3_keys.subject)
+    s3_output = upload_to_s3(output_files=out_files,
+                             bucket=out_bucket,
+                             prefix=s3_prefix,
+                             site=input_s3_keys.site,
+                             session=input_s3_keys.session,
+                             subject=input_s3_keys.subject)
+
+    return s3_output

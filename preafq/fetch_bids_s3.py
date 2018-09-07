@@ -493,7 +493,7 @@ def separate_sessions(input_files, multiples_policy='sessions',
                                                   site=input_files.site)
         )
 
-    t1w = input_files.files['t1w'][0]
+    t1w = input_files.files['t1w']
 
     # Take only the first freesurfer directory
     freesurfer_dirs = {
