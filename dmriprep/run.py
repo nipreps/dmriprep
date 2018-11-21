@@ -9,6 +9,19 @@ def run_dmriprep(dwi_file, bvec_file, bval_file,
     Runs dmriprep for acquisitions with just one PE direction.
 
     """
+    import nibabel as nib
+    import nipype.interfaces.freesurfer as fs
+    import nipype.interfaces.fsl as fsl
+    import nipype.interfaces.io as nio
+    import nipype.interfaces.utility as niu
+    import nipype.pipeline.engine as pe
+    import numpy as np
+    from nipype.algorithms.rapidart import ArtifactDetect
+    from nipype.interfaces.dipy import DTI
+    from nipype.interfaces.fsl.utils import AvScale
+    from nipype.utils.filemanip import fname_presuffix
+    from nipype.workflows.dmri.fsl.epi import create_dmri_preprocessing
+
     wf = create_dmri_preprocessing(name='dmriprep',
                                    use_fieldmap=False,
                                    fieldmap_registration=False)

@@ -1,16 +1,13 @@
-import matplotlib
-matplotlib.use('agg')
-
 import nibabel as nib
-
-import matplotlib.pyplot as plt
 import numpy as np
 import os.path as op
 from dipy.segment.mask import median_otsu
 from io import BytesIO
 from nipype.utils.filemanip import save_json
 import base64
-
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 
 
