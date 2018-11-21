@@ -10,21 +10,17 @@ import errno
 import logging
 import os
 
-from .dmriprep import upload_to_s3  # noqa
-from . import fetch_bids_s3  # noqa
-
-
 module_logger = logging.getLogger(__name__)
 
 # get the log level from environment variable
-if "AFQ_LOGLEVEL" in os.environ:
-    loglevel = os.environ['AFQ_LOGLEVEL']
+if "DMIRPREP_LOGLEVEL" in os.environ:
+    loglevel = os.environ['DMRIPREP_LOGLEVEL']
     module_logger.setLevel(getattr(logging, loglevel.upper()))
 else:
     module_logger.setLevel(logging.WARNING)
 
 # create a file handler
-logpath = os.path.join(os.path.expanduser('~'), '.afq', 'afq.log')
+logpath = os.path.join(os.path.expanduser('~'), '.dmriprep', 'dmriprep.log')
 
 # Create the config directory if it doesn't exist
 logdir = os.path.dirname(logpath)
@@ -49,8 +45,3 @@ handler.setFormatter(formatter)
 # add the handlers to the logger
 module_logger.addHandler(handler)
 module_logger.info('Started new dmriprep session')
-
-# Reduce verbosity of the boto logs
-logging.getLogger('boto').setLevel(logging.WARNING)
-logging.getLogger('boto3').setLevel(logging.WARNING)
-logging.getLogger('botocore').setLevel(logging.WARNING)

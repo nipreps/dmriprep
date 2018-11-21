@@ -7,90 +7,11 @@ import os
 import os.path as op
 import subprocess
 
-import boto3
-import nibabel as nib
-
-from . import fetch_bids_s3 as fetch
-from .run_1 import run_dmriprep
+from .run import run_dmriprep
 
 
 mod_logger = logging.getLogger(__name__)
 
-
-def move_t1_to_freesurfer(t1_file):
-    """Move the T1 file back into the freesurfer directory.
-
-    This step is specific to the HBN dataset where the T1 files
-    are outside of the derivatives/sub-XXX/freesurfer directory.
-
-    Parameters
-    ----------
-    t1_file : string
-        Path to the T1 weighted nifty file
-    """
-    freesurfer_path = op.join(op.dirname(t1_file), 'freesurfer')
-
-    convert_cmd = 'mri_convert {in_:s} {out_:s}'.format(
-        in_=t1_file, out_=op.join(freesurfer_path, 'mri', 'orig.mgz')
-    )
-
-    fnull = open(os.devnull, 'w')
-    cmd = subprocess.call(convert_cmd.split(),
-                          stdout=fnull,
-                          stderr=subprocess.STDOUT)
-
-
-def upload_to_s3(output_files, outdir, bucket, prefix, site, session, subject):
-    """Upload output files to S3, using key format specified by input params
-
-    Parameters
-    ----------
-    output_files : list
-        Output files to transfer to S3. Assume that the user has passed in
-        relative paths that are appropriate to fill in after the 'dmriprep'
-        directory.
-
-    outdir : string
-        a path to the root of the data
-
-    bucket : string
-        Output S3 bucket
-
-    prefix : string
-        Output S3 prefix
-
-    site : string
-        Site ID, e.g. 'side-SI'
-
-    session : string
-        Session ID, e.g. 'sess-001'
-
-    subject : string
-        Subject ID, e.g. 'sub-ABCXYZ'
-
-    Returns
-    -------
-    list
-        S3 keys for each output file
-    """
-    s3 = boto3.client('s3')
-
-    def filename2s3key(filename):
-        return '/'.join([
-            prefix, site, subject, session,
-            'derivatives', 'dmriprep',
-            filename
-        ])
-
-    for file in output_files:
-        with open(op.abspath(op.join(outdir, file)), 'rb') as fp:
-            s3.put_object(
-                Bucket=bucket,
-                Body=fp,
-                Key=filename2s3key(file),
-            )
-
-    return [filename2s3key(f) for f in output_files]
 
 
 def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
