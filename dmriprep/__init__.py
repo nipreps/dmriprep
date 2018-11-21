@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Top-level package for preAFQ."""
+"""Top-level package for dmriprep."""
 
 __author__ = """Anisha Keshavan"""
 __email__ = 'anishakeshavan@gmail.com'
@@ -10,7 +10,7 @@ import errno
 import logging
 import os
 
-from .preafq import upload_to_s3  # noqa
+from .dmriprep import upload_to_s3  # noqa
 from . import fetch_bids_s3  # noqa
 
 
@@ -48,7 +48,7 @@ handler.setFormatter(formatter)
 
 # add the handlers to the logger
 module_logger.addHandler(handler)
-module_logger.info('Started new preAFQ session')
+module_logger.info('Started new dmriprep session')
 
 # Reduce verbosity of the boto logs
 logging.getLogger('boto').setLevel(logging.WARNING)

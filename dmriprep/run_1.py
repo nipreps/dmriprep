@@ -2,7 +2,7 @@ import os.path as op
 from shutil import copyfile
 
 
-def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
+def run_dmriprep(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                subjects_dir, working_dir, out_dir):
     """This is for HBN diffusion data
 
@@ -29,7 +29,7 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     prep = all_fsl_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
 
     # initialize an overall workflow
-    wf = pe.Workflow(name="preAFQ")
+    wf = pe.Workflow(name="dmriprep")
     wf.base_dir = op.abspath(working_dir)
 
     prep.inputs.inputnode.in_file = dwi_file
@@ -142,47 +142,47 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         ("stats.eddy_corrected", dwi_fname.replace("dwi", "artStats")),
         ("eddy_corrected.eddy_parameters", dwi_fname+".eddy_parameters"),
         ("qc/eddy_corrected", "qc/"+dwi_fname),
-        ("derivatives/preafq", "derivatives/{}/preafq".format(bids_sub_name))
+        ("derivatives/dmriprep", "derivatives/{}/dmriprep".format(bids_sub_name))
     ]
 
-    wf.connect(prep, "outputnode.out_file", datasink, "preafq.dwi.@corrected")
-    wf.connect(prep, "outputnode.out_bvec", datasink, "preafq.dwi.@rotated")
+    wf.connect(prep, "outputnode.out_file", datasink, "dmriprep.dwi.@corrected")
+    wf.connect(prep, "outputnode.out_bvec", datasink, "dmriprep.dwi.@rotated")
     wf.connect(prep, "fsl_eddy.out_parameter",
-               datasink, "preafq.qc.@eddyparams")
+               datasink, "dmriprep.qc.@eddyparams")
 
     wf.connect(prep, "fsl_eddy.out_movement_rms",
-               datasink, "preafq.qc.@eddyparamsrms")
+               datasink, "dmriprep.qc.@eddyparamsrms")
     wf.connect(prep, "fsl_eddy.out_outlier_report",
-               datasink, "preafq.qc.@eddyparamsreport")
+               datasink, "dmriprep.qc.@eddyparamsreport")
     wf.connect(prep, "fsl_eddy.out_restricted_movement_rms",
-               datasink, "preafq.qc.@eddyparamsrestrictrms")
+               datasink, "dmriprep.qc.@eddyparamsrestrictrms")
     wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
-               datasink, "preafq.qc.@eddyparamsshellalign")
+               datasink, "dmriprep.qc.@eddyparamsshellalign")
 
-    wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@tensor")
-    wf.connect(get_tensor, "fa_file", datasink, "preafq.dti.@fa")
-    wf.connect(get_tensor, "md_file", datasink, "preafq.dti.@md")
-    wf.connect(get_tensor, "ad_file", datasink, "preafq.dti.@ad")
-    wf.connect(get_tensor, "rd_file", datasink, "preafq.dti.@rd")
-    wf.connect(get_tensor, "color_fa_file", datasink, "preafq.dti.@colorfa")
-    wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@scaled_tensor")
+    wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@tensor")
+    wf.connect(get_tensor, "fa_file", datasink, "dmriprep.dti.@fa")
+    wf.connect(get_tensor, "md_file", datasink, "dmriprep.dti.@md")
+    wf.connect(get_tensor, "ad_file", datasink, "dmriprep.dti.@ad")
+    wf.connect(get_tensor, "rd_file", datasink, "dmriprep.dti.@rd")
+    wf.connect(get_tensor, "color_fa_file", datasink, "dmriprep.dti.@colorfa")
+    wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@scaled_tensor")
 
-    wf.connect(bbreg, "min_cost_file", datasink, "preafq.reg.@mincost")
-    wf.connect(bbreg, "out_fsl_file", datasink, "preafq.reg.@fslfile")
-    wf.connect(bbreg, "out_reg_file", datasink, "preafq.reg.@reg")
-    wf.connect(threshold2, "binary_file", datasink, "preafq.anat.@mask")
+    wf.connect(bbreg, "min_cost_file", datasink, "dmriprep.reg.@mincost")
+    wf.connect(bbreg, "out_fsl_file", datasink, "dmriprep.reg.@fslfile")
+    wf.connect(bbreg, "out_reg_file", datasink, "dmriprep.reg.@reg")
+    wf.connect(threshold2, "binary_file", datasink, "dmriprep.anat.@mask")
 
     convert = pe.Node(fs.MRIConvert(out_type="niigz"), name="convert2nii")
     wf.connect(vt2, "transformed_file", convert, "in_file")
-    wf.connect(convert, "out_file", datasink, "preafq.anat.@aparc_aseg")
+    wf.connect(convert, "out_file", datasink, "dmriprep.anat.@aparc_aseg")
 
     convert1 = convert.clone("convertorig2nii")
     wf.connect(vt3, "transformed_file", convert1, "in_file")
-    wf.connect(convert1, "out_file", datasink, "preafq.anat.@anat")
+    wf.connect(convert1, "out_file", datasink, "dmriprep.anat.@anat")
 
     def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report,
                        color_fa_file, anat_mask_file):
-        from preafq.qc import create_report_json
+        from dmriprep.qc import create_report_json
 
         report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
                                     color_fa_file, anat_mask_file)
@@ -202,10 +202,10 @@ def run_preAFQ(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(threshold2, "binary_file", reportNode, 'anat_mask_file')
     wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
 
-    wf.connect(reportNode, 'report', datasink, 'preafq.report.@report')
+    wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
 
     wf.run()
 
     copyfile(bval_file, op.join(
-        out_dir, "preafq", "dwi", op.split(bval_file)[1]
+        out_dir, "dmriprep", "dwi", op.split(bval_file)[1]
     ))

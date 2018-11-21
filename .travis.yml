@@ -4,14 +4,14 @@ node_js:
 - '6.0'
 cache:
   directories:
-  - preafqViewer/node_modules
+  - dmriprepViewer/node_modules
 branches:
   only:
   - master
 notifications:
   email: false
 before_script:
-- cd preafqViewer
+- cd dmriprepViewer
 - npm prune
 script:
 - npm install
@@ -21,6 +21,6 @@ after_success:
 - bash ./deploy.sh
 env:
   global:
-  - GH_USER: akeshavan
-  - GH_REPO: preAFQ
+  - GH_USER: nipy
+  - GH_REPO: dmriprep
   - secure: irToFjVhLgr3rOdobRrhpJqSJtamvDTiBHmq4Xr1m3G24rirSRqSEjp6zronYbyNJ/VnoIhc0L8/VKrDUNsGR+0zqwJ4b4/2nR7LG7grvH79hWz2zGOckm2oYFC0BKyCFSiJ4n5op5SVslARr2ONgO+BqtclBIVAyHcbfnRMhHawZvcaWDgUOeLT8cTCT3uddOWNRQY1bH+nwv7OjqpQHlvLTAXjSH7XdVoGnzPhK79F1djUrpzJSODcsZl+VU1ghVKc1fj8AEpha0m3ZF0dSRK9xYBXOYaoXsbjXjDMo2kZJd8vobZ2Tvl9WP8xpEEJjqFMRxqDCd9JZq9kr/vVWpirm7mWce65BiJBj7K2iBwWjruqeLhYLcM8bdIEDybTqV8ZeXeghcbBpw+L+5hgSHbEK+XZFmTO9XKOpF0XhvYjxpti8cv2PIJ6Dhg+j+LrAo3MkRuYZ19DgKdId4fr+PM6Fuxfwa/h0AkL2bKampeofrbRQZDS/Q2TxTfp4UaxMYhLWLoJqZFYsdcLIPjlmMPSTvvnWq+YJ8bHxqrdORiUKDY32uXQ/LBFrQVjgZJFzR7OOazWcxykpBMYJh5sH1A6a52xJj26heygM2CxPGdwzapFM1XmS0QZ+qeGVYx9YMSD+oBxgpHj3xQorvon+YEiSdnTeyLWKq7sTciTAPM=

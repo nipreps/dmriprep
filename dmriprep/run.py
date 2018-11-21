@@ -16,9 +16,9 @@ from nipype.utils.filemanip import fname_presuffix
 from nipype.workflows.dmri.fsl.epi import create_dmri_preprocessing
 
 
-def run_preAFQ(dwi_file, bvec_file, bval_file,
+def run_dmriprep(dwi_file, bvec_file, bval_file,
                subjects_dir, working_dir, out_dir):
-    wf = create_dmri_preprocessing(name='preAFQ',
+    wf = create_dmri_preprocessing(name='dmriprep',
                                    use_fieldmap=False,
                                    fieldmap_registration=False)
     wf.inputs.inputnode.ref_num = 0
@@ -180,44 +180,44 @@ def run_preAFQ(dwi_file, bvec_file, bval_file,
         ("vol0000_flirt_merged", dwi_fname),
         ("_roi_bbreg_freesurfer", "_register"),
         ("aparc+asegbin_warped_thresh", dwi_fname.replace("_dwi", "_mask")),
-        ("derivatives/preafq", "derivatives/{}/preafq".format(bids_sub_name))
+        ("derivatives/dmriprep", "derivatives/{}/dmriprep".format(bids_sub_name))
     ]
 
-    wf.connect(art, "statistic_files", datasink, "preafq.art.@artstat")
-    wf.connect(art, "outlier_files", datasink, "preafq.art.@artoutlier")
-    wf.connect(outputspec, "dmri_corrected", datasink, "preafq.dwi.@corrected")
-    wf.connect(outputspec, "bvec_rotated", datasink, "preafq.dwi.@rotated")
-    wf.connect(getmotion, "motion_params", datasink, "preafq.art.@motion")
+    wf.connect(art, "statistic_files", datasink, "dmriprep.art.@artstat")
+    wf.connect(art, "outlier_files", datasink, "dmriprep.art.@artoutlier")
+    wf.connect(outputspec, "dmri_corrected", datasink, "dmriprep.dwi.@corrected")
+    wf.connect(outputspec, "bvec_rotated", datasink, "dmriprep.dwi.@rotated")
+    wf.connect(getmotion, "motion_params", datasink, "dmriprep.art.@motion")
 
-    wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@tensor")
-    wf.connect(get_tensor, "fa_file", datasink, "preafq.dti.@fa")
-    wf.connect(get_tensor, "md_file", datasink, "preafq.dti.@md")
-    wf.connect(get_tensor, "ad_file", datasink, "preafq.dti.@ad")
-    wf.connect(get_tensor, "rd_file", datasink, "preafq.dti.@rd")
-    wf.connect(get_tensor, "out_file", datasink, "preafq.dti.@scaled_tensor")
+    wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@tensor")
+    wf.connect(get_tensor, "fa_file", datasink, "dmriprep.dti.@fa")
+    wf.connect(get_tensor, "md_file", datasink, "dmriprep.dti.@md")
+    wf.connect(get_tensor, "ad_file", datasink, "dmriprep.dti.@ad")
+    wf.connect(get_tensor, "rd_file", datasink, "dmriprep.dti.@rd")
+    wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@scaled_tensor")
 
-    wf.connect(bbreg, "min_cost_file", datasink, "preafq.reg.@mincost")
-    wf.connect(bbreg, "out_fsl_file", datasink, "preafq.reg.@fslfile")
-    wf.connect(bbreg, "out_reg_file", datasink, "preafq.reg.@reg")
-    wf.connect(threshold2, "binary_file", datasink, "preafq.anat.@mask")
+    wf.connect(bbreg, "min_cost_file", datasink, "dmriprep.reg.@mincost")
+    wf.connect(bbreg, "out_fsl_file", datasink, "dmriprep.reg.@fslfile")
+    wf.connect(bbreg, "out_reg_file", datasink, "dmriprep.reg.@reg")
+    wf.connect(threshold2, "binary_file", datasink, "dmriprep.anat.@mask")
     # wf.connect(vt2, "transformed_file", datasink, "dwi.@aparc_aseg")
 
     convert = pe.Node(fs.MRIConvert(out_type="niigz"), name="convert2nii")
     wf.connect(vt2, "transformed_file", convert, "in_file")
-    wf.connect(convert, "out_file", datasink, "preafq.anat.@aparc_aseg")
+    wf.connect(convert, "out_file", datasink, "dmriprep.anat.@aparc_aseg")
 
     wf.base_dir = working_dir
     wf.run()
 
     copyfile(bval_file, op.join(
-        out_dir, bids_sub_name, "preafq", "dwi",
+        out_dir, bids_sub_name, "dmriprep", "dwi",
         op.split(bval_file)[1]
     ))
 
-    dmri_corrected = glob(op.join(out_dir, '*/preafq/dwi', '*.nii.gz'))[0]
-    bvec_rotated = glob(op.join(out_dir, '*/preafq/dwi', '*.bvec'))[0]
-    bval_file = glob(op.join(out_dir, '*/preafq/dwi', '*.bval'))[0]
-    art_file = glob(op.join(out_dir, '*/preafq/art', '*.art.json'))[0]
-    motion_file = glob(op.join(out_dir, '*/preafq/art', '*.motion.txt'))[0]
-    outlier_file = glob(op.join(out_dir, '*/preafq/art', '*.outliers.txt'))[0]
+    dmri_corrected = glob(op.join(out_dir, '*/dmriprep/dwi', '*.nii.gz'))[0]
+    bvec_rotated = glob(op.join(out_dir, '*/dmriprep/dwi', '*.bvec'))[0]
+    bval_file = glob(op.join(out_dir, '*/dmriprep/dwi', '*.bval'))[0]
+    art_file = glob(op.join(out_dir, '*/dmriprep/art', '*.art.json'))[0]
+    motion_file = glob(op.join(out_dir, '*/dmriprep/art', '*.motion.txt'))[0]
+    outlier_file = glob(op.join(out_dir, '*/dmriprep/art', '*.outliers.txt'))[0]
     return dmri_corrected, bvec_rotated, art_file, motion_file, outlier_file

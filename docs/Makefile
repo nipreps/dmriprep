@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = preafq
+SPHINXPROJ    = dmriprep
 SOURCEDIR     = .
 BUILDDIR      = _build
 

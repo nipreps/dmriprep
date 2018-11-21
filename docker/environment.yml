@@ -1,4 +1,4 @@
-name: preafq
+name: dmriprep
 channels:
    - conda-forge
 dependencies:

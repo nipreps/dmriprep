@@ -1,8 +1,8 @@
 <template>
   <b-container>
       <img class="logo" src="../assets/logo.svg" />
-      <h1>preAFQ Viewer</h1>
-      <p class="lead">Upload your report.json file from preAFQ</p>
+      <h1>dmriprep Viewer</h1>
+      <p class="lead">Upload your report.json file from dmriprep</p>
       <b-form-file class="mt-3" v-model="file"
        :state="Boolean(file)" placeholder="Choose a file...">
      </b-form-file>

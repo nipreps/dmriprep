@@ -1,16 +1,16 @@
 ======
-preAFQ
+dmriprep
 ======
 
 
-.. image:: https://img.shields.io/pypi/v/preafq.svg
-        :target: https://pypi.python.org/pypi/preafq
+.. image:: https://img.shields.io/pypi/v/dmriprep.svg
+        :target: https://pypi.python.org/pypi/dmriprep
 
-.. image:: https://img.shields.io/travis/akeshavan/preafq.svg
-        :target: https://travis-ci.org/akeshavan/preafq
+.. image:: https://img.shields.io/travis/akeshavan/dmriprep.svg
+        :target: https://travis-ci.org/akeshavan/dmriprep
 
-.. image:: https://readthedocs.org/projects/preafq/badge/?version=latest
-        :target: https://preafq.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
+        :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 
@@ -20,7 +20,7 @@ Preprocessing of neuroimaging data in preparation for AFQ analysis
 
 
 * Free software: BSD license
-* Documentation: https://preafq.readthedocs.io.
+* Documentation: https://dmriprep.readthedocs.io.
 
 
 Features
@@ -32,10 +32,10 @@ Features
 Contributing
 ------------
 
-We love contributions! preAFQ is open source, built on open source,
+We love contributions! dmriprep is open source, built on open source,
 and we'd love to have you hang out in our community.
 
-We have developed some `guidelines`_ for contributing to preAFQ.
+We have developed some `guidelines`_ for contributing to dmriprep.
 
 **Imposter syndrome disclaimer**: We want your help. No, really.
 

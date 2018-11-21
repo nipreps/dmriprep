@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Base datatypes for preafq"""
+"""Base datatypes for dmriprep"""
 
 from collections import namedtuple
 
