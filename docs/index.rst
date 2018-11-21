@@ -1,4 +1,4 @@
-Welcome to preAFQ's documentation!
+Welcome to dmriprep's documentation!
 ======================================
 
 .. toctree::

@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use preAFQ in a project::
+To use dmriprep in a project::
 
-    import preafq
+    import dmriprep

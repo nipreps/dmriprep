@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""Console script for preafq."""
+"""Console script for dmriprep."""
 import sys
 import click
 
 
 @click.command()
 def main(args=None):
-    """Console script for preafq."""
+    """Console script for dmriprep."""
     click.echo("Replace this message by putting your code into "
-               "preafq.cli.main")
+               "dmriprep.cli.main")
     click.echo("See click documentation at http://click.pocoo.org/")
     return 0
 

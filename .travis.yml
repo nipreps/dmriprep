@@ -4,23 +4,23 @@ node_js:
 - '6.0'
 cache:
   directories:
-  - preafqViewer/node_modules
+  - dmriprepViewer/node_modules
 branches:
   only:
   - master
 notifications:
   email: false
 before_script:
-- cd preafqViewer
+- cd dmriprepViewer
 - npm prune
 script:
 - npm install
 - npm run build
-#- npm test
 after_success:
 - bash ./deploy.sh
 env:
   global:
-  - GH_USER: akeshavan
-  - GH_REPO: preAFQ
+  - GH_USER: nipy
+  - GH_REPO: dmriprep
   - secure: irToFjVhLgr3rOdobRrhpJqSJtamvDTiBHmq4Xr1m3G24rirSRqSEjp6zronYbyNJ/VnoIhc0L8/VKrDUNsGR+0zqwJ4b4/2nR7LG7grvH79hWz2zGOckm2oYFC0BKyCFSiJ4n5op5SVslARr2ONgO+BqtclBIVAyHcbfnRMhHawZvcaWDgUOeLT8cTCT3uddOWNRQY1bH+nwv7OjqpQHlvLTAXjSH7XdVoGnzPhK79F1djUrpzJSODcsZl+VU1ghVKc1fj8AEpha0m3ZF0dSRK9xYBXOYaoXsbjXjDMo2kZJd8vobZ2Tvl9WP8xpEEJjqFMRxqDCd9JZq9kr/vVWpirm7mWce65BiJBj7K2iBwWjruqeLhYLcM8bdIEDybTqV8ZeXeghcbBpw+L+5hgSHbEK+XZFmTO9XKOpF0XhvYjxpti8cv2PIJ6Dhg+j+LrAo3MkRuYZ19DgKdId4fr+PM6Fuxfwa/h0AkL2bKampeofrbRQZDS/Q2TxTfp4UaxMYhLWLoJqZFYsdcLIPjlmMPSTvvnWq+YJ8bHxqrdORiUKDY32uXQ/LBFrQVjgZJFzR7OOazWcxykpBMYJh5sH1A6a52xJj26heygM2CxPGdwzapFM1XmS0QZ+qeGVYx9YMSD+oBxgpHj3xQorvon+YEiSdnTeyLWKq7sTciTAPM=
+  - secure: VmTfAChlLlC8WfK0QS9UzfTdI58so7YLkQdlTbB3WptqKIPDcGUSUjyB5ow9BO6nwupN0/zxaM3rneWJeJ7oEBQWGrbpdDkLWkCPB6htjECmUhfyWJccBH4ZnvVjDQH9Wl5SgNieJjGzI8QBLwnsvjzafH3VkP3SWFvqq4J3bGyDb97MUkWgDLdjy+3HsX6Ye7HCkYnLhi2BSwON/asQLd+Pr1FOv+P2tsJgwz9X4gkzws8gP5jGM4J5jxwYRUQKZKjgiEvDZbL0OqTvH/jxELKwcuIhDrqVeemZn5wWLRt7pvFUAzAwUliE0/NROUFi57RhU9NrwOZAo7ek3muM33AgBGodpkFJJ9vmsMJf5Diz71YN3xvMMD2vlfDByjcPOqYu/uM5o6sbuLZNDc+NExlsSSskMOnOBGz5e+Exo6c+X6Dxqx3rT6jmBPVTv7E9RiL1wwXF18fpCDrXwZb/mmxxbB0Bm3x/etIbi/mmbGlPo8K2GgOyzACPK3DHA6lRPd97qwU5cp/+7IWr7LWrVxAl6VS19/GIkVVlmBS3/7IJSg4ANgLAVZzXrcRcJTEY2xsF3TFJm840v6ArkFEogj84dGcxr1o9oLFLh2ZBSatoqSwdL8NezJruoOYDGzW37thp51iAHwNZ+Zfpv/PIcmWRrsBbhV+FA8KkFxmfIR0=

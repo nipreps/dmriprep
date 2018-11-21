@@ -1,6 +1,6 @@
-# preafq-viewer
+# dmriprep-viewer
 
-> Viewer for preAFQ reports
+> Viewer for dmriprep reports
 
 ## Build Setup
 

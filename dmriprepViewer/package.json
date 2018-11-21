@@ -1,7 +1,7 @@
 {
-  "name": "preafq-viewer",
+  "name": "dmriprep-viewer",
   "version": "1.0.0",
-  "description": "Viewer for preAFQ reports",
+  "description": "Viewer for dmriprep reports",
   "author": "akeshavan <keshavan@berkeley.edu>",
   "private": true,
   "scripts": {

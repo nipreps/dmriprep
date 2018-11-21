@@ -11,7 +11,7 @@ import boto3
 import nibabel as nib
 
 from . import fetch_bids_s3 as fetch
-from .run_1 import run_preAFQ
+from .run_1 import run_dmriprep
 
 
 mod_logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def upload_to_s3(output_files, outdir, bucket, prefix, site, session, subject):
     ----------
     output_files : list
         Output files to transfer to S3. Assume that the user has passed in
-        relative paths that are appropriate to fill in after the 'preAFQ'
+        relative paths that are appropriate to fill in after the 'dmriprep'
         directory.
 
     outdir : string
@@ -78,7 +78,7 @@ def upload_to_s3(output_files, outdir, bucket, prefix, site, session, subject):
     def filename2s3key(filename):
         return '/'.join([
             prefix, site, subject, session,
-            'derivatives', 'preAFQ',
+            'derivatives', 'dmriprep',
             filename
         ])
 
@@ -106,7 +106,7 @@ def pre_afq_individual(input_s3_keys, s3_prefix, out_bucket,
     scratch_dir = op.join(workdir, 'scratch')
     out_dir = op.join(workdir, 'output')
 
-    run_preAFQ(
+    run_dmriprep(
         dwi_file=input_files.files['dwi'][0],
         dwi_file_AP=input_files.files['epi_ap'][0],
         dwi_file_PA=input_files.files['epi_pa'][0],
