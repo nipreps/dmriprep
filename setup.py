@@ -15,6 +15,7 @@ requirements = [
     'Click>=6.0',
     'nipype',
     'dipy',
+    'parse',
 ]
 
 setup_requirements = ['pytest-runner', ]

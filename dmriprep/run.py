@@ -266,6 +266,92 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     eddy.inputs.repol = True
     eddy.inputs.niter = 1  # TODO: change back to 5 when running for real
 
+    def drop_eddy_outliers(outlier_report, threshold):
+        """Get list of scans that exceed threshold for number of outliers
+
+        Parameters
+        ----------
+        outlier_report: string
+            Path to the fsl_eddy outlier report
+
+        threshold: int or float
+            If threshold is an int, it is treated as number of allowed outlier
+            slices. If threshold is a float between 0 and 1 (exclusive), it is
+            treated the fraction of allowed outlier slices before we drop the
+            whole volume. Float param in not yet implemented
+
+        Returns
+        -------
+        drop_scans: numpy.ndarray
+            List of scan indices to drop
+        """
+        import numpy as np
+        import os.path as op
+        import parse
+        with open(op.abspath(outlier_report), 'r') as fp:
+            lines = fp.readlines()
+
+        p = parse.compile(
+            "Slice {slice:d} in scan {scan:d} is an outlier with "
+            "mean {mean_sd:f} standard deviations off, and mean "
+            "squared {mean_sq_sd:f} standard deviations off."
+        )
+
+        outliers = [p.parse(l).named for l in lines]
+        scans = {d['scan'] for d in outliers}
+
+        def num_outliers(scan, outliers):
+            return len([d for d in outliers if d['scan'] == scan])
+
+        drop_scans = np.array([
+            s for s in scans
+            if num_outliers(s, outliers) > threshold
+        ])
+
+        return drop_scans
+
+    drop_outliers = pe.Node(niu.Function(
+        input_names=["outlier_report", "threshold"],
+        output_names=["drop_scans"],
+        function=drop_eddy_outliers),
+        name="drop_outliers"
+    )
+
+    drop_outliers.inputs.threshold = 1
+    wf.connect(prep, "fsl_eddy.out_outlier_report",
+               drop_outliers, "outlier_report")
+
+    def save_outlier_list(drop_scans, outpath):
+        """Save list of outlier scans to file
+
+        Parameters
+        ----------
+        drop_scans: numpy.ndarray
+            Path to the fsl_eddy outlier report
+
+        outpath: string
+            Path to output file where list is saved
+
+        Returns
+        -------
+        outpath: string
+            Path to output file where list is saved
+        """
+        import numpy as np
+        np.savetxt(outpath, drop_scans, fmt="%d")
+        return outpath
+
+    save_drop_scans = pe.Node(niu.Function(
+        input_names=["drop_scans", "outpath"],
+        output_names=["outpath"],
+        function=save_outlier_list),
+        name="save_drop_scans"
+    )
+
+    wf.connect(drop_outliers, "drop_scans",
+               save_drop_scans, "drop_scans")
+    save_drop_scans.inputs.outpath = op.join(working_dir, 'outlier_report.txt')
+
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
     wf.connect(merge, 'merged_file', prep, 'inputnode.alt_file')
@@ -430,6 +516,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
 
     wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
 
+    wf.write_graph()
     wf.run()
 
     copyfile(bval_file, op.join(
