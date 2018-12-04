@@ -4,6 +4,8 @@ Functions to download example data from public repositories.
 """
 from .base import InputFiles, InputFilesWithSession
 import os
+import os.path as op
+from pathlib import Path
 
 
 def get_dataset(output_dir, source='HBN'):
@@ -26,7 +28,7 @@ def get_hbn_data(output_dir):
                                site='Site-{}'.format(site),
                                raw_keys=raw_keys,
                                deriv_keys=deriv_keys)
-    download_register(register, directory=output_dir)
+    download_register(register, s3_client=s3_client, directory=output_dir)
     # TODO: return a dict of subject ids and folder locations.
     return os.path.join(output_dir, subject)
 
@@ -252,7 +254,8 @@ def keys_to_subject_register(keys, prefix, site):
     return s3_registers
 
 
-def download_register(subject_keys, bucket='fcp-indi', directory='./input',
+def download_register(subject_keys, s3_client,
+                      bucket='fcp-indi', directory='./input',
                       overwrite=False):
     """
     Parameters
@@ -306,7 +309,9 @@ def download_register(subject_keys, bucket='fcp-indi', directory='./input',
             # Download the file
             s3_client.download_file(Bucket=bucket_, Key=key_, Filename=fname_)
         except FileExistsError:
-            mod_logger.info('File {fname:s} already exists. Continuing...')
+            pass
+            # TODO: add back logging
+            # mod_logger.info('File {fname:s} already exists. Continuing...')
 
     s3keys = subject_keys.files
     files = input_files.files
