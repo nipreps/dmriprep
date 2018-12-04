@@ -41,13 +41,13 @@ def main(participant_label, bids_dir, output_dir, analysis_level="participant"):
     if analysis_level is not 'participant':
         raise NotImplementedError('The only valid analysis level for dmriprep is participant at the moment.')
 
-    inputs = io.get_BIDS_files(participant_label, bids_dir)
+    inputs = io.get_bids_files(participant_label, bids_dir)
 
-    # for subject_id, subject_inputs in inputs:
-    #     run.run_dmriprep_pe(**subject_inputs,
-    #                         working_dir=os.path.join(output_dir, 'scratch'),
-    #                         out_dir=output_dir)
-    click.echo('doing stuff {} {} {} {}'.format(participant_label, bids_dir, output_dir, analysis_level))
+    for subject_inputs in inputs:
+        run.run_dmriprep_pe(**subject_inputs,
+                            working_dir=os.path.join(output_dir, 'scratch'),
+                            out_dir=output_dir)
+
     return 0
 
 
