@@ -266,7 +266,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     eddy.inputs.repol = True
     eddy.inputs.niter = 1  # TODO: change back to 5 when running for real
 
-    def drop_eddy_outliers(outlier_report, threshold):
+    def drop_outliers_fn(outlier_report, threshold):
         """Get list of scans that exceed threshold for number of outliers
 
         Parameters
@@ -310,18 +310,18 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
 
         return drop_scans
 
-    drop_outliers = pe.Node(niu.Function(
+    drop_outliers_node = pe.Node(niu.Function(
         input_names=["outlier_report", "threshold"],
         output_names=["drop_scans"],
-        function=drop_eddy_outliers),
-        name="drop_outliers"
+        function=drop_outliers_fn),
+        name="drop_outliers_node"
     )
 
-    drop_outliers.inputs.threshold = 1
+    drop_outliers_node.inputs.threshold = 1
     wf.connect(prep, "fsl_eddy.out_outlier_report",
-               drop_outliers, "outlier_report")
+               drop_outliers_node, "outlier_report")
 
-    def save_outlier_list(drop_scans):
+    def save_outlier_list_fn(drop_scans):
         """Save list of outlier scans to file
 
         Parameters
@@ -340,14 +340,15 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         np.savetxt(outpath, drop_scans, fmt="%d")
         return outpath
 
-    save_drop_scans = pe.Node(niu.Function(
+    save_outlier_list_node = pe.Node(niu.Function(
         input_names=["drop_scans"],
         output_names=["outpath"],
-        function=save_outlier_list),
-        name="save_drop_scans"
+        function=save_outlier_list_fn),
+        name="save_outlier_list_node"
     )
 
-    wf.connect(drop_outliers, "drop_scans", save_drop_scans, "drop_scans")
+    wf.connect(drop_outliers_node, "drop_scans",
+               save_outlier_list_node, "drop_scans")
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
@@ -468,7 +469,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
                datasink, "dmriprep.qc.@eddyparamsshellalign")
 
-    wf.connect(save_drop_scans, "outpath", datasink, "dmriprep.qc.@droppedscans")
+    wf.connect(save_outlier_list_node, "outpath", datasink, "dmriprep.qc.@droppedscans")
 
     wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@tensor")
     wf.connect(get_tensor, "fa_file", datasink, "dmriprep.dti.@fa")
