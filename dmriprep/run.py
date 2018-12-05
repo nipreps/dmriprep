@@ -321,7 +321,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(prep, "fsl_eddy.out_outlier_report",
                drop_outliers, "outlier_report")
 
-    def save_outlier_list(drop_scans, outpath):
+    def save_outlier_list(drop_scans):
         """Save list of outlier scans to file
 
         Parameters
@@ -329,28 +329,25 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         drop_scans: numpy.ndarray
             Path to the fsl_eddy outlier report
 
-        outpath: string
-            Path to output file where list is saved
-
         Returns
         -------
         outpath: string
             Path to output file where list is saved
         """
         import numpy as np
+        import os.path as op
+        outpath = op.abspath("dropped_scans.txt")
         np.savetxt(outpath, drop_scans, fmt="%d")
         return outpath
 
     save_drop_scans = pe.Node(niu.Function(
-        input_names=["drop_scans", "outpath"],
+        input_names=["drop_scans"],
         output_names=["outpath"],
         function=save_outlier_list),
         name="save_drop_scans"
     )
 
-    wf.connect(drop_outliers, "drop_scans",
-               save_drop_scans, "drop_scans")
-    save_drop_scans.inputs.outpath = op.join(working_dir, 'outlier_report.txt')
+    wf.connect(drop_outliers, "drop_scans", save_drop_scans, "drop_scans")
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
@@ -470,6 +467,8 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                datasink, "dmriprep.qc.@eddyparamsrestrictrms")
     wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
                datasink, "dmriprep.qc.@eddyparamsshellalign")
+
+    wf.connect(save_drop_scans, "outpath", datasink, "dmriprep.qc.@droppedscans")
 
     wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@tensor")
     wf.connect(get_tensor, "fa_file", datasink, "dmriprep.dti.@fa")
