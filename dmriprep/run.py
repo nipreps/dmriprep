@@ -264,7 +264,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     prep.inputs.inputnode.in_bval = bval_file
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = 1  # TODO: change back to 5 when running for real
+    eddy.inputs.niter = 1  # TODO: make this a parameter to the function with default 5
 
     def drop_outliers_fn(outlier_report, threshold):
         """Get list of scans that exceed threshold for number of outliers
@@ -515,8 +515,9 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
 
     wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
-
     wf.write_graph()
+
+    # TODO: take this out and just return workflow
     wf.run()
 
     copyfile(bval_file, op.join(
