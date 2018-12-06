@@ -266,7 +266,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     eddy.inputs.repol = True
     eddy.inputs.niter = 1  # TODO: make this a parameter to the function with default 5
 
-    def drop_outliers_fn(outlier_report, threshold):
+    def drop_outliers_fn(outlier_report, threshold, dwi_file):
         """Get list of scans that exceed threshold for number of outliers
 
         Parameters
@@ -280,14 +280,19 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
             treated the fraction of allowed outlier slices before we drop the
             whole volume. Float param in not yet implemented
 
+        dwi_file: string
+            Path to nii dwi file to determine total number of slices
+
         Returns
         -------
         drop_scans: numpy.ndarray
             List of scan indices to drop
         """
+        import nibabel as nib
         import numpy as np
         import os.path as op
         import parse
+
         with open(op.abspath(outlier_report), 'r') as fp:
             lines = fp.readlines()
 
@@ -303,6 +308,9 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         def num_outliers(scan, outliers):
             return len([d for d in outliers if d['scan'] == scan])
 
+        if 0 < threshold < 1:
+            threshold *= threshold * nib.load(dwi_file).shape[2]
+
         drop_scans = np.array([
             s for s in scans
             if num_outliers(s, outliers) > threshold
@@ -311,13 +319,14 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         return drop_scans
 
     drop_outliers_node = pe.Node(niu.Function(
-        input_names=["outlier_report", "threshold"],
+        input_names=["outlier_report", "threshold", "dwi_file"],
         output_names=["drop_scans"],
         function=drop_outliers_fn),
         name="drop_outliers_node"
     )
 
-    drop_outliers_node.inputs.threshold = 1
+    drop_outliers_node.inputs.threshold = 0.02
+    drop_outliers_node.inputs.dwi_file = dwi_file
     wf.connect(prep, "fsl_eddy.out_outlier_report",
                drop_outliers_node, "outlier_report")
 
