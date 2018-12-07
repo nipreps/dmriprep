@@ -2,10 +2,13 @@
 Functions to download example data from public repositories.
 
 """
-from .base import InputFiles, InputFilesWithSession
 import os
 import os.path as op
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import List
+
+from .base import InputFiles, InputFilesWithSession
 
 
 def get_dataset(output_dir, source='HBN'):
@@ -41,6 +44,77 @@ def get_s3_client():
     # Global s3 client to preserve anonymous config
     s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     return s3_client
+
+
+@dataclass
+class Study:
+    """A dMRI based study with a BIDS compliant directory structure"""
+    study_id: str = "HBN"
+    bucket: str = "fcp-indi"
+    s3_prefix: str = "data/Projects/{study_id}/MRI"
+    site_ids: List[str] = field(default_factory=list)
+
+    s3_client = get_s3_client()
+
+    def _get_s3_keys(self, prefix):
+        """Retrieve all keys in an S3 bucket that match the prefix and site ID
+
+        Parameters
+        ----------
+        prefix : string
+            S3 prefix designating the S3 "directory" in which to search.
+
+        Returns
+        -------
+        list
+            All the keys matching the prefix and site in the S3 bucket
+        """
+        # Avoid duplicate trailing slash in prefix
+        prefix = prefix.rstrip('/')
+
+        response = self.s3_client.list_objects_v2(
+            Bucket=self.bucket,
+            Prefix=prefix,
+        )
+
+        try:
+            keys = [d['Key'] for d in response.get('Contents')]
+        except TypeError:
+            raise ValueError(f'There are no subject files in the S3 bucket '
+                             f'with prefix {prefix}')
+
+        while response['IsTruncated']:
+            response = self.s3_client.list_objects_v2(
+                Bucket=self.bucket,
+                Prefix=prefix,
+                ContinuationToken=response['NextContinuationToken']
+            )
+
+            keys += [d['Key'] for d in response.get('Contents')]
+
+        return keys
+
+
+@dataclass
+class Site:
+    """A single site in a (potentially multisite) dMRI study"""
+    study_id: str = "HBN"
+    site_id: str = "Site-SI"
+
+
+@dataclass
+class Subject:
+    """A single dMRI study subject"""
+    subject_id: str
+    site: str
+
+    def list_s3_keys(self):
+        pass
+
+    def download(self):
+        pass
+
+
 
 
 def get_s3_register(subject_id, site, raw_keys, deriv_keys):
@@ -112,54 +186,6 @@ def get_s3_register(subject_id, site, raw_keys, deriv_keys):
             files=None,
             file_type='s3'
         )
-
-
-def get_s3_keys(prefix, s3_client, bucket='fcp-indi'):
-    """Retrieve all keys in an S3 bucket that match the prefix and site ID
-
-    Parameters
-    ----------
-    prefix : string
-        S3 prefix designating the S3 "directory" in which to search.
-        Do not include the site ID in the prefix.
-
-    s3_client : boto3 client object
-        from the get_s3_client() function
-
-    bucket : string
-        AWS S3 bucket in which to search
-
-    Returns
-    -------
-    list
-        All the keys matching the prefix and site in the S3 bucket
-    """
-    # Avoid duplicate trailing slash in prefix
-    prefix = prefix.rstrip('/')
-
-    response = s3_client.list_objects_v2(
-        Bucket=bucket,
-        Prefix=prefix,
-    )
-
-    try:
-        keys = [d['Key'] for d in response.get('Contents')]
-    except TypeError:
-        raise ValueError(
-            'There are no subject files in the S3 bucket with prefix '
-            '{pfix:s}'.format(pfix=prefix)
-        )
-
-    while response['IsTruncated']:
-        response = s3_client.list_objects_v2(
-            Bucket=bucket,
-            Prefix=prefix,
-            ContinuationToken=response['NextContinuationToken']
-        )
-
-        keys += [d['Key'] for d in response.get('Contents')]
-
-    return keys
 
 
 def keys_to_subject_register(keys, prefix, site):
