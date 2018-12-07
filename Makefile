@@ -86,3 +86,9 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+docker-dev: ## build the development environment
+	docker build -t dmriprep:dev -f docker/Dockerfile docker/.
+
+docker: docker-dev
+	docker build -t dmriprep:prod -f Dockerfile-dmriprep .

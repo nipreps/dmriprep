@@ -97,15 +97,6 @@ RUN export PATH="/opt/miniconda-latest/bin:$PATH" \
 #            boto3 \
 #     && sync && conda clean -tipsy && sync
 
-ADD environment.yml environment.yml
-RUN apt-get update && apt-get install -y git gcc
-RUN conda env create -f environment.yml
-
-#&& sync && conda clean -tipsy && sync
-
-
-RUN sed -i '$isource activate dmriprep' $ND_ENTRYPOINT
-
 
 ENV FREESURFER_HOME="/opt/freesurfer-6.0.0" \
     PATH="/opt/freesurfer-6.0.0/bin:$PATH"
@@ -140,6 +131,16 @@ RUN apt-get update -qq \
     && sed -i '$isource "/opt/freesurfer-6.0.0/SetUpFreeSurfer.sh"' "$ND_ENTRYPOINT"
 
 COPY ./license.txt /opt/freesurfer-6.0.0/license.txt
+
+ADD environment.yml environment.yml
+RUN apt-get update && apt-get install -y git gcc
+RUN conda env create -f environment.yml
+
+#&& sync && conda clean -tipsy && sync
+
+
+RUN sed -i '$isource activate dmriprep' $ND_ENTRYPOINT
+
 
 RUN echo '{ \
     \n  "pkg_manager": "apt", \

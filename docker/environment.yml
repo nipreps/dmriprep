@@ -6,6 +6,7 @@ dependencies:
    - dipy
    - boto3
    - graphviz
+   - ipython
    - pip:
      - "--editable=git+https://github.com/nipy/nipype@fa0a101fec2d010dcb68910000f66d7c64e5d03e#egg=nipype"
      - bids

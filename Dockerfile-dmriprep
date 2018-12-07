@@ -1,0 +1,5 @@
+FROM dmriprep:dev
+
+ADD . /dmriprep
+WORKDIR /dmriprep
+RUN python /dmriprep/setup.py install
