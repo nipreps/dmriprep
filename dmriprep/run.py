@@ -264,7 +264,75 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     prep.inputs.inputnode.in_bval = bval_file
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = 1  # TODO: change back to 5 when running for real
+    eddy.inputs.niter = 1  # TODO: make this a parameter to the function with default 5
+
+    def id_outliers_fn(outlier_report, threshold, dwi_file):
+        """Get list of scans that exceed threshold for number of outliers
+
+        Parameters
+        ----------
+        outlier_report: string
+            Path to the fsl_eddy outlier report
+
+        threshold: int or float
+            If threshold is an int, it is treated as number of allowed outlier
+            slices. If threshold is a float between 0 and 1 (exclusive), it is
+            treated the fraction of allowed outlier slices before we drop the
+            whole volume. Float param in not yet implemented
+
+        dwi_file: string
+            Path to nii dwi file to determine total number of slices
+
+        Returns
+        -------
+        drop_scans: numpy.ndarray
+            List of scan indices to drop
+        """
+        import nibabel as nib
+        import numpy as np
+        import os.path as op
+        import parse
+
+        with open(op.abspath(outlier_report), 'r') as fp:
+            lines = fp.readlines()
+
+        p = parse.compile(
+            "Slice {slice:d} in scan {scan:d} is an outlier with "
+            "mean {mean_sd:f} standard deviations off, and mean "
+            "squared {mean_sq_sd:f} standard deviations off."
+        )
+
+        outliers = [p.parse(l).named for l in lines]
+        scans = {d['scan'] for d in outliers}
+
+        def num_outliers(scan, outliers):
+            return len([d for d in outliers if d['scan'] == scan])
+
+        if 0 < threshold < 1:
+            threshold *= nib.load(dwi_file).shape[2]
+
+        drop_scans = np.array([
+            s for s in scans
+            if num_outliers(s, outliers) > threshold
+        ])
+
+        outpath = op.abspath("dropped_scans.txt")
+        np.savetxt(outpath, drop_scans, fmt="%d")
+
+        return drop_scans, outpath
+
+    id_outliers_node = pe.Node(niu.Function(
+        input_names=["outlier_report", "threshold", "dwi_file"],
+        output_names=["drop_scans", "outpath"],
+        function=id_outliers_fn),
+        name="id_outliers_node"
+    )
+
+    # TODO: make this a parameter to the function
+    id_outliers_node.inputs.threshold = 0.02
+    id_outliers_node.inputs.dwi_file = dwi_file
+    wf.connect(prep, "fsl_eddy.out_outlier_report",
+               id_outliers_node, "outlier_report")
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
@@ -281,10 +349,76 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     bbreg.inputs.subject_id = 'freesurfer'  # bids_sub_name
     wf.connect(fslroi, "roi_file", bbreg, "source_file")
 
+    def drop_outliers_fn(in_file, in_bval, in_bvec, drop_scans):
+        """Drop outlier volumes from dwi file
+
+        Parameters
+        ----------
+        in_file: string
+            Path to nii dwi file to drop outlier volumes from
+
+        in_bval: string
+            Path to bval file to drop outlier volumes from
+
+        in_bvec: string
+            Path to bvec file to drop outlier volumes from
+
+        drop_scans: numpy.ndarray
+            List of scan indices to drop
+
+        Returns
+        -------
+        out_file: string
+            Path to "thinned" output dwi file
+
+        out_bval: string
+            Path to "thinned" output bval file
+
+        out_bvec: string
+            Path to "thinned" output bvec file
+        """
+        import nibabel as nib
+        import numpy as np
+        import os.path as op
+
+        img = nib.load(op.abspath(in_file))
+        img_data = img.get_fdata()
+        img_data_thinned = np.delete(img_data, drop_scans, axis=3)
+        img_thinned = nib.Nifti1Image(img_data_thinned.astype(np.float64), img.affine)
+
+        root, ext1 = op.splitext(in_file)
+        root, ext0 = op.splitext(root)
+        out_file = ''.join([root + "_thinned", ext0, ext1])
+        nib.save(img_thinned, op.abspath(out_file))
+
+        bval = np.loadtxt(in_bval)
+        bval_thinned = np.delete(bval, drop_scans, axis=0)
+        out_bval = '_thinned'.join(op.splitext(in_bval))
+        np.savetxt(out_bval, bval_thinned)
+
+        bvec = np.loadtxt(in_bvec)
+        bvec_thinned = np.delete(bvec, drop_scans, axis=1)
+        out_bvec = '_thinned'.join(op.splitext(in_bvec))
+        np.savetxt(out_bvec, bvec_thinned)
+
+        return out_file, out_bval, out_bvec
+
+    drop_outliers_node = pe.Node(niu.Function(
+        input_names=["in_file", "in_bval", "in_bvec", "drop_scans"],
+        output_names=["out_file", "out_bval", "out_bvec"],
+        function=drop_outliers_fn),
+        name="drop_outliers_node"
+    )
+
+    wf.connect(id_outliers_node, "drop_scans", drop_outliers_node, "drop_scans")
+    wf.connect(prep, "outputnode.out_file", drop_outliers_node, "in_file")
+    drop_outliers_node.inputs.in_bval = bval_file
+    wf.connect(prep, "outputnode.out_bvec", drop_outliers_node, "in_bvec")
+
     get_tensor = pe.Node(DTI(), name="dipy_tensor")
-    wf.connect(prep, "outputnode.out_file", get_tensor, "in_file")
-    get_tensor.inputs.in_bval = bval_file
-    wf.connect(prep, "outputnode.out_bvec", get_tensor, "in_bvec")
+    wf.connect(drop_outliers_node, "out_file", get_tensor, "in_file")
+    wf.connect(drop_outliers_node, "out_bval", get_tensor, "in_bval")
+    wf.connect(drop_outliers_node, "out_bvec", get_tensor, "in_bvec")
 
     scale_tensor = pe.Node(name='scale_tensor', interface=fsl.BinaryMaths())
     scale_tensor.inputs.operation = 'mul'
@@ -371,6 +505,10 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
         ("derivatives/dmriprep", "derivatives/{}/dmriprep".format(bids_sub_name))
     ]
 
+    wf.connect(drop_outliers_node, "out_file", datasink, "dmriprep.dwi.@thinned")
+    wf.connect(drop_outliers_node, "out_bval", datasink, "dmriprep.dwi.@bval_thinned")
+    wf.connect(drop_outliers_node, "out_bvec", datasink, "dmriprep.dwi.@bvec_thinned")
+
     wf.connect(prep, "outputnode.out_file", datasink, "dmriprep.dwi.@corrected")
     wf.connect(prep, "outputnode.out_bvec", datasink, "dmriprep.dwi.@rotated")
     wf.connect(prep, "fsl_eddy.out_parameter",
@@ -384,6 +522,8 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                datasink, "dmriprep.qc.@eddyparamsrestrictrms")
     wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
                datasink, "dmriprep.qc.@eddyparamsshellalign")
+
+    wf.connect(id_outliers_node, "outpath", datasink, "dmriprep.qc.@droppedscans")
 
     wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@tensor")
     wf.connect(get_tensor, "fa_file", datasink, "dmriprep.dti.@fa")
@@ -429,7 +569,9 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
 
     wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
+    wf.write_graph()
 
+    # TODO: take this out and just return workflow
     wf.run()
 
     copyfile(bval_file, op.join(
