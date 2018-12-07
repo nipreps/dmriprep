@@ -227,7 +227,7 @@ def run_dmriprep(dwi_file, bvec_file, bval_file,
     return dmri_corrected, bvec_rotated, art_file, motion_file, outlier_file
 
 
-def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
+def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                     subjects_dir, working_dir, out_dir):
     """
     This assumes that there are scans with phase-encode directions AP/PA for
@@ -245,7 +245,7 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
 
     # some bookkeeping (getting the filename, gettings the BIDS subject name)
     dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
-    bids_sub_name = dwi_fname.split("_")[0]
+    bids_sub_name = subject_id
     assert bids_sub_name.startswith("sub-")
 
     # Grab the preprocessing all_fsl_pipeline
@@ -256,15 +256,14 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
 
     # initialize an overall workflow
     wf = pe.Workflow(name="dmriprep")
-    wf.base_dir = op.abspath(working_dir)
+    wf.base_dir = op.join(op.abspath(working_dir), subject_id)
 
     prep.inputs.inputnode.in_file = dwi_file
-    # prep.inputs.inputnode.alt_file = dwi_file_PA
     prep.inputs.inputnode.in_bvec = bvec_file
     prep.inputs.inputnode.in_bval = bval_file
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = 1  # TODO: change back to 5 when running for real
+    eddy.inputs.niter = 1  # TODO: make this a parameter to the function with default 5
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
     merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
@@ -429,7 +428,9 @@ def run_dmriprep_pe(dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
     wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
 
     wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
+    wf.write_graph()
 
+    # TODO: take this out and just return workflow
     wf.run()
 
     copyfile(bval_file, op.join(
