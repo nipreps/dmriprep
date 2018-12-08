@@ -212,6 +212,7 @@ def createB0_ColorFA_Mask_Sprites(b0_file, colorFA_file, mask_file):
 
 def create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
                        color_fa_file, anat_mask_file,
+                       outlier_indices,
                        outpath=op.abspath('./report.json')):
 
     report = {}
@@ -223,6 +224,7 @@ def create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
     report['b0'] = b0
     report['colorFA'] = colorFA
     report['anat_mask'] = mask
+    report['outlier_volumes'] = outlier_indices.tolist()
 
     with open(eddy_report, 'r') as f:
         report['eddy_report'] = f.readlines()

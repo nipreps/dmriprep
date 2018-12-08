@@ -153,6 +153,17 @@ export default {
         .attr('stroke-width', 1.5)
         .attr('d', line2);
 
+      this.g.selectAll('.outlier')
+        .data(this.outlier_indices)
+        .enter()
+        .append('rect')
+        .attr('class', 'outlier')
+        .attr('x', i => self.x(i) - 1.5)
+        .attr('y', () => self.y(maxY))
+        .attr('width', '3px')
+        .attr('height', () => `${self.height}px`)
+        .attr('fill', 'black');
+
 
       this.svg.on('mousemove', () => {
         // const x0 = self.x.invert(d3.mouse(this)[0]);
@@ -168,7 +179,7 @@ export default {
     this.initAx();
     this.plotData();
   },
-  props: ['ylabel', 'xlabel', 'data', 'id', 'highlightIdx'],
+  props: ['ylabel', 'xlabel', 'data', 'id', 'highlightIdx', 'outlier_indices'],
 };
 </script>
 
