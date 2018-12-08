@@ -5,6 +5,7 @@ import sys
 import click
 from . import run
 from . import io
+from .data import get_dataset
 import os
 
 
@@ -49,6 +50,13 @@ def main(participant_label, bids_dir, output_dir, analysis_level="participant"):
                             out_dir=output_dir)
 
     return 0
+
+@click.command()
+@click.argument('output_dir',
+                )
+def data(output_dir):
+    get_dataset(os.path.abspath(output_dir))
+    print('done')
 
 
 if __name__ == "__main__":

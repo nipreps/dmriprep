@@ -40,6 +40,7 @@ setup(
     entry_points={
         'console_scripts': [
             'dmriprep=dmriprep.cli:main',
+            'dmriprep-data=dmriprep.cli:data'
         ],
     },
     install_requires=requirements,

@@ -17,7 +17,7 @@
         </b-input-group-append>
       </b-input-group>
 
-      <report v-if="report.b0" :report="report"></report>
+      <report v-if="report.b0" :reportProp="report"></report>
   </b-container>
 </template>
 
@@ -26,6 +26,7 @@ import vueSlider from 'vue-slider-component';
 import sprite4d from './Sprite4D';
 import lineChart from './LineChart';
 import report from './Report';
+
 
 export default {
   name: 'HelloWorld',

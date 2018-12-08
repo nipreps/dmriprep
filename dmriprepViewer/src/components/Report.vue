@@ -34,6 +34,7 @@
         <div style="height: 200px; width: 100%; display: inline-flex;">
           <line-chart id="motion_params"
            :data="report.eddy_params"
+           :outlier_indices="report.outlier_volumes"
            xlabel="TR"
            ylabel="RMS"
            :highlightIdx="time"
@@ -44,59 +45,31 @@
       <h2 class="mt-3 pt-3">Registration + Brain Mask</h2>
       <p class="lead">Brain mask computed on T1w, and mapped to B0</p>
 
-      <sprite4d
-        :key="'bmask'+2"
-        :M="report.b0.M"
-        :N="report.b0.N"
-        :num_slices="report.b0.num_slices"
-        id="b0_mask"
-        :pix="report.b0.pix"
-        :time="spriteSlice"
-        :img="report.b0.img"
-        opacity="1"
-      ></sprite4d>
-      <sprite4d
-        :key="'anat_mask'+1"
-        :M="report.anat_mask.M"
-        :N="report.anat_mask.N"
-        :num_slices="report.anat_mask.num_slices"
-        id="anat_mask"
-        :pix="report.anat_mask.pix"
-        :time="spriteSlice"
-        :img="report.anat_mask.img"
-        :overlayMode="true"
-        opacity="1"
-      ></sprite4d>
-      <vue-slider ref="timeSlider"
-       v-model="spriteSlice" :min="0"
-       :max="report.b0.num_slices-1"></vue-slider>
+      <BrainSprite
+        id="brainMaskSprite"
+        ref="brainMaskSprite"
+        :base_dim_x="report.b0.pix"
+        :base_dim_y="report.b0.pix"
+        :overlay_dim_x="report.anat_mask.pix"
+        :overlay_dim_y="report.anat_mask.pix"
+        :base="report.b0.img"
+        :overlay="report.anat_mask.img"
+      />
 
       <h2 class="mt-3 pt-3">DTI: ColorFA</h2>
       <p class="lead">Color FA mapped on B0</p>
 
-      <sprite4d
-        key="bmask1"
-        :M="report.b0.M"
-        :N="report.b0.N"
-        :num_slices="report.b0.num_slices"
-        id="b0_mask"
-        :pix="report.b0.pix"
-        :time="spriteSlice"
-        :img="report.b0.img"
-        opacity="1"
-      ></sprite4d>
-      <sprite4d
-        key="colorfa_mask"
-        :M="report.colorFA.M"
-        :N="report.colorFA.N"
-        :num_slices="report.colorFA.num_slices"
-        id="colorfa_mask"
-        :pix="report.colorFA.pix"
-        :time="spriteSlice"
-        :img="report.colorFA.img"
-        :overlayMode="true"
-        opacity="0.5"
-      ></sprite4d>
+      <BrainSprite
+        id="colorFASprite"
+        ref="colorFASprite"
+        :base_dim_x="report.b0.pix"
+        :base_dim_y="report.b0.pix"
+        :overlay_dim_x="report.colorFA.pix"
+        :overlay_dim_y="report.colorFA.pix"
+        :base="report.b0.img"
+        :overlay="report.colorFA.img"
+      />
+
     </div>
   </div>
 </template>
@@ -106,6 +79,7 @@ import axios from 'axios';
 import vueSlider from 'vue-slider-component';
 import sprite4d from './Sprite4D';
 import lineChart from './LineChart';
+import BrainSprite from './BrainSprite.vue';
 
 export default {
   name: 'report',
@@ -113,11 +87,13 @@ export default {
     sprite4d,
     vueSlider,
     lineChart,
+    BrainSprite,
   },
   data() {
     return {
       time: 0,
       spriteSlice: 0,
+      report: null,
     };
   },
   methods: {
@@ -139,11 +115,23 @@ export default {
     }
   },
   mounted() {
-    if (this.report) {
-      this.spriteSlice = this.get_mid_slice();
+    if (this.reportProp) {
+      this.report = this.reportProp;
     }
+    this.$nextTick(() => {
+      if (this.report) {
+        this.spriteSlice = this.get_mid_slice();
+        // this.$refs.brainMaskSprite.initBrainSprite();
+        // this.$refs.colorFASprite.initBrainSprite();
+      }
+    });
   },
   watch: {
+    reportProp() {
+      if (this.reportProp) {
+        this.report = this.reportProp;
+      }
+    },
     report() {
       if (this.report) {
         this.spriteSlice = this.get_mid_slice();
@@ -163,7 +151,7 @@ export default {
     },
   },
   props: {
-    report: Object,
+    reportProp: Object,
   },
 };
 </script>

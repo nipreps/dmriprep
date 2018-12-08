@@ -2,4 +2,5 @@ FROM dmriprep:dev
 
 ADD . /dmriprep
 WORKDIR /dmriprep
-RUN /neurodocker/startup.sh python /dmriprep/setup.py install
+RUN /neurodocker/startup.sh python setup.py install
+WORKDIR /

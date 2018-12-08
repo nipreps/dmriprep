@@ -379,6 +379,7 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
         import nibabel as nib
         import numpy as np
         import os.path as op
+        from nipype.utils.filemanip import fname_presuffix
 
         img = nib.load(op.abspath(in_file))
         img_data = img.get_fdata()
@@ -387,17 +388,17 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
 
         root, ext1 = op.splitext(in_file)
         root, ext0 = op.splitext(root)
-        out_file = ''.join([root + "_thinned", ext0, ext1])
+        out_file = fname_presuffix(in_file, suffix="_thinned", newpath=op.abspath('.')) #''.join([root + "_thinned", ext0, ext1])
         nib.save(img_thinned, op.abspath(out_file))
 
         bval = np.loadtxt(in_bval)
         bval_thinned = np.delete(bval, drop_scans, axis=0)
-        out_bval = '_thinned'.join(op.splitext(in_bval))
+        out_bval = fname_presuffix(in_bval, suffix="_thinned", newpath=op.abspath('.'))
         np.savetxt(out_bval, bval_thinned)
 
         bvec = np.loadtxt(in_bvec)
         bvec_thinned = np.delete(bvec, drop_scans, axis=1)
-        out_bvec = '_thinned'.join(op.splitext(in_bvec))
+        out_bvec = fname_presuffix(in_bvec, suffix="_thinned", newpath=op.abspath('.'))
         np.savetxt(out_bvec, bvec_thinned)
 
         return out_file, out_bval, out_bvec
@@ -546,17 +547,17 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     wf.connect(convert1, "out_file", datasink, "dmriprep.anat.@anat")
 
     def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report,
-                       color_fa_file, anat_mask_file):
+                       color_fa_file, anat_mask_file, outlier_indices):
         from dmriprep.qc import create_report_json
 
         report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
-                                    color_fa_file, anat_mask_file)
+                                    color_fa_file, anat_mask_file, outlier_indices)
         return report
 
     reportNode = pe.Node(niu.Function(
         input_names=['dwi_corrected_file', 'eddy_rms',
                      'eddy_report', 'color_fa_file',
-                     'anat_mask_file'],
+                     'anat_mask_file', 'outlier_indices'],
         output_names=['report'],
         function=reportNodeFunc
     ), name="reportJSON")
@@ -564,6 +565,7 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     wf.connect(prep, "outputnode.out_file", reportNode, 'dwi_corrected_file')
     wf.connect(prep, "fsl_eddy.out_movement_rms", reportNode, 'eddy_rms')
     wf.connect(prep, "fsl_eddy.out_outlier_report", reportNode, 'eddy_report')
+    wf.connect(id_outliers_node, 'drop_scans', reportNode, 'outlier_indices')
     wf.connect(threshold2, "binary_file", reportNode, 'anat_mask_file')
     wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
 
@@ -574,5 +576,5 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     wf.run()
 
     copyfile(bval_file, op.join(
-        out_dir, "dmriprep", "dwi", op.split(bval_file)[1]
+        op.abspath(out_dir), "dmriprep", "dwi", op.split(bval_file)[1]
     ))
