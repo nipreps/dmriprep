@@ -436,7 +436,7 @@ def get_dmriprep_pe_workflow(working_dir):
         img = nib.load(op.abspath(in_file))
         img_data = img.get_fdata()
         img_data_thinned = np.delete(img_data, drop_scans, axis=3)
-        img_thinned = nib.Nifti1Image(img_data_thinned.astype(np.float64), img.affine)
+        img_thinned = nib.Nifti1Image(img_data_thinned.astype(np.float64), img.affine, header=img.header)
 
         root, ext1 = op.splitext(in_file)
         root, ext0 = op.splitext(root)

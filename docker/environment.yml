@@ -3,10 +3,12 @@ channels:
    - conda-forge
 dependencies:
    - python=3.6
-   - dipy
    - boto3
+   - dask
+   - dipy
    - graphviz
    - ipython
+   - pandas
    - pip:
      - "--editable=git+https://github.com/nipy/nipype@fa0a101fec2d010dcb68910000f66d7c64e5d03e#egg=nipype"
      - bids
