@@ -28,7 +28,7 @@ def get_dataset(output_dir, source='HBN'):
 
 def get_hbn_data(output_dir):
     subject_id = 'sub-NDARBA507GCT'
-    hbn_study = HBN(subject_ids=subject_id)
+    hbn_study = HBN(subjects=subject_id)
     subject = hbn_study.subjects[0]
     subject.download(directory=output_dir)
     # TODO: return a dict of subject ids and folder locations.
@@ -36,6 +36,12 @@ def get_hbn_data(output_dir):
 
 
 def get_s3_client():
+    """Return a boto3 s3 client
+
+    Returns
+    -------
+    s3_client : boto3.client('s3')
+    """
     import boto3
     from botocore import UNSIGNED
     from botocore.client import Config
@@ -50,18 +56,18 @@ def _get_matching_s3_keys(bucket, prefix='', suffix=''):
 
     Parameters
     ----------
-    bucket: str
+    bucket : str
         Name of the S3 bucket
 
-    prefix: str, optional
+    prefix : str, optional
         Only fetch keys that start with this prefix
 
-    suffix: str, optional
+    suffix : str, optional
         Only fetch keys that end with this suffix
 
     Yields
     ------
-    key: str
+    key : str
         S3 keys that match the prefix and suffix
     """
     s3 = get_s3_client()
@@ -97,6 +103,23 @@ def _get_matching_s3_keys(bucket, prefix='', suffix=''):
 
 
 def _download_from_s3(fname, bucket, key, overwrite=False):
+    """Download object from S3 to local file
+
+    Parameters
+    ----------
+    fname : str
+        File path to which to download the object
+
+    bucket : str
+        S3 bucket name
+
+    key : str
+        S3 key for the object to download
+
+    overwrite : bool, default=False
+        If True, overwrite file if it already exists.
+        If False, skip download and return
+    """
     # Create the directory and file if necessary
     s3 = get_s3_client()
     Path(op.dirname(fname)).mkdir(parents=True, exist_ok=True)
@@ -112,7 +135,25 @@ def _download_from_s3(fname, bucket, key, overwrite=False):
 
 class Study:
     """A dMRI based study with a BIDS compliant directory structure"""
-    def __init__(self, study_id, bucket, s3_prefix, subject_ids=None):
+    def __init__(self, study_id, bucket, s3_prefix, subjects=None):
+        """Initialize a Study instance
+
+        Parameters
+        ----------
+        study_id : str
+            An identifier string for the study
+
+        bucket : str
+            The S3 bucket that contains the study data
+
+        s3_prefix : str
+            The S3 prefix common to all of the study objects on S3
+
+        subjects : str, sequence(str), int, or None
+            If int, retrieve S3 keys for the first `subjects` subjects.
+            If str or sequence of strings, retrieve S3 keys for the specified
+            subjects. If None, retrieve S3 keys for the first subject.
+        """
         if not isinstance(study_id, str):
             raise TypeError("subject_id must be a string.")
 
@@ -122,15 +163,15 @@ class Study:
         if not isinstance(s3_prefix, str):
             raise TypeError("s3_prefix must be a string.")
 
-        if not (subject_ids is None or
-                isinstance(subject_ids, int) or
-                isinstance(subject_ids, str) or
-                all(isinstance(s, str) for s in subject_ids)):
-            raise TypeError("subject_ids must be an int, string or a "
+        if not (subjects is None or
+                isinstance(subjects, int) or
+                isinstance(subjects, str) or
+                all(isinstance(s, str) for s in subjects)):
+            raise TypeError("subjects must be an int, string or a "
                             "sequence of strings.")
 
-        if isinstance(subject_ids, int) and subject_ids < 1:
-            raise ValueError("If subject_ids is an int, it must be "
+        if isinstance(subjects, int) and subjects < 1:
+            raise ValueError("If subjects is an int, it must be "
                              "greater than 0.")
 
         self._study_id = study_id
@@ -138,29 +179,29 @@ class Study:
         self._s3_prefix = s3_prefix
 
         self._all_subjects = self.list_all_subjects()
-        if subject_ids is None or subject_ids == 1:
-            subject_ids = [list(self._all_subjects.keys())[0]]
+        if subjects is None or subjects == 1:
+            subjects = [sorted(self._all_subjects.keys())[0]]
             self._n_requested = 1
-        elif isinstance(subject_ids, int) and subject_ids > 1:
-            self._n_requested = subject_ids
-            subject_ids = list(self._all_subjects.keys())[:subject_ids]
-        elif subject_ids == "all":
+        elif isinstance(subjects, int) and subjects > 1:
+            self._n_requested = subjects
+            subjects = sorted(self._all_subjects.keys())[:subjects]
+        elif subjects == "all":
             self._n_requested = len(self._all_subjects)
-            subject_ids = list(self._all_subjects.keys())
-        elif isinstance(subject_ids, str):
+            subjects = list(self._all_subjects.keys())
+        elif isinstance(subjects, str):
             self._n_requested = 1
-            subject_ids = [subject_ids]
+            subjects = [subjects]
         else:
-            self._n_requested = len(subject_ids)
+            self._n_requested = len(subjects)
 
-        if not set(subject_ids) <= set(self._all_subjects.keys()):
+        if not set(subjects) <= set(self._all_subjects.keys()):
             raise ValueError(
                 f"The following subjects could not be found in the study: "
-                f"{set(subject_ids) - set(self._all_subjects.keys())}"
+                f"{set(subjects) - set(self._all_subjects.keys())}"
             )
 
         subs = [
-            delayed(self._get_subject)(s) for s in set(subject_ids)
+            delayed(self._get_subject)(s) for s in set(subjects)
         ]
 
         print("Retrieving subject S3 keys")
@@ -172,18 +213,22 @@ class Study:
 
     @property
     def study_id(self):
+        """An identifier string for the study"""
         return self._study_id
 
     @property
     def bucket(self):
+        """The S3 bucket that contains the study data"""
         return self._bucket
 
     @property
     def s3_prefix(self):
+        """The S3 prefix common to all of the study objects on S3"""
         return self._s3_prefix
 
     @property
     def subjects(self):
+        """A list of Subject instances for each requested subject"""
         return self._subjects
 
     def __repr__(self):
@@ -191,12 +236,19 @@ class Study:
                 f"bucket={self.bucket}, s3_prefix={self.s3_prefix})")
 
     def _get_subject(self, subject_id):
+        """Return a Subject instance from a subject-ID"""
         return Subject(subject_id=subject_id,
                        site=self._all_subjects[subject_id],
                        study=self)
 
     def list_all_subjects(self):
-        """Return a study-specific list of subjects."""
+        """Return a study-specific list of subjects.
+
+        Returns
+        -------
+        dict
+            dict with participant_id as keys and site_id as values
+        """
         raise NotImplementedError
 
     def postprocess(self):
@@ -204,6 +256,23 @@ class Study:
         raise NotImplementedError
 
     def download(self, directory, include_site=False, overwrite=False):
+        """Download files for each subject in the study
+
+        Parameters
+        ----------
+        directory : str
+            Directory to which to download subject files
+
+        include_site : bool, default=False
+            If True, include the site-ID in the download path
+
+        overwrite : bool, default=False
+            If True, overwrite files for each subject
+
+        See Also
+        --------
+        dmriprep.data.Subject.download()
+        """
         results = [delayed(sub.download)(
             directory=directory,
             include_site=include_site,
@@ -216,13 +285,27 @@ class Study:
 
 
 class HBN(Study):
-    """The HBN study"""
-    def __init__(self, subject_ids=None):
+    """The HBN study
+
+    See Also
+    --------
+    dmriprep.data.Study
+    """
+    def __init__(self, subjects=None):
+        """Initialize the HBN instance
+
+        Parameters
+        ----------
+        subjects : str, sequence(str), int, or None
+            If int, retrieve S3 keys for the first `subjects` subjects.
+            If str or sequence of strings, retrieve S3 keys for the specified
+            subjects. If None, retrieve S3 keys for the first subject.
+        """
         super().__init__(
             study_id="HBN",
             bucket="fcp-indi",
             s3_prefix="data/Projects/HBN/MRI",
-            subject_ids=subject_ids
+            subjects=subjects
         )
 
     def list_all_subjects(self):
@@ -276,6 +359,19 @@ class HBN(Study):
 class Subject:
     """A single dMRI study subject"""
     def __init__(self, subject_id, study, site=None):
+        """Initialize a Subject instance
+
+        Parameters
+        ----------
+        subject_id : str
+            Subject-ID for this subject
+
+        study : dmriprep.data.Study
+            The Study for which this subject was a participant
+
+        site : str, optional
+            Site-ID for the site from which this subject's data was collected
+        """
         if not isinstance(subject_id, str):
             raise TypeError("subject_id must be a string.")
 
@@ -292,26 +388,55 @@ class Subject:
 
     @property
     def subject_id(self):
+        """An identifier string for the subject"""
         return self._subject_id
 
     @property
     def study(self):
+        """The study in which this subject participated"""
         return self._study
 
     @property
     def site(self):
+        """The site at which this subject was a participant"""
         return self._site
 
     @property
     def valid(self):
+        """If True, this subject has all the required MRI files"""
         return self._valid
 
     @property
     def s3_keys(self):
+        """S3 keys for this subject's dMRI data
+
+        The S3 keys are stored in a dict with following keys:
+        - "dwi": Nifti file for DWI image
+        - "bval": Bval file
+        - "bvec": Bvec file
+        - "epi_ap": Nifti EPI image (anterior to posterior)
+        - "epi_pa": Nifti EPI image (posterior to anterior)
+        - "freesurfer": Freesurfer structural files
+        - "t1w": T1W Nifti file
+        """
         return self._s3_keys
 
     @property
     def files(self):
+        """Local files for this subject's dMRI data
+
+        Before the call to subject.download(), this is None.
+        Afterward, the files are stored in a dict with keys
+        for each imaging session. The value for each session
+        is itself a dict with the following keys:
+        - "dwi": Nifti file for DWI image
+        - "bval": Bval file
+        - "bvec": Bvec file
+        - "epi_ap": Nifti EPI image (anterior to posterior)
+        - "epi_pa": Nifti EPI image (posterior to anterior)
+        - "freesurfer": Freesurfer structural files
+        - "t1w": T1W Nifti file
+        """
         return self._files
 
     def __repr__(self):
@@ -320,6 +445,13 @@ class Subject:
                 f"valid={self.valid})")
 
     def _list_s3_keys(self):
+        """Get all required S3 keys for this subject
+
+        Returns
+        -------
+        s3_keys : dict
+            S3 keys organized into "raw" and "deriv" lists
+        """
         prefixes = {
             'raw': '/'.join([self.study.s3_prefix,
                              self.site,
@@ -340,6 +472,11 @@ class Subject:
         return s3_keys
 
     def _organize_s3_keys(self):
+        """Organize S3 keys into a dict
+
+        The dict keys are "dwi," "bvec," "bval," "epi_nii," "epi_json,"
+        "freesurfer," "t1w" and the values are the associated S3 object keys
+        """
         # Retrieve and unpack the s3_keys
         s3_keys = self._list_s3_keys()
         dwi_keys = [k for k in s3_keys['raw'] if '/dwi/' in k]
@@ -380,6 +517,22 @@ class Subject:
 
     def download(self, directory, include_site=False,
                  overwrite=False, pbar=True):
+        """Download files from S3
+
+        Parameters
+        ----------
+        directory : str
+            Directory to which to download subject files
+
+        include_site : bool, default=False
+            If True, include the site-ID in the download path
+
+        overwrite : bool, default=False
+            If True, overwrite files for each subject
+
+        pbar : bool, default=True
+            If True, include download progress bar
+        """
         if include_site:
             directory = op.join(directory, self.site)
 
@@ -389,8 +542,11 @@ class Subject:
             )) for p in v] for k, v in self.s3_keys.items()
         }
 
-        pbar_ftypes = tqdm(self.s3_keys.keys(),
-                      desc=f"Downloading {self.subject_id}")
+        if pbar:
+            pbar_ftypes = tqdm(self.s3_keys.keys(),
+                          desc=f"Downloading {self.subject_id}")
+        else:
+            pbar_ftypes = self.s3_keys.keys()
 
         for ftype in pbar_ftypes:
             pbar_ftypes.set_description(
@@ -403,10 +559,13 @@ class Subject:
                                   key=s3_keys,
                                   overwrite=overwrite)
             elif all(isinstance(x, str) for x in s3_keys):
-                file_zip = tqdm(zip(s3_keys, files[ftype]),
-                                desc=f"{ftype}",
-                                total=len(s3_keys),
-                                leave=False)
+                if pbar:
+                    file_zip = tqdm(zip(s3_keys, files[ftype]),
+                                    desc=f"{ftype}",
+                                    total=len(s3_keys),
+                                    leave=False)
+                else:
+                    file_zip = zip(s3_keys, files[ftype])
                 for key, fname in file_zip:
                     _download_from_s3(fname=fname,
                                       bucket=self.study.bucket,
