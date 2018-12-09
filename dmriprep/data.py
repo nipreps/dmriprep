@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
+from tqdm.auto import tqdm
 
 
 mod_logger = logging.getLogger(__name__)
@@ -203,8 +204,12 @@ class Study:
         raise NotImplementedError
 
     def download(self, directory, include_site=False, overwrite=False):
-        results = [delayed(sub.download)(directory, include_site, overwrite)
-                   for sub in self.subjects]
+        results = [delayed(sub.download)(
+            directory=directory,
+            include_site=include_site,
+            overwrite=overwrite,
+            pbar=False
+        ) for sub in self.subjects]
 
         with ProgressBar():
             compute(*results, scheduler="threads")
@@ -373,7 +378,8 @@ class Subject:
             self._valid = False
             self._s3_keys = None
 
-    def download(self, directory, include_site=False, overwrite=False):
+    def download(self, directory, include_site=False,
+                 overwrite=False, pbar=True):
         if include_site:
             directory = op.join(directory, self.site)
 
@@ -383,14 +389,25 @@ class Subject:
             )) for p in v] for k, v in self.s3_keys.items()
         }
 
-        for ftype, s3_keys in self.s3_keys.items():
+        pbar_ftypes = tqdm(self.s3_keys.keys(),
+                      desc=f"Downloading {self.subject_id}")
+
+        for ftype in pbar_ftypes:
+            pbar_ftypes.set_description(
+                f"Downloading {self.subject_id} ({ftype})"
+            )
+            s3_keys = self.s3_keys[ftype]
             if isinstance(s3_keys, str):
                 _download_from_s3(fname=files[ftype],
                                   bucket=self.study.bucket,
                                   key=s3_keys,
                                   overwrite=overwrite)
             elif all(isinstance(x, str) for x in s3_keys):
-                for key, fname in zip(s3_keys, files[ftype]):
+                file_zip = tqdm(zip(s3_keys, files[ftype]),
+                                desc=f"{ftype}",
+                                total=len(s3_keys),
+                                leave=False)
+                for key, fname in file_zip:
                     _download_from_s3(fname=fname,
                                       bucket=self.study.bucket,
                                       key=key,
@@ -420,7 +437,7 @@ class Subject:
 
         Parameters
         ----------
-        input_files : InputFiles namedtuple
+        input_files : dict
             The local input files for the subject
 
         input_type : "s3" or "local", default="s3"
@@ -572,8 +589,8 @@ class Subject:
 
         Returns
         -------
-        list of InputFiles namedtuples
-            List of InputFiles namedtuples for each session ID.
+        dict of dicts
+            Dict of Dicts of file names
         """
         if multiples_policy not in ['sessions', 'concatenate']:
             raise ValueError('`multiples_policy` must be either "sessions" or '

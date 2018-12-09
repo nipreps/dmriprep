@@ -13,11 +13,12 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
-    'nipype',
+    'dask',
     'dipy',
+    'nipype',
     'pandas',
     'parse',
-    'dask',
+    'tqdm',
 ]
 
 setup_requirements = ['pytest-runner', ]
