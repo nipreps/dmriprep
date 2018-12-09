@@ -8,6 +8,7 @@ import logging
 import os
 import os.path as op
 import re
+import subprocess
 from pathlib import Path
 
 import pandas as pd
@@ -251,8 +252,17 @@ class Study:
         """
         raise NotImplementedError
 
-    def postprocess(self):
-        """Study-specific postprocessing steps"""
+    def postprocess(self, subject, pbar):
+        """Study-specific postprocessing steps
+
+        Parameters
+        ----------
+        subject : dmriprep.data.Subject
+            subject instance
+
+        pbar : bool, default=True
+            If True, include progress bar
+        """
         raise NotImplementedError
 
     def download(self, directory, include_site=False, overwrite=False):
@@ -352,8 +362,39 @@ class HBN(Study):
 
         return all_subjects
 
-    def postprocess(self):
-        pass
+    def postprocess(self, subject, pbar):
+        """Move the T1 file back into the freesurfer directory.
+
+        This step is specific to the HBN dataset where the T1 files
+        are outside of the derivatives/sub-XXX/freesurfer directory,
+        due to defacing protocols.
+
+        Parameters
+        ----------
+        subject : dmriprep.data.Subject
+            subject instance
+
+        pbar : bool, default=True
+            If True, include progress bar
+        """
+        if pbar:
+            sessions_pbar = tqdm(subject.files.keys(),
+                                 desc="Postprocess mriconvert T1W")
+        else:
+            sessions_pbar = subject.files.keys()
+
+        for sess in sessions_pbar:
+            t1_file = subject.files[sess]['t1w'][0]
+            freesurfer_path = op.join(op.dirname(t1_file), 'freesurfer')
+
+            convert_cmd = 'mri_convert {in_:s} {out_:s}'.format(
+                in_=t1_file, out_=op.join(freesurfer_path, 'mri', 'orig.mgz')
+            )
+
+            fnull = open(os.devnull, 'w')
+            subprocess.call(convert_cmd.split(),
+                            stdout=fnull,
+                            stderr=subprocess.STDOUT)
 
 
 class Subject:
@@ -549,9 +590,10 @@ class Subject:
             pbar_ftypes = self.s3_keys.keys()
 
         for ftype in pbar_ftypes:
-            pbar_ftypes.set_description(
-                f"Downloading {self.subject_id} ({ftype})"
-            )
+            if pbar:
+                pbar_ftypes.set_description(
+                    f"Downloading {self.subject_id} ({ftype})"
+                )
             s3_keys = self.s3_keys[ftype]
             if isinstance(s3_keys, str):
                 _download_from_s3(fname=files[ftype],
@@ -583,6 +625,8 @@ class Subject:
         if not files_by_session.keys():
             # There were no valid sessions
             self._valid = False
+
+        self.study.postprocess(subject=self, pbar=pbar)
 
     def _determine_directions(self,
                               input_files,
