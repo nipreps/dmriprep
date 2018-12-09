@@ -243,6 +243,9 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     inputspec.inputs.subjects_dir = subjects_dir
     inputspec.inputs.out_dir = op.abspath(out_dir)
 
+    # write the graph (this is saved to the working dir)
+    wf.write_graph()
+
     wf.run()
 
 
@@ -469,14 +472,18 @@ def get_dmriprep_pe_workflow(working_dir):
         import os.path as op
         return op.join(subjects_dir, sub, "mri", "orig.mgz")
 
+
+    def get_aparc_aseg(subjects_dir, sub='freesurfer'):
+        import os.path as op
+        return op.join(subjects_dir, sub, "mri", "aparc+aseg.mgz")
+
     # transform the dropped volume version to anat space w/ out resampling
     voltransform = pe.Node(fs.ApplyVolTransform(no_resample=True),
                            iterfield=['source_file', 'reg_file'],
                            name='transform')
-    #voltransform.inputs.subjects_dir = subjects_dir
+
     wf.connect(inputspec, 'subjects_dir', voltransform, 'subjects_dir')
-    #voltransform.inputs.target_file = get_orig(subjects_dir, 'freesurfer')
-    wf.connect(inputspec, ('subjects_dir', get_orig), voltransform, 'target_file')
+    wf.connect(inputspec, ('subjects_dir', get_aparc_aseg), voltransform, 'target_file')
     wf.connect(prep, "outputnode.out_file", voltransform, "source_file")
     wf.connect(bbreg, "out_reg_file", voltransform, "reg_file")
 
@@ -559,9 +566,6 @@ def get_dmriprep_pe_workflow(working_dir):
                                        function=binarize_aparc),
                           name="bin_aparc")
 
-    def get_aparc_aseg(subjects_dir, sub='freesurfer'):
-        import os.path as op
-        return op.join(subjects_dir, sub, "mri", "aparc+aseg.mgz")
 
     getB0Anat = fslroi.clone('getB0Anat')
     wf.connect(voltransform, 'transformed_file', getB0Anat, 'in_file')
@@ -724,7 +728,6 @@ def get_dmriprep_pe_workflow(working_dir):
     wf.connect(inputspec, 'subject_id', node_name_files_nicely, 'subject_id')
     wf.connect(node_name_files_nicely, 'substitutions', datasink, 'substitutions')
 
-    # write the graph (this is saved to the working dir)
-    wf.write_graph()
+
 
     return wf
