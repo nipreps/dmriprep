@@ -229,6 +229,24 @@ def run_dmriprep(dwi_file, bvec_file, bval_file,
 
 def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
                     subjects_dir, working_dir, out_dir):
+
+    wf = get_dmriprep_pe_workflow(working_dir)
+    wf.base_dir = op.join(op.abspath(working_dir), subject_id)
+
+    inputspec = wf.get_node('inputspec')
+    inputspec.inputs.subject_id = subject_id
+    inputspec.inputs.dwi_file = dwi_file
+    inputspec.inputs.dwi_file_ap = dwi_file_AP
+    inputspec.inputs.dwi_file_pa = dwi_file_PA
+    inputspec.inputs.bvec_file = bvec_file
+    inputspec.inputs.bval_file = bval_file
+    inputspec.inputs.subjects_dir = subjects_dir
+    inputspec.inputs.out_dir = op.abspath(out_dir)
+
+    wf.run()
+
+
+def get_dmriprep_pe_workflow(working_dir):
     """
     This assumes that there are scans with phase-encode directions AP/PA for
     topup.
@@ -243,10 +261,30 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     from nipype.interfaces.dipy import DTI
     from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
 
-    # some bookkeeping (getting the filename, gettings the BIDS subject name)
-    dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
-    bids_sub_name = subject_id
-    assert bids_sub_name.startswith("sub-")
+    inputspec = pe.Node(niu.IdentityInterface(fields=[
+        'subject_id',
+        'dwi_file',
+        'dwi_file_ap',
+        'dwi_file_pa',
+        'bvec_file',
+        'bval_file',
+        'subjects_dir',
+        'out_dir'
+    ]), name="inputspec")
+
+    # inputspec.inputs.subject_id = subject_id
+    # inputspec.inputs.dwi_file = dwi_file
+    # inputspec.inputs.dwi_file_ap = dwi_file_AP
+    # inputspec.inputs.dwi_file_pa = dwi_file_PA
+    # inputspec.inputs.bvec_file = bvec_file
+    # inputspec.inputs.bval_file = bval_file
+    # inputspec.inputs.subjects_dir = subjects_dir
+    # inputspec.inputs.out_dir = op.abspath(out_dir)
+    #
+    # # some bookkeeping (getting the filename, getting the BIDS subject name)
+    # dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
+    # bids_sub_name = subject_id
+    # assert bids_sub_name.startswith("sub-")
 
     # Grab the preprocessing all_fsl_pipeline
     # AK: watch out, other datasets might be encoded LR
@@ -256,11 +294,15 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
 
     # initialize an overall workflow
     wf = pe.Workflow(name="dmriprep")
-    wf.base_dir = op.join(op.abspath(working_dir), subject_id)
 
-    prep.inputs.inputnode.in_file = dwi_file
-    prep.inputs.inputnode.in_bvec = bvec_file
-    prep.inputs.inputnode.in_bval = bval_file
+    #prep.inputs.inputnode.in_file = dwi_file
+    #prep.inputs.inputnode.in_bvec = bvec_file
+    #prep.inputs.inputnode.in_bval = bval_file
+
+    wf.connect(inputspec, 'dwi_file', prep, 'inputnode.in_file')
+    wf.connect(inputspec, 'bvec_file', prep, 'inputnode.in_bvec')
+    wf.connect(inputspec, 'bval_file', prep, 'inputnode.in_bval')
+
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
     eddy.inputs.niter = 1  # TODO: make this a parameter to the function with default 5
@@ -329,24 +371,31 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
 
     # TODO: make this a parameter to the function
     id_outliers_node.inputs.threshold = 0.02
-    id_outliers_node.inputs.dwi_file = dwi_file
+    wf.connect(inputspec, 'dwi_file', id_outliers_node, 'dwi_file')
+    # id_outliers_node.inputs.dwi_file = dwi_file
     wf.connect(prep, "fsl_eddy.out_outlier_report",
                id_outliers_node, "outlier_report")
 
+    listMerge = pe.Node(niu.Merge(numinputs=2), name="listMerge")
+    wf.connect(inputspec, 'dwi_file_ap', listMerge, 'in1')
+    wf.connect(inputspec, 'dwi_file_pa', listMerge, 'in2')
+
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
-    merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
+    # merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
     wf.connect(merge, 'merged_file', prep, 'inputnode.alt_file')
+    wf.connect(listMerge, 'out', merge, 'in_files')
 
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
     wf.connect(prep, "outputnode.out_file", fslroi, "in_file")
 
     bbreg = pe.Node(fs.BBRegister(contrast_type="t2", init="coreg",
                                   out_fsl_file=True,
-                                  subjects_dir=subjects_dir,
+                                  #subjects_dir=subjects_dir,
                                   epi_mask=True),
                     name="bbreg")
     bbreg.inputs.subject_id = 'freesurfer'  # bids_sub_name
     wf.connect(fslroi, "roi_file", bbreg, "source_file")
+    wf.connect(inputspec, 'subjects_dir', bbreg, 'subjects_dir')
 
     def drop_outliers_fn(in_file, in_bval, in_bvec, drop_scans):
         """Drop outlier volumes from dwi file
@@ -410,30 +459,87 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
         name="drop_outliers_node"
     )
 
-    wf.connect(id_outliers_node, "drop_scans", drop_outliers_node, "drop_scans")
-    wf.connect(prep, "outputnode.out_file", drop_outliers_node, "in_file")
-    drop_outliers_node.inputs.in_bval = bval_file
-    wf.connect(prep, "outputnode.out_bvec", drop_outliers_node, "in_bvec")
 
+    # Align the output of drop_outliers_node & also the eddy corrected version to the anatomical space
+    # without resampling. and then for aparc+aseg & the mask, resample to the larger voxel size of the B0 image from
+    # fslroi. Also we need to apply the transformation to both bvecs (dropped & eddied) and I think we can just load
+    # the affine from bbreg (sio.loadmat) and np.dot(coord, aff) for each coord in bvec
+
+    def get_orig(subjects_dir, sub='freesurfer'):
+        import os.path as op
+        return op.join(subjects_dir, sub, "mri", "orig.mgz")
+
+    # transform the dropped volume version to anat space w/ out resampling
+    voltransform = pe.Node(fs.ApplyVolTransform(no_resample=True),
+                           iterfield=['source_file', 'reg_file'],
+                           name='transform')
+    #voltransform.inputs.subjects_dir = subjects_dir
+    wf.connect(inputspec, 'subjects_dir', voltransform, 'subjects_dir')
+    #voltransform.inputs.target_file = get_orig(subjects_dir, 'freesurfer')
+    wf.connect(inputspec, ('subjects_dir', get_orig), voltransform, 'target_file')
+    wf.connect(prep, "outputnode.out_file", voltransform, "source_file")
+    wf.connect(bbreg, "out_reg_file", voltransform, "reg_file")
+
+    def func_applyTransformToBvecs(bvec_file, reg_mat_file):
+        import numpy as np
+        import nipype.utils.filemanip as fm
+        import os
+        aff = np.loadtxt(reg_mat_file)
+        bvecs = np.loadtxt(bvec_file)
+        bvec_trans = []
+        for bvec in bvecs.T:
+            coord = np.hstack((bvec, [1]))
+            coord_trans = np.dot(coord, aff)[:-1]
+            bvec_trans.append(coord_trans)
+        out_bvec = fm.fname_presuffix(bvec_file, suffix="anat_space", newpath=os.path.abspath('.'))
+        np.savetxt(out_bvec, np.asarray(bvec_trans).T)
+        return out_bvec
+
+    node_applyTransformToBvecs = pe.Node(niu.Function(input_names=['bvec_file', 'reg_mat_file'],
+                                                      output_names=['out_bvec'],
+                                                      function=func_applyTransformToBvecs),
+                                         name="applyTransformToBvecs")
+    wf.connect(bbreg, 'out_fsl_file', node_applyTransformToBvecs, 'reg_mat_file')
+    wf.connect(prep, 'outputnode.out_bvec', node_applyTransformToBvecs, 'bvec_file')
+
+    # ok cool, now lets do the thresholding.
+
+    wf.connect(id_outliers_node, "drop_scans", drop_outliers_node, "drop_scans")
+    wf.connect(voltransform, "transformed_file", drop_outliers_node, "in_file")
+    wf.connect(inputspec, 'bval_file', drop_outliers_node, 'in_bval')
+    # drop_outliers_node.inputs.in_bval = bval_file
+    wf.connect(node_applyTransformToBvecs, "out_bvec", drop_outliers_node, "in_bvec")
+
+    # lets compute the tensor on both the dropped volume scan
+    # and also the original, eddy corrected one.
     get_tensor = pe.Node(DTI(), name="dipy_tensor")
     wf.connect(drop_outliers_node, "out_file", get_tensor, "in_file")
     wf.connect(drop_outliers_node, "out_bval", get_tensor, "in_bval")
     wf.connect(drop_outliers_node, "out_bvec", get_tensor, "in_bvec")
 
+    get_tensor_eddy = get_tensor.clone('dipy_tensor_eddy')
+    wf.connect(voltransform, 'transformed_file', get_tensor_eddy, "in_file")
+    wf.connect(node_applyTransformToBvecs, 'out_bvec', get_tensor_eddy, "in_bvec")
+    wf.connect(inputspec, 'bval_file', get_tensor_eddy, 'in_bval')
+    # get_tensor_eddy.inputs.in_bval = bval_file
+
+    # AK: What is this, some vestigal node from a previous workflow?
+    # I'm not sure why the tensor gets scaled. but i guess lets scale it for
+    # both the dropped & eddy corrected versions.
     scale_tensor = pe.Node(name='scale_tensor', interface=fsl.BinaryMaths())
     scale_tensor.inputs.operation = 'mul'
     scale_tensor.inputs.operand_value = 1000
     wf.connect(get_tensor, 'out_file', scale_tensor, 'in_file')
 
-    voltransform = pe.Node(fs.ApplyVolTransform(inverse=True),
-                           iterfield=['source_file', 'reg_file'],
-                           name='transform')
-    voltransform.inputs.subjects_dir = subjects_dir
+    scale_tensor_eddy = scale_tensor.clone('scale_tensor_eddy')
+    wf.connect(get_tensor_eddy, 'out_file', scale_tensor_eddy, 'in_file')
 
-    vt2 = voltransform.clone("transform_aparcaseg")
-    vt2.inputs.interp = "nearest"
 
-    vt3 = voltransform.clone("transform_orig")
+    # OK now that anatomical stuff (segmentation & mask)
+    # We'll need:
+    # 1. the B0 image in anat space (fslroi the 'transformed file' of voltransform
+    # 2. the aparc aseg resampled-like the B0 image (mri_convert)
+    # 3. the resample aparc_aseg binarized to be the mask image.
 
     def binarize_aparc(aparc_aseg):
         import nibabel as nib
@@ -453,67 +559,53 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
                                        function=binarize_aparc),
                           name="bin_aparc")
 
-    def get_aparc_aseg(subjects_dir, sub):
+    def get_aparc_aseg(subjects_dir, sub='freesurfer'):
+        import os.path as op
         return op.join(subjects_dir, sub, "mri", "aparc+aseg.mgz")
 
-    def get_orig(subjects_dir, sub):
-        return op.join(subjects_dir, sub, "mri", "orig.mgz")
+    getB0Anat = fslroi.clone('getB0Anat')
+    wf.connect(voltransform, 'transformed_file', getB0Anat, 'in_file')
 
-    create_mask.inputs.aparc_aseg = get_aparc_aseg(subjects_dir, 'freesurfer')
-    wf.connect(create_mask, "outfile", voltransform, "target_file")
+    # reslice the anat-space aparc+aseg to the DWI resolution
+    resliceToDwi = pe.Node(fs.MRIConvert(resample_type="nearest"),
+                            name="resampleToDWI")
+    wf.connect(getB0Anat, 'roi_file', resliceToDwi, 'reslice_like')
+    wf.connect(inputspec, ('subjects_dir', get_aparc_aseg), resliceToDwi, 'in_file')
 
-    wf.connect(fslroi, "roi_file", voltransform, "source_file")
-    wf.connect(bbreg, "out_reg_file", voltransform, "reg_file")
+    # also reslice the orig i suppose
+    resliceOrigToDwi = resliceToDwi.clone('resliceT1wToDwi')
+    wf.connect(inputspec, ('subjects_dir', get_orig), resliceOrigToDwi, 'in_file')
+    # resliceOrigToDwi.inputs.in_file = get_orig(subjects_dir, 'freesurfer')
+    resliceOrigToDwi.inputs.out_type = 'niigz'
+    wf.connect(getB0Anat, 'roi_file', resliceOrigToDwi, 'reslice_like')
 
-    vt2.inputs.target_file = get_aparc_aseg(subjects_dir, 'freesurfer')
-    wf.connect(fslroi, "roi_file", vt2, "source_file")
-    wf.connect(bbreg, "out_reg_file", vt2, "reg_file")
+    # we assume the freesurfer is the output of BIDS
+    # so the freesurfer output is in /path/to/derivatives/sub-whatever/freesurfer
+    # which means the subject_dir is /path/to/derivatives/sub-whatever
+    # resliceToDwi.inputs.in_file = get_aparc_aseg(subjects_dir, 'freesurfer')
 
-    vt3.inputs.target_file = get_orig(subjects_dir, 'freesurfer')
-    wf.connect(fslroi, "roi_file", vt3, "source_file")
-    wf.connect(bbreg, "out_reg_file", vt3, "reg_file")
+    # now we have a nice aparc+aseg still in anat space but resliced like the dwi file
+    # lets create a mask file from it.
 
-    # AK (2017): THIS NODE MIGHT NOT BE NECESSARY
-    # AK (2018) doesn't know why she said that above..
-    threshold2 = pe.Node(fs.Binarize(min=0.5, out_type='nii.gz', dilate=1),
-                         iterfield=['in_file'],
-                         name='threshold2')
-    wf.connect(voltransform, "transformed_file", threshold2, "in_file")
+    wf.connect(resliceToDwi, 'out_file', create_mask, 'aparc_aseg')
 
+    # save all the things
     datasink = pe.Node(nio.DataSink(), name="sinker")
-    datasink.inputs.base_directory = out_dir
-    datasink.inputs.substitutions = [
-        ("vol0000_flirt_merged.nii.gz", dwi_fname + '.nii.gz'),
-        ("stats.vol0000_flirt_merged.txt", dwi_fname + ".art.json"),
-        ("motion_parameters.par", dwi_fname + ".motion.txt"),
-        ("_rotated.bvec", ".bvec"),
-        ("art.vol0000_flirt_merged_outliers.txt", dwi_fname + ".outliers.txt"),
-        ("vol0000_flirt_merged", dwi_fname),
-        ("_roi_bbreg_freesurfer", "_register"),
-        ("dwi/eddy_corrected", "dwi/%s" % dwi_fname),
-        ("dti/eddy_corrected", "dti/%s" % dwi_fname.replace("_dwi", "")),
-        ("reg/eddy_corrected", "reg/%s" % dwi_fname.replace("_dwi", "")),
-        ("aparc+asegbin_warped_thresh", dwi_fname.replace("_dwi", "_mask")),
-        ("aparc+aseg_warped_out", dwi_fname.replace("_dwi", "_aparc+aseg")),
-        ("art.eddy_corrected_outliers", dwi_fname.replace("dwi", "outliers")),
-        ("color_fa", "colorfa"),
-        ("orig_warped_out", dwi_fname.replace("_dwi", "_T1w")),
-        # ("eddy_corrected_", dwi_fname.replace("dwi", "")),
-        ("stats.eddy_corrected", dwi_fname.replace("dwi", "artStats")),
-        ("eddy_corrected.eddy_parameters", dwi_fname+".eddy_parameters"),
-        ("qc/eddy_corrected", "qc/"+dwi_fname),
-        ("derivatives/dmriprep", "derivatives/{}/dmriprep".format(bids_sub_name))
-    ]
+    wf.connect(inputspec, 'out_dir', datasink, 'base_directory')
+    wf.connect(inputspec, 'subject_id', datasink, 'container')
+    # datasink.inputs.base_directory = op.join(op.abspath(out_dir), subject_id)
+    # datasink.inputs.container = subject_id
 
     wf.connect(drop_outliers_node, "out_file", datasink, "dmriprep.dwi.@thinned")
     wf.connect(drop_outliers_node, "out_bval", datasink, "dmriprep.dwi.@bval_thinned")
     wf.connect(drop_outliers_node, "out_bvec", datasink, "dmriprep.dwi.@bvec_thinned")
 
-    wf.connect(prep, "outputnode.out_file", datasink, "dmriprep.dwi.@corrected")
-    wf.connect(prep, "outputnode.out_bvec", datasink, "dmriprep.dwi.@rotated")
-    wf.connect(prep, "fsl_eddy.out_parameter",
-               datasink, "dmriprep.qc.@eddyparams")
+    # eddy corrected files
+    wf.connect(prep, "outputnode.out_file", datasink, "dmriprep.dwi_eddy.@corrected")
+    wf.connect(prep, "outputnode.out_bvec", datasink, "dmriprep.dwi_eddy.@rotated")
+    wf.connect(inputspec, 'bval_file', datasink, 'dmriprep.dwi_eddy.@bval')
 
+    # all the eddy stuff except the corrected files
     wf.connect(prep, "fsl_eddy.out_movement_rms",
                datasink, "dmriprep.qc.@eddyparamsrms")
     wf.connect(prep, "fsl_eddy.out_outlier_report",
@@ -522,29 +614,39 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
                datasink, "dmriprep.qc.@eddyparamsrestrictrms")
     wf.connect(prep, "fsl_eddy.out_shell_alignment_parameters",
                datasink, "dmriprep.qc.@eddyparamsshellalign")
+    wf.connect(prep, "fsl_eddy.out_parameter",
+               datasink, "dmriprep.qc.@eddyparams")
 
+    # the file that told us which volumes to trop
     wf.connect(id_outliers_node, "outpath", datasink, "dmriprep.qc.@droppedscans")
 
+    # the tensors of the dropped volumes dwi
     wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@tensor")
     wf.connect(get_tensor, "fa_file", datasink, "dmriprep.dti.@fa")
     wf.connect(get_tensor, "md_file", datasink, "dmriprep.dti.@md")
     wf.connect(get_tensor, "ad_file", datasink, "dmriprep.dti.@ad")
     wf.connect(get_tensor, "rd_file", datasink, "dmriprep.dti.@rd")
     wf.connect(get_tensor, "color_fa_file", datasink, "dmriprep.dti.@colorfa")
-    wf.connect(get_tensor, "out_file", datasink, "dmriprep.dti.@scaled_tensor")
+    wf.connect(scale_tensor, "out_file", datasink, "dmriprep.dti.@scaled_tensor")
 
+    # the tensors of the eddied volumes dwi
+    wf.connect(get_tensor_eddy, "out_file", datasink, "dmriprep.dti_eddy.@tensor")
+    wf.connect(get_tensor_eddy, "fa_file", datasink, "dmriprep.dti_eddy.@fa")
+    wf.connect(get_tensor_eddy, "md_file", datasink, "dmriprep.dti_eddy.@md")
+    wf.connect(get_tensor_eddy, "ad_file", datasink, "dmriprep.dti_eddy.@ad")
+    wf.connect(get_tensor_eddy, "rd_file", datasink, "dmriprep.dti_eddy.@rd")
+    wf.connect(get_tensor_eddy, "color_fa_file", datasink, "dmriprep.dti_eddy.@colorfa")
+    wf.connect(scale_tensor_eddy, "out_file", datasink, "dmriprep.dti_eddy.@scaled_tensor")
+
+    # anatomical registration stuff
     wf.connect(bbreg, "min_cost_file", datasink, "dmriprep.reg.@mincost")
     wf.connect(bbreg, "out_fsl_file", datasink, "dmriprep.reg.@fslfile")
     wf.connect(bbreg, "out_reg_file", datasink, "dmriprep.reg.@reg")
-    wf.connect(threshold2, "binary_file", datasink, "dmriprep.anat.@mask")
 
-    convert = pe.Node(fs.MRIConvert(out_type="niigz"), name="convert2nii")
-    wf.connect(vt2, "transformed_file", convert, "in_file")
-    wf.connect(convert, "out_file", datasink, "dmriprep.anat.@aparc_aseg")
-
-    convert1 = convert.clone("convertorig2nii")
-    wf.connect(vt3, "transformed_file", convert1, "in_file")
-    wf.connect(convert1, "out_file", datasink, "dmriprep.anat.@anat")
+    # anatomical files resliced
+    wf.connect(resliceToDwi, 'out_file', datasink, 'dmriprep.anat.@segmentation')
+    wf.connect(create_mask, 'outfile', datasink, 'dmriprep.anat.@mask')
+    wf.connect(resliceOrigToDwi, 'out_file', datasink, 'dmriprep.anat.@T1w')
 
     def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report,
                        color_fa_file, anat_mask_file, outlier_indices):
@@ -562,19 +664,67 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
         function=reportNodeFunc
     ), name="reportJSON")
 
-    wf.connect(prep, "outputnode.out_file", reportNode, 'dwi_corrected_file')
+    # for the report, lets show the eddy corrected (full volume) image
+    wf.connect(voltransform, "transformed_file", reportNode, 'dwi_corrected_file')
+
+    # add the rms movement output from eddy
     wf.connect(prep, "fsl_eddy.out_movement_rms", reportNode, 'eddy_rms')
     wf.connect(prep, "fsl_eddy.out_outlier_report", reportNode, 'eddy_report')
     wf.connect(id_outliers_node, 'drop_scans', reportNode, 'outlier_indices')
-    wf.connect(threshold2, "binary_file", reportNode, 'anat_mask_file')
+
+    # the mask file to check our registration, and the colorFA file go in the report
+    wf.connect(create_mask, "outfile", reportNode, 'anat_mask_file')
     wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
 
+    # save that report!
     wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
+
+    # this part is done last, to get the filenames *just right*
+    # its super annoying.
+    def name_files_nicely(dwi_file, subject_id):
+        import os.path as op
+        dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
+        substitutions = [
+            ("vol0000_flirt_merged.nii.gz", dwi_fname + '.nii.gz'),
+            ("stats.vol0000_flirt_merged.txt", dwi_fname + ".art.json"),
+            ("motion_parameters.par", dwi_fname + ".motion.txt"),
+            ("_rotated.bvec", ".bvec"),
+            ("art.vol0000_flirt_merged_outliers.txt", dwi_fname + ".outliers.txt"),
+            ("vol0000_flirt_merged", dwi_fname),
+            ("_roi_bbreg_freesurfer", "_register"),
+            ("dwi/eddy_corrected", "dwi/%s" % dwi_fname),
+            ("dti/eddy_corrected", "dti/%s" % dwi_fname.replace("_dwi", "")),
+            ("reg/eddy_corrected", "reg/%s" % dwi_fname.replace("_dwi", "")),
+            ("aparc+aseg_outbin", dwi_fname.replace("_dwi", "_mask")),
+            ("aparc+aseg_out", dwi_fname.replace("_dwi", "_aparc+aseg")),
+            ("art.eddy_corrected_outliers", dwi_fname.replace("dwi", "outliers")),
+            ("color_fa", "colorfa"),
+            ("orig_out", dwi_fname.replace("_dwi", "_T1w")),
+            # ("eddy_corrected_", dwi_fname.replace("dwi", "")),
+            ("stats.eddy_corrected", dwi_fname.replace("dwi", "artStats")),
+            ("eddy_corrected.eddy_parameters", dwi_fname+".eddy_parameters"),
+            ("qc/eddy_corrected", "qc/"+dwi_fname),
+            ("derivatives/dmriprep", "derivatives/{}/dmriprep".format(subject_id)),
+            ("_rotatedanat_space_thinned", ""),
+            ("_thinned", ""),
+            ("eddy_corrected", dwi_fname),
+            ("_warped", ""),
+            ("_maths", "_scaled"),
+            ("dropped_scans", dwi_fname.replace("_dwi", "_dwi_dropped_scans")),
+            ("report.json", dwi_fname.replace("_dwi", "_dwi_report.json"))
+        ]
+        return substitutions
+
+    node_name_files_nicely = pe.Node(niu.Function(input_names=['dwi_file', 'subject_id'],
+                                                  output_names=['substitutions'],
+                                                  function=name_files_nicely),
+                                     name="name_files_nicely"
+                                     )
+    wf.connect(inputspec, 'dwi_file', node_name_files_nicely, 'dwi_file')
+    wf.connect(inputspec, 'subject_id', node_name_files_nicely, 'subject_id')
+    wf.connect(node_name_files_nicely, 'substitutions', datasink, 'substitutions')
+
+    # write the graph (this is saved to the working dir)
     wf.write_graph()
 
-    # TODO: take this out and just return workflow
-    wf.run()
-
-    copyfile(bval_file, op.join(
-        op.abspath(out_dir), "dmriprep", "dwi", op.split(bval_file)[1]
-    ))
+    return wf
