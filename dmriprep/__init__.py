@@ -10,6 +10,11 @@ import errno
 import logging
 import os
 
+from . import data
+from . import io
+from . import qc
+from . import run
+
 module_logger = logging.getLogger(__name__)
 
 # get the log level from environment variable

@@ -13,9 +13,12 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
-    'nipype',
+    'dask',
     'dipy',
+    'nipype',
+    'pandas',
     'parse',
+    'tqdm',
 ]
 
 setup_requirements = ['pytest-runner', ]
@@ -31,8 +34,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
