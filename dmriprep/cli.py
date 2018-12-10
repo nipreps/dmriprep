@@ -10,25 +10,27 @@ import os
 
 
 @click.command()
-@click.option('--participant-label', help="The label(s) of the participant(s) that should be"
-                                          "analyzed. The label corresponds to"
-                                          "sub-<participant_label> from the BIDS spec (so it does"
-                                          "not include 'sub-'). If this parameter is not provided"
-                                          "all subjects will be analyzed. Multiple participants"
-                                          "can be specified with a space separated list.",
-              default=None
-              )
+@click.option('--participant-label',
+              help="The label(s) of the participant(s) that should be"
+                   "analyzed. The label corresponds to"
+                   "sub-<participant_label> from the BIDS spec (so it does"
+                   "not include 'sub-'). If this parameter is not provided"
+                   "all subjects will be analyzed. Multiple participants"
+                   "can be specified with a space separated list.",
+              default=None)
 @click.option('--eddy-niter',
-              help="Fixed number of eddy iterations. See"
-                   "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide#A--niter",
+              help="Fixed number of eddy iterations. See "
+                   "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide"
+                   "#A--niter",
               default=5)
 @click.option('--slice-outlier-threshold',
-              help="Number of allowed outlier slices per volume."
-                   "If this is exceeded the volume is dropped from analysis. If"
-                   "`slice_outlier_threshold` is an int, it is treated as number of allowed"
-                   "outlier slices. If `slice_outlier_threshold` is a float between 0 and 1"
-                   "(exclusive), it is treated the fraction of allowed outlier slices.",
-              default=0.02)
+              help="Number of allowed outlier slices per volume. "
+                   "If this is exceeded the volume is dropped from analysis. "
+                   "If an int is provided, it is treated as number of allowed "
+                   "outlier slices. If a float between 0 and 1 "
+                   "(exclusive) is provided, it is treated the fraction of "
+                   "allowed outlier slices.",
+              default=0.02, type=(float, int))
 @click.argument('bids_dir',
                 )
 @click.argument('output_dir',
@@ -40,7 +42,8 @@ def main(participant_label, bids_dir, output_dir,
          eddy_niter=5, slice_outlier_threshold=0.02,
          analysis_level="participant"):
     """
-    BIDS_DIR: The directory with the input dataset formatted according to the BIDS standard.
+    BIDS_DIR: The directory with the input dataset formatted according to
+    the BIDS standard.
 
     OUTPUT_DIR: The directory where the output files should be stored.
     If you are running a group level analysis, this folder
@@ -52,7 +55,8 @@ def main(participant_label, bids_dir, output_dir,
     (in parallel).
     """
     if analysis_level is not 'participant':
-        raise NotImplementedError('The only valid analysis level for dmriprep is participant at the moment.')
+        raise NotImplementedError('The only valid analysis level for dmriprep '
+                                  'is participant at the moment.')
 
     inputs = io.get_bids_files(participant_label, bids_dir)
 

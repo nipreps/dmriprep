@@ -1,5 +1,11 @@
 import os.path as op
 from shutil import copyfile
+import warnings
+
+# Filter warnings that are visible whenever you import another package that
+# was compiled against an older numpy than is installed.
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 
 def run_dmriprep(dwi_file, bvec_file, bval_file,
