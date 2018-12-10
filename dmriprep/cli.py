@@ -22,7 +22,7 @@ import os
               help="Fixed number of eddy iterations. See "
                    "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide"
                    "#A--niter",
-              default=5)
+              default=5, type=(int))
 @click.option('--slice-outlier-threshold',
               help="Number of allowed outlier slices per volume. "
                    "If this is exceeded the volume is dropped from analysis. "
@@ -30,7 +30,7 @@ import os
                    "outlier slices. If a float between 0 and 1 "
                    "(exclusive) is provided, it is treated the fraction of "
                    "allowed outlier slices.",
-              default=0.02, type=(float, int))
+              default=0.02)
 @click.argument('bids_dir',
                 )
 @click.argument('output_dir',
