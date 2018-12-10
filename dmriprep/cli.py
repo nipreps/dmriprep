@@ -72,9 +72,10 @@ def upload(output_dir, bucket, access_key, secret_key, provider='s3', subject=No
 
     BUCKET: The cloud bucket name to upload data to.
     """
-
     import boto3
+    from dask import compute, delayed
     from glob import glob
+    from tqdm.auto import tqdm
 
     output_dir = os.path.abspath(output_dir)
     if not output_dir.endswith('/'):
@@ -89,17 +90,16 @@ def upload(output_dir, bucket, access_key, secret_key, provider='s3', subject=No
         else:
             subjects = [os.path.split(s)[1] for s in glob(os.path.join(output_dir, 'sub-*'))]
 
-        for s in subjects:
-            base_dir = os.path.join(output_dir, s, 'dmriprep')
+        def upload_subject(sub, sub_idx):
+            base_dir = os.path.join(output_dir, sub, 'dmriprep')
             for root, dirs, files in os.walk(base_dir):
-                for f in files:
+                for f in tqdm(files, desc=f"Uploading {s}", position=sub_idx):
                     filepath = os.path.join(root, f)
                     key = root.replace(output_dir, '')
-                    # TODO: progress bar on this!!
                     client.upload_file(filepath, bucket, os.path.join(key, f))
 
-
-
+        uploads = [delayed(upload_subject)(s, idx) for idx, s in enumerate(subjects)]
+        _ = list(compute(*uploads, scheduler="threads"))
     else:
         raise NotImplementedError('Only S3 is the only supported provider for data uploads at the moment')
 
