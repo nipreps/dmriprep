@@ -59,5 +59,50 @@ def data(output_dir):
     print('done')
 
 
+@click.command()
+@click.argument('output_dir')
+@click.argument('bucket')
+@click.option('--access_key', help="your AWS access key")
+@click.option('--secret_key', help="your AWS access secret")
+@click.option('--provider', default='s3', help="Cloud storage provider. Only S3 is supported right now.")
+@click.option('--subject', default=None, help="Subject id to upload (optional)")
+def upload(output_dir, bucket, access_key, secret_key, provider='s3', subject=None):
+    """
+    OUTPUT_DIR: The directory where the output files were stored.
+
+    BUCKET: The cloud bucket name to upload data to.
+    """
+
+    import boto3
+    from glob import glob
+
+    output_dir = os.path.abspath(output_dir)
+    if not output_dir.endswith('/'):
+        output_dir += '/'
+
+    if provider == 's3' or provider == 'S3':
+        client = boto3.client('s3',  aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+
+        if subject is not None:
+            assert os.path.exists(os.path.join(output_dir, subject)), 'this subject id does not exist!'
+            subjects = [subject]
+        else:
+            subjects = [os.path.split(s)[1] for s in glob(os.path.join(output_dir, 'sub-*'))]
+
+        for s in subjects:
+            base_dir = os.path.join(output_dir, s, 'dmriprep')
+            for root, dirs, files in os.walk(base_dir):
+                for f in files:
+                    filepath = os.path.join(root, f)
+                    key = root.replace(output_dir, '')
+                    # TODO: progress bar on this!!
+                    client.upload_file(filepath, bucket, os.path.join(key, f))
+
+
+
+    else:
+        raise NotImplementedError('Only S3 is the only supported provider for data uploads at the moment')
+
+
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover
