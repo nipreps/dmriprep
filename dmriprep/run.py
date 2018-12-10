@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 
 def run_dmriprep(dwi_file, bvec_file, bval_file,
-               subjects_dir, working_dir, out_dir):
+                 subjects_dir, working_dir, out_dir):
 
     """
     Runs dmriprep for acquisitions with just one PE direction.
@@ -234,7 +234,7 @@ def run_dmriprep(dwi_file, bvec_file, bval_file,
     return dmri_corrected, bvec_rotated, art_file, motion_file, outlier_file
 
 
-def run_dmriprep_pe(subject_id, dwi_file, dwi_file_ap, dwi_file_pa,
+def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA,
                     bvec_file, bval_file,
                     subjects_dir, working_dir, out_dir,
                     eddy_niter=5, slice_outlier_threshold=0.02):
@@ -248,10 +248,10 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_ap, dwi_file_pa,
     dwi_file : str
         Path to dwi nifti file
 
-    dwi_file_ap : str
+    dwi_file_AP : str
         Path to EPI nifti file (anterior-posterior)
 
-    dwi_file_pa : str
+    dwi_file_PA : str
         Path to EPI nifti file (posterior-anterior)
 
     bvec_file : str
@@ -289,21 +289,20 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_ap, dwi_file_pa,
     --------
     dmriprep.run.get_dmriprep_pe_workflow
     """
-    wf = get_dmriprep_pe_workflow(
-        eddy_niter=eddy_niter,
-        slice_outlier_threshold=slice_outlier_threshold
-    )
+    wf = get_dmriprep_pe_workflow()
     wf.base_dir = op.join(op.abspath(working_dir), subject_id)
 
     inputspec = wf.get_node('inputspec')
     inputspec.inputs.subject_id = subject_id
     inputspec.inputs.dwi_file = dwi_file
-    inputspec.inputs.dwi_file_ap = dwi_file_ap
-    inputspec.inputs.dwi_file_pa = dwi_file_pa
+    inputspec.inputs.dwi_file_ap = dwi_file_AP
+    inputspec.inputs.dwi_file_pa = dwi_file_PA
     inputspec.inputs.bvec_file = bvec_file
     inputspec.inputs.bval_file = bval_file
     inputspec.inputs.subjects_dir = subjects_dir
     inputspec.inputs.out_dir = op.abspath(out_dir)
+    inputspec.inputs.eddy_niter = eddy_niter
+    inputspec.inputs.slice_outlier_threshold = slice_outlier_threshold
 
     # write the graph (this is saved to the working dir)
     wf.write_graph()
@@ -311,21 +310,12 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_ap, dwi_file_pa,
     wf.run()
 
 
-def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
+def get_dmriprep_pe_workflow():
     """Return the dmriprep (phase encoded) nipype workflow
 
     Parameters
     ----------
-    eddy_niter : int, default=5
-        Fixed number of eddy iterations. See
-        https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide#A--niter
 
-    slice_outlier_threshold: int or float
-        Number of allowed outlier slices per volume. If this is exceeded the
-        volume is dropped from analysis. If `slice_outlier_threshold` is an
-        int, it is treated as number of allowed outlier slices. If
-        `slice_outlier_threshold` is a float between 0 and 1 (exclusive), it is
-        treated the fraction of allowed outlier slices.
 
     Returns
     -------
@@ -353,24 +343,11 @@ def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
         'bvec_file',
         'bval_file',
         'subjects_dir',
-        'out_dir'
+        'out_dir',
+        'eddy_niter',
+        'slice_outlier_threshold'
     ]), name="inputspec")
 
-    # inputspec.inputs.subject_id = subject_id
-    # inputspec.inputs.dwi_file = dwi_file
-    # inputspec.inputs.dwi_file_ap = dwi_file_ap
-    # inputspec.inputs.dwi_file_pa = dwi_file_pa
-    # inputspec.inputs.bvec_file = bvec_file
-    # inputspec.inputs.bval_file = bval_file
-    # inputspec.inputs.subjects_dir = subjects_dir
-    # inputspec.inputs.out_dir = op.abspath(out_dir)
-    #
-    # # some bookkeeping (getting the filename, getting the BIDS subject name)
-    # dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
-    # bids_sub_name = subject_id
-    # assert bids_sub_name.startswith("sub-")
-
-    # Grab the preprocessing all_fsl_pipeline
     # AK: watch out, other datasets might be encoded LR
     epi_ap = {'echospacing': 66.5e-3, 'enc_dir': 'y-'}
     epi_pa = {'echospacing': 66.5e-3, 'enc_dir': 'y'}
@@ -379,17 +356,13 @@ def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
     # initialize an overall workflow
     wf = pe.Workflow(name="dmriprep")
 
-    # prep.inputs.inputnode.in_file = dwi_file
-    # prep.inputs.inputnode.in_bvec = bvec_file
-    # prep.inputs.inputnode.in_bval = bval_file
-
     wf.connect(inputspec, 'dwi_file', prep, 'inputnode.in_file')
     wf.connect(inputspec, 'bvec_file', prep, 'inputnode.in_bvec')
     wf.connect(inputspec, 'bval_file', prep, 'inputnode.in_bval')
+    wf.connect(inputspec, 'eddy_niter', prep, 'fsl_eddy.niter')
 
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = eddy_niter
 
     def id_outliers_fn(outlier_report, threshold, dwi_file):
         """Get list of scans that exceed threshold for number of outliers
@@ -453,9 +426,9 @@ def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
         name="id_outliers_node"
     )
 
-    id_outliers_node.inputs.threshold = slice_outlier_threshold
     wf.connect(inputspec, 'dwi_file', id_outliers_node, 'dwi_file')
-    # id_outliers_node.inputs.dwi_file = dwi_file
+    wf.connect(inputspec, 'slice_outlier_threshold', id_outliers_node, 'threshold')
+
     wf.connect(prep, "fsl_eddy.out_outlier_report",
                id_outliers_node, "outlier_report")
 
@@ -590,7 +563,6 @@ def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
     wf.connect(id_outliers_node, "drop_scans", drop_outliers_node, "drop_scans")
     wf.connect(voltransform, "transformed_file", drop_outliers_node, "in_file")
     wf.connect(inputspec, 'bval_file', drop_outliers_node, 'in_bval')
-    # drop_outliers_node.inputs.in_bval = bval_file
     wf.connect(apply_transform_to_bvecs_node, "out_bvec", drop_outliers_node, "in_bvec")
 
     # lets compute the tensor on both the dropped volume scan
@@ -604,7 +576,6 @@ def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
     wf.connect(voltransform, 'transformed_file', get_tensor_eddy, "in_file")
     wf.connect(apply_transform_to_bvecs_node, 'out_bvec', get_tensor_eddy, "in_bvec")
     wf.connect(inputspec, 'bval_file', get_tensor_eddy, 'in_bval')
-    # get_tensor_eddy.inputs.in_bval = bval_file
 
     # AK: What is this, some vestigal node from a previous workflow?
     # I'm not sure why the tensor gets scaled. but i guess lets scale it for
@@ -671,8 +642,6 @@ def get_dmriprep_pe_workflow(eddy_niter=5, slice_outlier_threshold=0.02):
     datasink = pe.Node(nio.DataSink(), name="sinker")
     wf.connect(inputspec, 'out_dir', datasink, 'base_directory')
     wf.connect(inputspec, 'subject_id', datasink, 'container')
-    # datasink.inputs.base_directory = op.join(op.abspath(out_dir), subject_id)
-    # datasink.inputs.container = subject_id
 
     wf.connect(drop_outliers_node, "out_file", datasink, "dmriprep.dwi.@thinned")
     wf.connect(drop_outliers_node, "out_bval", datasink, "dmriprep.dwi.@bval_thinned")
