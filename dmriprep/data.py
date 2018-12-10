@@ -252,20 +252,18 @@ class Study:
         """
         raise NotImplementedError
 
-    def postprocess(self, subject, pbar):
+    def postprocess(self, subject):
         """Study-specific postprocessing steps
 
         Parameters
         ----------
         subject : dmriprep.data.Subject
             subject instance
-
-        pbar : bool, default=True
-            If True, include progress bar
         """
         raise NotImplementedError
 
-    def download(self, directory, include_site=False, overwrite=False):
+    def download(self, directory, include_site=False, overwrite=False,
+                 pbar=True):
         """Download files for each subject in the study
 
         Parameters
@@ -279,6 +277,9 @@ class Study:
         overwrite : bool, default=False
             If True, overwrite files for each subject
 
+        pbar : bool, default=True
+            If True, include progress bar
+
         See Also
         --------
         dmriprep.data.Subject.download()
@@ -287,11 +288,11 @@ class Study:
             directory=directory,
             include_site=include_site,
             overwrite=overwrite,
-            pbar=False
-        ) for sub in self.subjects]
+            pbar=pbar,
+            pbar_idx=idx,
+        ) for idx, sub in enumerate(self.subjects)]
 
-        with ProgressBar():
-            compute(*results, scheduler="threads")
+        compute(*results, scheduler="threads")
 
 
 class HBN(Study):
@@ -362,7 +363,7 @@ class HBN(Study):
 
         return all_subjects
 
-    def postprocess(self, subject, pbar):
+    def postprocess(self, subject):
         """Move the T1 file back into the freesurfer directory.
 
         This step is specific to the HBN dataset where the T1 files
@@ -373,17 +374,8 @@ class HBN(Study):
         ----------
         subject : dmriprep.data.Subject
             subject instance
-
-        pbar : bool, default=True
-            If True, include progress bar
         """
-        if pbar:
-            sessions_pbar = tqdm(subject.files.keys(),
-                                 desc="Postprocess mriconvert T1W")
-        else:
-            sessions_pbar = subject.files.keys()
-
-        for sess in sessions_pbar:
+        for sess in subject.files.keys():
             t1_file = subject.files[sess]['t1w'][0]
             freesurfer_path = op.join(op.dirname(t1_file), 'freesurfer')
 
@@ -424,8 +416,9 @@ class Subject:
         self._site = site
         self._valid = False
         self._organize_s3_keys()
-        self._s3_keys = self._determine_directions(self._s3_keys)
-        self._files = None
+        if self.valid:
+            self._s3_keys = self._determine_directions(self._s3_keys)
+            self._files = None
 
     @property
     def subject_id(self):
@@ -557,7 +550,7 @@ class Subject:
             self._s3_keys = None
 
     def download(self, directory, include_site=False,
-                 overwrite=False, pbar=True):
+                 overwrite=False, pbar=True, pbar_idx=0):
         """Download files from S3
 
         Parameters
@@ -573,7 +566,17 @@ class Subject:
 
         pbar : bool, default=True
             If True, include download progress bar
+
+        pbar_idx : int, default=0
+            Progress bar index for multithreaded progress bars
         """
+        if not self.valid:
+            mod_logger.warning(
+                f"Subject {self.subject_id} is not a valid subject. "
+                f"Skipping download."
+            )
+            return
+
         if include_site:
             directory = op.join(directory, self.site)
 
@@ -583,36 +586,16 @@ class Subject:
             )) for p in v] for k, v in self.s3_keys.items()
         }
 
-        if pbar:
-            pbar_ftypes = tqdm(self.s3_keys.keys(),
-                          desc=f"Downloading {self.subject_id}")
-        else:
-            pbar_ftypes = self.s3_keys.keys()
+        # Generate list of (key, file) tuples
+        key_file_pairs = []
 
-        for ftype in pbar_ftypes:
-            if pbar:
-                pbar_ftypes.set_description(
-                    f"Downloading {self.subject_id} ({ftype})"
-                )
+        for ftype in self.s3_keys.keys():
             s3_keys = self.s3_keys[ftype]
             if isinstance(s3_keys, str):
-                _download_from_s3(fname=files[ftype],
-                                  bucket=self.study.bucket,
-                                  key=s3_keys,
-                                  overwrite=overwrite)
+                key_file_pairs.append((s3_keys, files[ftype]))
             elif all(isinstance(x, str) for x in s3_keys):
-                if pbar:
-                    file_zip = tqdm(zip(s3_keys, files[ftype]),
-                                    desc=f"{ftype}",
-                                    total=len(s3_keys),
-                                    leave=False)
-                else:
-                    file_zip = zip(s3_keys, files[ftype])
-                for key, fname in file_zip:
-                    _download_from_s3(fname=fname,
-                                      bucket=self.study.bucket,
-                                      key=key,
-                                      overwrite=overwrite)
+                for key, fname in zip(s3_keys, files[ftype]):
+                    key_file_pairs.append((key, fname))
             else:
                 raise TypeError(
                     f"This subject {self.subject_id} has {ftype} S3 keys that "
@@ -625,8 +608,35 @@ class Subject:
         if not files_by_session.keys():
             # There were no valid sessions
             self._valid = False
+            mod_logger.warning(
+                f"Subject {self.subject_id} is not a valid subject. "
+                f"Skipping download."
+            )
+            return
 
-        self.study.postprocess(subject=self, pbar=pbar)
+        # Now iterate through the list and download each item
+        if pbar:
+            progress = tqdm(desc=f"Download {self.subject_id}",
+                            position=pbar_idx,
+                            total=len(key_file_pairs) + 1)
+
+        for (key, fname) in key_file_pairs:
+            _download_from_s3(fname=fname,
+                              bucket=self.study.bucket,
+                              key=key,
+                              overwrite=overwrite)
+
+            if pbar:
+                progress.update()
+
+        if pbar:
+            progress.set_description(f"Postproc {self.subject_id}")
+
+        self.study.postprocess(subject=self)
+
+        if pbar:
+            progress.update()
+            progress.close()
 
     def _determine_directions(self,
                               input_files,
