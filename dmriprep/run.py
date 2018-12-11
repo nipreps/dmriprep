@@ -407,7 +407,8 @@ def get_dmriprep_pe_workflow():
             return len([d for d in outliers if d['scan'] == scan])
 
         if 0 < threshold < 1:
-            threshold *= nib.load(dwi_file).shape[2]
+            img = nib.load(dwi_file)
+            threshold *= img.shape[img.header.get_n_slices()]
 
         drop_scans = np.array([
             s for s in scans
@@ -488,8 +489,19 @@ def get_dmriprep_pe_workflow():
 
         img = nib.load(op.abspath(in_file))
         img_data = img.get_fdata()
-        img_data_thinned = np.delete(img_data, drop_scans, axis=3)
-        img_thinned = nib.Nifti1Image(img_data_thinned.astype(np.float64), img.affine, header=img.header)
+        img_data_thinned = np.delete(img_data,
+                                     drop_scans,
+                                     axis=3)
+        if isinstance(img, nib.nifti1.Nifti1Image):
+            img_thinned = nib.Nifti1Image(img_data_thinned.astype(np.float64),
+                                          img.affine,
+                                          header=img.header)
+        elif isinstance(img, nib.nifti2.Nifti2Image):
+            img_thinned = nib.Nifti2Image(img_data_thinned.astype(np.float64),
+                                          img.affine,
+                                          header=img.header)
+        else:
+            raise TypeError("in_file does not contain Nifti image datatype.")
 
         out_file = fname_presuffix(in_file, suffix="_thinned", newpath=op.abspath('.'))
         nib.save(img_thinned, op.abspath(out_file))
