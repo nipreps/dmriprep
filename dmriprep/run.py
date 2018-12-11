@@ -1,14 +1,21 @@
 import os.path as op
 from shutil import copyfile
+import warnings
+
+# Filter warnings that are visible whenever you import another package that
+# was compiled against an older numpy than is installed.
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 
 def run_dmriprep(dwi_file, bvec_file, bval_file,
-               subjects_dir, working_dir, out_dir):
+                 subjects_dir, working_dir, out_dir):
 
     """
     Runs dmriprep for acquisitions with just one PE direction.
 
     """
+    from glob import glob
     import nibabel as nib
     import nipype.interfaces.freesurfer as fs
     import nipype.interfaces.fsl as fsl
@@ -227,10 +234,62 @@ def run_dmriprep(dwi_file, bvec_file, bval_file,
     return dmri_corrected, bvec_rotated, art_file, motion_file, outlier_file
 
 
-def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, bval_file,
-                    subjects_dir, working_dir, out_dir):
+def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA,
+                    bvec_file, bval_file,
+                    subjects_dir, working_dir, out_dir,
+                    eddy_niter=5, slice_outlier_threshold=0.02):
+    """Run the dmriprep (phase encoded) nipype workflow
 
-    wf = get_dmriprep_pe_workflow(working_dir)
+    Parameters
+    ----------
+    subject_id : str
+        Subject identifier
+
+    dwi_file : str
+        Path to dwi nifti file
+
+    dwi_file_AP : str
+        Path to EPI nifti file (anterior-posterior)
+
+    dwi_file_PA : str
+        Path to EPI nifti file (posterior-anterior)
+
+    bvec_file : str
+        Path to bvec file
+
+    bval_file : str
+        Path to bval file
+
+    subjects_dir : str
+        Path to subject's freesurfer directory
+
+    working_dir : str
+        Path to workflow working directory
+
+    out_dir : str
+        Path to output directory
+
+    eddy_niter : int, default=5
+        Fixed number of eddy iterations. See
+        https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide#A--niter
+
+    slice_outlier_threshold: int or float
+        Number of allowed outlier slices per volume. If this is exceeded the
+        volume is dropped from analysis. If `slice_outlier_threshold` is an
+        int, it is treated as number of allowed outlier slices. If
+        `slice_outlier_threshold` is a float between 0 and 1 (exclusive), it is
+        treated the fraction of allowed outlier slices.
+
+    Notes
+    -----
+    This assumes that there are scans with phase-encode directions AP/PA for
+    topup.
+
+    See Also
+    --------
+    dmriprep.run.get_dmriprep_pe_workflow
+    """
+    wf = get_dmriprep_pe_workflow()
     wf.base_dir = op.join(op.abspath(working_dir), subject_id)
 
     inputspec = wf.get_node('inputspec')
@@ -242,6 +301,8 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     inputspec.inputs.bval_file = bval_file
     inputspec.inputs.subjects_dir = subjects_dir
     inputspec.inputs.out_dir = op.abspath(out_dir)
+    inputspec.inputs.eddy_niter = eddy_niter
+    inputspec.inputs.slice_outlier_threshold = slice_outlier_threshold
 
     # write the graph (this is saved to the working dir)
     wf.write_graph()
@@ -249,13 +310,23 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA, bvec_file, b
     wf.run()
 
 
-def get_dmriprep_pe_workflow(working_dir):
-    """
+def get_dmriprep_pe_workflow():
+    """Return the dmriprep (phase encoded) nipype workflow
+
+    Parameters
+    ----------
+
+
+    Returns
+    -------
+    wf : nipype.pipeline.engine.Workflow
+        Nipype dmriprep workflow
+
+    Notes
+    -----
     This assumes that there are scans with phase-encode directions AP/PA for
     topup.
-
     """
-
     import nipype.interfaces.freesurfer as fs
     import nipype.interfaces.fsl as fsl
     import nipype.interfaces.io as nio
@@ -272,43 +343,26 @@ def get_dmriprep_pe_workflow(working_dir):
         'bvec_file',
         'bval_file',
         'subjects_dir',
-        'out_dir'
+        'out_dir',
+        'eddy_niter',
+        'slice_outlier_threshold'
     ]), name="inputspec")
 
-    # inputspec.inputs.subject_id = subject_id
-    # inputspec.inputs.dwi_file = dwi_file
-    # inputspec.inputs.dwi_file_ap = dwi_file_AP
-    # inputspec.inputs.dwi_file_pa = dwi_file_PA
-    # inputspec.inputs.bvec_file = bvec_file
-    # inputspec.inputs.bval_file = bval_file
-    # inputspec.inputs.subjects_dir = subjects_dir
-    # inputspec.inputs.out_dir = op.abspath(out_dir)
-    #
-    # # some bookkeeping (getting the filename, getting the BIDS subject name)
-    # dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
-    # bids_sub_name = subject_id
-    # assert bids_sub_name.startswith("sub-")
-
-    # Grab the preprocessing all_fsl_pipeline
     # AK: watch out, other datasets might be encoded LR
-    epi_AP = {'echospacing': 66.5e-3, 'enc_dir': 'y-'}
-    epi_PA = {'echospacing': 66.5e-3, 'enc_dir': 'y'}
-    prep = all_fsl_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
+    epi_ap = {'echospacing': 66.5e-3, 'enc_dir': 'y-'}
+    epi_pa = {'echospacing': 66.5e-3, 'enc_dir': 'y'}
+    prep = all_fsl_pipeline(epi_params=epi_ap, altepi_params=epi_pa)
 
     # initialize an overall workflow
     wf = pe.Workflow(name="dmriprep")
 
-    #prep.inputs.inputnode.in_file = dwi_file
-    #prep.inputs.inputnode.in_bvec = bvec_file
-    #prep.inputs.inputnode.in_bval = bval_file
-
     wf.connect(inputspec, 'dwi_file', prep, 'inputnode.in_file')
     wf.connect(inputspec, 'bvec_file', prep, 'inputnode.in_bvec')
     wf.connect(inputspec, 'bval_file', prep, 'inputnode.in_bval')
+    wf.connect(inputspec, 'eddy_niter', prep, 'fsl_eddy.niter')
 
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
-    eddy.inputs.niter = 1  # TODO: make this a parameter to the function with default 5
 
     def id_outliers_fn(outlier_report, threshold, dwi_file):
         """Get list of scans that exceed threshold for number of outliers
@@ -322,7 +376,7 @@ def get_dmriprep_pe_workflow(working_dir):
             If threshold is an int, it is treated as number of allowed outlier
             slices. If threshold is a float between 0 and 1 (exclusive), it is
             treated the fraction of allowed outlier slices before we drop the
-            whole volume. Float param in not yet implemented
+            whole volume.
 
         dwi_file: string
             Path to nii dwi file to determine total number of slices
@@ -372,28 +426,27 @@ def get_dmriprep_pe_workflow(working_dir):
         name="id_outliers_node"
     )
 
-    # TODO: make this a parameter to the function
-    id_outliers_node.inputs.threshold = 0.02
     wf.connect(inputspec, 'dwi_file', id_outliers_node, 'dwi_file')
-    # id_outliers_node.inputs.dwi_file = dwi_file
+    wf.connect(inputspec, 'slice_outlier_threshold', id_outliers_node, 'threshold')
+
     wf.connect(prep, "fsl_eddy.out_outlier_report",
                id_outliers_node, "outlier_report")
 
-    listMerge = pe.Node(niu.Merge(numinputs=2), name="listMerge")
-    wf.connect(inputspec, 'dwi_file_ap', listMerge, 'in1')
-    wf.connect(inputspec, 'dwi_file_pa', listMerge, 'in2')
+    list_merge = pe.Node(niu.Merge(numinputs=2), name="list_merge")
+    wf.connect(inputspec, 'dwi_file_ap', list_merge, 'in1')
+    wf.connect(inputspec, 'dwi_file_pa', list_merge, 'in2')
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
-    # merge.inputs.in_files = [dwi_file_AP, dwi_file_PA]
+    # merge.inputs.in_files = [dwi_file_ap, dwi_file_pa]
     wf.connect(merge, 'merged_file', prep, 'inputnode.alt_file')
-    wf.connect(listMerge, 'out', merge, 'in_files')
+    wf.connect(list_merge, 'out', merge, 'in_files')
 
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
     wf.connect(prep, "outputnode.out_file", fslroi, "in_file")
 
     bbreg = pe.Node(fs.BBRegister(contrast_type="t2", init="coreg",
                                   out_fsl_file=True,
-                                  #subjects_dir=subjects_dir,
+                                  # subjects_dir=subjects_dir,
                                   epi_mask=True),
                     name="bbreg")
     bbreg.inputs.subject_id = 'freesurfer'  # bids_sub_name
@@ -438,9 +491,7 @@ def get_dmriprep_pe_workflow(working_dir):
         img_data_thinned = np.delete(img_data, drop_scans, axis=3)
         img_thinned = nib.Nifti1Image(img_data_thinned.astype(np.float64), img.affine, header=img.header)
 
-        root, ext1 = op.splitext(in_file)
-        root, ext0 = op.splitext(root)
-        out_file = fname_presuffix(in_file, suffix="_thinned", newpath=op.abspath('.')) #''.join([root + "_thinned", ext0, ext1])
+        out_file = fname_presuffix(in_file, suffix="_thinned", newpath=op.abspath('.'))
         nib.save(img_thinned, op.abspath(out_file))
 
         bval = np.loadtxt(in_bval)
@@ -462,7 +513,6 @@ def get_dmriprep_pe_workflow(working_dir):
         name="drop_outliers_node"
     )
 
-
     # Align the output of drop_outliers_node & also the eddy corrected version to the anatomical space
     # without resampling. and then for aparc+aseg & the mask, resample to the larger voxel size of the B0 image from
     # fslroi. Also we need to apply the transformation to both bvecs (dropped & eddied) and I think we can just load
@@ -471,7 +521,6 @@ def get_dmriprep_pe_workflow(working_dir):
     def get_orig(subjects_dir, sub='freesurfer'):
         import os.path as op
         return op.join(subjects_dir, sub, "mri", "orig.mgz")
-
 
     def get_aparc_aseg(subjects_dir, sub='freesurfer'):
         import os.path as op
@@ -487,7 +536,7 @@ def get_dmriprep_pe_workflow(working_dir):
     wf.connect(prep, "outputnode.out_file", voltransform, "source_file")
     wf.connect(bbreg, "out_reg_file", voltransform, "reg_file")
 
-    def func_applyTransformToBvecs(bvec_file, reg_mat_file):
+    def apply_transform_to_bvecs_fn(bvec_file, reg_mat_file):
         import numpy as np
         import nipype.utils.filemanip as fm
         import os
@@ -502,20 +551,19 @@ def get_dmriprep_pe_workflow(working_dir):
         np.savetxt(out_bvec, np.asarray(bvec_trans).T)
         return out_bvec
 
-    node_applyTransformToBvecs = pe.Node(niu.Function(input_names=['bvec_file', 'reg_mat_file'],
-                                                      output_names=['out_bvec'],
-                                                      function=func_applyTransformToBvecs),
-                                         name="applyTransformToBvecs")
-    wf.connect(bbreg, 'out_fsl_file', node_applyTransformToBvecs, 'reg_mat_file')
-    wf.connect(prep, 'outputnode.out_bvec', node_applyTransformToBvecs, 'bvec_file')
+    apply_transform_to_bvecs_node = pe.Node(niu.Function(input_names=['bvec_file', 'reg_mat_file'],
+                                                         output_names=['out_bvec'],
+                                                         function=apply_transform_to_bvecs_fn),
+                                            name="applyTransformToBvecs")
+    wf.connect(bbreg, 'out_fsl_file', apply_transform_to_bvecs_node, 'reg_mat_file')
+    wf.connect(prep, 'outputnode.out_bvec', apply_transform_to_bvecs_node, 'bvec_file')
 
     # ok cool, now lets do the thresholding.
 
     wf.connect(id_outliers_node, "drop_scans", drop_outliers_node, "drop_scans")
     wf.connect(voltransform, "transformed_file", drop_outliers_node, "in_file")
     wf.connect(inputspec, 'bval_file', drop_outliers_node, 'in_bval')
-    # drop_outliers_node.inputs.in_bval = bval_file
-    wf.connect(node_applyTransformToBvecs, "out_bvec", drop_outliers_node, "in_bvec")
+    wf.connect(apply_transform_to_bvecs_node, "out_bvec", drop_outliers_node, "in_bvec")
 
     # lets compute the tensor on both the dropped volume scan
     # and also the original, eddy corrected one.
@@ -526,9 +574,8 @@ def get_dmriprep_pe_workflow(working_dir):
 
     get_tensor_eddy = get_tensor.clone('dipy_tensor_eddy')
     wf.connect(voltransform, 'transformed_file', get_tensor_eddy, "in_file")
-    wf.connect(node_applyTransformToBvecs, 'out_bvec', get_tensor_eddy, "in_bvec")
+    wf.connect(apply_transform_to_bvecs_node, 'out_bvec', get_tensor_eddy, "in_bvec")
     wf.connect(inputspec, 'bval_file', get_tensor_eddy, 'in_bval')
-    # get_tensor_eddy.inputs.in_bval = bval_file
 
     # AK: What is this, some vestigal node from a previous workflow?
     # I'm not sure why the tensor gets scaled. but i guess lets scale it for
@@ -540,7 +587,6 @@ def get_dmriprep_pe_workflow(working_dir):
 
     scale_tensor_eddy = scale_tensor.clone('scale_tensor_eddy')
     wf.connect(get_tensor_eddy, 'out_file', scale_tensor_eddy, 'in_file')
-
 
     # OK now that anatomical stuff (segmentation & mask)
     # We'll need:
@@ -566,39 +612,36 @@ def get_dmriprep_pe_workflow(working_dir):
                                        function=binarize_aparc),
                           name="bin_aparc")
 
-
-    getB0Anat = fslroi.clone('getB0Anat')
-    wf.connect(voltransform, 'transformed_file', getB0Anat, 'in_file')
+    get_b0_anat = fslroi.clone('get_b0_anat')
+    wf.connect(voltransform, 'transformed_file', get_b0_anat, 'in_file')
 
     # reslice the anat-space aparc+aseg to the DWI resolution
-    resliceToDwi = pe.Node(fs.MRIConvert(resample_type="nearest"),
-                            name="resampleToDWI")
-    wf.connect(getB0Anat, 'roi_file', resliceToDwi, 'reslice_like')
-    wf.connect(inputspec, ('subjects_dir', get_aparc_aseg), resliceToDwi, 'in_file')
+    reslice_to_dwi = pe.Node(fs.MRIConvert(resample_type="nearest"),
+                             name="reslice_to_dwi")
+    wf.connect(get_b0_anat, 'roi_file', reslice_to_dwi, 'reslice_like')
+    wf.connect(inputspec, ('subjects_dir', get_aparc_aseg), reslice_to_dwi, 'in_file')
 
     # also reslice the orig i suppose
-    resliceOrigToDwi = resliceToDwi.clone('resliceT1wToDwi')
-    wf.connect(inputspec, ('subjects_dir', get_orig), resliceOrigToDwi, 'in_file')
-    # resliceOrigToDwi.inputs.in_file = get_orig(subjects_dir, 'freesurfer')
-    resliceOrigToDwi.inputs.out_type = 'niigz'
-    wf.connect(getB0Anat, 'roi_file', resliceOrigToDwi, 'reslice_like')
+    reslice_orig_to_dwi = reslice_to_dwi.clone('resliceT1wToDwi')
+    wf.connect(inputspec, ('subjects_dir', get_orig), reslice_orig_to_dwi, 'in_file')
+    # reslice_orig_to_dwi.inputs.in_file = get_orig(subjects_dir, 'freesurfer')
+    reslice_orig_to_dwi.inputs.out_type = 'niigz'
+    wf.connect(get_b0_anat, 'roi_file', reslice_orig_to_dwi, 'reslice_like')
 
     # we assume the freesurfer is the output of BIDS
     # so the freesurfer output is in /path/to/derivatives/sub-whatever/freesurfer
     # which means the subject_dir is /path/to/derivatives/sub-whatever
-    # resliceToDwi.inputs.in_file = get_aparc_aseg(subjects_dir, 'freesurfer')
+    # reslice_to_dwi.inputs.in_file = get_aparc_aseg(subjects_dir, 'freesurfer')
 
     # now we have a nice aparc+aseg still in anat space but resliced like the dwi file
     # lets create a mask file from it.
 
-    wf.connect(resliceToDwi, 'out_file', create_mask, 'aparc_aseg')
+    wf.connect(reslice_to_dwi, 'out_file', create_mask, 'aparc_aseg')
 
     # save all the things
     datasink = pe.Node(nio.DataSink(), name="sinker")
     wf.connect(inputspec, 'out_dir', datasink, 'base_directory')
     wf.connect(inputspec, 'subject_id', datasink, 'container')
-    # datasink.inputs.base_directory = op.join(op.abspath(out_dir), subject_id)
-    # datasink.inputs.container = subject_id
 
     wf.connect(drop_outliers_node, "out_file", datasink, "dmriprep.dwi.@thinned")
     wf.connect(drop_outliers_node, "out_bval", datasink, "dmriprep.dwi.@bval_thinned")
@@ -648,40 +691,40 @@ def get_dmriprep_pe_workflow(working_dir):
     wf.connect(bbreg, "out_reg_file", datasink, "dmriprep.reg.@reg")
 
     # anatomical files resliced
-    wf.connect(resliceToDwi, 'out_file', datasink, 'dmriprep.anat.@segmentation')
+    wf.connect(reslice_to_dwi, 'out_file', datasink, 'dmriprep.anat.@segmentation')
     wf.connect(create_mask, 'outfile', datasink, 'dmriprep.anat.@mask')
-    wf.connect(resliceOrigToDwi, 'out_file', datasink, 'dmriprep.anat.@T1w')
+    wf.connect(reslice_orig_to_dwi, 'out_file', datasink, 'dmriprep.anat.@T1w')
 
-    def reportNodeFunc(dwi_corrected_file, eddy_rms, eddy_report,
-                       color_fa_file, anat_mask_file, outlier_indices):
+    def report_fn(dwi_corrected_file, eddy_rms, eddy_report,
+                  color_fa_file, anat_mask_file, outlier_indices):
         from dmriprep.qc import create_report_json
 
         report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
                                     color_fa_file, anat_mask_file, outlier_indices)
         return report
 
-    reportNode = pe.Node(niu.Function(
+    report_node = pe.Node(niu.Function(
         input_names=['dwi_corrected_file', 'eddy_rms',
                      'eddy_report', 'color_fa_file',
                      'anat_mask_file', 'outlier_indices'],
         output_names=['report'],
-        function=reportNodeFunc
+        function=report_fn
     ), name="reportJSON")
 
     # for the report, lets show the eddy corrected (full volume) image
-    wf.connect(voltransform, "transformed_file", reportNode, 'dwi_corrected_file')
+    wf.connect(voltransform, "transformed_file", report_node, 'dwi_corrected_file')
 
     # add the rms movement output from eddy
-    wf.connect(prep, "fsl_eddy.out_movement_rms", reportNode, 'eddy_rms')
-    wf.connect(prep, "fsl_eddy.out_outlier_report", reportNode, 'eddy_report')
-    wf.connect(id_outliers_node, 'drop_scans', reportNode, 'outlier_indices')
+    wf.connect(prep, "fsl_eddy.out_movement_rms", report_node, 'eddy_rms')
+    wf.connect(prep, "fsl_eddy.out_outlier_report", report_node, 'eddy_report')
+    wf.connect(id_outliers_node, 'drop_scans', report_node, 'outlier_indices')
 
     # the mask file to check our registration, and the colorFA file go in the report
-    wf.connect(create_mask, "outfile", reportNode, 'anat_mask_file')
-    wf.connect(get_tensor, "color_fa_file", reportNode, 'color_fa_file')
+    wf.connect(create_mask, "outfile", report_node, 'anat_mask_file')
+    wf.connect(get_tensor, "color_fa_file", report_node, 'color_fa_file')
 
     # save that report!
-    wf.connect(reportNode, 'report', datasink, 'dmriprep.report.@report')
+    wf.connect(report_node, 'report', datasink, 'dmriprep.report.@report')
 
     # this part is done last, to get the filenames *just right*
     # its super annoying.
@@ -706,8 +749,8 @@ def get_dmriprep_pe_workflow(working_dir):
             ("orig_out", dwi_fname.replace("_dwi", "_T1w")),
             # ("eddy_corrected_", dwi_fname.replace("dwi", "")),
             ("stats.eddy_corrected", dwi_fname.replace("dwi", "artStats")),
-            ("eddy_corrected.eddy_parameters", dwi_fname+".eddy_parameters"),
-            ("qc/eddy_corrected", "qc/"+dwi_fname),
+            ("eddy_corrected.eddy_parameters", dwi_fname + ".eddy_parameters"),
+            ("qc/eddy_corrected", "qc/" + dwi_fname),
             ("derivatives/dmriprep", "derivatives/{}/dmriprep".format(subject_id)),
             ("_rotatedanat_space_thinned", ""),
             ("_thinned", ""),
@@ -722,12 +765,9 @@ def get_dmriprep_pe_workflow(working_dir):
     node_name_files_nicely = pe.Node(niu.Function(input_names=['dwi_file', 'subject_id'],
                                                   output_names=['substitutions'],
                                                   function=name_files_nicely),
-                                     name="name_files_nicely"
-                                     )
+                                     name="name_files_nicely")
     wf.connect(inputspec, 'dwi_file', node_name_files_nicely, 'dwi_file')
     wf.connect(inputspec, 'subject_id', node_name_files_nicely, 'subject_id')
     wf.connect(node_name_files_nicely, 'substitutions', datasink, 'substitutions')
-
-
 
     return wf
