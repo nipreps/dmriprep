@@ -93,10 +93,11 @@ def upload(output_dir, bucket, access_key, secret_key, provider='s3', subject=No
         def upload_subject(sub, sub_idx):
             base_dir = os.path.join(output_dir, sub, 'dmriprep')
             for root, dirs, files in os.walk(base_dir):
-                for f in tqdm(files, desc=f"Uploading {sub}", position=sub_idx):
-                    filepath = os.path.join(root, f)
-                    key = root.replace(output_dir, '')
-                    client.upload_file(filepath, bucket, os.path.join(key, f))
+                if len(files):
+                    for f in tqdm(files, desc=f"Uploading {sub} {root.split('/')[-1]}", position=sub_idx):
+                        filepath = os.path.join(root, f)
+                        key = root.replace(output_dir, '')
+                        client.upload_file(filepath, bucket, os.path.join(key, f))
 
         uploads = [delayed(upload_subject)(s, idx) for idx, s in enumerate(subjects)]
         _ = list(compute(*uploads, scheduler="threads"))
