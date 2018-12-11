@@ -39,8 +39,8 @@ RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
 
 ENTRYPOINT ["/neurodocker/startup.sh"]
 
-ENV FSLDIR="/opt/fsl-5.0.11" \
-    PATH="/opt/fsl-5.0.11/bin:$PATH"
+ENV FSLDIR="/opt/fsl-6.0.0" \
+    PATH="/opt/fsl-6.0.0/bin:$PATH"
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
            bc \
@@ -63,15 +63,15 @@ RUN apt-get update -qq \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && echo "Downloading FSL ..." \
-    && mkdir -p /opt/fsl-5.0.11 \
-    && curl -fsSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.11-centos6_64.tar.gz \
-    | tar -xz -C /opt/fsl-5.0.11 --strip-components 1 \
+    && mkdir -p /opt/fsl-6.0.0 \
+    && curl -fsSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.0-centos6_64.tar.gz \
+    | tar -xz -C /opt/fsl-6.0.0 --strip-components 1 \
     && sed -i '$iecho Some packages in this Docker container are non-free' $ND_ENTRYPOINT \
     && sed -i '$iecho If you are considering commercial use of this container, please consult the relevant license:' $ND_ENTRYPOINT \
     && sed -i '$iecho https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence' $ND_ENTRYPOINT \
     && sed -i '$isource $FSLDIR/etc/fslconf/fsl.sh' $ND_ENTRYPOINT \
     && echo "Installing FSL conda environment ..." \
-    && bash /opt/fsl-5.0.11/etc/fslconf/fslpython_install.sh -f /opt/fsl-5.0.11
+    && bash /opt/fsl-6.0.0/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.0
 
 ENV CONDA_DIR="/opt/miniconda-latest" \
     PATH="/opt/miniconda-latest/bin:$PATH"
@@ -152,7 +152,7 @@ RUN echo '{ \
     \n    [ \
     \n      "fsl", \
     \n      { \
-    \n        "version": "5.0.11" \
+    \n        "version": "6.0.0" \
     \n      } \
     \n    ], \
     \n    [ \
