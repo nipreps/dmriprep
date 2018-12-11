@@ -10,7 +10,6 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 
-
 def reorient_array(data, aff):
     # rearrange the matrix to RAS orientation
     orientation = nib.orientations.io_orientation(aff)

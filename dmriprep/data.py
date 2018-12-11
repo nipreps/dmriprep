@@ -252,6 +252,16 @@ class Study:
         """
         raise NotImplementedError
 
+    def filter_keys(self, subject):
+        """Study-specific S3 key filtering
+
+        Parameters
+        ----------
+        subject : dmriprep.data.Subject
+            subject instance
+        """
+        raise NotImplementedError
+
     def postprocess(self, subject):
         """Study-specific postprocessing steps
 
@@ -363,6 +373,34 @@ class HBN(Study):
 
         return all_subjects
 
+    def filter_keys(self, subject):
+        """Filter S3 keys based on HBN specific vagaries
+
+        HBN Site-CBIC has multiple anatomy folders due to
+        motion correction software at the scanner level.
+        If subject.site == "Site-CBIC" then choose only the
+        anatomy files in the T1W_VNavNorm files
+
+        Parameters
+        ----------
+        subject : dmriprep.data.Subject
+            subject instance
+        """
+        if subject.site == "Site-CBIC":
+            t1w_keys = subject.s3_keys['t1w']
+            freesurfer_keys = subject.s3_keys['freesurfer']
+            correct_dir = "T1w_VNavNorm"
+
+            subject._s3_keys['t1w'] = list(filter(
+                lambda x: correct_dir in x,
+                t1w_keys
+            ))
+
+            subject._s3_keys['freesurfer'] = list(filter(
+                lambda x: correct_dir in x,
+                freesurfer_keys
+            ))
+
     def postprocess(self, subject):
         """Move the T1 file back into the freesurfer directory.
 
@@ -417,6 +455,7 @@ class Subject:
         self._valid = False
         self._organize_s3_keys()
         if self.valid:
+            self.study.filter_keys(self)
             self._s3_keys = self._determine_directions(self._s3_keys)
             self._files = None
 
