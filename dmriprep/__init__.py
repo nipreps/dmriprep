@@ -9,6 +9,12 @@ __version__ = '0.1.0'
 import errno
 import logging
 import os
+import warnings
+
+# Filter warnings that are visible whenever you import another package that
+# was compiled against an older numpy than is installed.
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 from . import data
 from . import io
