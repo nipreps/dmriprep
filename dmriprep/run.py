@@ -407,7 +407,7 @@ def get_dmriprep_pe_workflow():
 
         if 0 < threshold < 1:
             img = nib.load(dwi_file)
-            threshold *= img.shape[img.header.get_n_slices()]
+            threshold *= img.header.get_n_slices()
 
         drop_scans = np.array([
             s for s in scans
