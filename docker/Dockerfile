@@ -137,7 +137,8 @@ RUN apt-get update && apt-get install -y git gcc
 RUN conda env create -f environment.yml
 
 #&& sync && conda clean -tipsy && sync
-
+RUN apt-get install libopenblas-base
+ENV LD_LIBRARY_PATH=/usr/lib/openblas-base/
 
 RUN sed -i '$isource activate dmriprep' $ND_ENTRYPOINT
 
