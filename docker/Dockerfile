@@ -132,13 +132,13 @@ RUN apt-get update -qq \
 
 COPY ./license.txt /opt/freesurfer-6.0.0/license.txt
 
+#&& sync && conda clean -tipsy && sync
+RUN apt-get install -y libopenblas-base
+ENV LD_LIBRARY_PATH=/usr/lib/openblas-base/
+
 ADD environment.yml environment.yml
 RUN apt-get update && apt-get install -y git gcc
 RUN conda env create -f environment.yml
-
-#&& sync && conda clean -tipsy && sync
-RUN apt-get install libopenblas-base
-ENV LD_LIBRARY_PATH=/usr/lib/openblas-base/
 
 RUN sed -i '$isource activate dmriprep' $ND_ENTRYPOINT
 
