@@ -20,15 +20,14 @@ from tqdm.auto import tqdm
 mod_logger = logging.getLogger(__name__)
 
 
-def get_dataset(output_dir, source='HBN'):
+def get_dataset(output_dir, source='HBN', subject_id='sub-NDARBA507GCT'):
     if source in ['HBN']:
-        get_hbn_data(output_dir)
+        get_hbn_data(output_dir, subject_id)
     else:
         raise ValueError('Invalid dataset source')
 
 
-def get_hbn_data(output_dir):
-    subject_id = 'sub-NDARBA507GCT'
+def get_hbn_data(output_dir, subject_id):
     hbn_study = HBN(subjects=subject_id)
     subject = hbn_study.subjects[0]
     subject.download(directory=output_dir)

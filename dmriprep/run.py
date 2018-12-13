@@ -1,4 +1,5 @@
 import os.path as op
+import os
 from shutil import copyfile
 
 
@@ -357,6 +358,10 @@ def get_dmriprep_pe_workflow():
 
     eddy = prep.get_node('fsl_eddy')
     eddy.inputs.repol = True
+    eddy.inputs.cnr_maps = True
+    eddy.inputs.residuals = True
+    import multiprocessing
+    eddy.inputs.num_threads = multiprocessing.cpu_count()
 
     def id_outliers_fn(outlier_report, threshold, dwi_file):
         """Get list of scans that exceed threshold for number of outliers
@@ -669,6 +674,10 @@ def get_dmriprep_pe_workflow():
                datasink, "dmriprep.qc.@eddyparamsshellalign")
     wf.connect(prep, "fsl_eddy.out_parameter",
                datasink, "dmriprep.qc.@eddyparams")
+    wf.connect(prep, "fsl_eddy.out_cnr_maps",
+               datasink, "dmriprep.qc.@eddycndr")
+    wf.connect(prep, "fsl_eddy.out_residuals",
+               datasink, "dmriprep.qc.@eddyresid")
 
     # the file that told us which volumes to trop
     wf.connect(id_outliers_node, "outpath", datasink, "dmriprep.qc.@droppedscans")

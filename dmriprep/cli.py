@@ -7,6 +7,12 @@ from . import run
 from . import io
 from .data import get_dataset
 import os
+import warnings
+
+# Filter warnings that are visible whenever you import another package that
+# was compiled against an older numpy than is installed.
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 
 @click.command()
@@ -72,8 +78,26 @@ def main(participant_label, bids_dir, output_dir,
 @click.command()
 @click.argument('output_dir',
                 )
-def data(output_dir):
-    get_dataset(os.path.abspath(output_dir))
+@click.option('--subject', help="subject id to download (will choose 1 subject if not specified",
+              default="sub-NDARBA507GCT")
+@click.option('--study', help="which study to download. Right now we only support the HBN dataset",
+              default="HBN")
+def data(output_dir, study="HBN", subject="sub-NDARBA507GCT"):
+    """
+    Download dwi raw data in BIDS format from public datasets
+
+    :param output_dir: A directory to write files to
+    :param study: A study name, right now we only support 'HBN'
+    :param subject: A subject from the study, starting with 'sub-'
+    :return: None
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    if study.upper() != 'HBN':
+        raise NotImplementedError('We only support data downloads from the HBN dataset right now.')
+
+    get_dataset(os.path.abspath(output_dir), source=study.upper(), subject_id=subject)
     print('done')
 
 
