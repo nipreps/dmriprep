@@ -642,8 +642,17 @@ class Subject:
                     f"offending S3 keys are {s3_keys!s}"
                 )
 
-        files_by_session = self._separate_sessions(files)
-        self._files = files_by_session
+        try:
+            files_by_session = self._separate_sessions(files)
+            self._files = files_by_session
+        except NotImplementedError:
+            self._valid = False
+            mod_logger.warning(
+                f"Subject {self.subject_id} has inconsistent session numbers."
+                f"Skipping download."
+            )
+            return
+
         if not files_by_session.keys():
             # There were no valid sessions
             self._valid = False
@@ -730,11 +739,15 @@ class Subject:
             # Confirm that each nifty file has a corresponding json file.
             required_json = set([f.replace('.nii.gz', '.json') for f in epi_files])
             if set(json_files) != required_json:
-                raise ValueError(
-                    'There are nifty files without corresponding json files. We '
-                    'failed to find the following expected files: {files!s}'
-                    ''.format(files=required_json - set(json_files))
+                self._valid = False
+                mod_logger.warning(
+                    f'Subject {self.subject_id} does not have json files '
+                    f'corresponding to its fmap NIFTI files. Failed to '
+                    f'find the following expected files: '
+                    f'{required_json - set(json_files)}. Subject deemed '
+                    f'invalid.'
                 )
+                return input_files
 
             def get_json(json_file):
                 if input_type == 'local':
@@ -785,11 +798,14 @@ class Subject:
                     elif 'dir-PA' in jfile:
                         pa_files.append(jfile.replace('.json', '.nii.gz'))
                     else:
-                        raise ValueError(
-                            'The key {key:s} does not exist in file {jfile:s} and '
-                            'the directionality could not be inferred from the '
-                            'file name.'.format(key=json_key, jfile=jfile)
+                        self._valid = False
+                        mod_logger.warning(
+                            f'Subject {self.subject_id} lacks the expected '
+                            f'{json_key} key in file {jfile} and the '
+                            f'directionality could not be inferred from the '
+                            f'file name. Setting subject validity to False.'
                         )
+                        return input_files
                 else:
                     mod_logger.warning(
                         'The metadata in file {jfile:s} does not match the dir-PA '
@@ -802,7 +818,8 @@ class Subject:
                     elif 'dir-PA' in jfile:
                         pa_files.append(jfile.replace('.json', '.nii.gz'))
                     else:
-                        raise ValueError(
+                        self._valid = False
+                        mod_logger.warning(
                             'The metadata for key {key:s} in file {jfile:s} does '
                             'not match the dir-PA or dir-AP values that you '
                             'provided. {key:s} = {val:s}. And the directionality '
@@ -811,6 +828,7 @@ class Subject:
                                 jfile=jfile,
                                 val=direction,
                             ))
+                        return input_files
 
         files = copy.deepcopy(input_files)
         del files['epi_nii']
