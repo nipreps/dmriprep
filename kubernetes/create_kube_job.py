@@ -19,6 +19,7 @@ if __name__ == "__main__":
         with open("run_dmriprep.yml.tmpl", 'r') as template:
             with open("jobs/job_{}.yml".format(subject), 'w') as f:
                 all_text = "\n".join(template.readlines())
+                all_text = all_text.replace("{{subject_lower}}", subject.lower())
                 all_text = all_text.replace("{{subject}}", subject)
                 all_text = all_text.replace("{{access_key}}", access_key)
                 all_text = all_text.replace("{{secret_key}}", secret_key)

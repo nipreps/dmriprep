@@ -1,13 +1,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dmriprep-{{subject}}
+  name: dmriprep-{{subject_lower}}
 spec:
   template:
     spec:
       containers:
       - name: dmriprep-subject
         image: gcr.io/dmriprep/dmriprep:kube1
-        command: ["/neurodocker/startup.sh", "./dmriprep_all.sh",  "sub-NDARED632KNG", "{{access_key}}", "{{secret_key}}"]
+        command: ["/neurodocker/startup.sh", "./dmriprep_all.sh",  "{{subject}}", "{{access_key}}", "{{secret_key}}"]
       restartPolicy: Never
   backoffLimit: 1
