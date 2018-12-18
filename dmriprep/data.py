@@ -435,6 +435,11 @@ class HBN(Study):
                                 stdout=fnull1,
                                 stderr=subprocess.STDOUT)
 
+            # now check that the AP/PA files are named correctly
+            # eg it should look like "sub-{id}_dir-{dir}_acq-dwi_epi.nii.gz
+            # but sometimes it looks like sub-{id}_acq-dwi_run-01_epi.nii.gz
+            # which is silly. the direction should be in the filename.
+
 
 class Subject:
     """A single dMRI study subject"""
