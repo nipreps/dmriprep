@@ -15,4 +15,4 @@ CLUSTERNAME=dmriprep
 gcloud config set compute/zone $ZONE
 
 # start the cluster!
-gcloud beta container clusters create $CLUSTERNAME --machine-type n1-highmem-4 --enable-autoscaling --max-nodes=$MAX_NODES --num-nodes 2 --cluster-version latest --node-labels dmriprep/node-purpose=core
+gcloud beta container clusters create $CLUSTERNAME --machine-type n1-highmem-4 --enable-autoscaling --max-nodes=$MAX_NODES --num-nodes 1 --cluster-version latest --node-labels dmriprep/node-purpose=core

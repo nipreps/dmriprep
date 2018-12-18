@@ -752,23 +752,26 @@ def get_dmriprep_pe_workflow():
     wf.connect(reslice_orig_to_dwi, 'out_file', datasink, 'dmriprep.anat.@T1w')
 
     def report_fn(dwi_corrected_file, eddy_rms, eddy_report,
-                  color_fa_file, anat_mask_file, outlier_indices):
+                  color_fa_file, anat_mask_file, outlier_indices,
+                  eddy_qc_file):
         from dmriprep.qc import create_report_json
 
         report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
-                                    color_fa_file, anat_mask_file, outlier_indices)
+                                    color_fa_file, anat_mask_file, outlier_indices,
+                                    eddy_qc_file)
         return report
 
     report_node = pe.Node(niu.Function(
         input_names=['dwi_corrected_file', 'eddy_rms',
                      'eddy_report', 'color_fa_file',
-                     'anat_mask_file', 'outlier_indices'],
+                     'anat_mask_file', 'outlier_indices', 'eddy_qc_file'],
         output_names=['report'],
         function=report_fn
     ), name="reportJSON")
 
     # for the report, lets show the eddy corrected (full volume) image
     wf.connect(voltransform, "transformed_file", report_node, 'dwi_corrected_file')
+    wf.connect(eddy_quad, 'out_qc_json', report_node, 'eddy_qc_file')
 
     # add the rms movement output from eddy
     wf.connect(prep, "fsl_eddy.out_movement_rms", report_node, 'eddy_rms')
