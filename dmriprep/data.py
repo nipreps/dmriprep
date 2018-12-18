@@ -425,6 +425,21 @@ class HBN(Study):
                             stdout=fnull,
                             stderr=subprocess.STDOUT)
 
+            # if the site is CBIC, then the freesurfer directory has an additional level.
+            # move that level up by 1 (e.g. removing the T1w_VNavNorm folder
+            if subject.site == 'Site-CBIC':
+                newpath = freesurfer_path.replace('T1w_VNavNorm/', '')
+                move_cmd = 'mv {oldpath} {newpath}'.format(oldpath=freesurfer_path, newpath=newpath)
+                fnull1 = open(os.devnull, 'w')
+                subprocess.call(move_cmd.split(),
+                                stdout=fnull1,
+                                stderr=subprocess.STDOUT)
+
+            # now check that the AP/PA files are named correctly
+            # eg it should look like "sub-{id}_dir-{dir}_acq-dwi_epi.nii.gz
+            # but sometimes it looks like sub-{id}_acq-dwi_run-01_epi.nii.gz
+            # which is silly. the direction should be in the filename.
+
 
 class Subject:
     """A single dMRI study subject"""

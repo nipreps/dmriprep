@@ -11,6 +11,7 @@ dependencies:
    - pandas
    - tqdm
    - pip:
-     - "--editable=git+https://github.com/nipy/nipype@35b58cdb59a900430f4b9639e220c8408341805d#egg=nipype"
+     - "--editable=git+https://github.com/akeshavan/nipype@7b5e7ab92183eb561980ec713d86eb69f28733e1#egg=nipype"
+     - "--editable=git+https://git.fmrib.ox.ac.uk/matteob/eddy_qc_release@57bb11da6a634c4195593fbc439ba9f8998157b0#egg=eddy_qc"
      - bids
      - duecredit

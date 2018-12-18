@@ -3,7 +3,7 @@ import numpy as np
 import os.path as op
 from dipy.segment.mask import median_otsu
 from io import BytesIO
-from nipype.utils.filemanip import save_json
+from nipype.utils.filemanip import save_json, load_json
 import base64
 import matplotlib
 matplotlib.use('agg')
@@ -212,6 +212,7 @@ def createB0_ColorFA_Mask_Sprites(b0_file, colorFA_file, mask_file):
 def create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
                        color_fa_file, anat_mask_file,
                        outlier_indices,
+                       eddy_qc_file,
                        outpath=op.abspath('./report.json')):
 
     report = {}
@@ -229,6 +230,7 @@ def create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
         report['eddy_report'] = f.readlines()
 
     report['eddy_params'] = np.genfromtxt(eddy_rms).tolist()
-
+    eddy_qc = load_json(eddy_qc_file)
+    report['eddy_quad'] = eddy_qc
     save_json(outpath, report)
     return outpath

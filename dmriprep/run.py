@@ -301,7 +301,8 @@ def run_dmriprep_pe(subject_id, dwi_file, dwi_file_AP, dwi_file_PA,
 
     # write the graph (this is saved to the working dir)
     wf.write_graph()
-
+    wf.config['execution']['remove_unnecessary_outputs'] = False
+    wf.config['execution']['keep_inputs'] = True
     wf.run()
 
 
@@ -362,6 +363,31 @@ def get_dmriprep_pe_workflow():
     eddy.inputs.residuals = True
     import multiprocessing
     eddy.inputs.num_threads = multiprocessing.cpu_count()
+
+    eddy_quad = pe.Node(fsl.EddyQuad(verbose=True), name="eddy_quad")
+    get_path = lambda x: x.split('.nii.gz')[0]
+    wf.connect(prep, ('fsl_eddy.out_corrected', get_path), eddy_quad, "base_name")
+    wf.connect(inputspec, 'bval_file', eddy_quad, 'bval_file')
+    wf.connect(prep, 'Rotate_Bvec.out_file', eddy_quad, 'bvec_file')
+    wf.connect(prep, 'peb_correction.topup.out_field', eddy_quad, 'field')
+    wf.connect(prep, 'gen_index.out_file', eddy_quad, 'idx_file')
+    wf.connect(prep, 'peb_correction.topup.out_enc_file', eddy_quad, 'param_file')
+
+    # need a mask file for eddy_quad. lets get it from the B0.
+    def get_b0_mask_fn(b0_file):
+        import nibabel as nib
+        from nipype.utils.filemanip import fname_presuffix
+        from dipy.segment.mask import median_otsu
+        import os
+
+        mask_file = fname_presuffix(b0_file, suffix="_mask", newpath=os.path.abspath('.'))
+        img = nib.load(b0_file)
+        data, aff = img.get_data(), img.affine
+        _, mask = median_otsu(data, 2, 1)
+        nib.Nifti1Image(mask.astype(float), aff).to_filename(mask_file)
+        return mask_file
+
+
 
     def id_outliers_fn(outlier_report, threshold, dwi_file):
         """Get list of scans that exceed threshold for number of outliers
@@ -437,12 +463,18 @@ def get_dmriprep_pe_workflow():
     wf.connect(inputspec, 'dwi_file_pa', list_merge, 'in2')
 
     merge = pe.Node(fsl.Merge(dimension='t'), name="mergeAPPA")
-    # merge.inputs.in_files = [dwi_file_ap, dwi_file_pa]
     wf.connect(merge, 'merged_file', prep, 'inputnode.alt_file')
     wf.connect(list_merge, 'out', merge, 'in_files')
 
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
     wf.connect(prep, "outputnode.out_file", fslroi, "in_file")
+
+    b0mask_node = pe.Node(niu.Function(input_names=['b0_file'],
+                                       output_names=['mask_file'],
+                                       function=get_b0_mask_fn),
+                          name="getB0Mask")
+    wf.connect(fslroi, 'roi_file', b0mask_node, 'b0_file')
+    wf.connect(b0mask_node, 'mask_file', eddy_quad, 'mask_file')
 
     bbreg = pe.Node(fs.BBRegister(contrast_type="t2", init="coreg",
                                   out_fsl_file=True,
@@ -487,7 +519,7 @@ def get_dmriprep_pe_workflow():
         from nipype.utils.filemanip import fname_presuffix
 
         img = nib.load(op.abspath(in_file))
-        img_data = img.get_fdata()
+        img_data = img.get_data()
         img_data_thinned = np.delete(img_data,
                                      drop_scans,
                                      axis=3)
@@ -679,7 +711,7 @@ def get_dmriprep_pe_workflow():
     wf.connect(prep, "fsl_eddy.out_residuals",
                datasink, "dmriprep.qc.@eddyresid")
 
-    # the file that told us which volumes to trop
+    # the file that told us which volumes to drop
     wf.connect(id_outliers_node, "outpath", datasink, "dmriprep.qc.@droppedscans")
 
     # the tensors of the dropped volumes dwi
@@ -700,6 +732,15 @@ def get_dmriprep_pe_workflow():
     wf.connect(get_tensor_eddy, "color_fa_file", datasink, "dmriprep.dti_eddy.@colorfa")
     wf.connect(scale_tensor_eddy, "out_file", datasink, "dmriprep.dti_eddy.@scaled_tensor")
 
+    # all the eddy_quad stuff
+    wf.connect(eddy_quad, 'out_qc_json', datasink, "dmriprep.qc.@eddyquad_json")
+    wf.connect(eddy_quad, 'out_qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
+    wf.connect(eddy_quad, 'out_avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
+    wf.connect(eddy_quad, 'out_avg_b0_png', datasink, "dmriprep.qc.@eddyquad_b0png")
+    wf.connect(eddy_quad, 'out_cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
+    wf.connect(eddy_quad, 'out_vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
+    wf.connect(eddy_quad, 'out_residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
+
     # anatomical registration stuff
     wf.connect(bbreg, "min_cost_file", datasink, "dmriprep.reg.@mincost")
     wf.connect(bbreg, "out_fsl_file", datasink, "dmriprep.reg.@fslfile")
@@ -711,23 +752,26 @@ def get_dmriprep_pe_workflow():
     wf.connect(reslice_orig_to_dwi, 'out_file', datasink, 'dmriprep.anat.@T1w')
 
     def report_fn(dwi_corrected_file, eddy_rms, eddy_report,
-                  color_fa_file, anat_mask_file, outlier_indices):
+                  color_fa_file, anat_mask_file, outlier_indices,
+                  eddy_qc_file):
         from dmriprep.qc import create_report_json
 
         report = create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
-                                    color_fa_file, anat_mask_file, outlier_indices)
+                                    color_fa_file, anat_mask_file, outlier_indices,
+                                    eddy_qc_file)
         return report
 
     report_node = pe.Node(niu.Function(
         input_names=['dwi_corrected_file', 'eddy_rms',
                      'eddy_report', 'color_fa_file',
-                     'anat_mask_file', 'outlier_indices'],
+                     'anat_mask_file', 'outlier_indices', 'eddy_qc_file'],
         output_names=['report'],
         function=report_fn
     ), name="reportJSON")
 
     # for the report, lets show the eddy corrected (full volume) image
     wf.connect(voltransform, "transformed_file", report_node, 'dwi_corrected_file')
+    wf.connect(eddy_quad, 'out_qc_json', report_node, 'eddy_qc_file')
 
     # add the rms movement output from eddy
     wf.connect(prep, "fsl_eddy.out_movement_rms", report_node, 'eddy_rms')
@@ -762,7 +806,6 @@ def get_dmriprep_pe_workflow():
             ("art.eddy_corrected_outliers", dwi_fname.replace("dwi", "outliers")),
             ("color_fa", "colorfa"),
             ("orig_out", dwi_fname.replace("_dwi", "_T1w")),
-            # ("eddy_corrected_", dwi_fname.replace("dwi", "")),
             ("stats.eddy_corrected", dwi_fname.replace("dwi", "artStats")),
             ("eddy_corrected.eddy_parameters", dwi_fname + ".eddy_parameters"),
             ("qc/eddy_corrected", "qc/" + dwi_fname),
