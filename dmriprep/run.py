@@ -519,7 +519,7 @@ def get_dmriprep_pe_workflow():
         from nipype.utils.filemanip import fname_presuffix
 
         img = nib.load(op.abspath(in_file))
-        img_data = img.get_fdata()
+        img_data = img.get_data()
         img_data_thinned = np.delete(img_data,
                                      drop_scans,
                                      axis=3)
