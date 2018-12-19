@@ -4,6 +4,11 @@
       <div class="col-md-3">
         <div class="container">
         <h3>{{bucket}} ({{manifestEntries.length}})</h3>
+          <div class="mb-3">
+            <b-button v-if="!statsReady" @click="getAllReports">
+              Compute Statistics
+            </b-button>
+          </div>
           <b-nav vertical pills class="w-100">
             <!-- <b-nav-item active>Active</b-nav-item> -->
             <b-nav-item v-for="(subject, index) in manifestEntries"
@@ -18,6 +23,9 @@
         <h1 v-if="manifestEntries.length">
           {{manifestEntries[currentReportIdx].split('/')[0]}}
         </h1>
+        <div v-if="statsReady">
+          <GroupStats :data="allReports" :individual="currentReport.eddy_quad"/>
+        </div>
         <div v-if="ready">
           <report
             :reportProp="currentReport"
@@ -35,6 +43,7 @@
 import axios from 'axios';
 import _ from 'lodash';
 import Report from './Report';
+import GroupStats from './GroupStats';
 
 export default {
   name: 'bucket',
@@ -44,12 +53,33 @@ export default {
       currentReportIdx: 0,
       currentReport: {},
       ready: false,
+      allReports: [],
+      statsReady: false,
     };
   },
   components: {
     Report,
+    GroupStats,
   },
   methods: {
+    getReport(r) {
+      return axios.get(`https://s3-us-west-2.amazonaws.com/${this.bucket}/${r}`);
+    },
+    /**
+    *
+    */
+    async getAllReports() {
+      this.statsReady = false;
+      const reports = await _.map(this.manifestEntries, m => this.getReport(m));
+      _.map(reports, (r) => {
+        r.then((resp) => {
+          if (resp.data.eddy_quad) {
+            this.allReports.push(resp.data.eddy_quad);
+          }
+        });
+      });
+      this.statsReady = true;
+    },
     /**
     * XML parser for pubmed query returns.
     */
