@@ -48,7 +48,6 @@ export default {
     },
     getColor(direction, zScore) {
       if (direction) {
-        console.log(zScore);
         // positive is good
         if (zScore <= -1) {
           return 'danger';
@@ -56,7 +55,6 @@ export default {
           return 'success';
         }
       }
-      console.log('here', zScore);
       if (zScore <= -1) {
         return 'success';
       } else if (zScore >= 1) {

@@ -42,6 +42,7 @@ export default {
       brain: null,
       showOrig: true,
       done: false,
+      ready: false,
     };
   },
   methods: {
@@ -64,7 +65,10 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      setTimeout(() => { this.initBrainSprite(); }, 1);
+      setTimeout(() => {
+        this.ready = true;
+        this.initBrainSprite();
+      }, 100);
     });
   },
 };

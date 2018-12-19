@@ -148,10 +148,14 @@ export default {
     },
     updateReport() {
       this.ready = false;
-      axios.get(`https://s3-us-west-2.amazonaws.com/${this.bucket}/${this.manifestEntries[this.currentReportIdx]}`)
+      const reportUrl = `https://s3-us-west-2.amazonaws.com/${this.bucket}/${this.manifestEntries[this.currentReportIdx]}`;
+      return axios.get(reportUrl)
         .then((resp) => {
           this.currentReport = resp.data;
           this.ready = true;
+          this.$router.replace({ name: 'Bucket',
+            params: { bucket: this.bucket },
+            query: { report: reportUrl } });
         });
     },
   },
@@ -169,7 +173,19 @@ export default {
     },
   },
   mounted() {
-    this.getS3Manifest().then(this.updateReport);
+    let path = null;
+    if (this.$route.query) {
+      if (this.$route.query.report) {
+        path = this.$route.query.report.split(`https://s3-us-west-2.amazonaws.com/${this.bucket}/`)[1];
+      }
+    }
+
+    this.getS3Manifest().then(this.updateReport).then(() => {
+      if (path) {
+        this.currentReportIdx = this.manifestEntries.indexOf(path);
+      }
+      this.getAllReports();
+    });
   },
 };
 </script>
