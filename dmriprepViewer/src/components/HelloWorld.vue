@@ -17,6 +17,16 @@
         </b-input-group-append>
       </b-input-group>
 
+      <p class="lead mt-3">OR point to an S3 bucket</p>
+      <b-input-group size="md" class="mb-3" prepend="Bucket">
+         <b-form-input v-model="bucket" />
+         <b-input-group-append>
+           <b-btn size="md" text="Button"
+            variant="primary"
+            @click="s3">Go</b-btn>
+         </b-input-group-append>
+       </b-input-group>
+
       <report v-if="report.b0" :reportProp="report"></report>
   </b-container>
 </template>
@@ -44,6 +54,7 @@ export default {
       time: 0,
       spriteSlice: 0,
       url: null,
+      bucket: null,
     };
   },
   methods: {
@@ -51,8 +62,10 @@ export default {
       return Math.floor(this.report.b0.num_slices / 2);
     },
     navigate() {
-      console.log(this.url);
       this.$router.push({ path: '/report', query: { url: this.url } });
+    },
+    s3() {
+      this.$router.push({ path: `/bucket/${this.bucket}` });
     },
   },
   watch: {

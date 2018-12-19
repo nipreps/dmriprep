@@ -364,8 +364,16 @@ def get_dmriprep_pe_workflow():
     import multiprocessing
     eddy.inputs.num_threads = multiprocessing.cpu_count()
 
-    eddy_quad = pe.Node(fsl.EddyQuad(verbose=True), name="eddy_quad")
-    get_path = lambda x: x.split('.nii.gz')[0]
+    topup = prep.get_node('peb_correction.topup')
+    topup.inputs.checksize = True
+
+    applytopup = prep.get_node('peb_correction.unwarp')
+    applytopup.inputs.checksize = True
+
+    eddy.inputs.checksize = True
+
+    eddy_quad = pe.Node(fsl.EddyQuad(verbose=True, checksize=True), name="eddy_quad")
+    get_path = lambda x: x.split('.nii.gz')[0].split('_fix')[0]
     wf.connect(prep, ('fsl_eddy.out_corrected', get_path), eddy_quad, "base_name")
     wf.connect(inputspec, 'bval_file', eddy_quad, 'bval_file')
     wf.connect(prep, 'Rotate_Bvec.out_file', eddy_quad, 'bvec_file')
@@ -433,7 +441,12 @@ def get_dmriprep_pe_workflow():
 
         if 0 < threshold < 1:
             img = nib.load(dwi_file)
-            threshold *= img.header.get_n_slices()
+            try:
+                threshold *= img.header.get_n_slices()
+            except nib.spatialimages.HeaderDataError:
+                print('WARNING. We are not sure which dimension has the '
+                      'slices in this image. So we are using the 3rd dim.', img.shape)
+                threshold *= img.shape[2]
 
         drop_scans = np.array([
             s for s in scans
@@ -736,7 +749,7 @@ def get_dmriprep_pe_workflow():
     wf.connect(eddy_quad, 'out_qc_json', datasink, "dmriprep.qc.@eddyquad_json")
     wf.connect(eddy_quad, 'out_qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
     wf.connect(eddy_quad, 'out_avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
-    wf.connect(eddy_quad, 'out_avg_b0_png', datasink, "dmriprep.qc.@eddyquad_b0png")
+    wf.connect(eddy_quad, 'out_avg_b0_pe_png', datasink, "dmriprep.qc.@eddyquad_b0png")
     wf.connect(eddy_quad, 'out_cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
     wf.connect(eddy_quad, 'out_vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
     wf.connect(eddy_quad, 'out_residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
