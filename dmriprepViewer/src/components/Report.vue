@@ -106,7 +106,7 @@ export default {
     if (this.$route.query) {
       // load the json
       if (!this.$route.query.url) {
-        this.$router.push('/');
+        // this.$router.push('/');
       } else {
         axios.get(this.$route.query.url).then((resp) => {
           this.report = resp.data;
@@ -140,8 +140,9 @@ export default {
     $route() {
       if (this.$route.query) {
         // load the json
+        console.log(this.$route.name);
         if (!this.$route.query.url) {
-          this.$router.push('/');
+          // this.$router.push('/');
         } else {
           axios.get(this.$route.query.url).then((resp) => {
             this.report = resp.data;
