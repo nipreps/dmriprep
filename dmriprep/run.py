@@ -364,6 +364,12 @@ def get_dmriprep_pe_workflow():
     import multiprocessing
     eddy.inputs.num_threads = multiprocessing.cpu_count()
 
+    topup = prep.get_node('peb_correction.topup')
+    topup.inputs.checksize = True
+
+    applytopup = prep.get_node('peb_correction.unwarp')
+    applytopup.inputs.checksize = True
+
     eddy_quad = pe.Node(fsl.EddyQuad(verbose=True), name="eddy_quad")
     get_path = lambda x: x.split('.nii.gz')[0]
     wf.connect(prep, ('fsl_eddy.out_corrected', get_path), eddy_quad, "base_name")
