@@ -4,20 +4,20 @@
       <p class="lead">
         Comparison to Group Eddy_Quad Statistics
       </p>
-      <p>Absolute Motion (z-score)</p>
+      <p>Absolute Motion (Z = {{numberFormatter(individual_abs_mot_z)}})</p>
       <b-progress class="w-50 mx-auto">
         <b-progress-bar :value="scaleZ(individual_abs_mot_z)"
          :variant="getColor(0, individual_abs_mot_z)">
-          z = {{individual_abs_mot_z}}
+          z = {{numberFormatter(individual_abs_mot_z)}}
         </b-progress-bar>
       </b-progress>
     </div>
     <div class="mb-3">
-      <p>Relative Motion (z-score)</p>
+      <p>Relative Motion (Z = {{numberFormatter(individual_rel_mot_z)}})</p>
       <b-progress class="w-50 mx-auto">
         <b-progress-bar :value="scaleZ(individual_rel_mot_z)"
          :variant="getColor(0, individual_rel_mot_z)">
-          z = {{individual_rel_mot_z}}
+          z = {{numberFormatter(individual_rel_mot_z)}}
         </b-progress-bar>
       </b-progress>
     </div>
@@ -41,6 +41,10 @@ export default {
     scaleZ(val) {
       const scaler = d3.scaleLinear().range([0, 100]).domain([-3, 3]);
       return scaler(val);
+    },
+    numberFormatter(val) {
+      const formatter = d3.format('.3n');
+      return formatter(val);
     },
     getColor(direction, zScore) {
       if (direction) {
