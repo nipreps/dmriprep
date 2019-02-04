@@ -26,7 +26,7 @@ Preparing your data
 -------------------
 
 You should have raw data organized in the BIDS format. Also, you should have run Freesurfer and the results should be in a derivatives/ folder:
-
+```
 | BIDS_input_dir
 |   |-- sub-01
 |       |-- dwi
@@ -39,7 +39,7 @@ You should have raw data organized in the BIDS format. Also, you should have run
 |   |-- derivatives
 |       |-- sub-01
 |           |-- freesurfer
-
+```
 
 Quickstart
 ----------
