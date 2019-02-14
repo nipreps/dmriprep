@@ -21,7 +21,8 @@ requirements = [
     'tqdm',
     'pybids',
     'matplotlib',
-    'cytoolz'
+    'cytoolz',
+    'numba'
 ]
 
 setup_requirements = ['pytest-runner', ]
