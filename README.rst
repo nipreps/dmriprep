@@ -31,11 +31,11 @@ You should have raw data organized in the BIDS format. Also, you should have run
 |   |-- sub-01
 |       |-- dwi
 |           |-- sub-01_ses-01_dwi.nii.gz
-|           |-- sub-01_ses-01_dwi.bvals
-|           |-- sub-01_ses-01_dwi.bvecs
+|           |-- sub-01_ses-01_dwi.bval
+|           |-- sub-01_ses-01_dwi.bvec
 |       |-- fmap
-|           |-- sub-01_ses-01_dir-AP_dwi.nii.gz
-|           |-- sub-01_ses-01_dir-PA_dwi.nii.gz
+|           |-- sub-01_ses-01_acq-dwi_dir-AP_epi.nii.gz
+|           |-- sub-01_ses-01_acq-dwi_dir-PA_epi.nii.gz
 |   |-- derivatives
 |       |-- sub-01
 |           |-- freesurfer
