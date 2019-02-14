@@ -1,5 +1,5 @@
-import os.path as op
 import os
+import os.path as op
 from shutil import copyfile
 
 

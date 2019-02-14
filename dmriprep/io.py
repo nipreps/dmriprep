@@ -2,9 +2,10 @@
 BIDS-functions to return inputs for the run.py functions.
 
 """
-from glob import glob
 import os
 import os.path as op
+from glob import glob
+
 import bids
 
 
