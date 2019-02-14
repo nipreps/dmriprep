@@ -33,7 +33,6 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
                          suffix='epi',
                          dir='PA',
                          extensions=['.nii', '.nii.gz'])
-
     assert len(pa_file) == 1, 'found {} pa fieldmap files and we need just 1'.format(len(pa_file))
 
     dwi_files = layout.get(subject=subject_id, datatype='dwi', suffix='dwi')
@@ -41,7 +40,7 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
 
     for d in dwi_files:
         if d.path.startswith(op.abspath(op.join(bids_input_directory, 'sub-' + subject_id))):
-            valid_dwi_files.append(d.filename)
+            valid_dwi_files.append(d.path)
 
     dwi_file = [d for d in valid_dwi_files if d.endswith('.nii.gz') and not "TRACE" in d]
     assert len(dwi_file) == 1, 'found {} dwi files and we need just 1'.format(len(dwi_file))
