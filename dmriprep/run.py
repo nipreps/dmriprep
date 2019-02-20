@@ -1,5 +1,5 @@
-import os.path as op
 import os
+import os.path as op
 from shutil import copyfile
 
 
@@ -363,6 +363,12 @@ def get_dmriprep_pe_workflow():
     eddy.inputs.residuals = True
     import multiprocessing
     eddy.inputs.num_threads = multiprocessing.cpu_count()
+    import numba.cuda
+    try:
+        if numba.cuda.gpus:
+            eddy.inputs.use_cuda = True
+    except:
+        eddy.inputs.use_cuda = False
 
     topup = prep.get_node('peb_correction.topup')
     topup.inputs.checksize = True
@@ -374,12 +380,14 @@ def get_dmriprep_pe_workflow():
 
     eddy_quad = pe.Node(fsl.EddyQuad(verbose=True, checksize=True), name="eddy_quad")
     get_path = lambda x: x.split('.nii.gz')[0].split('_fix')[0]
-    wf.connect(prep, ('fsl_eddy.out_corrected', get_path), eddy_quad, "base_name")
+    get_qc_path = lambda x: x.split('.nii.gz')[0] + '.qc'
+    wf.connect(prep, ('fsl_eddy.out_corrected', get_path), eddy_quad, 'base_name')
     wf.connect(inputspec, 'bval_file', eddy_quad, 'bval_file')
     wf.connect(prep, 'Rotate_Bvec.out_file', eddy_quad, 'bvec_file')
     wf.connect(prep, 'peb_correction.topup.out_field', eddy_quad, 'field')
     wf.connect(prep, 'gen_index.out_file', eddy_quad, 'idx_file')
     wf.connect(prep, 'peb_correction.topup.out_enc_file', eddy_quad, 'param_file')
+    wf.connect(prep, ('fsl_eddy.out_corrected', get_qc_path), eddy_quad, 'output_dir')
 
     # need a mask file for eddy_quad. lets get it from the B0.
     def get_b0_mask_fn(b0_file):
@@ -394,7 +402,6 @@ def get_dmriprep_pe_workflow():
         _, mask = median_otsu(data, 2, 1)
         nib.Nifti1Image(mask.astype(float), aff).to_filename(mask_file)
         return mask_file
-
 
 
     def id_outliers_fn(outlier_report, threshold, dwi_file):
@@ -596,6 +603,7 @@ def get_dmriprep_pe_workflow():
         import numpy as np
         import nipype.utils.filemanip as fm
         import os
+
         aff = np.loadtxt(reg_mat_file)
         bvecs = np.loadtxt(bvec_file)
         bvec_trans = []
@@ -654,6 +662,7 @@ def get_dmriprep_pe_workflow():
         import nibabel as nib
         from nipype.utils.filemanip import fname_presuffix
         import os.path as op
+
         img = nib.load(aparc_aseg)
         data, aff = img.get_data(), img.affine
         outfile = fname_presuffix(
@@ -746,13 +755,13 @@ def get_dmriprep_pe_workflow():
     wf.connect(scale_tensor_eddy, "out_file", datasink, "dmriprep.dti_eddy.@scaled_tensor")
 
     # all the eddy_quad stuff
-    wf.connect(eddy_quad, 'out_qc_json', datasink, "dmriprep.qc.@eddyquad_json")
-    wf.connect(eddy_quad, 'out_qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
-    wf.connect(eddy_quad, 'out_avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
-    wf.connect(eddy_quad, 'out_avg_b0_pe_png', datasink, "dmriprep.qc.@eddyquad_b0png")
-    wf.connect(eddy_quad, 'out_cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
-    wf.connect(eddy_quad, 'out_vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
-    wf.connect(eddy_quad, 'out_residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
+    wf.connect(eddy_quad, 'qc_json', datasink, "dmriprep.qc.@eddyquad_json")
+    wf.connect(eddy_quad, 'qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
+    wf.connect(eddy_quad, 'avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
+    wf.connect(eddy_quad, 'avg_b0_pe_png', datasink, "dmriprep.qc.@eddyquad_b0png")
+    wf.connect(eddy_quad, 'cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
+    wf.connect(eddy_quad, 'vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
+    wf.connect(eddy_quad, 'residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
 
     # anatomical registration stuff
     wf.connect(bbreg, "min_cost_file", datasink, "dmriprep.reg.@mincost")
@@ -784,7 +793,7 @@ def get_dmriprep_pe_workflow():
 
     # for the report, lets show the eddy corrected (full volume) image
     wf.connect(voltransform, "transformed_file", report_node, 'dwi_corrected_file')
-    wf.connect(eddy_quad, 'out_qc_json', report_node, 'eddy_qc_file')
+    wf.connect(eddy_quad, 'qc_json', report_node, 'eddy_qc_file')
 
     # add the rms movement output from eddy
     wf.connect(prep, "fsl_eddy.out_movement_rms", report_node, 'eddy_rms')
@@ -802,6 +811,7 @@ def get_dmriprep_pe_workflow():
     # its super annoying.
     def name_files_nicely(dwi_file, subject_id):
         import os.path as op
+
         dwi_fname = op.split(dwi_file)[1].split(".nii.gz")[0]
         substitutions = [
             ("vol0000_flirt_merged.nii.gz", dwi_fname + '.nii.gz'),

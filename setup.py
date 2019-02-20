@@ -19,6 +19,10 @@ requirements = [
     'pandas',
     'parse',
     'tqdm',
+    'pybids',
+    'matplotlib',
+    'cytoolz',
+    'numba'
 ]
 
 setup_requirements = ['pytest-runner', ]

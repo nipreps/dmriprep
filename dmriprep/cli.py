@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """Console script for dmriprep."""
-import sys
-import click
-from . import run
-from . import io
-from .data import get_dataset
 import os
+import sys
 import warnings
+
+import click
+
+from . import io
+from . import run
+from .data import get_dataset
 
 # Filter warnings that are visible whenever you import another package that
 # was compiled against an older numpy than is installed.
