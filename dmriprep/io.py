@@ -16,30 +16,25 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
     :param bids_input_directory: string to bids dir
     :return: dict of inputs
     """
-    layout = bids.layout.BIDSLayout(bids_input_directory)
+    layout = bids.layout.BIDSLayout(bids_input_directory, validate=False)
     subjects = layout.get_subjects()
     assert subject_id in subjects, "subject {} is not in the bids folder".format(subject_id)
 
-    ap_file = layout.get(subject=subject_id, fmap="epi", modality="fmap", dir="AP")
+    ap_file = layout.get(subject=subject_id, fmap="epi", datatype="fmap", dir="AP")
     assert len(ap_file) == 1, 'found {} ap fieldmap files and we need just 1'.format(len(ap_file))
 
-    pa_file = layout.get(subject=subject_id, fmap="epi", modality="fmap", dir="PA")
+    pa_file = layout.get(subject=subject_id, fmap="epi", datatype="fmap", dir="PA")
     assert len(pa_file) == 1, 'found {} pa fieldmap files and we need just 1'.format(len(pa_file))
 
-    dwi_files = layout.get(subject=subject_id, modality="dwi")
-    valid_dwi_files = []
+    dwi_files = layout.get(subject=subject_id, datatype="dwi")
 
-    for d in dwi_files:
-        if d.filename.startswith(op.abspath(op.join(bids_input_directory, 'sub-' + subject_id))):
-            valid_dwi_files.append(d.filename)
-
-    dwi_file = [d for d in valid_dwi_files if d.endswith('.nii.gz') and not "TRACE" in d]
+    dwi_file = [d.path for d in dwi_files if d.filename.endswith('.nii.gz') and not "TRACE" in d.filename]
     assert len(dwi_file) == 1, 'found {} dwi files and we need just 1'.format(len(dwi_file))
 
-    bval_file = [d for d in valid_dwi_files if d.endswith('.bval')]
+    bval_file = [d.path for d in dwi_files if d.filename.endswith('.bval')]
     assert len(bval_file) == 1, 'found {} bval files and we need just 1'.format(len(bval_file))
 
-    bvec_file = [d for d in valid_dwi_files if d.endswith('.bvec')]
+    bvec_file = [d.path for d in dwi_files if d.filename.endswith('.bvec')]
     assert len(bvec_file) == 1, 'found {} bvec files and we need just 1'.format(len(bvec_file))
 
     subjects_dir = op.join(bids_input_directory, 'derivatives', 'sub-'+subject_id)
@@ -51,8 +46,8 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
 
     outputs = dict(subject_id="sub-"+subject_id,
                    dwi_file=dwi_file[0],
-                   dwi_file_AP=ap_file[0].filename,
-                   dwi_file_PA=pa_file[0].filename,
+                   dwi_file_AP=ap_file[0].path,
+                   dwi_file_PA=pa_file[0].path,
                    bvec_file=bvec_file[0],
                    bval_file=bval_file[0],
                    subjects_dir=op.abspath(subjects_dir))
