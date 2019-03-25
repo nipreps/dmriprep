@@ -31,7 +31,7 @@ def is_hemispherical(vecs):
 
     References
     ----------
-    https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html
+    https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html  # noqa
     """
     if vecs.shape[1] != 3:
         raise ValueError("Input vectors must be 3D vectors")
