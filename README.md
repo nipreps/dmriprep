@@ -57,10 +57,15 @@ git clone https://github.com/nipy/dmriprep
 cd dmriprep
 make docker
 
+# If you don't want to log into the docker image:
+
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
+
+# If you want to log into the image:
+
 docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod 
 
-# Inside the image: 
-
+# Run this inside the docker image:
 dmriprep /inputs /outpus --participant-label 01
 ```
 
