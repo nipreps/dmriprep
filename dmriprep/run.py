@@ -758,7 +758,8 @@ def get_dmriprep_pe_workflow():
     wf.connect(eddy_quad, 'qc_json', datasink, "dmriprep.qc.@eddyquad_json")
     wf.connect(eddy_quad, 'qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
     wf.connect(eddy_quad, 'avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
-    wf.connect(eddy_quad, 'avg_b0_pe_png', datasink, "dmriprep.qc.@eddyquad_b0png")
+    wf.connect(eddy_quad, 'avg_b0_pe_png',
+               datasink, "dmriprep.qc.@eddyquad_b0png")
     wf.connect(eddy_quad, 'cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
     wf.connect(eddy_quad, 'vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
     wf.connect(eddy_quad, 'residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
