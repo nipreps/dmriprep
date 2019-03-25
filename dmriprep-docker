@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --rm -ti -v "$1":/inputs -v "$2":/outputs dmriprep /inputs /outputs
