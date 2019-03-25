@@ -17,7 +17,7 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
     :param bids_input_directory: string to bids dir
     :return: dict of inputs
     """
-    layout = bids.layout.BIDSLayout(bids_input_directory)
+    layout = bids.layout.BIDSLayout(bids_input_directory, validate=False)
     subjects = layout.get_subjects()
     assert subject_id in subjects, "subject {} is not in the bids folder".format(subject_id)
 
@@ -45,10 +45,10 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
     dwi_file = [d for d in valid_dwi_files if d.endswith('.nii.gz') and not "TRACE" in d]
     assert len(dwi_file) == 1, 'found {} dwi files and we need just 1'.format(len(dwi_file))
 
-    bval_file = [d for d in valid_dwi_files if d.endswith('.bval')]
+    bval_file = [d.path for d in dwi_files if d.filename.endswith('.bval')]
     assert len(bval_file) == 1, 'found {} bval files and we need just 1'.format(len(bval_file))
 
-    bvec_file = [d for d in valid_dwi_files if d.endswith('.bvec')]
+    bvec_file = [d.path for d in dwi_files if d.filename.endswith('.bvec')]
     assert len(bvec_file) == 1, 'found {} bvec files and we need just 1'.format(len(bvec_file))
 
     subjects_dir = op.join(bids_input_directory, 'derivatives', 'sub-'+subject_id)

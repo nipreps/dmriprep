@@ -755,13 +755,14 @@ def get_dmriprep_pe_workflow():
     wf.connect(scale_tensor_eddy, "out_file", datasink, "dmriprep.dti_eddy.@scaled_tensor")
 
     # all the eddy_quad stuff
-    wf.connect(eddy_quad, 'out_qc_json', datasink, "dmriprep.qc.@eddyquad_json")
-    wf.connect(eddy_quad, 'out_qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
-    wf.connect(eddy_quad, 'out_avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
-    wf.connect(eddy_quad, 'out_avg_b0_pe_png', datasink, "dmriprep.qc.@eddyquad_b0png")
-    wf.connect(eddy_quad, 'out_cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
-    wf.connect(eddy_quad, 'out_vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
-    wf.connect(eddy_quad, 'out_residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
+    wf.connect(eddy_quad, 'qc_json', datasink, "dmriprep.qc.@eddyquad_json")
+    wf.connect(eddy_quad, 'qc_pdf', datasink, "dmriprep.qc.@eddyquad_pdf")
+    wf.connect(eddy_quad, 'avg_b_png', datasink, "dmriprep.qc.@eddyquad_bpng")
+    wf.connect(eddy_quad, 'avg_b0_pe_png',
+               datasink, "dmriprep.qc.@eddyquad_b0png")
+    wf.connect(eddy_quad, 'cnr_png', datasink, "dmriprep.qc.@eddyquad_cnr")
+    wf.connect(eddy_quad, 'vdm_png', datasink, "dmriprep.qc.@eddyquad_vdm")
+    wf.connect(eddy_quad, 'residuals', datasink, 'dmriprep.qc.@eddyquad_resid')
 
     # anatomical registration stuff
     wf.connect(bbreg, "min_cost_file", datasink, "dmriprep.reg.@mincost")
@@ -793,7 +794,7 @@ def get_dmriprep_pe_workflow():
 
     # for the report, lets show the eddy corrected (full volume) image
     wf.connect(voltransform, "transformed_file", report_node, 'dwi_corrected_file')
-    wf.connect(eddy_quad, 'out_qc_json', report_node, 'eddy_qc_file')
+    wf.connect(eddy_quad, 'qc_json', report_node, 'eddy_qc_file')
 
     # add the rms movement output from eddy
     wf.connect(prep, "fsl_eddy.out_movement_rms", report_node, 'eddy_rms')
