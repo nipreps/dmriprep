@@ -22,6 +22,36 @@ Preprocessing of neuroimaging data in preparation for AFQ analysis
 * Free software: BSD license
 * Documentation: https://dmriprep.readthedocs.io.
 
+Preparing your data
+-------------------
+
+You should have raw data organized in the BIDS format. Also, you should have run Freesurfer and the results should be in a derivatives/ folder:
+```
+| BIDS_input_dir
+|   |-- sub-01
+|       |-- dwi
+|           |-- sub-01_ses-01_dwi.nii.gz
+|           |-- sub-01_ses-01_dwi.bval
+|           |-- sub-01_ses-01_dwi.bvec
+|       |-- fmap
+|           |-- sub-01_ses-01_acq-dwi_dir-AP_epi.nii.gz
+|           |-- sub-01_ses-01_acq-dwi_dir-PA_epi.nii.gz
+|   |-- derivatives
+|       |-- sub-01
+|           |-- freesurfer
+```
+
+Quickstart
+----------
+
+```
+git clone https://github.com/nipy/dmriprep
+cd dmriprep
+python setup.py install
+
+dmriprep $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
+```
+
 
 Features
 --------

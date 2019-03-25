@@ -2,9 +2,10 @@
 BIDS-functions to return inputs for the run.py functions.
 
 """
-from glob import glob
 import os
 import os.path as op
+from glob import glob
+
 import bids
 
 
@@ -20,15 +21,28 @@ def get_bids_subject_input_files(subject_id, bids_input_directory):
     subjects = layout.get_subjects()
     assert subject_id in subjects, "subject {} is not in the bids folder".format(subject_id)
 
-    ap_file = layout.get(subject=subject_id, fmap="epi", datatype="fmap", dir="AP")
+    ap_file = layout.get(subject=subject_id,
+                         datatype='fmap',
+                         suffix='epi',
+                         dir='AP',
+                         extensions=['.nii', '.nii.gz'])
     assert len(ap_file) == 1, 'found {} ap fieldmap files and we need just 1'.format(len(ap_file))
 
-    pa_file = layout.get(subject=subject_id, fmap="epi", datatype="fmap", dir="PA")
+    pa_file = layout.get(subject=subject_id,
+                         datatype='fmap',
+                         suffix='epi',
+                         dir='PA',
+                         extensions=['.nii', '.nii.gz'])
     assert len(pa_file) == 1, 'found {} pa fieldmap files and we need just 1'.format(len(pa_file))
 
-    dwi_files = layout.get(subject=subject_id, datatype="dwi")
+    dwi_files = layout.get(subject=subject_id, datatype='dwi', suffix='dwi')
+    valid_dwi_files = []
 
-    dwi_file = [d.path for d in dwi_files if d.filename.endswith('.nii.gz') and not "TRACE" in d.filename]
+    for d in dwi_files:
+        if d.path.startswith(op.abspath(op.join(bids_input_directory, 'sub-' + subject_id))):
+            valid_dwi_files.append(d.path)
+
+    dwi_file = [d for d in valid_dwi_files if d.endswith('.nii.gz') and not "TRACE" in d]
     assert len(dwi_file) == 1, 'found {} dwi files and we need just 1'.format(len(dwi_file))
 
     bval_file = [d.path for d in dwi_files if d.filename.endswith('.bval')]
