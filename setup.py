@@ -49,6 +49,7 @@ setup(
             'dmriprep-upload=dmriprep.cli:upload',
         ],
     },
+    scripts=['./dmriprep-docker'],
     install_requires=requirements,
     license="BSD license",
     long_description=readme + '\n\n' + history,
