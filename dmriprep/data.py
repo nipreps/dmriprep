@@ -179,7 +179,8 @@ def _cumulative_paths(path_parts, add_ext=""):
     except IndexError:
         pass
 
-    return [''.join(path_parts[:i+1]) + add_ext for i in range(len(path_parts))]
+    return [''.join(path_parts[:i+1]) + add_ext
+            for i in range(len(path_parts))]
 
 
 class Study:
