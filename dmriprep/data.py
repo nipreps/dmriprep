@@ -133,6 +133,55 @@ def _download_from_s3(fname, bucket, key, overwrite=False):
         pass
 
 
+def _recursive_split_ext(path):
+    """Recursively split pathname `path` into components.
+
+    Parameters
+    ----------
+    path : path-like object
+
+    Returns
+    -------
+    tuple :
+        tuple of path parts. All parts except the first have a beginning
+        period.
+
+    """
+    p0, p1 = op.splitext(path)
+    if p1:
+        return _recursive_split_ext(p0) + (p1,)
+    else:
+        return (p0,)
+
+
+def _cumulative_paths(path_parts, add_ext=""):
+    """Return all possible cumulative path names from a list of path parts
+
+    For example, if `path_parts` = ["a", ".b", ".c", ".d"],
+    this function will return ["a", "a.b", "a.b.c", "a.b.c.d"]
+
+    Parameters
+    ----------
+    path_parts: sequence of strings
+        The sequence of path substrings. All elements except the first must
+        begin with a period.
+
+    add_ext: str
+        If provided, add this extension to each element of the result
+
+    Returns
+    -------
+    list :
+        List of cumulative path names
+    """
+    try:
+        add_ext = add_ext if add_ext[0] == "." else "." + add_ext
+    except IndexError:
+        pass
+
+    return [''.join(path_parts[:i+1]) + add_ext for i in range(len(path_parts))]
+
+
 class Study:
     """A dMRI based study with a BIDS compliant directory structure"""
     def __init__(self, study_id, bucket, s3_prefix, subjects=None):
@@ -151,6 +200,7 @@ class Study:
 
         subjects : str, sequence(str), int, or None
             If int, retrieve S3 keys for the first `subjects` subjects.
+            If "all", retrieve all subjects.
             If str or sequence of strings, retrieve S3 keys for the specified
             subjects. If None, retrieve S3 keys for the first subject.
         """
@@ -180,18 +230,23 @@ class Study:
 
         self._all_subjects = self.list_all_subjects()
         if subjects is None or subjects == 1:
+            enter_validation_loop = True
             subjects = [sorted(self._all_subjects.keys())[0]]
             self._n_requested = 1
         elif isinstance(subjects, int) and subjects > 1:
+            enter_validation_loop = True
             self._n_requested = subjects
             subjects = sorted(self._all_subjects.keys())[:subjects]
         elif subjects == "all":
+            enter_validation_loop = False
             self._n_requested = len(self._all_subjects)
             subjects = list(self._all_subjects.keys())
         elif isinstance(subjects, str):
+            enter_validation_loop = False
             self._n_requested = 1
             subjects = [subjects]
         else:
+            enter_validation_loop = False
             self._n_requested = len(subjects)
 
         if not set(subjects) <= set(self._all_subjects.keys()):
@@ -208,8 +263,35 @@ class Study:
         with ProgressBar():
             subjects = list(compute(*subs, scheduler="threads"))
 
-        self._n_discarded = len([s for s in subjects if not s.valid])
         self._subjects = [s for s in subjects if s.valid]
+
+        if enter_validation_loop:
+            # index of first uninspected subject
+            idx_lo = self._n_requested
+            while len(self._subjects) < self._n_requested:
+                n_needed = self._n_requested - len(self._subjects)
+                if n_needed == 1:
+                    subjects = [sorted(self._all_subjects.keys())[idx_lo]]
+                else:
+                    subjects = sorted(
+                        self._all_subjects.keys()
+                    )[idx_lo:idx_lo + n_needed]
+
+                idx_lo += n_needed
+
+                subs = [
+                    delayed(self._get_subject)(s) for s in set(subjects)
+                ]
+
+                with ProgressBar():
+                    subjects = list(compute(*subs, scheduler="threads"))
+
+                self._subjects += [s for s in subjects if s.valid]
+
+            self._n_discarded = 0
+        else:
+            self._n_discarded = len([s for s in subjects if not s.valid])
+
 
     @property
     def study_id(self):
@@ -259,7 +341,7 @@ class Study:
         subject : dmriprep.data.Subject
             subject instance
         """
-        raise NotImplementedError
+        pass
 
     def postprocess(self, subject):
         """Study-specific postprocessing steps
@@ -269,7 +351,7 @@ class Study:
         subject : dmriprep.data.Subject
             subject instance
         """
-        raise NotImplementedError
+        pass
 
     def download(self, directory, include_site=False, overwrite=False,
                  pbar=True):
@@ -569,6 +651,7 @@ class Subject:
         dwi_keys = [k for k in s3_keys['raw'] if '/dwi/' in k]
         fmap_keys = [k for k in s3_keys['raw'] if '/fmap/' in k]
         deriv_keys = s3_keys['deriv']
+        all_json_keys = [k for k in s3_keys['raw'] if k.endswith('.json')]
 
         # Get the dwi files, bvec files, and bval files
         dwi = [f for f in dwi_keys
@@ -583,6 +666,13 @@ class Subject:
         freesurfer = [f for f in deriv_keys
                       if '/freesurfer/' in f]
 
+        json_keys = []
+        for file_list in [dwi, bvec, bval, epi_nii, t1w]:
+            for f in file_list:
+                potential_keys = _cumulative_paths(_recursive_split_ext(f),
+                                                   add_ext="json")
+                json_keys += [k for k in potential_keys if k in all_json_keys]
+
         # Use truthiness of non-empty lists to verify that all
         # of the required prereq files exist in `s3_keys`
         # TODO: If some of the files are missing, look farther up in the directory
@@ -593,6 +683,7 @@ class Subject:
                 dwi=dwi,
                 bvec=bvec,
                 bval=bval,
+                json=json_keys,
                 epi_nii=epi_nii,
                 epi_json=epi_json,
                 freesurfer=freesurfer,
@@ -979,6 +1070,7 @@ class Subject:
                     bval=input_files['bval'],
                     epi_ap=input_files['epi_ap'],
                     epi_pa=input_files['epi_pa'],
+                    json=input_files['json'],
                     t1w=t1w,
                     freesurfer=freesurfer,
                 )
