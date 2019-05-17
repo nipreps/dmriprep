@@ -8,4 +8,4 @@ tqdm
 pybids
 matplotlib
 cytoolz
-numba
+numba==0.43.1
