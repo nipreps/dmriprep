@@ -7,10 +7,27 @@ Contributing
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
 
-You can contribute in many ways:
+Installing a development version of dmriprep
+--------------------------------------------
+
+First, you can install a development version of dmriprep by cloning this repository
+and then typing::
+
+    $ pip install -e .[dev]
+
+Activate the pre-commit formatting hook by typing::
+
+    $ pre-commit install
+
+Before committing your work, you can check for formatting issues or error by typing::
+
+    $ make lint
+    $ make test
 
 Types of Contributions
 ----------------------
+
+You can contribute in many ways:
 
 Report Bugs
 ~~~~~~~~~~~
