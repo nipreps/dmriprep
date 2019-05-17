@@ -2,10 +2,10 @@ Click>=6.0
 dask
 dipy
 nipype==1.2.0
-pandas
+pandas==0.24.2
 parse
 tqdm
-pybids
+pybids==0.8.0
 matplotlib
 cytoolz
-numba
+numba==0.43.1
