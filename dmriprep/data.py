@@ -387,6 +387,48 @@ class Study:
         compute(*results, scheduler="threads")
 
 
+class S3BidsStudy(Study):
+    """
+
+    """
+    def __init__(self, study_id, bucket, s3_prefix=None,
+                 subjects=None):
+        """
+        Initialize a study which is organized as BIDS compliant S3 bucket, or a
+        sub-path of this bucket.
+
+        Parameters
+        ----------
+        study_id : str An identifier string for the study
+
+        bucket : str The S3 bucket that contains the study data
+
+        s3_prefix : str, optional The S3 prefix common to all of the study
+            objects on S3. Defaults to the root of the bucket.
+
+        subjects : str, sequence(str), int, or None
+            If int, retrieve S3 keys for the first `subjects` subjects.
+            If str or sequence of strings, retrieve S3 keys for the specified
+            subjects. If None, retrieve S3 keys for the first subject. If 'all',
+            use all of the subjects in the study.
+        """
+        if s3_prefix is None:
+            s3_prefix = ""
+        super().__init__(
+            study_id=study_id,
+            bucket=bucket,
+            s3_prefix=s3_prefix,
+            subjects=subjects)
+
+    def list_all_subjects(self):
+        """
+        Find the identifiers of all subjects
+        """
+        # XXX Ariel will figure this out.
+
+
+
+
 class HBN(Study):
     """The HBN study
 
