@@ -5,7 +5,6 @@ Welcome to dmriprep's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   readme
    installation
    usage
    modules
