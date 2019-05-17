@@ -5,7 +5,7 @@ nipype
 pandas
 parse
 tqdm
-pybids
+pybids==0.8.0
 matplotlib
 cytoolz
 numba
