@@ -4,7 +4,7 @@ dipy==0.16.0
 nipype==1.2.0
 pandas==0.24.2
 parse
-tqdm
+tqdm==4.32.1
 pybids==0.8.0
 matplotlib
 cytoolz
