@@ -6,6 +6,6 @@ pandas
 parse
 tqdm
 pybids
-matplotlib
+matplotlib==3.0.3
 cytoolz
 numba
