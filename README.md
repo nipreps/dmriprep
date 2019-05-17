@@ -67,7 +67,7 @@ dmriprep /inputs /outpus --participant-label 01
 We love contributions! dmriprep is open source, built on open source,
 and we'd love to have you hang out in our community.
 
-We have developed some [guidelines](CONTRIBUTING.md) for contributing to
+We have developed some [guidelines](CONTRIBUTING.rst) for contributing to
 dmriprep.
 
 **Imposter syndrome disclaimer**: We want your help. No, really.
