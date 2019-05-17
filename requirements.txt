@@ -1,5 +1,5 @@
 Click>=6.0
-dask
+dask==1.2.2
 dipy
 nipype
 pandas
