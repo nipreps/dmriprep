@@ -4,7 +4,7 @@ dipy
 nipype
 pandas
 parse
-tqdm
+tqdm==4.32.1
 pybids
 matplotlib
 cytoolz
