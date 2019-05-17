@@ -1,0 +1,11 @@
+Click>=6.0
+dask
+dipy
+nipype
+pandas
+parse
+tqdm
+pybids
+matplotlib
+cytoolz
+numba
