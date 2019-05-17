@@ -1,50 +1,35 @@
-======
-dmriprep
-======
+# dmriprep
 
-
-.. image:: https://img.shields.io/pypi/v/dmriprep.svg
-        :target: https://pypi.python.org/pypi/dmriprep
-
-.. image:: https://img.shields.io/travis/akeshavan/dmriprep.svg
-        :target: https://travis-ci.org/akeshavan/dmriprep
-
-.. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
-        :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
-
-
+[![Build Status](https://travis-ci.org/nipy/dmriprep.png?branch=master)](https://travis-ci.org/nipy/dmriprep)
+[![Documentation Status](https://readthedocs.org/projects/dmriprep/badge/?version=latest)](httpsL//dmriprep.readthredocs.io/en/latest/?badge=latest)
 
 Preprocessing of neuroimaging data in preparation for AFQ analysis
-
 
 * Free software: BSD license
 * Documentation: https://dmriprep.readthedocs.io.
 
-Preparing your data
--------------------
+## Preparing your data
 
 You should have raw data organized in the BIDS format. Also, you should have run Freesurfer and the results should be in a derivatives/ folder:
-```
-| BIDS_input_dir
-|   |-- sub-01
-|       |-- dwi
-|           |-- sub-01_ses-01_dwi.nii.gz
-|           |-- sub-01_ses-01_dwi.bval
-|           |-- sub-01_ses-01_dwi.bvec
-|       |-- fmap
-|           |-- sub-01_ses-01_acq-dwi_dir-AP_epi.nii.gz
-|           |-- sub-01_ses-01_acq-dwi_dir-PA_epi.nii.gz
-|   |-- derivatives
-|       |-- sub-01
-|           |-- freesurfer
-```
 
-Quickstart
-----------
+    BIDS_input_dir
+    ├── sub-01
+    │   ├── dwi
+    │   │   ├── sub-01_ses-01_dwi.nii.gz
+    │   │   ├── sub-01_ses-01_dwi.bval
+    │   │   ├── sub-01_ses-01_dwi.bvec
+    │   ├── fmap
+    │   │   ├── sub-01_ses-01_acq-dwi_dir-AP_epi.nii.gz
+    │   │   ├── sub-01_ses-01_acq-dwi_dir-PA_epi.nii.gz
+    │   │   ├── sub-01_ses-01_acq-dwi_dir-AP_epi.json
+    │   │   ├── sub-01_ses-01_acq-dwi_dir-PA_epi.json
+    ├── derivatives
+    │   ├── sub-01
+    │   │   ├── freesurfer
 
-```
+## Quickstart
+
+```bash
 git clone https://github.com/nipy/dmriprep
 cd dmriprep
 python setup.py install
@@ -52,7 +37,7 @@ python setup.py install
 dmriprep $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
 ```
 
-```
+```bash
 git clone https://github.com/nipy/dmriprep
 cd dmriprep
 make docker
@@ -69,21 +54,17 @@ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod
 dmriprep /inputs /outpus --participant-label 01
 ```
 
-
-
-Features
---------
+## Features
 
 * TODO
 
-
-Contributing
-------------
+## Contributing
 
 We love contributions! dmriprep is open source, built on open source,
 and we'd love to have you hang out in our community.
 
-We have developed some `guidelines`_ for contributing to dmriprep.
+We have developed some [guidelines](CONTRIBUTING.md) for contributing to
+dmriprep.
 
 **Imposter syndrome disclaimer**: We want your help. No, really.
 
@@ -108,19 +89,13 @@ most valuable to the project as a whole, because you're coming to the
 project with fresh eyes, so you can see the errors and assumptions that
 seasoned contributors have glossed over.
 
+## Credits
 
-Credits
--------
+This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the [`audreyr/cookiecutter-pypackage`](https://github.com/audreyr/cookiecutter-pypackage) project template.
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+The imposter syndrome disclaimer was originally written by
+[Adrienne Lowe](https://github.com/adriennefriend) for a [PyCon
+talk](https://www.youtube.com/watch?v=6Uj746j9Heo), and was
+adapted based on its use in the README file for the [MetPy
+project](https://github.com/Unidata/MetPy).
 
-The imposter syndrome disclaimer was originally written by `Adrienne
-Lowe`_ for a `PyCon talk`_, and was adapted based on its use in the
-README file for the `MetPy project`_.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-.. _`Adrienne Lowe`: https://github.com/adriennefriend
-.. _`Pycom talk`: https://www.youtube.com/watch?v=6Uj746j9Heo
-.. _`MetPy project`: https://github.com/Unidata/MetPy
-.. _`guidelines`: CONTRIBUTING.rst
