@@ -52,6 +52,24 @@ python setup.py install
 dmriprep $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
 ```
 
+```
+git clone https://github.com/nipy/dmriprep
+cd dmriprep
+make docker
+
+# If you don't want to log into the docker image:
+
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
+
+# If you want to log into the image:
+
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod 
+
+# Run this inside the docker image:
+dmriprep /inputs /outpus --participant-label 01
+```
+
+
 
 Features
 --------
