@@ -2,7 +2,7 @@ Click>=6.0
 dask
 dipy
 nipype
-pandas
+pandas==0.24.2
 parse
 tqdm
 pybids==0.8.0
