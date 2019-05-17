@@ -1,6 +1,6 @@
 Click>=6.0
 dask
-dipy
+dipy==0.16.0
 nipype
 pandas
 parse
