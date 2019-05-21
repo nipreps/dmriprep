@@ -1,7 +1,7 @@
+[![Known Vulnerabilities](https://snyk.io/test/github/nipy/dmriprep/badge.svg)](https://snyk.io/test/github/nipy/dmriprep)
 [![Documentation Status](https://readthedocs.org/projects/dmriprep/badge/?version=latest)](httpsL//dmriprep.readthredocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/nipy/dmriprep.png?branch=master)](https://travis-ci.org/nipy/dmriprep)
 [![Coverage Status](https://coveralls.io/repos/github/nipy/dmriprep/badge.svg?branch=master)](https://coveralls.io/github/nipy/dmriprep?branch=master)
-[![Updates](https://pyup.io/repos/github/nipy/dmriprep/shield.svg)](https://pyup.io/repos/github/nipy/dmriprep/)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
