@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
-# <img alt="dmriprep" src="docs/img/dmriprep_icon.svg" height="60"> dmriprep
+# <img alt="dmriprep" src="docs/img/dmriprep_icon.svg" height="128"> dmriprep
 
 Preprocessing of neuroimaging data in preparation for AFQ analysis
 
