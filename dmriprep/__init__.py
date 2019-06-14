@@ -17,7 +17,6 @@ warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 from . import data
-from . import io
 from . import qc
 from . import run
 
