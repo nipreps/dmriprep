@@ -4,6 +4,7 @@
 import os
 import sys
 import warnings
+from bids import BIDSLayout
 
 import click
 

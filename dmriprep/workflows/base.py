@@ -45,6 +45,17 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
     for dwi_file in subject_data['dwi']:
         dwi_preproc_wf = init_dwi_preproc_wf(dwi_file=dwi_file,
                                              layout=layout)
+        dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(work_dir), subject_id)
+        entities = layout.parse_file_entities(dwi_file)
+        session_id = entities['session']
+
+        inputspec = dwi_preproc_wf.get_node('inputnode')
+        inputspec.inputs.subject_id = subject_id
+        inputspec.inputs.dwi_file = dwi_file
+        inputspec.inputs.metadata = layout.get_metadata(dwi_file)
+        inputspec.inputs.bvec_file = layout.get_bvec(dwi_file)
+        inputspec.inputs.bval_file = layout.get_bval(dwi_file)
+        inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
         subject_wf.add_nodes([dwi_preproc_wf])
 

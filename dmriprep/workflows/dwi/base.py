@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-def init_dwi_preproc_wf(dwi_file):
+def init_dwi_preproc_wf(dwi_file, layout):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import (
         freesurfer as fs,
@@ -43,13 +43,13 @@ def init_dwi_preproc_wf(dwi_file):
 
     outputnode = pe.Node(
         niu.IdentityInterface(fields=["out_file", "out_mask", "out_bvec"]),
-        name="outputnode",
+        name="outputnode"
     )
 
     # name noise and out_file using fname_presuffix
     denoise = pe.Node(
         mrtrix3.DWIDenoise(noise="noise.nii.gz", out_file="denoised.nii.gz"),
-        name="denoise",
+        name="denoise"
     )
 
     # name unring using fname_presuffix
@@ -159,7 +159,7 @@ def init_dwi_preproc_wf(dwi_file):
     # dilate mask
     bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name="bet_dwi_pre")
 
-    mrtrix3.MaskFilter
+    #mrtrix3.MaskFilter
 
     ecc = pe.Node(
         fsl.Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
@@ -230,8 +230,8 @@ def init_dwi_preproc_wf(dwi_file):
                 eddy_quad,
                 [
                     (("out_corrected", get_path), "base_name"),
-                    (("out_corrected", get_qc_path), "output_dir"),
-                ],
+                    (("out_corrected", get_qc_path), "output_dir")
+                ]
             ),
             (inputnode, eddy_quad, [("bval_file", "bval_file")]),
             (ecc, eddy_quad, [("out_rotated_bvecs", "bvec_file")]),
@@ -239,9 +239,8 @@ def init_dwi_preproc_wf(dwi_file):
             (gen_idx, eddy_quad, [("out_file", "idx_file")]),
             (acqp, eddy_quad, [("out_file", "param_file")]),
             (ecc, outputnode, [("out_corrected", "out_file")]),
-            (b0mask_node, outputnode, [("mask_file", "out_mask")])(
-                ecc, outputnode, [("out_rotated_bvecs", "out_bvec")]
-            ),
+            (b0mask_node, outputnode, [("mask_file", "out_mask")]),
+            (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")])
         ]
     )
 
