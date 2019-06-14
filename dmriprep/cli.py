@@ -71,6 +71,7 @@ def main(participant_label, bids_dir, output_dir,
     subject_list = utils.collect_participants(layout,
                                               participant_label=participant_label)
 
+    work_dir = os.path.join(output_dir, 'scratch')
     wf = init_dmriprep_wf(layout, subject_list, work_dir, output_dir)
     wf.write_graph(graph2use='colored')
     wf.config['execution']['remove_unnecessary_outputs'] = False
