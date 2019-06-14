@@ -7,9 +7,10 @@ import warnings
 
 import click
 
-from . import io
 from . import run
+from . import utils
 from .data import get_dataset
+from ..workflows.base import init_dmriprep_wf
 
 # Filter warnings that are visible whenever you import another package that
 # was compiled against an older numpy than is installed.
@@ -66,14 +67,15 @@ def main(participant_label, bids_dir, output_dir,
         raise NotImplementedError('The only valid analysis level for dmriprep '
                                   'is participant at the moment.')
 
-    inputs = io.get_bids_files(participant_label, bids_dir)
+    layout = BIDSLayout(bids_dir, validate=False)
+    subject_list = utils.collect_participants(layout,
+                                              participant_label=participant_label)
 
-    for subject_inputs in inputs:
-        run.run_dmriprep_pe(**subject_inputs,
-                            working_dir=os.path.join(output_dir, 'scratch'),
-                            out_dir=output_dir,
-                            eddy_niter=eddy_niter,
-                            slice_outlier_threshold=slice_outlier_threshold)
+    wf = init_dmriprep_wf(layout, subject_list, work_dir, output_dir)
+    wf.write_graph(graph2use='colored')
+    wf.config['execution']['remove_unnecessary_outputs'] = False
+    wf.config['execution']['keep_inputs'] = True
+    wf.run()
 
     return 0
 
