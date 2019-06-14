@@ -5,6 +5,7 @@ Utility functions for other submodules
 
 import warnings
 import itertools
+import logging
 
 import numpy as np
 from bids.layout import BIDSLayout
@@ -72,10 +73,13 @@ class BIDSError(ValueError):
     def __init__(self, message, bids_root):
         indent = 10
         header = '{sep} BIDS root folder: "{bids_root}" {sep}'.format(
-            bids_root=bids_root, sep=''.join(['-'] * indent))
-        self.msg = '\n{header}\n{indent}{message}\n{footer}'.format(
-            header=header, indent=''.join([' '] * (indent + 1)),
-            message=message, footer=''.join(['-'] * len(header))
+            bids_root=bids_root, sep="".join(["-"] * indent)
+        )
+        self.msg = "\n{header}\n{indent}{message}\n{footer}".format(
+            header=header,
+            indent="".join([" "] * (indent + 1)),
+            message=message,
+            footer="".join(["-"] * len(header)),
         )
         super(BIDSError, self).__init__(self.msg)
         self.bids_root = bids_root
@@ -85,8 +89,9 @@ class BIDSWarning(RuntimeWarning):
     pass
 
 
-def collect_participants(bids_dir, participant_label=None, strict=False,
-                         bids_validate=True):
+def collect_participants(
+    bids_dir, participant_label=None, strict=False, bids_validate=True
+):
     """
     List the participants under the BIDS root and checks that participants
     designated with the participant_label argument exist in that folder.
@@ -124,11 +129,13 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
     # Error: bids_dir does not contain subjects
     if not all_participants:
         raise BIDSError(
-            'Could not find participants. Please make sure the BIDS data '
-            'structure is present and correct. Datasets can be validated online '
-            'using the BIDS Validator (http://bids-standard.github.io/bids-validator/).\n'
-            'If you are using Docker for Mac or Docker for Windows, you '
-            'may need to adjust your "File sharing" preferences.', bids_dir)
+            "Could not find participants. Please make sure the BIDS data "
+            "structure is present and correct. Datasets can be validated online "
+            "using the BIDS Validator (http://bids-standard.github.io/bids-validator/).\n"
+            "If you are using Docker for Mac or Docker for Windows, you "
+            'may need to adjust your "File sharing" preferences.',
+            bids_dir,
+        )
 
     # No --participant-label was set, return all
     if not participant_label:
@@ -138,20 +145,26 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
         participant_label = [participant_label]
 
     # Drop sub- prefixes
-    participant_label = [sub[4:] if sub.startswith('sub-') else sub for sub in participant_label]
+    participant_label = [
+        sub[4:] if sub.startswith("sub-") else sub for sub in participant_label
+    ]
     # Remove duplicates
     participant_label = sorted(set(participant_label))
     # Remove labels not found
     found_label = sorted(set(participant_label) & all_participants)
     if not found_label:
-        raise BIDSError('Could not find participants [{}]'.format(
-            ', '.join(participant_label)), bids_dir)
+        raise BIDSError(
+            "Could not find participants [{}]".format(", ".join(participant_label)),
+            bids_dir,
+        )
 
     # Warn if some IDs were not found
     notfound_label = sorted(set(participant_label) - all_participants)
     if notfound_label:
-        exc = BIDSError('Some participants were not found: {}'.format(
-            ', '.join(notfound_label)), bids_dir)
+        exc = BIDSError(
+            "Some participants were not found: {}".format(", ".join(notfound_label)),
+            bids_dir,
+        )
         if strict:
             raise exc
         warnings.warn(exc.msg, BIDSWarning)
@@ -159,8 +172,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
     return found_label
 
 
-def collect_data(bids_dir, participant_label, task=None, echo=None,
-                 bids_validate=True):
+def collect_data(bids_dir, participant_label, task=None, echo=None, bids_validate=True):
     """
     Uses pybids to retrieve the input data for a given participant
     >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185',
@@ -194,15 +206,22 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
         layout = BIDSLayout(str(bids_dir), validate=bids_validate)
 
     queries = {
-        'fmap': {'datatype': 'fmap'},
-        't2w': {'datatype': 'anat', 'suffix': 'T2w'},
-        't1w': {'datatype': 'anat', 'suffix': 'T1w'},
-        'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
+        "fmap": {"datatype": "fmap"},
+        "t2w": {"datatype": "anat", "suffix": "T2w"},
+        "t1w": {"datatype": "anat", "suffix": "T1w"},
+        "dwi": {"datatype": "dwi", "suffix": "dwi"},
     }
 
     subj_data = {
-        dtype: sorted(layout.get(return_type='file', subject=participant_label,
-                                 extensions=['nii', 'nii.gz'], **query))
-        for dtype, query in queries.items()}
+        dtype: sorted(
+            layout.get(
+                return_type="file",
+                subject=participant_label,
+                extensions=["nii", "nii.gz"],
+                **query
+            )
+        )
+        for dtype, query in queries.items()
+    }
 
     return subj_data, layout
