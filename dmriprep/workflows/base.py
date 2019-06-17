@@ -35,11 +35,16 @@ def init_dmriprep_wf(layout, subject_list, work_dir, output_dir):
 
 
 def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
-    from ..utils import collect_data
 
-    subject_data = collect_data(layout, subject_id)[0]
+    dwi_files = layout.get(
+        subject=subject_id,
+        datatype="dwi",
+        suffix="dwi",
+        extensions=[".nii", ".nii.gz"],
+        return_type="filename",
+    )
 
-    if not subject_data["dwi"]:
+    if not dwi_files:
         raise Exception(
             "No dwi images found for participant {}. "
             "All workflows require dwi images".format(subject_id)
@@ -47,14 +52,13 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
 
     subject_wf = pe.Workflow(name=name)
 
-    for dwi_file in subject_data['dwi']:
+    for dwi_file in dwi_files:
         entities = layout.parse_file_entities(dwi_file)
-        session_id = entities['session']
-        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file=dwi_file,
-                                             layout=layout)
-        datasink_wf = init_output_wf(subject=subject_id,
-                                    session=session_id,
-                                    output_folder=output_dir)
+        session_id = entities["session"]
+        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file=dwi_file, layout=layout)
+        datasink_wf = init_output_wf(
+            subject=subject_id, session=session_id, output_folder=output_dir
+        )
 
         dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(work_dir), subject_id)
         entities = layout.parse_file_entities(dwi_file)
@@ -68,7 +72,7 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
         inputspec.inputs.bval_file = layout.get_bval(dwi_file)
         inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
-        ds_inputspec = datasink_wf.get_node('inputnode')
+        ds_inputspec = datasink_wf.get_node("inputnode")
         ds_inputspec.inputs.subject = subject_id
         ds_inputspec.inputs.session = session_id
         ds_inputspec.inputs.output_folder = output_dir
@@ -78,11 +82,17 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
 
         full_wf.connect(
             [
-            (dwi_preproc_wf, datasink_wf, [('fsl_eddy.out_corrected', 'inputnode.out_file'),
-                                            ('fsl_eddy.out_rotated_bvecs', 'inputnode.out_bvec'),
-                                            ('getB0Mask.mask_file', 'inputnode.out_mask')])
+                (
+                    dwi_preproc_wf,
+                    datasink_wf,
+                    [
+                        ("fsl_eddy.out_corrected", "inputnode.out_file"),
+                        ("fsl_eddy.out_rotated_bvecs", "inputnode.out_bvec"),
+                        ("getB0Mask.mask_file", "inputnode.out_mask"),
+                    ],
+                )
             ]
-            )
+        )
         subject_wf.add_nodes([full_wf])
 
     return subject_wf
