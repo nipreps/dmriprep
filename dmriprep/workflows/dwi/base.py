@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from .fieldmap import init_fmap_wf
 
 
 def init_dwi_preproc_wf(dwi_file, layout):
@@ -22,6 +23,15 @@ def init_dwi_preproc_wf(dwi_file, layout):
         else:
             fmap_key = fmap["suffix"]
         fmap["metadata"] = layout.get_metadata(fmap[fmap_key])
+
+    if not fmaps:
+        raise Exception(
+            "No fieldmap images found for participant {}. "
+            "All workflows require fieldmap images".format(subject_id)
+        )
+
+    if fmaps[0]["suffix"] == "fieldmap":
+        fmap_wf = init_fmap_wf()
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -241,6 +251,17 @@ def init_dwi_preproc_wf(dwi_file, layout):
             (ecc, outputnode, [("out_corrected", "out_file")]),
             (b0mask_node, outputnode, [("mask_file", "out_mask")]),
             (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")]),
+            (
+                inputnode,
+                fmap_wf,
+                [
+                    ("fieldmap", "inputnode.fieldmap"),
+                    ("magnitude", "inputnode.magnitude"),
+                ],
+            ),
+            (bet_dwi0, fmap_wf, [("out_file", "inputnode.b0_stripped")]),
+            (fmap_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
+            (fmap_wf, eddy_quad, [(("outputnode.out_fmap", get_path), "field")]),
         ]
     )
 
