@@ -5,6 +5,7 @@ from copy import deepcopy
 
 from nipype.pipeline import engine as pe
 from .dwi import init_dwi_preproc_wf
+from .datasink import init_output_wf
 
 def init_dmriprep_wf(layout, subject_list, work_dir, output_dir):
     dmriprep_wf = pe.Workflow(name='dmriprep_wf')
@@ -43,11 +44,15 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
     subject_wf = pe.Workflow(name=name)
 
     for dwi_file in subject_data['dwi']:
-        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file=dwi_file,
-                                             layout=layout)
-        dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(work_dir), subject_id)
         entities = layout.parse_file_entities(dwi_file)
         session_id = entities['session']
+        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file=dwi_file,
+                                             layout=layout)
+        datasink_wf = init_output_wf(subject=subject_id,
+                                    session=session_id,
+                                    output_folder=output_dir)
+
+        dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(work_dir), subject_id)
 
         inputspec = dwi_preproc_wf.get_node('inputnode')
         inputspec.inputs.subject_id = subject_id
@@ -57,6 +62,21 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
         inputspec.inputs.bval_file = layout.get_bval(dwi_file)
         inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
-        subject_wf.add_nodes([dwi_preproc_wf])
+        ds_inputspec = datasink_wf.get_node('inputnode')
+        ds_inputspec.inputs.subject = subject_id
+        ds_inputspec.inputs.session = session_id
+        ds_inputspec.inputs.output_folder = output_dir
+
+        wf_name = "sub_" + subject_id + "_ses_" + session_id + "_preproc_wf"
+        full_wf = pe.Workflow(name=wf_name)
+
+        full_wf.connect(
+            [
+            (dwi_preproc_wf, datasink_wf, [('fsl_eddy.out_corrected', 'inputnode.out_file'),
+                                            ('fsl_eddy.out_rotated_bvecs', 'inputnode.out_bvec'),
+                                            ('getB0Mask.mask_file', 'inputnode.out_mask')])
+            ]
+            )
+        subject_wf.add_nodes([full_wf])
 
     return subject_wf

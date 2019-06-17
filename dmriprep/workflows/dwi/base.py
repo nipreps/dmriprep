@@ -43,13 +43,13 @@ def init_dwi_preproc_wf(dwi_file, layout):
 
     outputnode = pe.Node(
         niu.IdentityInterface(fields=["out_file", "out_mask", "out_bvec"]),
-        name="outputnode"
+        name="outputnode",
     )
 
     # name noise and out_file using fname_presuffix
     denoise = pe.Node(
         mrtrix3.DWIDenoise(noise="noise.nii.gz", out_file="denoised.nii.gz"),
-        name="denoise"
+        name="denoise",
     )
 
     # name unring using fname_presuffix
