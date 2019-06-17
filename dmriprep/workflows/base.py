@@ -4,8 +4,7 @@ import os
 from copy import deepcopy
 
 from nipype.pipeline import engine as pe
-from .dwi import init_dwi_preproc_wf
-from .datasink import init_output_wf
+from .dwi import init_dwi_preproc_wf, init_output_wf
 
 
 def init_dmriprep_wf(layout, subject_list, work_dir, output_dir):

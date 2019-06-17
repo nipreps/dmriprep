@@ -18,7 +18,6 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 from . import data
 from . import qc
-from . import run
 
 module_logger = logging.getLogger(__name__)
 
