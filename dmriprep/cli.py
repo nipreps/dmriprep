@@ -8,7 +8,6 @@ from bids import BIDSLayout
 
 import click
 
-from . import run
 from . import utils
 from .data import get_dataset
 from .workflows.base import init_dmriprep_wf
