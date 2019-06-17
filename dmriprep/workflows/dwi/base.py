@@ -159,7 +159,7 @@ def init_dwi_preproc_wf(dwi_file, layout):
     # dilate mask
     bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name="bet_dwi_pre")
 
-    #mrtrix3.MaskFilter
+    # mrtrix3.MaskFilter
 
     ecc = pe.Node(
         fsl.Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
@@ -230,8 +230,8 @@ def init_dwi_preproc_wf(dwi_file, layout):
                 eddy_quad,
                 [
                     (("out_corrected", get_path), "base_name"),
-                    (("out_corrected", get_qc_path), "output_dir")
-                ]
+                    (("out_corrected", get_qc_path), "output_dir"),
+                ],
             ),
             (inputnode, eddy_quad, [("bval_file", "bval_file")]),
             (ecc, eddy_quad, [("out_rotated_bvecs", "bvec_file")]),
@@ -240,7 +240,7 @@ def init_dwi_preproc_wf(dwi_file, layout):
             (acqp, eddy_quad, [("out_file", "param_file")]),
             (ecc, outputnode, [("out_corrected", "out_file")]),
             (b0mask_node, outputnode, [("mask_file", "out_mask")]),
-            (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")])
+            (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")]),
         ]
     )
 

@@ -20,11 +20,11 @@ from tqdm.auto import tqdm
 mod_logger = logging.getLogger(__name__)
 
 
-def get_dataset(output_dir, source='HBN', subject_id='sub-NDARBA507GCT'):
-    if source in ['HBN']:
+def get_dataset(output_dir, source="HBN", subject_id="sub-NDARBA507GCT"):
+    if source in ["HBN"]:
         get_hbn_data(output_dir, subject_id)
     else:
-        raise ValueError('Invalid dataset source')
+        raise ValueError("Invalid dataset source")
 
 
 def get_hbn_data(output_dir, subject_id):
@@ -47,11 +47,11 @@ def get_s3_client():
     from botocore.client import Config
 
     # Global s3 client to preserve anonymous config
-    s3_client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+    s3_client = boto3.client("s3", config=Config(signature_version=UNSIGNED))
     return s3_client
 
 
-def _get_matching_s3_keys(bucket, prefix='', suffix=''):
+def _get_matching_s3_keys(bucket, prefix="", suffix=""):
     """Generate all the matching keys in an S3 bucket.
 
     Parameters
@@ -71,12 +71,12 @@ def _get_matching_s3_keys(bucket, prefix='', suffix=''):
         S3 keys that match the prefix and suffix
     """
     s3 = get_s3_client()
-    kwargs = {'Bucket': bucket, "MaxKeys": 1000}
+    kwargs = {"Bucket": bucket, "MaxKeys": 1000}
 
     # If the prefix is a single string (not a tuple of strings), we can
     # do the filtering directly in the S3 API.
     if isinstance(prefix, str):
-        kwargs['Prefix'] = prefix
+        kwargs["Prefix"] = prefix
 
     while True:
         # The S3 API response is a large blob of metadata.
@@ -84,12 +84,12 @@ def _get_matching_s3_keys(bucket, prefix='', suffix=''):
         resp = s3.list_objects_v2(**kwargs)
 
         try:
-            contents = resp['Contents']
+            contents = resp["Contents"]
         except KeyError:
             return
 
         for obj in contents:
-            key = obj['Key']
+            key = obj["Key"]
             if key.startswith(prefix) and key.endswith(suffix):
                 yield key
 
@@ -97,7 +97,7 @@ def _get_matching_s3_keys(bucket, prefix='', suffix=''):
         # Pass the continuation token into the next response, until we
         # reach the final page (when this field is missing).
         try:
-            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+            kwargs["ContinuationToken"] = resp["NextContinuationToken"]
         except KeyError:
             break
 
@@ -129,7 +129,7 @@ def _download_from_s3(fname, bucket, key, overwrite=False):
         # Download the file
         s3.download_file(Bucket=bucket, Key=key, Filename=fname)
     except FileExistsError:
-        mod_logger.info(f'File {fname} already exists. Continuing...')
+        mod_logger.info(f"File {fname} already exists. Continuing...")
         pass
 
 
@@ -179,12 +179,12 @@ def _cumulative_paths(path_parts, add_ext=""):
     except IndexError:
         pass
 
-    return [''.join(path_parts[:i+1]) + add_ext
-            for i in range(len(path_parts))]
+    return ["".join(path_parts[: i + 1]) + add_ext for i in range(len(path_parts))]
 
 
 class Study:
     """A dMRI based study with a BIDS compliant directory structure"""
+
     def __init__(self, study_id, bucket, s3_prefix, subjects=None):
         """Initialize a Study instance
 
@@ -214,16 +214,18 @@ class Study:
         if not isinstance(s3_prefix, str):
             raise TypeError("s3_prefix must be a string.")
 
-        if not (subjects is None or
-                isinstance(subjects, int) or
-                isinstance(subjects, str) or
-                all(isinstance(s, str) for s in subjects)):
-            raise TypeError("subjects must be an int, string or a "
-                            "sequence of strings.")
+        if not (
+            subjects is None
+            or isinstance(subjects, int)
+            or isinstance(subjects, str)
+            or all(isinstance(s, str) for s in subjects)
+        ):
+            raise TypeError(
+                "subjects must be an int, string or a " "sequence of strings."
+            )
 
         if isinstance(subjects, int) and subjects < 1:
-            raise ValueError("If subjects is an int, it must be "
-                             "greater than 0.")
+            raise ValueError("If subjects is an int, it must be " "greater than 0.")
 
         self._study_id = study_id
         self._bucket = bucket
@@ -256,9 +258,7 @@ class Study:
                 f"{set(subjects) - set(self._all_subjects.keys())}"
             )
 
-        subs = [
-            delayed(self._get_subject)(s) for s in set(subjects)
-        ]
+        subs = [delayed(self._get_subject)(s) for s in set(subjects)]
 
         print("Retrieving subject S3 keys")
         with ProgressBar():
@@ -274,15 +274,13 @@ class Study:
                 if n_needed == 1:
                     subjects = [sorted(self._all_subjects.keys())[idx_lo]]
                 else:
-                    subjects = sorted(
-                        self._all_subjects.keys()
-                    )[idx_lo:idx_lo + n_needed]
+                    subjects = sorted(self._all_subjects.keys())[
+                        idx_lo : idx_lo + n_needed
+                    ]
 
                 idx_lo += n_needed
 
-                subs = [
-                    delayed(self._get_subject)(s) for s in set(subjects)
-                ]
+                subs = [delayed(self._get_subject)(s) for s in set(subjects)]
 
                 with ProgressBar():
                     subjects = list(compute(*subs, scheduler="threads"))
@@ -292,7 +290,6 @@ class Study:
             self._n_discarded = 0
         else:
             self._n_discarded = len([s for s in subjects if not s.valid])
-
 
     @property
     def study_id(self):
@@ -315,14 +312,16 @@ class Study:
         return self._subjects
 
     def __repr__(self):
-        return (f"{type(self).__name__}(study_id={self.study_id}, "
-                f"bucket={self.bucket}, s3_prefix={self.s3_prefix})")
+        return (
+            f"{type(self).__name__}(study_id={self.study_id}, "
+            f"bucket={self.bucket}, s3_prefix={self.s3_prefix})"
+        )
 
     def _get_subject(self, subject_id):
         """Return a Subject instance from a subject-ID"""
-        return Subject(subject_id=subject_id,
-                       site=self._all_subjects[subject_id],
-                       study=self)
+        return Subject(
+            subject_id=subject_id, site=self._all_subjects[subject_id], study=self
+        )
 
     def list_all_subjects(self):
         """Return a study-specific list of subjects.
@@ -354,8 +353,7 @@ class Study:
         """
         pass
 
-    def download(self, directory, include_site=False, overwrite=False,
-                 pbar=True):
+    def download(self, directory, include_site=False, overwrite=False, pbar=True):
         """Download files for each subject in the study
 
         Parameters
@@ -376,13 +374,16 @@ class Study:
         --------
         dmriprep.data.Subject.download()
         """
-        results = [delayed(sub.download)(
-            directory=directory,
-            include_site=include_site,
-            overwrite=overwrite,
-            pbar=pbar,
-            pbar_idx=idx,
-        ) for idx, sub in enumerate(self.subjects)]
+        results = [
+            delayed(sub.download)(
+                directory=directory,
+                include_site=include_site,
+                overwrite=overwrite,
+                pbar=pbar,
+                pbar_idx=idx,
+            )
+            for idx, sub in enumerate(self.subjects)
+        ]
 
         compute(*results, scheduler="threads")
 
@@ -391,8 +392,8 @@ class S3BidsStudy(Study):
     """
 
     """
-    def __init__(self, study_id, bucket, s3_prefix=None,
-                 subjects=None):
+
+    def __init__(self, study_id, bucket, s3_prefix=None, subjects=None):
         """
         Initialize a study which is organized as BIDS compliant S3 bucket, or a
         sub-path of this bucket.
@@ -415,18 +416,14 @@ class S3BidsStudy(Study):
         if s3_prefix is None:
             s3_prefix = ""
         super().__init__(
-            study_id=study_id,
-            bucket=bucket,
-            s3_prefix=s3_prefix,
-            subjects=subjects)
+            study_id=study_id, bucket=bucket, s3_prefix=s3_prefix, subjects=subjects
+        )
 
     def list_all_subjects(self):
         """
         Find the identifiers of all subjects
         """
         # XXX Ariel will figure this out.
-
-
 
 
 class HBN(Study):
@@ -436,6 +433,7 @@ class HBN(Study):
     --------
     dmriprep.data.Study
     """
+
     def __init__(self, subjects=None):
         """Initialize the HBN instance
 
@@ -450,7 +448,7 @@ class HBN(Study):
             study_id="HBN",
             bucket="fcp-indi",
             s3_prefix="data/Projects/HBN/MRI",
-            subjects=subjects
+            subjects=subjects,
         )
 
     def list_all_subjects(self):
@@ -463,32 +461,27 @@ class HBN(Study):
         dict
             dict with participant_id as keys and site_id as values
         """
-        def get_site_tsv_keys(site_id):
-            pre = 'data/Projects/HBN/MRI/'
-            raw = pre + f'{site_id}/participants.tsv'
-            deriv = pre + f'{site_id}/derivatives/participants.tsv'
-            return {'raw': raw, 'deriv': deriv}
 
-        sites = ['Site-CBIC', 'Site-RU', 'Site-SI']
+        def get_site_tsv_keys(site_id):
+            pre = "data/Projects/HBN/MRI/"
+            raw = pre + f"{site_id}/participants.tsv"
+            deriv = pre + f"{site_id}/derivatives/participants.tsv"
+            return {"raw": raw, "deriv": deriv}
+
+        sites = ["Site-CBIC", "Site-RU", "Site-SI"]
         tsv_keys = {site: get_site_tsv_keys(site) for site in sites}
 
         s3 = get_s3_client()
 
         def get_subs_from_tsv_key(s3_key):
-            response = s3.get_object(
-                Bucket=self.bucket,
-                Key=s3_key
-            )
+            response = s3.get_object(Bucket=self.bucket, Key=s3_key)
 
-            return set(pd.read_csv(
-                response.get('Body')
-            ).participant_id.values)
+            return set(pd.read_csv(response.get("Body")).participant_id.values)
 
         subjects = {}
         for site, s3_keys in tsv_keys.items():
-            site_subs = {k: get_subs_from_tsv_key(v)
-                         for k, v in s3_keys.items()}
-            subjects[site] = site_subs['raw'] & site_subs['deriv']
+            site_subs = {k: get_subs_from_tsv_key(v) for k, v in s3_keys.items()}
+            subjects[site] = site_subs["raw"] & site_subs["deriv"]
 
         all_subjects = {}
         for site, subs in subjects.items():
@@ -511,19 +504,15 @@ class HBN(Study):
             subject instance
         """
         if subject.site == "Site-CBIC":
-            t1w_keys = subject.s3_keys['t1w']
-            freesurfer_keys = subject.s3_keys['freesurfer']
+            t1w_keys = subject.s3_keys["t1w"]
+            freesurfer_keys = subject.s3_keys["freesurfer"]
             correct_dir = "T1w_VNavNorm"
 
-            subject._s3_keys['t1w'] = list(filter(
-                lambda x: correct_dir in x,
-                t1w_keys
-            ))
+            subject._s3_keys["t1w"] = list(filter(lambda x: correct_dir in x, t1w_keys))
 
-            subject._s3_keys['freesurfer'] = list(filter(
-                lambda x: correct_dir in x,
-                freesurfer_keys
-            ))
+            subject._s3_keys["freesurfer"] = list(
+                filter(lambda x: correct_dir in x, freesurfer_keys)
+            )
 
     def postprocess(self, subject):
         """Move the T1 file back into the freesurfer directory.
@@ -538,27 +527,27 @@ class HBN(Study):
             subject instance
         """
         for sess in subject.files.keys():
-            t1_file = subject.files[sess]['t1w'][0]
-            freesurfer_path = op.join(op.dirname(t1_file), 'freesurfer')
+            t1_file = subject.files[sess]["t1w"][0]
+            freesurfer_path = op.join(op.dirname(t1_file), "freesurfer")
 
-            convert_cmd = 'mri_convert {in_:s} {out_:s}'.format(
-                in_=t1_file, out_=op.join(freesurfer_path, 'mri', 'orig.mgz')
+            convert_cmd = "mri_convert {in_:s} {out_:s}".format(
+                in_=t1_file, out_=op.join(freesurfer_path, "mri", "orig.mgz")
             )
 
-            fnull = open(os.devnull, 'w')
-            subprocess.call(convert_cmd.split(),
-                            stdout=fnull,
-                            stderr=subprocess.STDOUT)
+            fnull = open(os.devnull, "w")
+            subprocess.call(convert_cmd.split(), stdout=fnull, stderr=subprocess.STDOUT)
 
             # if the site is CBIC, then the freesurfer directory has an additional level.
             # move that level up by 1 (e.g. removing the T1w_VNavNorm folder
-            if subject.site == 'Site-CBIC':
-                newpath = freesurfer_path.replace('T1w_VNavNorm/', '')
-                move_cmd = 'mv {oldpath} {newpath}'.format(oldpath=freesurfer_path, newpath=newpath)
-                fnull1 = open(os.devnull, 'w')
-                subprocess.call(move_cmd.split(),
-                                stdout=fnull1,
-                                stderr=subprocess.STDOUT)
+            if subject.site == "Site-CBIC":
+                newpath = freesurfer_path.replace("T1w_VNavNorm/", "")
+                move_cmd = "mv {oldpath} {newpath}".format(
+                    oldpath=freesurfer_path, newpath=newpath
+                )
+                fnull1 = open(os.devnull, "w")
+                subprocess.call(
+                    move_cmd.split(), stdout=fnull1, stderr=subprocess.STDOUT
+                )
 
             # now check that the AP/PA files are named correctly
             # eg it should look like "sub-{id}_dir-{dir}_acq-dwi_epi.nii.gz
@@ -568,6 +557,7 @@ class HBN(Study):
 
 class Subject:
     """A single dMRI study subject"""
+
     def __init__(self, subject_id, study, site=None):
         """Initialize a Subject instance
 
@@ -652,9 +642,11 @@ class Subject:
         return self._files
 
     def __repr__(self):
-        return (f"{type(self).__name__}(subject_id={self.subject_id}, "
-                f"study_id={self.study.study_id}, site={self.site}, "
-                f"valid={self.valid})")
+        return (
+            f"{type(self).__name__}(subject_id={self.subject_id}, "
+            f"study_id={self.study.study_id}, site={self.site}, "
+            f"valid={self.valid})"
+        )
 
     def _list_s3_keys(self):
         """Get all required S3 keys for this subject
@@ -665,20 +657,15 @@ class Subject:
             S3 keys organized into "raw" and "deriv" lists
         """
         prefixes = {
-            'raw': '/'.join([self.study.s3_prefix,
-                             self.site,
-                             self.subject_id]),
-            'deriv': '/'.join([self.study.s3_prefix,
-                               self.site,
-                               'derivatives',
-                               self.subject_id]),
+            "raw": "/".join([self.study.s3_prefix, self.site, self.subject_id]),
+            "deriv": "/".join(
+                [self.study.s3_prefix, self.site, "derivatives", self.subject_id]
+            ),
         }
 
         s3_keys = {
-            rd: list(_get_matching_s3_keys(
-                bucket=self.study.bucket,
-                prefix=prefix,
-            )) for rd, prefix in prefixes.items()
+            rd: list(_get_matching_s3_keys(bucket=self.study.bucket, prefix=prefix))
+            for rd, prefix in prefixes.items()
         }
 
         return s3_keys
@@ -691,29 +678,26 @@ class Subject:
         """
         # Retrieve and unpack the s3_keys
         s3_keys = self._list_s3_keys()
-        dwi_keys = [k for k in s3_keys['raw'] if '/dwi/' in k]
-        fmap_keys = [k for k in s3_keys['raw'] if '/fmap/' in k]
-        deriv_keys = s3_keys['deriv']
-        all_json_keys = [k for k in s3_keys['raw'] if k.endswith('.json')]
+        dwi_keys = [k for k in s3_keys["raw"] if "/dwi/" in k]
+        fmap_keys = [k for k in s3_keys["raw"] if "/fmap/" in k]
+        deriv_keys = s3_keys["deriv"]
+        all_json_keys = [k for k in s3_keys["raw"] if k.endswith(".json")]
 
         # Get the dwi files, bvec files, and bval files
-        dwi = [f for f in dwi_keys
-               if f.endswith('.nii.gz') and 'TRACEW' not in f]
-        bvec = [f for f in dwi_keys if f.endswith('.bvec')]
-        bval = [f for f in dwi_keys if f.endswith('.bval')]
-        epi_nii = [f for f in fmap_keys if f.endswith('epi.nii.gz')
-                   and 'fMRI' not in f]
-        epi_json = [f for f in fmap_keys if f.endswith('epi.json')
-                    and 'fMRI' not in f]
-        t1w = [f for f in deriv_keys if f.endswith('/T1w.nii.gz')]
-        freesurfer = [f for f in deriv_keys
-                      if '/freesurfer/' in f]
+        dwi = [f for f in dwi_keys if f.endswith(".nii.gz") and "TRACEW" not in f]
+        bvec = [f for f in dwi_keys if f.endswith(".bvec")]
+        bval = [f for f in dwi_keys if f.endswith(".bval")]
+        epi_nii = [f for f in fmap_keys if f.endswith("epi.nii.gz") and "fMRI" not in f]
+        epi_json = [f for f in fmap_keys if f.endswith("epi.json") and "fMRI" not in f]
+        t1w = [f for f in deriv_keys if f.endswith("/T1w.nii.gz")]
+        freesurfer = [f for f in deriv_keys if "/freesurfer/" in f]
 
         json_keys = []
         for file_list in [dwi, bvec, bval, epi_nii, t1w]:
             for f in file_list:
-                potential_keys = _cumulative_paths(_recursive_split_ext(f),
-                                                   add_ext="json")
+                potential_keys = _cumulative_paths(
+                    _recursive_split_ext(f), add_ext="json"
+                )
                 json_keys += [k for k in potential_keys if k in all_json_keys]
 
         # Use truthiness of non-empty lists to verify that all
@@ -736,8 +720,9 @@ class Subject:
             self._valid = False
             self._s3_keys = None
 
-    def download(self, directory, include_site=False,
-                 overwrite=False, pbar=True, pbar_idx=0):
+    def download(
+        self, directory, include_site=False, overwrite=False, pbar=True, pbar_idx=0
+    ):
         """Download files from S3
 
         Parameters
@@ -768,9 +753,11 @@ class Subject:
             directory = op.join(directory, self.site)
 
         files = {
-            k: [op.abspath(op.join(
-                directory, p.split('/' + self.site + '/')[-1]
-            )) for p in v] for k, v in self.s3_keys.items()
+            k: [
+                op.abspath(op.join(directory, p.split("/" + self.site + "/")[-1]))
+                for p in v
+            ]
+            for k, v in self.s3_keys.items()
         }
 
         # Generate list of (key, file) tuples
@@ -812,15 +799,16 @@ class Subject:
 
         # Now iterate through the list and download each item
         if pbar:
-            progress = tqdm(desc=f"Download {self.subject_id}",
-                            position=pbar_idx,
-                            total=len(key_file_pairs) + 1)
+            progress = tqdm(
+                desc=f"Download {self.subject_id}",
+                position=pbar_idx,
+                total=len(key_file_pairs) + 1,
+            )
 
         for (key, fname) in key_file_pairs:
-            _download_from_s3(fname=fname,
-                              bucket=self.study.bucket,
-                              key=key,
-                              overwrite=overwrite)
+            _download_from_s3(
+                fname=fname, bucket=self.study.bucket, key=key, overwrite=overwrite
+            )
 
             if pbar:
                 progress.update()
@@ -834,12 +822,15 @@ class Subject:
             progress.update()
             progress.close()
 
-    def _determine_directions(self,
-                              input_files,
-                              input_type='s3',
-                              metadata_source='json',
-                              json_key='PhaseEncodingDirection',
-                              ap_value='j-', pa_value='j'):
+    def _determine_directions(
+        self,
+        input_files,
+        input_type="s3",
+        metadata_source="json",
+        json_key="PhaseEncodingDirection",
+        ap_value="j-",
+        pa_value="j",
+    ):
         """Determine direction ['AP', 'PA'] of single subject's EPI nifty files
 
         Use either metadata in associated json file or filename
@@ -872,42 +863,39 @@ class Subject:
             self.s3_keys except that in the "epi_nii" and "epi_json" keys
             have been replaced with "epi_ap" and "epi_pa."
         """
-        if metadata_source not in ['filename', 'json']:
+        if metadata_source not in ["filename", "json"]:
             raise ValueError('metadata_source must be "filename" or "json".')
 
-        if input_type not in ['s3', 'local']:
+        if input_type not in ["s3", "local"]:
             raise ValueError('input_type must be "local" or "s3".')
 
-        epi_files = input_files['epi_nii']
-        json_files = input_files['epi_json']
-        if metadata_source == 'filename':
-            ap_files = [f for f in epi_files if 'dir-AP' in f]
-            pa_files = [f for f in epi_files if 'dir-PA' in f]
+        epi_files = input_files["epi_nii"]
+        json_files = input_files["epi_json"]
+        if metadata_source == "filename":
+            ap_files = [f for f in epi_files if "dir-AP" in f]
+            pa_files = [f for f in epi_files if "dir-PA" in f]
         else:
             # Confirm that each nifty file has a corresponding json file.
-            required_json = set([f.replace('.nii.gz', '.json') for f in epi_files])
+            required_json = set([f.replace(".nii.gz", ".json") for f in epi_files])
             if set(json_files) != required_json:
                 self._valid = False
                 mod_logger.warning(
-                    f'Subject {self.subject_id} does not have json files '
-                    f'corresponding to its fmap NIFTI files. Failed to '
-                    f'find the following expected files: '
-                    f'{required_json - set(json_files)}. Subject deemed '
-                    f'invalid.'
+                    f"Subject {self.subject_id} does not have json files "
+                    f"corresponding to its fmap NIFTI files. Failed to "
+                    f"find the following expected files: "
+                    f"{required_json - set(json_files)}. Subject deemed "
+                    f"invalid."
                 )
                 return input_files
 
             def get_json(json_file):
-                if input_type == 'local':
-                    with open(json_file, 'r') as fp:
+                if input_type == "local":
+                    with open(json_file, "r") as fp:
                         meta = json.load(fp)
                 else:
                     s3 = get_s3_client()
-                    response = s3.get_object(
-                        Bucket=self.study.bucket,
-                        Key=json_file,
-                    )
-                    meta = json.loads(response.get('Body').read())
+                    response = s3.get_object(Bucket=self.study.bucket, Key=json_file)
+                    meta = json.loads(response.get("Body").read())
 
                 return meta
 
@@ -918,76 +906,76 @@ class Subject:
 
                 direction = metadata.get(json_key)
                 if direction == ap_value:
-                    if 'dir-PA' in jfile:
+                    if "dir-PA" in jfile:
                         mod_logger.warning(
-                            'The key {key:s}={val:s} does not match the direction '
-                            'suggested by the filename {fn:s}'.format(
+                            "The key {key:s}={val:s} does not match the direction "
+                            "suggested by the filename {fn:s}".format(
                                 key=json_key, val=direction, fn=jfile
                             )
                         )
-                    ap_files.append(jfile.replace('.json', '.nii.gz'))
+                    ap_files.append(jfile.replace(".json", ".nii.gz"))
                 elif direction == pa_value:
-                    if 'dir-AP' in jfile:
+                    if "dir-AP" in jfile:
                         mod_logger.warning(
-                            'The key {key:s}={val:s} does not match the direction '
-                            'suggested by the filename {fn:s}'.format(
+                            "The key {key:s}={val:s} does not match the direction "
+                            "suggested by the filename {fn:s}".format(
                                 key=json_key, val=direction, fn=jfile
                             )
                         )
-                    pa_files.append(jfile.replace('.json', '.nii.gz'))
+                    pa_files.append(jfile.replace(".json", ".nii.gz"))
                 elif direction is None:
                     mod_logger.warning(
-                        'The key {key:s} does not exist in file {jfile:s}. '
-                        'Falling back on filename to determine directionality.'
-                        '\n\n'.format(key=json_key, jfile=jfile)
+                        "The key {key:s} does not exist in file {jfile:s}. "
+                        "Falling back on filename to determine directionality."
+                        "\n\n".format(key=json_key, jfile=jfile)
                     )
-                    if 'dir-AP' in jfile:
-                        ap_files.append(jfile.replace('.json', '.nii.gz'))
-                    elif 'dir-PA' in jfile:
-                        pa_files.append(jfile.replace('.json', '.nii.gz'))
+                    if "dir-AP" in jfile:
+                        ap_files.append(jfile.replace(".json", ".nii.gz"))
+                    elif "dir-PA" in jfile:
+                        pa_files.append(jfile.replace(".json", ".nii.gz"))
                     else:
                         self._valid = False
                         mod_logger.warning(
-                            f'Subject {self.subject_id} lacks the expected '
-                            f'{json_key} key in file {jfile} and the '
-                            f'directionality could not be inferred from the '
-                            f'file name. Setting subject validity to False.'
+                            f"Subject {self.subject_id} lacks the expected "
+                            f"{json_key} key in file {jfile} and the "
+                            f"directionality could not be inferred from the "
+                            f"file name. Setting subject validity to False."
                         )
                         return input_files
                 else:
                     mod_logger.warning(
-                        'The metadata in file {jfile:s} does not match the dir-PA '
-                        'or dir-AP values that you provided. {key:s} = {val:s}. '
-                        'Falling back on filename to determine directionality.\n\n'
-                        ''.format(jfile=jfile, key=json_key, val=direction)
+                        "The metadata in file {jfile:s} does not match the dir-PA "
+                        "or dir-AP values that you provided. {key:s} = {val:s}. "
+                        "Falling back on filename to determine directionality.\n\n"
+                        "".format(jfile=jfile, key=json_key, val=direction)
                     )
-                    if 'dir-AP' in jfile:
-                        ap_files.append(jfile.replace('.json', '.nii.gz'))
-                    elif 'dir-PA' in jfile:
-                        pa_files.append(jfile.replace('.json', '.nii.gz'))
+                    if "dir-AP" in jfile:
+                        ap_files.append(jfile.replace(".json", ".nii.gz"))
+                    elif "dir-PA" in jfile:
+                        pa_files.append(jfile.replace(".json", ".nii.gz"))
                     else:
                         self._valid = False
                         mod_logger.warning(
-                            'The metadata for key {key:s} in file {jfile:s} does '
-                            'not match the dir-PA or dir-AP values that you '
-                            'provided. {key:s} = {val:s}. And the directionality '
-                            'could not be inferred from the file name.'.format(
-                                key=json_key,
-                                jfile=jfile,
-                                val=direction,
-                            ))
+                            "The metadata for key {key:s} in file {jfile:s} does "
+                            "not match the dir-PA or dir-AP values that you "
+                            "provided. {key:s} = {val:s}. And the directionality "
+                            "could not be inferred from the file name.".format(
+                                key=json_key, jfile=jfile, val=direction
+                            )
+                        )
                         return input_files
 
         files = copy.deepcopy(input_files)
-        del files['epi_nii']
-        del files['epi_json']
-        files['epi_ap'] = ap_files
-        files['epi_pa'] = pa_files
+        del files["epi_nii"]
+        del files["epi_json"]
+        files["epi_ap"] = ap_files
+        files["epi_pa"] = pa_files
 
         return files
 
-    def _separate_sessions(self, input_files, multiples_policy='sessions',
-                           assign_empty_sessions=True):
+    def _separate_sessions(
+        self, input_files, multiples_policy="sessions", assign_empty_sessions=True
+    ):
         """Separate input file register into different sessions
 
         Parameters
@@ -1010,22 +998,23 @@ class Subject:
         dict of dicts
             Dict of Dicts of file names
         """
-        if multiples_policy not in ['sessions', 'concatenate']:
-            raise ValueError('`multiples_policy` must be either "sessions" or '
-                             '"concatenate"')
+        if multiples_policy not in ["sessions", "concatenate"]:
+            raise ValueError(
+                '`multiples_policy` must be either "sessions" or ' '"concatenate"'
+            )
 
         # Take only the first of the T1W nifty files
-        if len(input_files['t1w']) > 1:
+        if len(input_files["t1w"]) > 1:
             mod_logger.warning(
                 f"Found more than one T1W file for subject {self.subject_id} "
                 f"at site {self.site}. Discarding the others.\n\n"
             )
 
-        t1w = input_files['t1w']
+        t1w = input_files["t1w"]
 
         # Take only the first freesurfer directory
         freesurfer_dirs = {
-            f.split('/freesurfer/')[0] for f in input_files['freesurfer']
+            f.split("/freesurfer/")[0] for f in input_files["freesurfer"]
         }
 
         if len(freesurfer_dirs) > 1:
@@ -1036,25 +1025,24 @@ class Subject:
             )
 
         freesurfer_dir = freesurfer_dirs.pop()
-        freesurfer = [f for f in input_files['freesurfer']
-                      if f.startswith(freesurfer_dir)]
+        freesurfer = [
+            f for f in input_files["freesurfer"] if f.startswith(freesurfer_dir)
+        ]
 
         # Organize the files by session ID
-        def get_sess_id(filename, fallback='null'):
+        def get_sess_id(filename, fallback="null"):
             # Retrieve the session ID from a filename
-            match = re.search('/ses-[0-9a-zA-Z]*/', filename)
+            match = re.search("/ses-[0-9a-zA-Z]*/", filename)
             if match is not None:
-                return match.group().strip('/')
+                return match.group().strip("/")
             else:
                 return fallback
 
-        ftypes = ['dwi', 'bvec', 'bval', 'epi_ap', 'epi_pa']
+        ftypes = ["dwi", "bvec", "bval", "epi_ap", "epi_pa"]
 
-        sess_ids = {ft: {get_sess_id(fn) for fn in input_files[ft]}
-                    for ft in ftypes}
+        sess_ids = {ft: {get_sess_id(fn) for fn in input_files[ft]} for ft in ftypes}
 
-        if not all([s == list(sess_ids.values())[0]
-                    for s in sess_ids.values()]):
+        if not all([s == list(sess_ids.values())[0] for s in sess_ids.values()]):
             mod_logger.warning(
                 "Session numbers are inconsistent for subject {sub:s} at site "
                 "{site:s}. Ses-IDs: {sess_ids!s}.\n"
@@ -1063,8 +1051,9 @@ class Subject:
                     site=self.site,
                     sess_ids=sess_ids,
                     files={
-                        k: (v) for k, v in input_files.items()
-                        if k in ['dwi', 'bvec', 'bval', 'epi_ap', 'epi_pa']
+                        k: (v)
+                        for k, v in input_files.items()
+                        if k in ["dwi", "bvec", "bval", "epi_ap", "epi_pa"]
                     },
                 )
             )
@@ -1077,9 +1066,7 @@ class Subject:
         # Collect files by session ID and then file type
         files_by_session = {
             sess: {
-                ft: [
-                    f for f in input_files[ft] if get_sess_id(f) == sess
-                ]
+                ft: [f for f in input_files[ft] if get_sess_id(f) == sess]
                 for ft in ftypes
             }
             for sess in sess_ids
@@ -1090,8 +1077,11 @@ class Subject:
         # Loop over each session ID
         for session, files in files_by_session.items():
             # Confirm that the subject has an equal number of each type of file
-            n_files = {k: len(v) for k, v in files.items()
-                       if k in ['dwi', 'bvec', 'bval', 'epi_ap', 'epi_pa']}
+            n_files = {
+                k: len(v)
+                for k, v in files.items()
+                if k in ["dwi", "bvec", "bval", "epi_ap", "epi_pa"]
+            }
 
             if len(set(n_files.values())) != 1:
                 mod_logger.warning(
@@ -1102,32 +1092,34 @@ class Subject:
             elif len(set(n_files.values())) == 1:
                 # There is only one set of files in this session.
                 # Append to output.
-                if session == 'null':
-                    output_session = 'ses-01' if assign_empty_sessions else None
+                if session == "null":
+                    output_session = "ses-01" if assign_empty_sessions else None
                 else:
                     output_session = session
 
                 output_files[output_session] = dict(
-                    dwi=input_files['dwi'],
-                    bvec=input_files['bvec'],
-                    bval=input_files['bval'],
-                    epi_ap=input_files['epi_ap'],
-                    epi_pa=input_files['epi_pa'],
-                    json=input_files['json'],
+                    dwi=input_files["dwi"],
+                    bvec=input_files["bvec"],
+                    bval=input_files["bval"],
+                    epi_ap=input_files["epi_ap"],
+                    epi_pa=input_files["epi_pa"],
+                    json=input_files["json"],
                     t1w=t1w,
                     freesurfer=freesurfer,
                 )
             else:
                 # There are multiple copies of files for this one session ID.
-                if multiples_policy == 'concatenate':
+                if multiples_policy == "concatenate":
                     # The multiple copies represent one session and should be
                     # concatenated
-                    raise NotImplementedError("Concatenation of multiples not "
-                                              "yet implemented.")
+                    raise NotImplementedError(
+                        "Concatenation of multiples not " "yet implemented."
+                    )
                 else:
                     # The multiple copies represent multiple sessions and
                     # should be further subdivided into sessions
-                    raise NotImplementedError("Session subdivision not yet "
-                                              "implemented.")
+                    raise NotImplementedError(
+                        "Session subdivision not yet " "implemented."
+                    )
 
         return output_files
