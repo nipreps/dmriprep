@@ -32,7 +32,7 @@ Fieldmap estimation and unwarping workflows
     :show-inheritance:
 """
 
-from .base import init_fmap_wf
+from .fmap import init_fmap_wf
 
 # from .base import init_sdc_wf
 # from .unwarp import init_sdc_unwarp_wf, init_fmap_unwarp_report_wf

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from .fieldmap import init_fmap_wf
+from ..fieldmap import init_fmap_wf
 
 
 def init_dwi_preproc_wf(dwi_file, layout):
