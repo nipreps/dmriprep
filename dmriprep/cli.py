@@ -21,11 +21,11 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 @click.command()
 @click.option(
     "--participant-label",
-    help="The label(s) of the participant(s) that should be"
-    "analyzed. The label corresponds to"
-    "sub-<participant_label> from the BIDS spec (so it does"
-    "not include 'sub-'). If this parameter is not provided"
-    "all subjects will be analyzed. Multiple participants"
+    help="The label(s) of the participant(s) that should be "
+    "analyzed. The label corresponds to "
+    "sub-<participant_label> from the BIDS spec (so it does "
+    "not include 'sub-'). If this parameter is not provided "
+    "all subjects will be analyzed. Multiple participants "
     "can be specified with a space separated list.",
     default=None,
 )

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from ..fieldmap import init_fmap_wf
+from ..fieldmap.fmap import init_fmap_wf
 
 
 def init_dwi_preproc_wf(subject_id, dwi_file, layout):
@@ -43,6 +43,8 @@ def init_dwi_preproc_wf(subject_id, dwi_file, layout):
                 "metadata",
                 "bvec_file",
                 "bval_file",
+                "fieldmap",
+                "magnitude"
                 "out_dir",
                 "eddy_niter",
                 "slice_outlier_threshold",
