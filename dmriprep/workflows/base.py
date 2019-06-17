@@ -54,14 +54,14 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
     for dwi_file in dwi_files:
         entities = layout.parse_file_entities(dwi_file)
         session_id = entities["session"]
-        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file=dwi_file, layout=layout)
+        dwi_preproc_wf = init_dwi_preproc_wf(
+            subject_id=subject_id, dwi_file=dwi_file, layout=layout
+        )
         datasink_wf = init_output_wf(
-            subject=subject_id, session=session_id, output_folder=output_dir
+            subject_id=subject_id, session_id=session_id, output_folder=output_dir
         )
 
         dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(work_dir), subject_id)
-        entities = layout.parse_file_entities(dwi_file)
-        session_id = entities["session"]
 
         inputspec = dwi_preproc_wf.get_node("inputnode")
         inputspec.inputs.subject_id = subject_id
@@ -72,8 +72,8 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
         inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
         ds_inputspec = datasink_wf.get_node("inputnode")
-        ds_inputspec.inputs.subject = subject_id
-        ds_inputspec.inputs.session = session_id
+        ds_inputspec.inputs.subject_id = subject_id
+        ds_inputspec.inputs.session_id = session_id
         ds_inputspec.inputs.output_folder = output_dir
 
         wf_name = "sub_" + subject_id + "_ses_" + session_id + "_preproc_wf"

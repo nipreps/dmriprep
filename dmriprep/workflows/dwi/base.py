@@ -2,7 +2,7 @@
 from ..fieldmap import init_fmap_wf
 
 
-def init_dwi_preproc_wf(dwi_file, layout):
+def init_dwi_preproc_wf(subject_id, dwi_file, layout):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import (
         freesurfer as fs,
