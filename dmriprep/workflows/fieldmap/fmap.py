@@ -4,14 +4,10 @@
 def init_fmap_wf():
     from nipype.pipeline import engine as pe
     from nipype.interfaces import fsl, utility as niu
-    from nipype import logging
 
-    fmap_wf = pe.Workflow(name="fmap_prep_wf")
+    wf = pe.Workflow(name="fmap_prep_wf")
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["fieldmap", "magnitude", "b0_stripped"]),
-        name="inputnode",
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=["fieldmap", "magnitude", "b0_stripped"]), name="inputnode")
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap"]), name="outputnode")
 
@@ -23,7 +19,7 @@ def init_fmap_wf():
 
     fmap_flirt = pe.Node(fsl.FLIRT(apply_xfm=True), name="fmapFlirt")
 
-    fmap_wf.connect(
+    wf.connect(
         [
             (inputnode, rad_to_hz, [("fieldmap", "in_file")]),
             (inputnode, mag_flirt, [("magnitude", "in_file")]),
@@ -35,4 +31,4 @@ def init_fmap_wf():
         ]
     )
 
-    return fmap_wf
+    return wf

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-from ..fieldmap.fmap import init_fmap_wf
 
 
-def init_dwi_preproc_wf(subject_id, dwi_file, layout):
+def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import (
         freesurfer as fs,
@@ -12,26 +11,21 @@ def init_dwi_preproc_wf(subject_id, dwi_file, layout):
         io as nio,
         utility as niu,
     )
-    from nipype import logging
+
+    from ..fieldmap.base import init_sdc_prep_wf
 
     fmaps = []
     fmaps = layout.get_fieldmap(dwi_file, return_list=True)
 
     for fmap in fmaps:
-        if fmap["suffix"] == "phase":
-            fmap_key = "phase1"
-        else:
-            fmap_key = fmap["suffix"]
-        fmap["metadata"] = layout.get_metadata(fmap[fmap_key])
+        # if fmap["suffix"] == "phase":
+        #     fmap_key = "phase1"
+        # else:
+        #     fmap_key = fmap["suffix"]
+        # fmap["metadata"] = layout.get_metadata(fmap[fmap_key])
+        fmap["metadata"] = layout.get_metadata(fmap["suffix"])
 
-    if not fmaps:
-        raise Exception(
-            "No fieldmap images found for participant {}. "
-            "All workflows require fieldmap images".format(subject_id)
-        )
-
-    if fmaps[0]["suffix"] == "fieldmap":
-        fmap_wf = init_fmap_wf()
+    sdc_wf = init_sdc_prep_wf(fmaps, metadata)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -43,8 +37,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, layout):
                 "metadata",
                 "bvec_file",
                 "bval_file",
-                "fieldmap",
-                "magnitude"
                 "out_dir",
                 "eddy_niter",
                 "slice_outlier_threshold",
@@ -253,17 +245,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, layout):
             (ecc, outputnode, [("out_corrected", "out_file")]),
             (b0mask_node, outputnode, [("mask_file", "out_mask")]),
             (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")]),
-            (
-                inputnode,
-                fmap_wf,
-                [
-                    ("fieldmap", "inputnode.fieldmap"),
-                    ("magnitude", "inputnode.magnitude"),
-                ],
-            ),
-            (bet_dwi0, fmap_wf, [("out_file", "inputnode.b0_stripped")]),
-            (fmap_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
-            (fmap_wf, eddy_quad, [(("outputnode.out_fmap", get_path), "field")]),
+            (bet_dwi0, sdc_wf, [("out_file", "inputnode.b0_stripped")]),
+            (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
+            (sdc_wf, eddy_quad, [(("outputnode.out_fmap", get_path), "field")]),
         ]
     )
 
