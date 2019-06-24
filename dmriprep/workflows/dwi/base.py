@@ -20,6 +20,12 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     fmaps = []
     fmaps = layout.get_fieldmap(dwi_file, return_list=True)
 
+    if not fmaps:
+        raise Exception(
+            "No fieldmaps found for participant {}. "
+            "All workflows require fieldmaps".format(subject_id)
+        )
+
     for fmap in fmaps:
         # if fmap["suffix"] == "phase":
         #     fmap_key = "phase1"
@@ -53,17 +59,25 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         name="outputnode",
     )
 
-    denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
-    denoise.inputs.noise = fname_presuffix(
-        dwi_file, suffix="_noise", newpath=os.path.abspath("."), use_ext=True
-    )
-    denoise.inputs.out_file = fname_presuffix(
-        dwi_file, suffix="_denoised", newpath=os.path.abspath("."), use_ext=True
+    denoise = pe.Node(
+        mrtrix3.DWIDenoise(
+            noise=fname_presuffix(
+                dwi_file, suffix="_noise", newpath=os.path.abspath("."), use_ext=True
+            ),
+            out_file=fname_presuffix(
+                dwi_file, suffix="_denoised", newpath=os.path.abspath("."), use_ext=True
+            ),
+        ),
+        name="denoise",
     )
 
-    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
-    unring.inputs.out_file = fname_presuffix(
-        dwi_file, suffix="_unringed", newpath=os.path.abspath("."), use_ext=True
+    unring = pe.Node(
+        mrtrix3.MRDeGibbs(
+            out_file=fname_presuffix(
+                dwi_file, suffix="_unringed", newpath=os.path.abspath("."), use_ext=True
+            )
+        ),
+        name="unring",
     )
 
     def gen_index(in_file):
