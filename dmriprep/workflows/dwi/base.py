@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+
 
 def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     from nipype.pipeline import engine as pe
@@ -11,6 +13,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         io as nio,
         utility as niu,
     )
+    from nipype.utils.filemanip import fname_presuffix
 
     from ..fieldmap.base import init_sdc_prep_wf
 
@@ -50,14 +53,18 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         name="outputnode",
     )
 
-    # name noise and out_file using fname_presuffix
-    denoise = pe.Node(
-        mrtrix3.DWIDenoise(noise="noise.nii.gz", out_file="denoised.nii.gz"),
-        name="denoise",
+    denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
+    denoise.inputs.noise = fname_presuffix(
+        dwi_file, suffix="_noise", newpath=os.path.abspath("."), use_ext=True
+    )
+    denoise.inputs.out_file = fname_presuffix(
+        dwi_file, suffix="_denoised", newpath=os.path.abspath("."), use_ext=True
     )
 
-    # name unring using fname_presuffix
-    unring = pe.Node(mrtrix3.MRDeGibbs(out_file="unringed.nii.gz"), name="unring")
+    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
+    unring.inputs.out_file = fname_presuffix(
+        dwi_file, suffix="_unringed", newpath=os.path.abspath("."), use_ext=True
+    )
 
     def gen_index(in_file):
         import os.path as op
