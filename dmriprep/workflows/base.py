@@ -76,6 +76,7 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
         ds_inputspec.inputs.subject_id = subject_id
         ds_inputspec.inputs.session_id = session_id
         ds_inputspec.inputs.output_folder = output_dir
+        ds_inputspec.inputs.metadata = metadata
 
         wf_name = "sub_" + subject_id + "_ses_" + session_id + "_preproc_wf"
         full_wf = pe.Workflow(name=wf_name)

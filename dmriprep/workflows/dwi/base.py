@@ -34,7 +34,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         # fmap["metadata"] = layout.get_metadata(fmap[fmap_key])
         fmap["metadata"] = layout.get_metadata(fmap["suffix"])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, metadata)
+    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
