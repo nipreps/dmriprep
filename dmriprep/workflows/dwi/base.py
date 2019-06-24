@@ -247,7 +247,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
             (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")]),
             (bet_dwi0, sdc_wf, [("out_file", "inputnode.b0_stripped")]),
             (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
-            (sdc_wf, eddy_quad, [(("outputnode.out_fmap", get_path), "field")]),
+            (sdc_wf, eddy_quad, [("outputnode.out_fmap", "field")]),
         ]
     )
 
