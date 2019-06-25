@@ -3,7 +3,7 @@
 FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 
-def init_sdc_prep_wf(fmaps, dwi_meta, layout, omp_nthreads=1, fmap_bspline=False):
+def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -48,8 +48,8 @@ def init_sdc_prep_wf(fmaps, dwi_meta, layout, omp_nthreads=1, fmap_bspline=False
     if fmap['suffix'] in ('phasediff', 'phase'):
         from .phdiff import init_phdiff_wf
         fmap_estimator_wf = init_phdiff_wf(omp_nthreads=omp_nthreads,
-                                            phasetype=fmap['suffix'],
-                                            layout=layout)
+                                            phasetype=fmap['suffix'])
+        fmap_estimator_wf.inputs.inputnode.layout = layout
         if fmap['suffix'] == 'phasediff':
             fmap_estimator_wf.inputs.inputnode.phasediff = fmap['phasediff']
         elif fmap['suffix'] == 'phase':

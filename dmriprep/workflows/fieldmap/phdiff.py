@@ -16,6 +16,12 @@ from nipype.interfaces import ants, fsl, utility as niu
 from nipype.pipeline import engine as pe
 from nipype.workflows.dmri.fsl.utils import siemens2rads, demean_image, \
     cleanup_edge_pipeline
+from nipype.interfaces.base import (
+    traits, isdefined, Undefined,
+    TraitedSpec, BaseInterfaceInputSpec, DynamicTraitedSpec,
+    File, Directory, InputMultiObject, OutputMultiObject, Str,
+    SimpleInterface, InputMultiPath, OutputMultiPath
+)
 #from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 #from niworkflows.interfaces.bids import ReadSidecarJSON
 #from niworkflows.interfaces.images import IntraModalMerge
@@ -23,7 +29,7 @@ from nipype.workflows.dmri.fsl.utils import siemens2rads, demean_image, \
 
 from ...interfaces import Phasediff2Fieldmap, Phases2Fieldmap
 
-def init_phdiff_wf(omp_nthreads, layout, phasetype='phasediff', name='phdiff_wf'):
+def init_phdiff_wf(omp_nthreads, phasetype='phasediff', name='phdiff_wf'):
     """
     Estimates the fieldmap using a phase-difference image and one or more
     magnitude images corresponding to two or more :abbr:`GRE (Gradient Echo sequence)`
@@ -50,7 +56,7 @@ using a custom workflow of *fMRIPrep* derived from D. Greve's `epidewarp.fsl`
 further improvements of HCP Pipelines [@hcppipelines].
 """
     '''
-    inputnode = pe.Node(niu.IdentityInterface(fields=['magnitude', 'phasediff']),
+    inputnode = pe.Node(niu.IdentityInterface(fields=['magnitude', 'phasediff', 'layout']),
                         name='inputnode')
 
     outputnode = pe.Node(niu.IdentityInterface(
@@ -66,9 +72,10 @@ further improvements of HCP Pipelines [@hcppipelines].
     #              name='bet')
     bet = pe.Node(fsl.BET(frac=0.6, mask=True),
                   name='bet')
-    ds_report_fmap_mask = pe.Node(DerivativesDataSink(
-        desc='brain', suffix='mask'), name='ds_report_fmap_mask',
-        mem_gb=0.01, run_without_submitting=True)
+    #ds_report_fmap_mask = pe.Node(DerivativesDataSink(
+    #    desc='brain', suffix='mask'), name='ds_report_fmap_mask',
+    #    mem_gb=0.01, run_without_submitting=True)
+
     # uses mask from bet; outputs a mask
     # dilate = pe.Node(fsl.maths.MathsCommand(
     #     nan2zeros=True, args='-kernel sphere 5 -dilM'), name='MskDilate')
@@ -84,7 +91,6 @@ further improvements of HCP Pipelines [@hcppipelines].
     cleanup_wf = cleanup_edge_pipeline(name="cleanup_wf")
 
     compfmap = pe.Node(Phasediff2Fieldmap(), name='compfmap')
-    compfmap.inputs.metadata = metadata
 
     # The phdiff2fmap interface is equivalent to:
     # rad2rsec (using rads2radsec from nipype.workflows.dmri.fsl.utils)
@@ -93,40 +99,60 @@ further improvements of HCP Pipelines [@hcppipelines].
 
     if phasetype == "phasediff":
         # Read phasediff echo times
-        meta = pe.Node(ReadSidecarJSON(bids_validate=False), name='meta', mem_gb=0.01)
+        #meta = pe.Node(ReadSidecarJSON(bids_validate=False), name='meta', mem_gb=0.01)
 
         # phase diff -> radians
         pha2rads = pe.Node(niu.Function(function=siemens2rads),
                            name='pha2rads')
         # Read phasediff echo times
-        meta = pe.Node(ReadSidecarJSON(), name='meta', mem_gb=0.01,
-                       run_without_submitting=True)
+        #meta = pe.Node(ReadSidecarJSON(bids_validate=False), name='meta', mem_gb=0.01,
+        #               run_without_submitting=True)
+
+        meta = pe.Node(
+            niu.Function(
+                input_names=["in_file", "in_layout"], output_names=["out_dict"], function=get_metadata
+            ),
+            name="meta",
+        )
+
         workflow.connect([
-            #(meta, compfmap, [('out_dict', 'metadata')]),
+            (meta, compfmap, [('out_dict', 'metadata')]),
             (inputnode, pha2rads, [('phasediff', 'in_file')]),
             (pha2rads, prelude, [('out', 'phase_file')]),
-            (inputnode, ds_report_fmap_mask, [('phasediff', 'source_file')]),
+            #(inputnode, ds_report_fmap_mask, [('phasediff', 'source_file')]),
         ])
 
     elif phasetype == "phase":
-        workflow.__desc__ += """\
-The phase difference used for unwarping was calculated using two separate phase measurements
- [@pncprocessing].
-    """
         # Special case for phase1, phase2 images
-        meta = pe.MapNode(ReadSidecarJSON(), name='meta', mem_gb=0.01,
-                          run_without_submitting=True, iterfield=['in_file'])
+        #meta = pe.MapNode(ReadSidecarJSON(), name='meta', mem_gb=0.01,
+        #                  run_without_submitting=True, iterfield=['in_file'])
+
+        meta = pe.Node(
+            niu.Function(
+                input_names=["in_file", "in_layout"], output_names=["out_dict"], function=get_metadata
+            ),
+            name="meta",
+        )
+
         phases2fmap = pe.Node(Phases2Fieldmap(), name='phases2fmap')
         workflow.connect([
             (meta, phases2fmap, [('out_dict', 'metadatas')]),
             (inputnode, phases2fmap, [('phasediff', 'phase_files')]),
             (phases2fmap, prelude, [('out_file', 'phase_file')]),
             (phases2fmap, compfmap, [('phasediff_metadata', 'metadata')]),
-            (phases2fmap, ds_report_fmap_mask, [('out_file', 'source_file')])
+            #(phases2fmap, ds_report_fmap_mask, [('out_file', 'source_file')])
         ])
 
     workflow.connect([
-        (inputnode, meta, [('phasediff', 'in_file')]),
+        #(inputnode, meta, [('phasediff', 'in_file')]),
+        (
+            inputnode,
+            meta,
+            [
+                ('phasediff', 'in_file'),
+                ('layout', 'in_layout'),
+            ],
+        ),
         (inputnode, magmrg, [('magnitude', 'in_files')]),
         (magmrg, n4, [('out_avg', 'input_image')]),
         (n4, prelude, [('output_image', 'magnitude_file')]),
@@ -140,11 +166,15 @@ The phase difference used for unwarping was calculated using two separate phase 
         (compfmap, outputnode, [('out_file', 'fmap')]),
         (bet, outputnode, [('mask_file', 'fmap_mask'),
                            ('out_file', 'fmap_ref')]),
-        (bet, ds_report_fmap_mask, [('out_report', 'in_file')]),
+        #(bet, ds_report_fmap_mask, [('out_report', 'in_file')]),
     ])
 
     return workflow
 
+def get_metadata(in_file, in_layout):
+    out_dict = in_layout.get_metadata(in_file)
+    return out_dict
+'''
 class ReadSidecarJSONInputSpec(BIDSBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the input nifti file')
 
@@ -197,7 +227,7 @@ class ReadSidecarJSON(SimpleInterface):
                         fname, self.inputs.in_file))
             self._results[fname] = metadata.get(fname, Undefined)
         return runtime
-
+'''
 class IntraModalMergeInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input files')
@@ -271,7 +301,7 @@ class IntraModalMerge(SimpleInterface):
             self._results['out_avg'])
 
         return runtime
-
+'''
 class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')
@@ -433,3 +463,4 @@ class DerivativesDataSink(SimpleInterface):
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results['out_meta'] = str(sidecar)
         return runtime
+'''
