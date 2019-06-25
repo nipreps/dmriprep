@@ -31,7 +31,9 @@ def init_output_wf(subject_id, session_id, output_folder):
     def build_path(output_folder, subject_id, session_id):
         import os.path as op
 
-        return op.join(output_folder, "sub-" + subject_id, "ses-" + session_id, "dwi")
+        return op.join(
+            output_folder, "dmriprep", "sub-" + subject_id, "ses-" + session_id, "dwi"
+        )
 
     concat = pe.Node(
         niu.Function(
