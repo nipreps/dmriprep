@@ -89,10 +89,18 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
                         ("fsl_eddy.out_corrected", "inputnode.out_file"),
                         ("fsl_eddy.out_rotated_bvecs", "inputnode.out_bvec"),
                         ("getB0Mask.mask_file", "inputnode.out_mask"),
+                        ("inputnode.bval_file", "inputnode.out_bval"),
+                        ("bet_dwi_pre.out_file", "inputnode.out_b0_brain"),
+                        ("bet_dwi_pre.mask_file", "inputnode.out_b0_mask"),
+                        ("eddy_quad.qc_json", "inputnode.out_eddy_qc"),
+                        ("dtifit.FA", "inputnode.out_FA"),
+                        ("dtifit.V1", "inputnode.out_V1"),
+                        ("denoise_eddy.noise", "inputnode.out_sh_residual"),
                     ],
                 )
             ]
         )
+
         subject_wf.add_nodes([full_wf])
 
     return subject_wf
