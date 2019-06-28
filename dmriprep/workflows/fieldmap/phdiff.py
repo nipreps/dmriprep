@@ -16,12 +16,14 @@ from nipype.interfaces import ants, fsl, utility as niu
 from nipype.pipeline import engine as pe
 from nipype.workflows.dmri.fsl.utils import siemens2rads, demean_image, \
     cleanup_edge_pipeline
+'''
 from nipype.interfaces.base import (
     traits, isdefined, Undefined,
     TraitedSpec, BaseInterfaceInputSpec, DynamicTraitedSpec,
     File, Directory, InputMultiObject, OutputMultiObject, Str,
     SimpleInterface, InputMultiPath, OutputMultiPath
 )
+'''
 #from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 #from niworkflows.interfaces.bids import ReadSidecarJSON
 #from niworkflows.interfaces.images import IntraModalMerge
@@ -63,7 +65,13 @@ further improvements of HCP Pipelines [@hcppipelines].
         fields=['fmap', 'fmap_ref', 'fmap_mask']), name='outputnode')
 
     # Merge input magnitude images
-    magmrg = pe.Node(IntraModalMerge(), name='magmrg')
+    #magmrg = pe.Node(IntraModalMerge(), name='magmrg')
+    magmrg = pe.Node(
+        niu.Function(
+            input_names=["in_file", "hmc", "zero_based_avg", "to_ras"], output_names=["out_dict"], function=intra_modal_merge
+        ),
+        name="magmrg",
+    )
 
     # de-gradient the fields ("bias/illumination artifact")
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3, copy_header=True),
@@ -228,6 +236,66 @@ class ReadSidecarJSON(SimpleInterface):
             self._results[fname] = metadata.get(fname, Undefined)
         return runtime
 '''
+
+def intra_modal_merge(in_file, hmc, zero_based_avg, to_ras):
+    #OUTPUTS
+    # out_avg, out_file, out_mats, out_movpar
+
+    #in_files = self.inputs.in_files
+    #if not isinstance(in_files, list):
+    #    in_files = [self.inputs.in_files]
+    in_files = [in_file]
+
+    # Generate output average name early
+    #self._results['out_avg'] = fname_presuffix(self.inputs.in_files[0],
+    #                                           suffix='_avg', newpath=runtime.cwd)
+    out_avg = fname_presuffix(in_files, suffix='_avg', newpath=runtime.cwd)
+    if to_ras:
+        in_files = [reorient(inf, newpath=runtime.cwd)
+                    for inf in in_files]
+
+    if len(in_files) == 1:
+        filenii = nb.load(in_files[0])
+        filedata = filenii.get_data()
+
+        # magnitude files can have an extra dimension empty
+        if filedata.ndim == 5:
+            sqdata = np.squeeze(filedata)
+            if sqdata.ndim == 5:
+                raise RuntimeError('Input image (%s) is 5D' % in_files[0])
+            else:
+                in_files = [fname_presuffix(in_files[0], suffix='_squeezed',
+                                            newpath=runtime.cwd)]
+                nb.Nifti1Image(sqdata, filenii.affine,
+                               filenii.header).to_filename(in_files[0])
+
+        if np.squeeze(nb.load(in_files[0]).get_data()).ndim < 4:
+            out_file = in_files[0]
+            out_avg = in_files[0]
+            # TODO: generate identity out_mats and zero-filled out_movpar
+            return runtime
+        in_files = in_files[0]
+    else:
+        magmrg = fsl.Merge(dimension='t', in_files=in_files)
+        in_files = magmrg.run().outputs.merged_file
+    mcflirt = fsl.MCFLIRT(cost='normcorr', save_mats=True, save_plots=True,
+                          ref_vol=0, in_file=in_files)
+    mcres = mcflirt.run()
+    out_mats = mcres.outputs.mat_file
+    out_movpar = mcres.outputs.par_file
+    out_file = mcres.outputs.out_file
+
+    hmcnii = nb.load(mcres.outputs.out_file)
+    hmcdat = hmcnii.get_data().mean(axis=3)
+    if zero_based_avg:
+        hmcdat -= hmcdat.min()
+
+    nb.Nifti1Image(
+        hmcdat, hmcnii.affine, hmcnii.header).to_filename(
+        out_avg)
+
+    return runtime
+'''
 class IntraModalMergeInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input files')
@@ -301,7 +369,7 @@ class IntraModalMerge(SimpleInterface):
             self._results['out_avg'])
 
         return runtime
-'''
+
 class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')

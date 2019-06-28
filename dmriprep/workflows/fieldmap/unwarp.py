@@ -21,51 +21,19 @@ import pkg_resources as pkgr
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import ants, fsl, utility as niu
-from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-from niworkflows.interfaces import itk
-from niworkflows.interfaces.images import DemeanImage, FilledImageLike
-from niworkflows.interfaces.registration import ANTSApplyTransformsRPT, ANTSRegistrationRPT
-
-from ...interfaces import DerivativesDataSink
+#from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+#from niworkflows.interfaces import itk
+#from niworkflows.interfaces.images import DemeanImage, FilledImageLike
+#from niworkflows.interfaces.registration import ANTSApplyTransformsRPT, ANTSRegistrationRPT
+from nipype.interfaces.base import (
+    traits, isdefined, Undefined,
+    TraitedSpec, BaseInterfaceInputSpec, DynamicTraitedSpec,
+    File, Directory, InputMultiObject, OutputMultiObject, Str,
+    SimpleInterface, InputMultiPath, OutputMultiPath
+)
+#from ...interfaces import DerivativesDataSink
 from ...interfaces.fmap import get_ees as _get_ees, FieldToRadS
 from ..bold.util import init_enhance_and_skullstrip_bold_wf
-
-class LiterateWorkflow(pe.Workflow):
-    """Controls the setup and execution of a pipeline of processes."""
-
-    def __init__(self, name, base_dir=None):
-        """Create a workflow object.
-        Parameters
-        ----------
-        name : alphanumeric string
-            unique identifier for the workflow
-        base_dir : string, optional
-            path to workflow storage
-        """
-        super(LiterateWorkflow, self).__init__(name, base_dir)
-        self.__desc__ = None
-        self.__postdesc__ = None
-
-    def visit_desc(self):
-        """
-        Builds a citation boilerplate by visiting all workflows
-        appending their ``__desc__`` field
-        """
-        desc = []
-
-        if self.__desc__:
-            desc += [self.__desc__]
-
-        for node in pe.utils.topological_sort(self._graph)[0]:
-            if isinstance(node, LiterateWorkflow):
-                add_desc = node.visit_desc()
-                if add_desc not in desc:
-                    desc.append(add_desc)
-
-        if self.__postdesc__:
-            desc += [self.__postdesc__]
-
-        return ''.join(desc)
 
 def init_sdc_unwarp_wf(omp_nthreads, fmap_demean, debug, name='sdc_unwarp_wf'):
     """
@@ -120,7 +88,7 @@ def init_sdc_unwarp_wf(omp_nthreads, fmap_demean, debug, name='sdc_unwarp_wf'):
 
     """
 
-    workflow = Workflow(name=name)
+    workflow = pe.Workflow(name=name)
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['in_reference', 'in_reference_brain', 'in_mask', 'metadata',
                 'fmap_ref', 'fmap_mask', 'fmap']), name='inputnode')
@@ -197,7 +165,7 @@ def init_sdc_unwarp_wf(omp_nthreads, fmap_demean, debug, name='sdc_unwarp_wf'):
             ('composite_transform', 'transforms')]),
         (fmap2ref_apply, ds_report_vsm, [('out_report', 'in_file')]),
         (inputnode, fmap2ref_reg, [('in_reference_brain', 'fixed_image')]),
-        (fmap2ref_reg, ds_report_reg, [('out_report', 'in_file')]),
+        #(fmap2ref_reg, ds_report_reg, [('out_report', 'in_file')]),
         (inputnode, fmap2ref_apply, [('fmap', 'input_image')]),
         (inputnode, fmap_mask2ref_apply, [('fmap_mask', 'input_image')]),
         (fmap2ref_apply, torads, [('output_image', 'in_file')]),
@@ -299,16 +267,16 @@ def init_fmap_unwarp_report_wf(name='fmap_unwarp_report_wf', forcedsyn=False):
 
     bold_rpt = pe.Node(SimpleBeforeAfter(), name='bold_rpt',
                        mem_gb=0.1)
-    ds_report_sdc = pe.Node(
-        DerivativesDataSink(desc='sdc' if not forcedsyn else 'forcedsyn',
-                            suffix='bold'), name='ds_report_sdc',
-        mem_gb=DEFAULT_MEMORY_MIN_GB, run_without_submitting=True
-    )
+    #ds_report_sdc = pe.Node(
+    #    DerivativesDataSink(desc='sdc' if not forcedsyn else 'forcedsyn',
+    #                        suffix='bold'), name='ds_report_sdc',
+    #    mem_gb=DEFAULT_MEMORY_MIN_GB, run_without_submitting=True
+    #)
 
     workflow.connect([
         (inputnode, bold_rpt, [('in_post', 'after'),
                                ('in_pre', 'before')]),
-        (bold_rpt, ds_report_sdc, [('out_report', 'in_file')]),
+        #(bold_rpt, ds_report_sdc, [('out_report', 'in_file')]),
         (inputnode, map_seg, [('in_post', 'reference_image'),
                               ('in_seg', 'input_image'),
                               ('in_xfm', 'transforms')]),
@@ -318,6 +286,69 @@ def init_fmap_unwarp_report_wf(name='fmap_unwarp_report_wf', forcedsyn=False):
 
     return workflow
 
+class FUGUEvsm2ANTSwarpInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='input displacements field map')
+    pe_dir = traits.Enum('i', 'i-', 'j', 'j-', 'k', 'k-',
+                         desc='phase-encoding axis')
+
+
+class FUGUEvsm2ANTSwarpOutputSpec(TraitedSpec):
+    out_file = File(desc='the output warp field')
+
+
+class FUGUEvsm2ANTSwarp(SimpleInterface):
+
+    """
+    Convert a voxel-shift-map to ants warp
+    """
+    input_spec = FUGUEvsm2ANTSwarpInputSpec
+    output_spec = FUGUEvsm2ANTSwarpOutputSpec
+
+    def _run_interface(self, runtime):
+
+        nii = nb.load(self.inputs.in_file)
+
+        phaseEncDim = {'i': 0, 'j': 1, 'k': 2}[self.inputs.pe_dir[0]]
+
+        if len(self.inputs.pe_dir) == 2:
+            phaseEncSign = 1.0
+        else:
+            phaseEncSign = -1.0
+
+        # Fix header
+        hdr = nii.header.copy()
+        hdr.set_data_dtype(np.dtype('<f4'))
+        hdr.set_intent('vector', (), '')
+
+        # Get data, convert to mm
+        data = nii.get_data()
+
+        aff = np.diag([1.0, 1.0, -1.0])
+        if np.linalg.det(aff) < 0 and phaseEncDim != 0:
+            # Reverse direction since ITK is LPS
+            aff *= -1.0
+
+        aff = aff.dot(nii.affine[:3, :3])
+
+        data *= phaseEncSign * nii.header.get_zooms()[phaseEncDim]
+
+        # Add missing dimensions
+        zeros = np.zeros_like(data)
+        field = [zeros, zeros]
+        field.insert(phaseEncDim, data)
+        field = np.stack(field, -1)
+        # Add empty axis
+        field = field[:, :, :, np.newaxis, :]
+
+        # Write out
+        self._results['out_file'] = fname_presuffix(
+            self.inputs.in_file, suffix='_antswarp', newpath=runtime.cwd)
+        nb.Nifti1Image(
+            field.astype(np.dtype('<f4')), nii.affine, hdr).to_filename(
+                self._results['out_file'])
+
+        return runtime
 
 # Helper functions
 # ------------------------------------------------------------

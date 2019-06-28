@@ -46,18 +46,22 @@ def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False
         )
 
     if fmap['suffix'] in ('phasediff', 'phase'):
-        from .phdiff import init_phdiff_wf
-        fmap_estimator_wf = init_phdiff_wf(omp_nthreads=omp_nthreads,
-                                            phasetype=fmap['suffix'])
-        fmap_estimator_wf.inputs.inputnode.layout = layout
+        print("phase made")
+        #from .phdiff import init_phdiff_wf
+        from .phasediff import init_phase_wf
+        #fmap_estimator_wf = init_phdiff_wf(omp_nthreads=omp_nthreads,
+        #                                    phasetype=fmap['suffix'])
+        phase_wf = init_phase_wf(layout)
+        #fmap_estimator_wf.inputs.inputnode.layout = layout
         if fmap['suffix'] == 'phasediff':
-            fmap_estimator_wf.inputs.inputnode.phasediff = fmap['phasediff']
+            phase_wf.inputs.inputnode.phasediff = fmap['phasediff']
         elif fmap['suffix'] == 'phase':
+            '''
             # Check that fieldmap is not bipolar
             fmap_polarity = fmap['metadata'].get('DiffusionScheme', None)
             if fmap_polarity == 'Bipolar':
-                LOGGER.warning("Bipolar fieldmaps are not supported. Ignoring")
-                sdc_prep_wf.__postdesc__ = ""
+                #LOGGER.warning("Bipolar fieldmaps are not supported. Ignoring")
+                #sdc_prep_wf.__postdesc__ = ""
                 outputnode.inputs.method = 'None'
                 sdc_prep_wf.connect([
                     (inputnode, outputnode, [('bold_ref', 'bold_ref'),
@@ -65,16 +69,24 @@ def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False
                                              ('bold_ref_brain', 'bold_ref_brain')]),
                 ])
                 return sdc_prep_wf
-            if fmap_polarity is None:
-                LOGGER.warning("Assuming phase images are Monopolar")
+            #if fmap_polarity is None:
+                #LOGGER.warning("Assuming phase images are Monopolar")
+            '''
 
-            fmap_estimator_wf.inputs.inputnode.phasediff = [fmap['phase1'], fmap['phase2']]
+            phase_wf.inputs.inputnode.phasediff = [fmap['phase1'], fmap['phase2']]
 
-        fmap_estimator_wf.inputs.inputnode.magnitude = [
+        phase_wf.inputs.inputnode.magnitude1 = [
             fmap_ for key, fmap_ in sorted(fmap.items())
             if key.startswith("magnitude")
         ]
 
+        sdc_prep_wf.connect(
+            [
+                (phase_wf, outputnode, [("outputnode.out_fieldmap", "out_fmap")])
+            ]
+        )
+
+        '''
         sdc_unwarp_wf = init_sdc_unwarp_wf(
             omp_nthreads=omp_nthreads,
             fmap_demean=fmap_demean,
@@ -100,4 +112,6 @@ def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False
                 ('outputnode.out_reference_brain', 'bold_ref_brain'),
                 ('outputnode.out_mask', 'bold_mask')]),
         ])
+        '''
+
     return sdc_prep_wf
