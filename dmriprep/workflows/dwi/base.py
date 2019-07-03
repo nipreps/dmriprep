@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
+def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bids_dir):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import fsl, utility as niu
 
@@ -20,7 +20,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     for fmap in fmaps:
         fmap["metadata"] = layout.get_metadata(fmap["suffix"])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, metadata)
+    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout, bids_dir)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -171,6 +171,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
             ecc.inputs.use_cuda = True
     except:
         ecc.inputs.use_cuda = False
+    ecc.inputs.use_cuda = False
 
     denoise_eddy = pe.Node(mrtrix.DWIDenoise(), name="denoise_eddy")
 
