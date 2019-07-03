@@ -7,7 +7,7 @@ from nipype.pipeline import engine as pe
 from .dwi import init_dwi_preproc_wf, init_output_wf
 
 
-def init_dmriprep_wf(layout, subject_list, work_dir, output_dir):
+def init_dmriprep_wf(layout, subject_list, work_dir, output_dir, bids_dir):
     dmriprep_wf = pe.Workflow(name="dmriprep_wf")
     dmriprep_wf.base_dir = work_dir
 
@@ -19,6 +19,7 @@ def init_dmriprep_wf(layout, subject_list, work_dir, output_dir):
             name="single_subject_" + subject_id + "_wf",
             work_dir=work_dir,
             output_dir=output_dir,
+            bids_dir=bids_dir
         )
 
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
@@ -33,7 +34,7 @@ def init_dmriprep_wf(layout, subject_list, work_dir, output_dir):
     return dmriprep_wf
 
 
-def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
+def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir, bids_dir):
 
     dwi_files = layout.get(
         subject=subject_id,
@@ -56,7 +57,7 @@ def init_single_subject_wf(layout, subject_id, name, work_dir, output_dir):
         session_id = entities["session"]
         metadata = layout.get_metadata(dwi_file)
         dwi_preproc_wf = init_dwi_preproc_wf(
-            subject_id=subject_id, dwi_file=dwi_file, metadata=metadata, layout=layout
+            subject_id=subject_id, dwi_file=dwi_file, metadata=metadata, layout=layout, bids_dir=bids_dir
         )
         datasink_wf = init_output_wf(
             subject_id=subject_id, session_id=session_id, output_folder=output_dir

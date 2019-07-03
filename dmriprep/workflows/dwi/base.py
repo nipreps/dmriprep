@@ -3,7 +3,7 @@
 import os
 
 
-def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
+def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bids_dir):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import (
         freesurfer as fs,
@@ -34,7 +34,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         # fmap["metadata"] = layout.get_metadata(fmap[fmap_key])
         fmap["metadata"] = layout.get_metadata(fmap["suffix"])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout)
+    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout, bids_dir)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -202,6 +202,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
             ecc.inputs.use_cuda = True
     except:
         ecc.inputs.use_cuda = False
+    ecc.inputs.use_cuda = False
 
     eddy_quad = pe.Node(fsl.EddyQuad(verbose=True), name="eddy_quad")
 

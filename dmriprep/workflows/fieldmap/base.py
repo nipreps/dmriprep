@@ -3,13 +3,13 @@
 FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 
-def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False):
+def init_sdc_prep_wf(fmaps, metadata, layout, bids_dir, omp_nthreads=1, fmap_bspline=False):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
     sdc_prep_wf = pe.Workflow(name="sdc_prep_wf")
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped"]), name="inputnode")
+    inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped", "bids_dir"]), name="inputnode")
 
     #outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap",]), name="outputnode")
 
@@ -46,72 +46,32 @@ def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False
         )
 
     if fmap['suffix'] in ('phasediff', 'phase'):
-        print("phase made")
-        #from .phdiff import init_phdiff_wf
         from .phasediff import init_phase_wf
-        #fmap_estimator_wf = init_phdiff_wf(omp_nthreads=omp_nthreads,
-        #                                    phasetype=fmap['suffix'])
-        phase_wf = init_phase_wf(layout)
-        #fmap_estimator_wf.inputs.inputnode.layout = layout
+        from .fmap import init_fmap_wf
+        phase_wf = init_phase_wf()
         if fmap['suffix'] == 'phasediff':
             phase_wf.inputs.inputnode.phasediff = fmap['phasediff']
         elif fmap['suffix'] == 'phase':
-            '''
-            # Check that fieldmap is not bipolar
-            fmap_polarity = fmap['metadata'].get('DiffusionScheme', None)
-            if fmap_polarity == 'Bipolar':
-                #LOGGER.warning("Bipolar fieldmaps are not supported. Ignoring")
-                #sdc_prep_wf.__postdesc__ = ""
-                outputnode.inputs.method = 'None'
-                sdc_prep_wf.connect([
-                    (inputnode, outputnode, [('bold_ref', 'bold_ref'),
-                                             ('bold_mask', 'bold_mask'),
-                                             ('bold_ref_brain', 'bold_ref_brain')]),
-                ])
-                return sdc_prep_wf
-            #if fmap_polarity is None:
-                #LOGGER.warning("Assuming phase images are Monopolar")
-            '''
-
             phase_wf.inputs.inputnode.phasediff = [fmap['phase1'], fmap['phase2']]
 
         phase_wf.inputs.inputnode.magnitude1 = [
             fmap_ for key, fmap_ in sorted(fmap.items())
-            if key.startswith("magnitude")
+            if key.startswith("magnitude1")
+        ][0]
+
+        phase_wf.inputs.inputnode.phases_meta = [
+            layout.get_metadata(i)
+            for i in phase_wf.inputs.inputnode.phasediff
         ]
+
+        post_phase_wf = init_fmap_wf()
 
         sdc_prep_wf.connect(
             [
-                (phase_wf, outputnode, [("outputnode.out_fieldmap", "out_fmap")])
+                (inputnode, post_phase_wf, [("b0_stripped", "inputnode.b0_stripped")]),
+                (phase_wf, post_phase_wf, [("outputnode.out_fmap", "inputnode.fieldmap")]),
+                (phase_wf, post_phase_wf, [("outputnode.out_mag", "inputnode.magnitude")]),
+                (post_phase_wf, outputnode, [("outputnode.out_fmap", "out_fmap")])
             ]
         )
-
-        '''
-        sdc_unwarp_wf = init_sdc_unwarp_wf(
-            omp_nthreads=omp_nthreads,
-            fmap_demean=fmap_demean,
-            debug=debug,
-            name='sdc_unwarp_wf')
-        sdc_unwarp_wf.inputs.inputnode.metadata = bold_meta
-
-        sdc_prep_wf.connect([
-            (inputnode, sdc_unwarp_wf, [
-                ('bold_ref', 'inputnode.in_reference'),
-                ('bold_ref_brain', 'inputnode.in_reference_brain'),
-                ('bold_mask', 'inputnode.in_mask')]),
-            (fmap_estimator_wf, sdc_unwarp_wf, [
-                ('outputnode.fmap', 'inputnode.fmap'),
-                ('outputnode.fmap_ref', 'inputnode.fmap_ref'),
-                ('outputnode.fmap_mask', 'inputnode.fmap_mask')]),
-        ])
-
-        sdc_prep_wf.connect([
-            (sdc_unwarp_wf, outputnode, [
-                ('outputnode.out_warp', 'out_warp'),
-                ('outputnode.out_reference', 'bold_ref'),
-                ('outputnode.out_reference_brain', 'bold_ref_brain'),
-                ('outputnode.out_mask', 'bold_mask')]),
-        ])
-        '''
-
     return sdc_prep_wf
