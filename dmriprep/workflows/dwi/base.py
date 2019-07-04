@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 
-import os
-
 
 def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     from nipype.pipeline import engine as pe
-    from nipype.interfaces import (
-        freesurfer as fs,
-        fsl,
-        mrtrix3,
-        ants,
-        io as nio,
-        utility as niu,
-    )
-    from nipype.utils.filemanip import fname_presuffix
+    from nipype.interfaces import fsl, utility as niu
 
+    from ...interfaces import mrtrix
     from ..fieldmap.base import init_sdc_prep_wf
 
     fmaps = []
@@ -27,11 +18,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         )
 
     for fmap in fmaps:
-        # if fmap["suffix"] == "phase":
-        #     fmap_key = "phase1"
-        # else:
-        #     fmap_key = fmap["suffix"]
-        # fmap["metadata"] = layout.get_metadata(fmap[fmap_key])
         fmap["metadata"] = layout.get_metadata(fmap["suffix"])
 
     sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout)
@@ -59,26 +45,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         name="outputnode",
     )
 
-    denoise = pe.Node(
-        mrtrix3.DWIDenoise(
-            noise=fname_presuffix(
-                dwi_file, suffix="_noise", newpath=os.path.abspath("."), use_ext=True
-            ),
-            out_file=fname_presuffix(
-                dwi_file, suffix="_denoised", newpath=os.path.abspath("."), use_ext=True
-            ),
-        ),
-        name="denoise",
-    )
+    denoise = pe.Node(mrtrix.DWIDenoise(), name="denoise")
 
-    unring = pe.Node(
-        mrtrix3.MRDeGibbs(
-            out_file=fname_presuffix(
-                dwi_file, suffix="_unringed", newpath=os.path.abspath("."), use_ext=True
-            )
-        ),
-        name="unring",
-    )
+    unring = pe.Node(mrtrix.MRDeGibbs(), name="unring")
 
     def gen_index(in_file):
         import os.path as op
@@ -204,12 +173,12 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         ecc.inputs.use_cuda = False
     ecc.inputs.use_cuda = False
 
+    denoise_eddy = pe.Node(mrtrix.DWIDenoise(), name="denoise_eddy")
+
     eddy_quad = pe.Node(fsl.EddyQuad(verbose=True), name="eddy_quad")
 
     get_path = lambda x: x.split(".nii.gz")[0].split("_fix")[0]
     get_qc_path = lambda x: x.split(".nii.gz")[0] + ".qc"
-
-    dwi_bias_corr = pe.Node(ants.N4BiasFieldCorrection(), name="dwi_bias_corr")
 
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
 
@@ -235,6 +204,8 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
         name="getB0Mask",
     )
 
+    dtifit = pe.Node(fsl.DTIFit(save_tensor=True, sse=True), name="dtifit")
+
     dwi_wf.connect(
         [
             (inputnode, denoise, [("dwi_file", "in_file")]),
@@ -249,6 +220,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
             (bet_dwi0, ecc, [("mask_file", "in_mask")]),
             (gen_idx, ecc, [("out_file", "in_index")]),
             (acqp, ecc, [("out_file", "in_acqp")]),
+            (ecc, denoise_eddy, [("out_corrected", "in_file")]),
             (ecc, fslroi, [("out_corrected", "in_file")]),
             (fslroi, b0mask_node, [("roi_file", "b0_file")]),
             (
@@ -270,6 +242,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
             (bet_dwi0, sdc_wf, [("out_file", "inputnode.b0_stripped")]),
             (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
             (sdc_wf, eddy_quad, [("outputnode.out_fmap", "field")]),
+            (ecc, dtifit, [("out_corrected", "dwi"), ("out_rotated_bvecs", "bvecs")]),
+            (b0mask_node, dtifit, [("mask_file", "mask")]),
+            (inputnode, dtifit, [("bval_file", "bvals")]),
         ]
     )
 
