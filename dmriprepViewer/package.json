@@ -11,7 +11,9 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "axios": "^0.18.0",
@@ -21,7 +23,8 @@
     "lodash": "^4.17.11",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
-    "vue-slider-component": "^2.7.7"
+    "vue-slider-component": "^2.7.7",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -87,5 +90,6 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "snyk": true
 }
