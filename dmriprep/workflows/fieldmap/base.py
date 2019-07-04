@@ -3,13 +3,13 @@
 FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 
-def init_sdc_prep_wf(fmaps, metadata, layout, bids_dir, omp_nthreads=1, fmap_bspline=False):
+def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
     sdc_prep_wf = pe.Workflow(name="sdc_prep_wf")
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped", "bids_dir"]), name="inputnode")
+    inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped"]), name="inputnode")
 
     #outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap",]), name="outputnode")
 
@@ -46,32 +46,50 @@ def init_sdc_prep_wf(fmaps, metadata, layout, bids_dir, omp_nthreads=1, fmap_bsp
         )
 
     if fmap['suffix'] in ('phasediff', 'phase'):
-        from .phasediff import init_phase_wf
+        from .phasediff import init_phase_wf, init_phdiff_wf
         from .fmap import init_fmap_wf
-        phase_wf = init_phase_wf()
         if fmap['suffix'] == 'phasediff':
+            phase_wf = init_phdiff_wf()
             phase_wf.inputs.inputnode.phasediff = fmap['phasediff']
+
+            phase_wf.inputs.inputnode.magnitude1 = [
+                fmap_ for key, fmap_ in sorted(fmap.items())
+                if key.startswith("magnitude1")
+            ][0]
+
+            phase_wf.inputs.inputnode.phases_meta = layout.get_metadata(phase_wf.inputs.inputnode.phasediff)
+            post_phase_wf = init_fmap_wf()
+
+            sdc_prep_wf.connect(
+                [
+                    (inputnode, post_phase_wf, [("b0_stripped", "inputnode.b0_stripped")]),
+                    (phase_wf, post_phase_wf, [("outputnode.out_fmap", "inputnode.fieldmap")]),
+                    (phase_wf, post_phase_wf, [("outputnode.out_mag", "inputnode.magnitude")]),
+                    (post_phase_wf, outputnode, [("outputnode.out_fmap", "out_fmap")])
+                ]
+            )
+
         elif fmap['suffix'] == 'phase':
+            phase_wf = init_phase_wf()
             phase_wf.inputs.inputnode.phasediff = [fmap['phase1'], fmap['phase2']]
 
-        phase_wf.inputs.inputnode.magnitude1 = [
-            fmap_ for key, fmap_ in sorted(fmap.items())
-            if key.startswith("magnitude1")
-        ][0]
+            phase_wf.inputs.inputnode.magnitude1 = [
+                fmap_ for key, fmap_ in sorted(fmap.items())
+                if key.startswith("magnitude1")
+            ][0]
 
-        phase_wf.inputs.inputnode.phases_meta = [
-            layout.get_metadata(i)
-            for i in phase_wf.inputs.inputnode.phasediff
-        ]
-
-        post_phase_wf = init_fmap_wf()
-
-        sdc_prep_wf.connect(
-            [
-                (inputnode, post_phase_wf, [("b0_stripped", "inputnode.b0_stripped")]),
-                (phase_wf, post_phase_wf, [("outputnode.out_fmap", "inputnode.fieldmap")]),
-                (phase_wf, post_phase_wf, [("outputnode.out_mag", "inputnode.magnitude")]),
-                (post_phase_wf, outputnode, [("outputnode.out_fmap", "out_fmap")])
+            phase_wf.inputs.inputnode.phases_meta = [
+                layout.get_metadata(i)
+                for i in phase_wf.inputs.inputnode.phasediff
             ]
-        )
+            post_phase_wf = init_fmap_wf()
+
+            sdc_prep_wf.connect(
+                [
+                    (inputnode, post_phase_wf, [("b0_stripped", "inputnode.b0_stripped")]),
+                    (phase_wf, post_phase_wf, [("outputnode.out_fmap", "inputnode.fieldmap")]),
+                    (phase_wf, post_phase_wf, [("outputnode.out_mag", "inputnode.magnitude")]),
+                    (post_phase_wf, outputnode, [("outputnode.out_fmap", "out_fmap")])
+                ]
+            )
     return sdc_prep_wf

@@ -11,6 +11,8 @@ def init_phase_wf():
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap", "out_mag"]), name="outputnode")
 
+    phases2fmap = pe.Node(Phases2Fieldmap(), name='phases2fmap')
+
     mag_bet = pe.Node(fsl.BET(frac=0.3, robust=True),
                                     name='mag_bet')
 
@@ -25,8 +27,6 @@ def init_phase_wf():
         ),
         name="delta",
     )
-
-    phases2fmap = pe.Node(Phases2Fieldmap(), name='phases2fmap')
 
     wf.connect(
         [
@@ -48,6 +48,53 @@ def init_phase_wf():
         ]
     )
 
+    return wf
+
+def init_phdiff_wf():
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import fsl, utility as niu
+    from ...interfaces import Phasediff2Fieldmap
+
+    wf = pe.Workflow(name="phase_prep_wf")
+
+    inputnode = pe.Node(niu.IdentityInterface(fields=["magnitude1", "phasediff", "b0_stripped", "phases_meta"]), name="inputnode")
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap", "out_mag"]), name="outputnode")
+
+    mag_bet = pe.Node(fsl.BET(frac=0.3, robust=True),
+                                    name='mag_bet')
+
+    prep_fmap = pe.Node(fsl.PrepareFieldmap(scanner='SIEMENS'),
+                                    name='prep_fmap')
+
+    fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi_phase")
+
+    delta = pe.Node(
+        niu.Function(
+            input_names=["in_values"], output_names=["out_value"], function=delta_te
+        ),
+        name="delta",
+    )
+
+    #phdiff2fmap = pe.Node(Phasediff2Fieldmap(), name='phdiff2fmap')
+
+    wf.connect(
+        [
+            # mag bet
+            (inputnode, mag_bet, [("magnitude1", "in_file")]),
+            # phdiff delta_te
+            (inputnode, delta, [('phases_meta', 'in_values')]),
+            # prep fmap
+            (mag_bet, prep_fmap, [("out_file", "in_magnitude")]),
+            (inputnode, prep_fmap, [('phasediff', 'in_phase')]),
+            (delta, prep_fmap, [('out_value', 'delta_TE')]),
+            # Remove second empty volume
+            (prep_fmap, fslroi, [("out_fieldmap", "in_file")]),
+            # Output
+            (fslroi, outputnode, [("roi_file", "out_fmap")]),
+            (inputnode, outputnode, [("magnitude1", "out_mag")])
+        ]
+    )
     return wf
 
 
@@ -89,4 +136,4 @@ def delta_te(in_values, te1=None, te2=None):
         raise RuntimeError(
             'EchoTime2 metadata field not found. Please consult the BIDS specification.')
 
-    return abs(float(te2) - float(te1))
+    return 1000*abs(float(te2) - float(te1))

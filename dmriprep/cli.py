@@ -85,7 +85,7 @@ def main(
     )
 
     work_dir = os.path.join(output_dir, "scratch")
-    wf = init_dmriprep_wf(layout, subject_list, work_dir, output_dir, bids_dir)
+    wf = init_dmriprep_wf(layout, subject_list, work_dir, output_dir)
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
     wf.config["execution"]["keep_inputs"] = True
