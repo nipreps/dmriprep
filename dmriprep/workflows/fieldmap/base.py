@@ -11,8 +11,6 @@ def init_sdc_prep_wf(fmaps, metadata, layout, omp_nthreads=1, fmap_bspline=False
 
     inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped"]), name="inputnode")
 
-    #outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap",]), name="outputnode")
-
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[

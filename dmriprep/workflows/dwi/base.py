@@ -171,7 +171,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
             ecc.inputs.use_cuda = True
     except:
         ecc.inputs.use_cuda = False
-    ecc.inputs.use_cuda = False
 
     denoise_eddy = pe.Node(mrtrix.DWIDenoise(), name="denoise_eddy")
 

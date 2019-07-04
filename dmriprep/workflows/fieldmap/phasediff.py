@@ -55,7 +55,7 @@ def init_phdiff_wf():
     from nipype.interfaces import fsl, utility as niu
     from ...interfaces import Phasediff2Fieldmap
 
-    wf = pe.Workflow(name="phase_prep_wf")
+    wf = pe.Workflow(name="phdiff_prep_wf")
 
     inputnode = pe.Node(niu.IdentityInterface(fields=["magnitude1", "phasediff", "b0_stripped", "phases_meta"]), name="inputnode")
 
