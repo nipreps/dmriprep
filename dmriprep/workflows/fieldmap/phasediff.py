@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-def init_phase_wf():
+def init_phase_wf(bet_mag_frac):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import fsl, utility as niu
     from ...interfaces import Phasediff2Fieldmap, Phases2Fieldmap
@@ -13,7 +13,7 @@ def init_phase_wf():
 
     phases2fmap = pe.Node(Phases2Fieldmap(), name='phases2fmap')
 
-    mag_bet = pe.Node(fsl.BET(frac=0.3, robust=True),
+    mag_bet = pe.Node(fsl.BET(frac=bet_mag_frac, robust=True),
                                     name='mag_bet')
 
     prep_fmap = pe.Node(fsl.PrepareFieldmap(scanner='SIEMENS', nocheck=True),
@@ -50,7 +50,7 @@ def init_phase_wf():
 
     return wf
 
-def init_phdiff_wf():
+def init_phdiff_wf(bet_mag_frac):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import fsl, utility as niu
     from ...interfaces import Phasediff2Fieldmap
@@ -61,7 +61,7 @@ def init_phdiff_wf():
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap", "out_mag"]), name="outputnode")
 
-    mag_bet = pe.Node(fsl.BET(frac=0.3, robust=True),
+    mag_bet = pe.Node(fsl.BET(frac=bet_mag_frac, robust=True),
                                     name='mag_bet')
 
     prep_fmap = pe.Node(fsl.PrepareFieldmap(scanner='SIEMENS'),

@@ -15,7 +15,7 @@ def init_fmap_wf():
         fsl.BinaryMaths(operation="div", operand_value=6.28), name="radToHz"
     )
 
-    mag_flirt = pe.Node(fsl.FLIRT(), name="magFlirt")
+    mag_flirt = pe.Node(fsl.FLIRT(dof=6), name="magFlirt")
 
     fmap_flirt = pe.Node(fsl.FLIRT(apply_xfm=True), name="fmapFlirt")
 

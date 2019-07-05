@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
+def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, bet_mag_frac):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import fsl, utility as niu
 
@@ -20,7 +20,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     for fmap in fmaps:
         fmap["metadata"] = layout.get_metadata(fmap["suffix"])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout)
+    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout, bet_mag_frac)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -151,7 +151,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout):
     )
 
     # dilate mask
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name="bet_dwi_pre")
+    bet_dwi0 = pe.Node(fsl.BET(frac=bet_dwi_frac, mask=True, robust=True), name="bet_dwi_pre")
 
     # mrtrix3.MaskFilter
 

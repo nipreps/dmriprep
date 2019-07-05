@@ -47,6 +47,24 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     "allowed outlier slices.",
     default=0.02,
 )
+@click.option(
+    "--bet-dwi",
+    help="Fractional intensity threshold for BET on the DWI. "
+    "A higher value will be more strict; it will cut off more "
+    "around what it analyzes the brain to be. "
+    "If this parameter is not provided a default of 0.3 will "
+    "be used.",
+    default=0.3,
+)
+@click.option(
+    "--bet-mag",
+    help="Fractional intensity threshold for BET on the magnitude. "
+    "A higher value will be more strict; it will cut off more "
+    "around what it analyzes the brain to be. "
+    "If this parameter is not provided a default of 0.3 will "
+    "be used.",
+    default=0.3,
+)
 @click.argument("bids_dir")
 @click.argument("output_dir")
 @click.argument(
@@ -57,6 +75,8 @@ def main(
     bids_dir,
     output_dir,
     eddy_niter=5,
+    bet_dwi=0.3,
+    bet_mag=0.3,
     slice_outlier_threshold=0.02,
     analysis_level="participant",
 ):
@@ -85,7 +105,9 @@ def main(
     )
 
     work_dir = os.path.join(output_dir, "scratch")
-    wf = init_dmriprep_wf(layout, subject_list, work_dir, output_dir)
+    wf = init_dmriprep_wf(
+        layout, subject_list, work_dir, output_dir, bet_dwi, bet_mag
+    )
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
     wf.config["execution"]["keep_inputs"] = True
