@@ -19,8 +19,9 @@ from ..fieldmap.base import init_sdc_prep_wf
 def init_dwi_preproc_wf(
     subject_id,
     dwi_file,
-    metadata,
+    dwi_meta,
     layout,
+    resize_scale,
     bet_dwi_frac,
     bet_mag_frac,
     total_readout,
@@ -38,7 +39,7 @@ def init_dwi_preproc_wf(
     for fmap in fmaps:
         fmap["metadata"] = layout.get_metadata(fmap[fmap["suffix"]])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout, bet_mag_frac)
+    sdc_wf = init_sdc_prep_wf(fmaps, dwi_meta, layout, bet_mag_frac)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -47,7 +48,7 @@ def init_dwi_preproc_wf(
             fields=[
                 "subject_id",
                 "dwi_file",
-                "metadata",
+                "di_meta",
                 "bvec_file",
                 "bval_file",
                 "out_dir",
@@ -66,7 +67,8 @@ def init_dwi_preproc_wf(
 
     unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
 
-    resize = pe.Node(mrtrix3.MRResize(), name="resize")
+    if resize_scale:
+        resize = pe.Node(mrtrix3.MRResize(scale=resize_scale), name="resize")
 
     def gen_index(in_file):
 
@@ -234,7 +236,7 @@ def init_dwi_preproc_wf(
             (
                 inputnode,
                 acqp,
-                [("dwi_file", "in_file"), ("metadata", "metadata")],
+                [("dwi_file", "in_file"), ("dwi_meta", "metadata")],
             ),
             (unring, ecc, [("out_file", "in_file")]),
             (

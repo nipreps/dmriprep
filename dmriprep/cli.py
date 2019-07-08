@@ -28,6 +28,15 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     "can be specified with a space separated list.",
     default=None,
 )
+@click.command()
+@click.option(
+    "--ignore",
+    help="Ignore selected parts of the workflow.",
+    type=click.Choice(["denoise", "unring"]),
+)
+@click.option(
+    "--resize-scale", help="Scale factor to resize DWI image", type=(float)
+)
 @click.option(
     "--eddy-niter",
     help="Fixed number of eddy iterations. See "
@@ -73,6 +82,7 @@ def main(
     participant_label,
     bids_dir,
     output_dir,
+    resize_scale,
     eddy_niter=5,
     bet_dwi=0.3,
     bet_mag=0.3,
@@ -109,6 +119,7 @@ def main(
         subject_list,
         work_dir,
         output_dir,
+        resize_scale,
         bet_dwi,
         bet_mag,
         total_readout,
