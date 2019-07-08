@@ -52,7 +52,6 @@ def init_dwi_preproc_wf(
                 "bval_file",
                 "out_dir",
                 "eddy_niter",
-                "slice_outlier_threshold",
             ]
         ),
         name="inputnode",

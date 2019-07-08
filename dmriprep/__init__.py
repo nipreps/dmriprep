@@ -16,7 +16,6 @@ import warnings
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
-from . import data
 from . import qc
 
 module_logger = logging.getLogger(__name__)
@@ -46,7 +45,9 @@ handler = logging.FileHandler(logpath, mode="w")
 handler.setLevel(logging.DEBUG)
 
 # create a logging format
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 handler.setFormatter(formatter)
 
 # add the handlers to the logger

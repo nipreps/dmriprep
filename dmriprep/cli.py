@@ -9,7 +9,6 @@ from bids import BIDSLayout
 import click
 
 from . import utils
-from .data import get_dataset
 from .workflows.base import init_dmriprep_wf
 
 # Filter warnings that are visible whenever you import another package that
@@ -36,16 +35,6 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     "#A--niter",
     default=5,
     type=(int),
-)
-@click.option(
-    "--slice-outlier-threshold",
-    help="Number of allowed outlier slices per volume. "
-    "If this is exceeded the volume is dropped from analysis. "
-    "If an int is provided, it is treated as number of allowed "
-    "outlier slices. If a float between 0 and 1 "
-    "(exclusive) is provided, it is treated the fraction of "
-    "allowed outlier slices.",
-    default=0.02,
 )
 @click.option(
     "--bet-dwi",
@@ -76,7 +65,9 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 @click.argument("bids_dir")
 @click.argument("output_dir")
 @click.argument(
-    "analysis_level", type=click.Choice(["participant", "group"]), default="participant"
+    "analysis_level",
+    type=click.Choice(["participant", "group"]),
+    default="participant",
 )
 def main(
     participant_label,
@@ -85,7 +76,6 @@ def main(
     eddy_niter=5,
     bet_dwi=0.3,
     bet_mag=0.3,
-    slice_outlier_threshold=0.02,
     total_readout=None,
     analysis_level="participant",
 ):
@@ -115,7 +105,13 @@ def main(
 
     work_dir = os.path.join(output_dir, "scratch")
     wf = init_dmriprep_wf(
-        layout, subject_list, work_dir, output_dir, bet_dwi, bet_mag, total_readout
+        layout,
+        subject_list,
+        work_dir,
+        output_dir,
+        bet_dwi,
+        bet_mag,
+        total_readout,
     )
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
@@ -123,101 +119,6 @@ def main(
     wf.run()
 
     return 0
-
-
-@click.command()
-@click.argument("output_dir")
-@click.option(
-    "--subject",
-    help="subject id to download (will choose 1 subject if not specified",
-    default="sub-NDARBA507GCT",
-)
-@click.option(
-    "--study",
-    help="which study to download. Right now we only support the HBN dataset",
-    default="HBN",
-)
-def data(output_dir, study="HBN", subject="sub-NDARBA507GCT"):
-    """
-    Download dwi raw data in BIDS format from public datasets
-
-    :param output_dir: A directory to write files to
-    :param study: A study name, right now we only support 'HBN'
-    :param subject: A subject from the study, starting with 'sub-'
-    :return: None
-    """
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    if study.upper() != "HBN":
-        raise NotImplementedError(
-            "We only support data downloads from the HBN dataset right now."
-        )
-
-    get_dataset(os.path.abspath(output_dir), source=study.upper(), subject_id=subject)
-    print("done")
-
-
-@click.command()
-@click.argument("output_dir")
-@click.argument("bucket")
-@click.option("--access_key", help="your AWS access key")
-@click.option("--secret_key", help="your AWS access secret")
-@click.option(
-    "--provider",
-    default="s3",
-    help="Cloud storage provider. Only S3 is supported right now.",
-)
-@click.option("--subject", default=None, help="Subject id to upload (optional)")
-def upload(output_dir, bucket, access_key, secret_key, provider="s3", subject=None):
-    """
-    OUTPUT_DIR: The directory where the output files were stored.
-
-    BUCKET: The cloud bucket name to upload data to.
-    """
-    import boto3
-    from dask import compute, delayed
-    from glob import glob
-    from tqdm.auto import tqdm
-
-    output_dir = os.path.abspath(output_dir)
-    if not output_dir.endswith("/"):
-        output_dir += "/"
-
-    if provider == "s3" or provider == "S3":
-        client = boto3.client(
-            "s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key
-        )
-
-        if subject is not None:
-            assert os.path.exists(
-                os.path.join(output_dir, subject)
-            ), "this subject id does not exist!"
-            subjects = [subject]
-        else:
-            subjects = [
-                os.path.split(s)[1] for s in glob(os.path.join(output_dir, "sub-*"))
-            ]
-
-        def upload_subject(sub, sub_idx):
-            base_dir = os.path.join(output_dir, sub, "dmriprep")
-            for root, dirs, files in os.walk(base_dir):
-                if len(files):
-                    for f in tqdm(
-                        files,
-                        desc=f"Uploading {sub} {root.split('/')[-1]}",
-                        position=sub_idx,
-                    ):
-                        filepath = os.path.join(root, f)
-                        key = root.replace(output_dir, "")
-                        client.upload_file(filepath, bucket, os.path.join(key, f))
-
-        uploads = [delayed(upload_subject)(s, idx) for idx, s in enumerate(subjects)]
-        _ = list(compute(*uploads, scheduler="threads"))
-    else:
-        raise NotImplementedError(
-            "Only S3 is the only supported provider for data uploads at the moment"
-        )
 
 
 if __name__ == "__main__":
