@@ -13,7 +13,6 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "Click>=6.0",
-    "dask",
     "dipy",
     "nipype",
     "pandas",
@@ -21,7 +20,6 @@ requirements = [
     "tqdm",
     "pybids",
     "matplotlib",
-    "cytoolz",
     "numba",
 ]
 
