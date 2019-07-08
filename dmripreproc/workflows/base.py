@@ -7,7 +7,7 @@ from nipype.pipeline import engine as pe
 from .dwi import init_dwi_preproc_wf, init_output_wf
 
 
-def init_dmriprep_wf(
+def init_dmriprepoc_wf(
     layout,
     subject_list,
     work_dir,
@@ -17,8 +17,8 @@ def init_dmriprep_wf(
     bet_mag,
     total_readout,
 ):
-    dmriprep_wf = pe.Workflow(name="dmriprep_wf")
-    dmriprep_wf.base_dir = work_dir
+    dmriprepoc_wf = pe.Workflow(name="dmriprepoc_wf")
+    dmriprepoc_wf.base_dir = work_dir
 
     for subject_id in subject_list:
 
@@ -35,15 +35,15 @@ def init_dmriprep_wf(
         )
 
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
-            output_dir, "dmriprep", "sub-" + subject_id, "log"
+            output_dir, "dmriprepoc", "sub-" + subject_id, "log"
         )
 
         for node in single_subject_wf._get_all_nodes():
             node.config = deepcopy(single_subject_wf.config)
 
-        dmriprep_wf.add_nodes([single_subject_wf])
+        dmriprepoc_wf.add_nodes([single_subject_wf])
 
-    return dmriprep_wf
+    return dmriprepoc_wf
 
 
 def init_single_subject_wf(

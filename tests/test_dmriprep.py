@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `dmriprep` package."""
+"""Tests for `dmriprepoc` package."""
 
 import pytest
 
 from click.testing import CliRunner
 
-from dmriprep import cli
+from dmriprepoc import cli
 
 
 @pytest.fixture

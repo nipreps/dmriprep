@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Console script for dmriprep."""
+"""Console script for dmriprepoc."""
 import os
 import sys
 import warnings
@@ -9,7 +9,7 @@ from bids import BIDSLayout
 import click
 
 from . import utils
-from .workflows.base import init_dmriprep_wf
+from .workflows.base import init_dmriprepoc_wf
 
 # Filter warnings that are visible whenever you import another package that
 # was compiled against an older numpy than is installed.
@@ -104,7 +104,7 @@ def main(
     """
     if analysis_level is not "participant":
         raise NotImplementedError(
-            "The only valid analysis level for dmriprep "
+            "The only valid analysis level for dmriprepoc "
             "is participant at the moment."
         )
 
@@ -114,7 +114,7 @@ def main(
     )
 
     work_dir = os.path.join(output_dir, "scratch")
-    wf = init_dmriprep_wf(
+    wf = init_dmriprepoc_wf(
         layout,
         subject_list,
         work_dir,

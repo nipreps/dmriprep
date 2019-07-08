@@ -8,13 +8,13 @@ Installation
 Stable release
 --------------
 
-To install dmriprep, run this command in your terminal:
+To install dmriprepoc, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install dmriprep
+    $ pip install dmriprepoc
 
-This is the preferred method to install dmriprep, as it will always install the most recent stable release.
+This is the preferred method to install dmriprepoc, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,19 +26,19 @@ you through the process.
 From sources
 ------------
 
-The sources for dmriprep can be downloaded from the `Github repo`_.
+The sources for dmriprepoc can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/nipy/dmriprep
+    $ git clone git://github.com/nipy/dmriprepoc
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/nipy/dmriprep/tarball/master
+    $ curl  -OL https://github.com/nipy/dmriprepoc/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/nipy/dmriprep
-.. _tarball: https://github.com/nipy/dmriprep/tarball/master
+.. _Github repo: https://github.com/nipy/dmriprepoc
+.. _tarball: https://github.com/nipy/dmriprepoc/tarball/master

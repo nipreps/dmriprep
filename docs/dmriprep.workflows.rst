@@ -1,4 +1,4 @@
-dmriprep.workflows package
+dmriprepoc.workflows package
 ==========================
 
 Subpackages
@@ -6,16 +6,16 @@ Subpackages
 
 .. toctree::
 
-   dmriprep.workflows.dwi
-   dmriprep.workflows.fieldmap
+   dmriprepoc.workflows.dwi
+   dmriprepoc.workflows.fieldmap
 
 Submodules
 ----------
 
-dmriprep.workflows.base module
+dmriprepoc.workflows.base module
 ------------------------------
 
-.. automodule:: dmriprep.workflows.base
+.. automodule:: dmriprepoc.workflows.base
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,7 +24,7 @@ dmriprep.workflows.base module
 Module contents
 ---------------
 
-.. automodule:: dmriprep.workflows
+.. automodule:: dmriprepoc.workflows
    :members:
    :undoc-members:
    :show-inheritance:

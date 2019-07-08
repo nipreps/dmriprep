@@ -1,16 +1,16 @@
-[![Known Vulnerabilities](https://snyk.io/test/github/nipy/dmriprep/badge.svg)](https://snyk.io/test/github/nipy/dmriprep)
-[![Documentation Status](https://readthedocs.org/projects/dmriprep/badge/?version=latest)](httpsL//dmriprep.readthredocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/nipy/dmriprep.png?branch=master)](https://travis-ci.org/nipy/dmriprep)
-[![Coverage Status](https://coveralls.io/repos/github/nipy/dmriprep/badge.svg?branch=master)](https://coveralls.io/github/nipy/dmriprep?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/nipy/dmriprepoc/badge.svg)](https://snyk.io/test/github/nipy/dmriprepoc)
+[![Documentation Status](https://readthedocs.org/projects/dmriprepoc/badge/?version=latest)](httpsL//dmriprepoc.readthredocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/nipy/dmriprepoc.png?branch=master)](https://travis-ci.org/nipy/dmriprepoc)
+[![Coverage Status](https://coveralls.io/repos/github/nipy/dmriprepoc/badge.svg?branch=master)](https://coveralls.io/github/nipy/dmriprepoc?branch=master)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 
-# <img alt="dmriprep" src="docs/img/dmriprep_icon.svg" height="128"> dmriprep
+# <img alt="dmriprepoc" src="docs/img/dmriprepoc_icon.svg" height="128"> dmriprepoc
 
 Preprocessing of neuroimaging data in preparation for AFQ analysis
 
 * Free software: BSD license
-* Documentation: https://dmriprep.readthedocs.io.
+* Documentation: https://dmriprepoc.readthedocs.io.
 
 ## Preparing your data
 
@@ -34,28 +34,28 @@ You should have raw data organized in the BIDS format. Also, you should have run
 ## Quickstart
 
 ```bash
-git clone https://github.com/nipy/dmriprep
-cd dmriprep
+git clone https://github.com/nipy/dmriprepoc
+cd dmriprepoc
 python setup.py install
 
-dmriprep $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
+dmriprepoc $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
 ```
 
 ```bash
-git clone https://github.com/nipy/dmriprep
-cd dmriprep
+git clone https://github.com/nipy/dmriprepoc
+cd dmriprepoc
 make docker
 
 # If you don't want to log into the docker image:
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:prod dmriprepoc /inputs /outputs
 
 # If you want to log into the image:
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod 
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:prod 
 
 # Run this inside the docker image:
-dmriprep /inputs /outpus --participant-label 01
+dmriprepoc /inputs /outpus --participant-label 01
 ```
 
 ## Features
@@ -64,11 +64,11 @@ dmriprep /inputs /outpus --participant-label 01
 
 ## Contributing
 
-We love contributions! dmriprep is open source, built on open source,
+We love contributions! dmriprepoc is open source, built on open source,
 and we'd love to have you hang out in our community.
 
 We have developed some [guidelines](CONTRIBUTING.rst) for contributing to
-dmriprep.
+dmriprepoc.
 
 **Imposter syndrome disclaimer**: We want your help. No, really.
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Top-level package for dmriprep."""
+"""Top-level package for dmriprepoc."""
 
 __author__ = """Anisha Keshavan"""
 __email__ = "anishakeshavan@gmail.com"
@@ -22,13 +22,13 @@ module_logger = logging.getLogger(__name__)
 
 # get the log level from environment variable
 if "DMIRPREP_LOGLEVEL" in os.environ:
-    loglevel = os.environ["DMRIPREP_LOGLEVEL"]
+    loglevel = os.environ["dmriprepoc_LOGLEVEL"]
     module_logger.setLevel(getattr(logging, loglevel.upper()))
 else:
     module_logger.setLevel(logging.WARNING)
 
 # create a file handler
-logpath = os.path.join(os.path.expanduser("~"), ".dmriprep", "dmriprep.log")
+logpath = os.path.join(os.path.expanduser("~"), ".dmriprepoc", "dmriprepoc.log")
 
 # Create the config directory if it doesn't exist
 logdir = os.path.dirname(logpath)
@@ -52,4 +52,4 @@ handler.setFormatter(formatter)
 
 # add the handlers to the logger
 module_logger.addHandler(handler)
-module_logger.info("Started new dmriprep session")
+module_logger.info("Started new dmriprepoc session")

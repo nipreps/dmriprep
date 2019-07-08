@@ -1,29 +1,29 @@
-dmriprep.workflows.dwi package
+dmriprepoc.workflows.dwi package
 ==============================
 
 Submodules
 ----------
 
-dmriprep.workflows.dwi.base module
+dmriprepoc.workflows.dwi.base module
 ----------------------------------
 
-.. automodule:: dmriprep.workflows.dwi.base
+.. automodule:: dmriprepoc.workflows.dwi.base
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprep.workflows.dwi.outputs module
+dmriprepoc.workflows.dwi.outputs module
 -------------------------------------
 
-.. automodule:: dmriprep.workflows.dwi.outputs
+.. automodule:: dmriprepoc.workflows.dwi.outputs
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprep.workflows.dwi.tensor module
+dmriprepoc.workflows.dwi.tensor module
 ------------------------------------
 
-.. automodule:: dmriprep.workflows.dwi.tensor
+.. automodule:: dmriprepoc.workflows.dwi.tensor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -32,7 +32,7 @@ dmriprep.workflows.dwi.tensor module
 Module contents
 ---------------
 
-.. automodule:: dmriprep.workflows.dwi
+.. automodule:: dmriprepoc.workflows.dwi
    :members:
    :undoc-members:
    :show-inheritance:
