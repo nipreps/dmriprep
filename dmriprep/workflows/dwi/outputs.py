@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+import os
+
+from nipype.pipeline import engine as pe
+from nipype.interfaces import io as nio, utility as niu
+
 
 def init_output_wf(subject_id, session_id, output_folder):
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import io as nio, utility as niu
 
     op_wf = pe.Workflow(name="output_wf")
 
@@ -30,10 +33,13 @@ def init_output_wf(subject_id, session_id, output_folder):
     )
 
     def build_path(output_folder, subject_id, session_id):
-        import os.path as op
 
-        return op.join(
-            output_folder, "dmriprep", "sub-" + subject_id, "ses-" + session_id, "dwi"
+        return os.path.join(
+            output_folder,
+            "dmriprep",
+            "sub-" + subject_id,
+            "ses-" + session_id,
+            "dwi",
         )
 
     concat = pe.Node(
