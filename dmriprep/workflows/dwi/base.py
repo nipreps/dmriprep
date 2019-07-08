@@ -37,7 +37,12 @@ def init_dwi_preproc_wf(
         )
 
     for fmap in fmaps:
-        fmap["metadata"] = layout.get_metadata(fmap[fmap["suffix"]])
+        if fmap["suffix"] == "phase":
+            fmap["metadata"] = {}
+            fmap["metadata"]["phase1"] = layout.get_metadata(fmap["phase1"])
+            fmap["metadata"]["phase2"] = layout.get_metadata(fmap["phase2"])
+        else:
+            fmap["metadata"] = layout.get_metadata(fmap[fmap["suffix"]])
 
     sdc_wf = init_sdc_prep_wf(fmaps, dwi_meta, layout, bet_mag_frac)
 
