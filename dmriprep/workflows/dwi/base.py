@@ -1,12 +1,24 @@
 #!/usr/bin/env python
 
+import os
+import multiprocessing
 
-def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, bet_mag_frac):
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import fsl, utility as niu
+import numpy as np
+import nibabel as nib
+from nipype.pipeline import engine as pe
+from nipype.interfaces import fsl, utility as niu
+from nipype.utils import NUMPY_MMAP
+from nipype.utils.filemanip import fname_presuffix
+from dipy.segment.mask import median_otsu
+from numba import cuda
 
-    from ...interfaces import mrtrix
-    from ..fieldmap.base import init_sdc_prep_wf
+from ...interfaces import mrtrix3
+from ..fieldmap.base import init_sdc_prep_wf
+
+
+def init_dwi_preproc_wf(
+    subject_id, dwi_file, metadata, layout, bet_dwi_frac, bet_mag_frac
+):
 
     fmaps = []
     fmaps = layout.get_fieldmap(dwi_file, return_list=True)
@@ -18,7 +30,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
         )
 
     for fmap in fmaps:
-        fmap["metadata"] = layout.get_metadata(fmap["suffix"])
+        fmap["metadata"] = layout.get_metadata(fmap[fmap["suffix"]])
 
     sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout, bet_mag_frac)
 
@@ -45,21 +57,21 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
         name="outputnode",
     )
 
-    denoise = pe.Node(mrtrix.DWIDenoise(), name="denoise")
+    denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
 
-    unring = pe.Node(mrtrix.MRDeGibbs(), name="unring")
+    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
+
+    resize = pe.Node(mrtrix3.MRResize(), name="resize")
 
     def gen_index(in_file):
-        import os.path as op
-        import numpy as np
-        import nibabel as nb
-        from nipype.utils import NUMPY_MMAP
-        from nipype.utils.filemanip import fname_presuffix
 
         out_file = fname_presuffix(
-            in_file, suffix="_index.txt", newpath=op.abspath("."), use_ext=False
+            in_file,
+            suffix="_index.txt",
+            newpath=os.path.abspath("."),
+            use_ext=False,
         )
-        vols = nb.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
+        vols = nib.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
         index_lines = np.ones((vols,))
         index_lines_reshape = index_lines.reshape(1, index_lines.shape[0])
         np.savetxt(out_file, index_lines_reshape, fmt="%i")
@@ -67,17 +79,20 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
 
     gen_idx = pe.Node(
         niu.Function(
-            input_names=["in_file"], output_names=["out_file"], function=gen_index
+            input_names=["in_file"],
+            output_names=["out_file"],
+            function=gen_index,
         ),
         name="gen_index",
     )
 
     def gen_acqparams(in_file, metadata):
-        import os.path as op
-        from nipype.utils.filemanip import fname_presuffix
 
         out_file = fname_presuffix(
-            in_file, suffix="_acqparams.txt", newpath=op.abspath("."), use_ext=False
+            in_file,
+            suffix="_acqparams.txt",
+            newpath=os.path.abspath("."),
+            use_ext=False,
         )
 
         acq_param_dict = {
@@ -116,18 +131,13 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
         .. warning:: *b0* should be already registered (head motion artifact
         should be corrected).
         """
-        import numpy as np
-        import nibabel as nb
-        import os.path as op
-        from nipype.utils import NUMPY_MMAP
-        from nipype.utils.filemanip import fname_presuffix
 
         if out_file is None:
             out_file = fname_presuffix(
-                in_dwi, suffix="_avg_b0", newpath=op.abspath(".")
+                in_dwi, suffix="_avg_b0", newpath=os.path.abspath(".")
             )
 
-        imgs = np.array(nb.four_to_three(nb.load(in_dwi, mmap=NUMPY_MMAP)))
+        imgs = np.array(nib.four_to_three(nib.load(in_dwi, mmap=NUMPY_MMAP)))
         bval = np.loadtxt(in_bval)
         index = np.argwhere(bval <= b0_thresh).flatten().tolist()
 
@@ -138,7 +148,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
         hdr.set_data_shape(b0.shape)
         hdr.set_xyzt_units("mm")
         hdr.set_data_dtype(np.float32)
-        nb.Nifti1Image(b0, imgs[0].affine, hdr).to_filename(out_file)
+        nib.Nifti1Image(b0, imgs[0].affine, hdr).to_filename(out_file)
         return out_file
 
     avg_b0_0 = pe.Node(
@@ -151,7 +161,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
     )
 
     # dilate mask
-    bet_dwi0 = pe.Node(fsl.BET(frac=bet_dwi_frac, mask=True, robust=True), name="bet_dwi_pre")
+    bet_dwi0 = pe.Node(
+        fsl.BET(frac=bet_dwi_frac, mask=True, robust=True), name="bet_dwi_pre"
+    )
 
     # mrtrix3.MaskFilter
 
@@ -160,11 +172,8 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
         name="fsl_eddy",
     )
 
-    import multiprocessing
-
+    # if nthreads not specified, do this
     ecc.inputs.num_threads = multiprocessing.cpu_count()
-
-    from numba import cuda
 
     try:
         if cuda.gpus:
@@ -172,7 +181,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
     except:
         ecc.inputs.use_cuda = False
 
-    denoise_eddy = pe.Node(mrtrix.DWIDenoise(), name="denoise_eddy")
+    denoise_eddy = pe.Node(mrtrix3.DWIDenoise(), name="denoise_eddy")
 
     eddy_quad = pe.Node(fsl.EddyQuad(verbose=True), name="eddy_quad")
 
@@ -182,10 +191,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
 
     def get_b0_mask_fn(b0_file):
-        import nibabel as nib
-        from nipype.utils.filemanip import fname_presuffix
-        from dipy.segment.mask import median_otsu
-        import os
 
         mask_file = fname_presuffix(
             b0_file, suffix="_mask", newpath=os.path.abspath(".")
@@ -198,7 +203,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
 
     b0mask_node = pe.Node(
         niu.Function(
-            input_names=["b0_file"], output_names=["mask_file"], function=get_b0_mask_fn
+            input_names=["b0_file"],
+            output_names=["mask_file"],
+            function=get_b0_mask_fn,
         ),
         name="getB0Mask",
     )
@@ -213,9 +220,17 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
             (unring, avg_b0_0, [("out_file", "in_dwi")]),
             (avg_b0_0, bet_dwi0, [("out_file", "in_file")]),
             (inputnode, gen_idx, [("dwi_file", "in_file")]),
-            (inputnode, acqp, [("dwi_file", "in_file"), ("metadata", "metadata")]),
+            (
+                inputnode,
+                acqp,
+                [("dwi_file", "in_file"), ("metadata", "metadata")],
+            ),
             (unring, ecc, [("out_file", "in_file")]),
-            (inputnode, ecc, [("bval_file", "in_bval"), ("bvec_file", "in_bvec")]),
+            (
+                inputnode,
+                ecc,
+                [("bval_file", "in_bval"), ("bvec_file", "in_bvec")],
+            ),
             (bet_dwi0, ecc, [("mask_file", "in_mask")]),
             (gen_idx, ecc, [("out_file", "in_index")]),
             (acqp, ecc, [("out_file", "in_acqp")]),
@@ -241,7 +256,11 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, layout, bet_dwi_frac, be
             (bet_dwi0, sdc_wf, [("out_file", "inputnode.b0_stripped")]),
             (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
             (sdc_wf, eddy_quad, [("outputnode.out_fmap", "field")]),
-            (ecc, dtifit, [("out_corrected", "dwi"), ("out_rotated_bvecs", "bvecs")]),
+            (
+                ecc,
+                dtifit,
+                [("out_corrected", "dwi"), ("out_rotated_bvecs", "bvecs")],
+            ),
             (b0mask_node, dtifit, [("mask_file", "mask")]),
             (inputnode, dtifit, [("bval_file", "bvals")]),
         ]
