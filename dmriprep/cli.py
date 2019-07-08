@@ -65,6 +65,14 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     "be used.",
     default=0.3,
 )
+@click.option(
+    "--total-readout",
+    help="Manual option for what value will be used in acquired params step. "
+    "If this parameter is not provided the value will be taken from the "
+    "TotalReadoutTime field in the dwi json. ",
+    default=None,
+    type=(float),
+)
 @click.argument("bids_dir")
 @click.argument("output_dir")
 @click.argument(
@@ -78,6 +86,7 @@ def main(
     bet_dwi=0.3,
     bet_mag=0.3,
     slice_outlier_threshold=0.02,
+    total_readout=None,
     analysis_level="participant",
 ):
     """
@@ -106,7 +115,7 @@ def main(
 
     work_dir = os.path.join(output_dir, "scratch")
     wf = init_dmriprep_wf(
-        layout, subject_list, work_dir, output_dir, bet_dwi, bet_mag
+        layout, subject_list, work_dir, output_dir, bet_dwi, bet_mag, total_readout
     )
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
