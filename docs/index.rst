@@ -7,7 +7,6 @@ Welcome to dmriprep's documentation!
 
    installation
    usage
-   modules
    contributing
    authors
    history
