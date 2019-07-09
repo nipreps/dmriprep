@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 
+from nipype.pipeline import engine as pe
+from nipype.interfaces import fsl, utility as niu
+
 
 def init_fmap_wf():
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import fsl, utility as niu
 
     wf = pe.Workflow(name="fmap_prep_wf")
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["fieldmap", "magnitude", "b0_stripped"]), name="inputnode")
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["fieldmap", "magnitude", "b0_stripped"]),
+        name="inputnode",
+    )
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["out_fmap"]), name="outputnode")
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=["out_fmap"]), name="outputnode"
+    )
 
     rad_to_hz = pe.Node(
         fsl.BinaryMaths(operation="div", operand_value=6.28), name="radToHz"
