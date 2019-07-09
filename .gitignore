@@ -103,3 +103,6 @@ ENV/
 
 # Mac OS nonsense:
 .DS_Store
+
+# data
+notebooks/data/
