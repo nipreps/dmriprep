@@ -9,7 +9,7 @@ from .dwi import init_dwi_preproc_wf, init_output_wf
 
 def init_dmriprep_wf(
     layout, subject_list, work_dir, output_dir,
-    bet_dwi, bet_mag, total_readout
+    bet_dwi, bet_mag, total_readout, ignore_nodes
 ):
     dmriprep_wf = pe.Workflow(name="dmriprep_wf")
     dmriprep_wf.base_dir = work_dir
@@ -25,6 +25,7 @@ def init_dmriprep_wf(
             bet_dwi=bet_dwi,
             bet_mag=bet_mag,
             total_readout=total_readout,
+            ignore_nodes=ignore_nodes,
         )
 
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
@@ -41,7 +42,7 @@ def init_dmriprep_wf(
 
 def init_single_subject_wf(
     layout, subject_id, name, work_dir, output_dir,
-    bet_dwi, bet_mag, total_readout
+    bet_dwi, bet_mag, total_readout, ignore_nodes
 ):
 
     dwi_files = layout.get(
@@ -66,7 +67,8 @@ def init_single_subject_wf(
         metadata = layout.get_metadata(dwi_file)
         dwi_preproc_wf = init_dwi_preproc_wf(
             subject_id=subject_id, dwi_file=dwi_file, metadata=metadata, layout=layout,
-            bet_dwi_frac=bet_dwi, bet_mag_frac=bet_mag, total_readout=total_readout
+            bet_dwi_frac=bet_dwi, bet_mag_frac=bet_mag, total_readout=total_readout,
+            ignore_nodes=ignore_nodes
         )
         datasink_wf = init_output_wf(
             subject_id=subject_id, session_id=session_id, output_folder=output_dir

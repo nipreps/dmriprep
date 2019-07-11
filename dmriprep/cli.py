@@ -62,6 +62,17 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     default=None,
     type=(float),
 )
+@click.option(
+    "--ignore_nodes",
+    help="Specify which node(s) to skip during the preprocessing of the dwi."
+    "Example: If you want to skip unring and resize, use '--ignore_nodes ur'."
+    "Options are: \n"
+    "   d: denoise \n"
+    "   u: unring \n"
+    "   r: resize (upsample)",
+    default=None,
+    type=(str),
+)
 @click.argument("bids_dir")
 @click.argument("output_dir")
 @click.argument(
@@ -77,6 +88,7 @@ def main(
     bet_dwi=0.3,
     bet_mag=0.3,
     total_readout=None,
+    ignore_nodes='',
     analysis_level="participant",
 ):
     """
@@ -112,6 +124,7 @@ def main(
         bet_dwi,
         bet_mag,
         total_readout,
+        ignore_nodes,
     )
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
