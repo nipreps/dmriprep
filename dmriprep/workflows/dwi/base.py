@@ -20,15 +20,11 @@ def init_dwi_preproc_wf(
     subject_id,
     dwi_file,
     metadata,
-    layout,
-    bet_dwi_frac,
-    bet_mag_frac,
-    total_readout,
-    ignore_nodes,
+    parameters
 ):
 
     fmaps = []
-    fmaps = layout.get_fieldmap(dwi_file, return_list=True)
+    fmaps = parameters.layout.get_fieldmap(dwi_file, return_list=True)
 
     if not fmaps:
         raise Exception(
@@ -37,9 +33,9 @@ def init_dwi_preproc_wf(
         )
 
     for fmap in fmaps:
-        fmap["metadata"] = layout.get_metadata(fmap[fmap["suffix"]])
+        fmap["metadata"] = parameters.layout.get_metadata(fmap[fmap["suffix"]])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, metadata, layout, bet_mag_frac)
+    sdc_wf = init_sdc_prep_wf(fmaps, metadata, parameters.layout, parameters.bet_mag)
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -64,7 +60,7 @@ def init_dwi_preproc_wf(
     )
 
     # Create the dwi prep workflow
-    dwi_prep_wf = init_dwiprep_wf(ignore_nodes)
+    dwi_prep_wf = init_dwiprep_wf(parameters.ignore_nodes)
 
     def gen_index(in_file):
         import os
@@ -141,7 +137,7 @@ def init_dwi_preproc_wf(
         name="acqp",
     )
 
-    acqp.inputs.total_readout_time = total_readout
+    acqp.inputs.total_readout_time = parameters.total_readout
 
     def b0_average(in_dwi, in_bval, b0_thresh=10.0, out_file=None):
         """
@@ -189,7 +185,7 @@ def init_dwi_preproc_wf(
 
     # dilate mask
     bet_dwi0 = pe.Node(
-        fsl.BET(frac=bet_dwi_frac, mask=True, robust=True), name="bet_dwi_pre"
+        fsl.BET(frac=parameters.bet_dwi, mask=True, robust=True), name="bet_dwi_pre"
     )
 
     # mrtrix3.MaskFilter

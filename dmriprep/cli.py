@@ -116,15 +116,24 @@ def main(
     )
 
     work_dir = os.path.join(output_dir, "scratch")
+
+    # Set parameters based on CLI, pass through object
+    parameters = utils.Parameters()
+    parameters.participant_label = participant_label
+    parameters.layout = layout
+    parameters.subject_list = subject_list
+    parameters.bids_dir = bids_dir
+    parameters.work_dir = work_dir
+    parameters.output_dir = output_dir
+    parameters.eddy_niter = eddy_niter
+    parameters.bet_dwi = bet_dwi
+    parameters.bet_mag = bet_mag
+    parameters.total_readout = total_readout
+    parameters.ignore_nodes = ignore_nodes
+    parameters.analysis_level = analysis_level
+
     wf = init_dmriprep_wf(
-        layout,
-        subject_list,
-        work_dir,
-        output_dir,
-        bet_dwi,
-        bet_mag,
-        total_readout,
-        ignore_nodes,
+        parameters
     )
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False

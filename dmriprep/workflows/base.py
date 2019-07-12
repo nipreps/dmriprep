@@ -6,30 +6,22 @@ from copy import deepcopy
 from nipype.pipeline import engine as pe
 from .dwi import init_dwi_preproc_wf, init_output_wf
 
-
 def init_dmriprep_wf(
-    layout, subject_list, work_dir, output_dir,
-    bet_dwi, bet_mag, total_readout, ignore_nodes
+    parameters
 ):
     dmriprep_wf = pe.Workflow(name="dmriprep_wf")
-    dmriprep_wf.base_dir = work_dir
+    dmriprep_wf.base_dir = parameters.work_dir
 
-    for subject_id in subject_list:
+    for subject_id in parameters.subject_list:
 
         single_subject_wf = init_single_subject_wf(
-            layout=layout,
             subject_id=subject_id,
             name="single_subject_" + subject_id + "_wf",
-            work_dir=work_dir,
-            output_dir=output_dir,
-            bet_dwi=bet_dwi,
-            bet_mag=bet_mag,
-            total_readout=total_readout,
-            ignore_nodes=ignore_nodes,
+            parameters=parameters
         )
 
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
-            output_dir, "dmriprep", "sub-" + subject_id, "log"
+            parameters.output_dir, "dmriprep", "sub-" + subject_id, "log"
         )
 
         for node in single_subject_wf._get_all_nodes():
@@ -41,11 +33,10 @@ def init_dmriprep_wf(
 
 
 def init_single_subject_wf(
-    layout, subject_id, name, work_dir, output_dir,
-    bet_dwi, bet_mag, total_readout, ignore_nodes
+    subject_id, name, parameters
 ):
 
-    dwi_files = layout.get(
+    dwi_files = parameters.layout.get(
         subject=subject_id,
         datatype="dwi",
         suffix="dwi",
@@ -62,32 +53,31 @@ def init_single_subject_wf(
     subject_wf = pe.Workflow(name=name)
 
     for dwi_file in dwi_files:
-        entities = layout.parse_file_entities(dwi_file)
+        entities = parameters.layout.parse_file_entities(dwi_file)
         session_id = entities["session"]
-        metadata = layout.get_metadata(dwi_file)
+        metadata = parameters.layout.get_metadata(dwi_file)
         dwi_preproc_wf = init_dwi_preproc_wf(
-            subject_id=subject_id, dwi_file=dwi_file, metadata=metadata, layout=layout,
-            bet_dwi_frac=bet_dwi, bet_mag_frac=bet_mag, total_readout=total_readout,
-            ignore_nodes=ignore_nodes
+            subject_id=subject_id, dwi_file=dwi_file, metadata=metadata,
+            parameters=parameters
         )
         datasink_wf = init_output_wf(
-            subject_id=subject_id, session_id=session_id, output_folder=output_dir
+            subject_id=subject_id, session_id=session_id, output_folder=parameters.output_dir
         )
 
-        dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(work_dir), subject_id)
+        dwi_preproc_wf.base_dir = os.path.join(os.path.abspath(parameters.work_dir), subject_id)
 
         inputspec = dwi_preproc_wf.get_node("inputnode")
         inputspec.inputs.subject_id = subject_id
         inputspec.inputs.dwi_file = dwi_file
         inputspec.inputs.metadata = metadata
-        inputspec.inputs.bvec_file = layout.get_bvec(dwi_file)
-        inputspec.inputs.bval_file = layout.get_bval(dwi_file)
-        inputspec.inputs.out_dir = os.path.abspath(output_dir)
+        inputspec.inputs.bvec_file = parameters.layout.get_bvec(dwi_file)
+        inputspec.inputs.bval_file = parameters.layout.get_bval(dwi_file)
+        inputspec.inputs.out_dir = os.path.abspath(parameters.output_dir)
 
         ds_inputspec = datasink_wf.get_node("inputnode")
         ds_inputspec.inputs.subject_id = subject_id
         ds_inputspec.inputs.session_id = session_id
-        ds_inputspec.inputs.output_folder = output_dir
+        ds_inputspec.inputs.output_folder = parameters.output_dir
         ds_inputspec.inputs.metadata = metadata
 
         wf_name = "sub_" + subject_id + "_ses_" + session_id + "_preproc_wf"
