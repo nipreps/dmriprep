@@ -1,9 +1,7 @@
-[![Known Vulnerabilities](https://snyk.io/test/github/nipy/dmriprep/badge.svg)](https://snyk.io/test/github/nipy/dmriprep)
-[![Documentation Status](https://readthedocs.org/projects/dmriprep/badge/?version=latest)](httpsL//dmriprep.readthredocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/nipy/dmriprep.png?branch=master)](https://travis-ci.org/nipy/dmriprep)
-[![Coverage Status](https://coveralls.io/repos/github/nipy/dmriprep/badge.svg?branch=master)](https://coveralls.io/github/nipy/dmriprep?branch=master)
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+.. image:: https://codecov.io/gh/TIGRLab/dmripreproc/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/TIGRLab/dmripreproc  
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/python/black
 
 # <img alt="dmriprep" src="docs/img/dmriprep_icon.svg" height="128"> dmriprep
 
