@@ -71,6 +71,17 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     default=None,
     type=(float),
 )
+@click.option(
+    "--ignore_nodes",
+    help="Specify which node(s) to skip during the preprocessing of the dwi."
+    "Example: If you want to skip unring and resize, use '--ignore_nodes ur'."
+    "Options are: \n"
+    "   d: denoise \n"
+    "   u: unring \n"
+    "   r: resize (upsample)",
+    default=None,
+    type=(str),
+)
 @click.argument("bids_dir")
 @click.argument("output_dir")
 @click.argument(
@@ -87,6 +98,7 @@ def main(
     bet_dwi=0.3,
     bet_mag=0.3,
     total_readout=None,
+    ignore_nodes="",
     analysis_level="participant",
 ):
     """
@@ -114,16 +126,23 @@ def main(
     )
 
     work_dir = os.path.join(output_dir, "scratch")
-    wf = init_dmriprepoc_wf(
-        layout,
-        subject_list,
-        work_dir,
-        output_dir,
-        resize_scale,
-        bet_dwi,
-        bet_mag,
-        total_readout,
-    )
+
+    # Set parameters based on CLI, pass through object
+    parameters = utils.Parameters()
+    parameters.participant_label = participant_label
+    parameters.layout = layout
+    parameters.subject_list = subject_list
+    parameters.bids_dir = bids_dir
+    parameters.work_dir = work_dir
+    parameters.output_dir = output_dir
+    parameters.eddy_niter = eddy_niter
+    parameters.bet_dwi = bet_dwi
+    parameters.bet_mag = bet_mag
+    parameters.total_readout = total_readout
+    parameters.ignore_nodes = ignore_nodes
+    parameters.analysis_level = analysis_level
+
+    wf = init_dmriprep_wf(parameters)
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
     wf.config["execution"]["keep_inputs"] = True

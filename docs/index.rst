@@ -7,7 +7,6 @@ Welcome to dmriprepoc's documentation!
 
    installation
    usage
-   modules
    contributing
    authors
    history

@@ -14,21 +14,13 @@ from numba import cuda
 
 from ...interfaces import mrtrix3
 from ..fieldmap.base import init_sdc_prep_wf
+from .dwiprep import init_dwiprep_wf
 
 
-def init_dwi_preproc_wf(
-    subject_id,
-    dwi_file,
-    dwi_meta,
-    layout,
-    resize_scale,
-    bet_dwi_frac,
-    bet_mag_frac,
-    total_readout,
-):
+def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     fmaps = []
-    fmaps = layout.get_fieldmap(dwi_file, return_list=True)
+    fmaps = parameters.layout.get_fieldmap(dwi_file, return_list=True)
 
     if not fmaps:
         raise Exception(
@@ -37,14 +29,11 @@ def init_dwi_preproc_wf(
         )
 
     for fmap in fmaps:
-        if fmap["suffix"] == "phase":
-            fmap["metadata"] = {}
-            fmap["metadata"]["phase1"] = layout.get_metadata(fmap["phase1"])
-            fmap["metadata"]["phase2"] = layout.get_metadata(fmap["phase2"])
-        else:
-            fmap["metadata"] = layout.get_metadata(fmap[fmap["suffix"]])
+        fmap["metadata"] = parameters.layout.get_metadata(fmap[fmap["suffix"]])
 
-    sdc_wf = init_sdc_prep_wf(fmaps, dwi_meta, layout, bet_mag_frac)
+    sdc_wf = init_sdc_prep_wf(
+        fmaps, metadata, parameters.layout, parameters.bet_mag
+    )
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
 
@@ -68,14 +57,17 @@ def init_dwi_preproc_wf(
         name="outputnode",
     )
 
-    denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
-
-    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
-
-    if resize_scale:
-        resize = pe.Node(mrtrix3.MRResize(scale=resize_scale), name="resize")
+    # Create the dwi prep workflow
+    dwi_prep_wf = init_dwiprep_wf(parameters.ignore_nodes)
 
     def gen_index(in_file):
+        import os
+        import numpy as np
+        import nibabel as nib
+        from nipype.pipeline import engine as pe
+        from nipype.interfaces import fsl, utility as niu
+        from nipype.utils import NUMPY_MMAP
+        from nipype.utils.filemanip import fname_presuffix
 
         out_file = fname_presuffix(
             in_file,
@@ -99,6 +91,10 @@ def init_dwi_preproc_wf(
     )
 
     def gen_acqparams(in_file, metadata, total_readout_time):
+        import os
+        import numpy as np
+        import nibabel as nib
+        from nipype.utils.filemanip import fname_presuffix
 
         out_file = fname_presuffix(
             in_file,
@@ -139,7 +135,7 @@ def init_dwi_preproc_wf(
         name="acqp",
     )
 
-    acqp.inputs.total_readout_time = total_readout
+    acqp.inputs.total_readout_time = parameters.total_readout
 
     def b0_average(in_dwi, in_bval, b0_thresh=10.0, out_file=None):
         """
@@ -149,6 +145,13 @@ def init_dwi_preproc_wf(
         .. warning:: *b0* should be already registered (head motion artifact
         should be corrected).
         """
+        import os
+        import numpy as np
+        import nibabel as nib
+        from nipype.pipeline import engine as pe
+        from nipype.interfaces import fsl, utility as niu
+        from nipype.utils import NUMPY_MMAP
+        from nipype.utils.filemanip import fname_presuffix
 
         if out_file is None:
             out_file = fname_presuffix(
@@ -180,7 +183,8 @@ def init_dwi_preproc_wf(
 
     # dilate mask
     bet_dwi0 = pe.Node(
-        fsl.BET(frac=bet_dwi_frac, mask=True, robust=True), name="bet_dwi_pre"
+        fsl.BET(frac=parameters.bet_dwi, mask=True, robust=True),
+        name="bet_dwi_pre",
     )
 
     # mrtrix3.MaskFilter
@@ -209,6 +213,12 @@ def init_dwi_preproc_wf(
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
 
     def get_b0_mask_fn(b0_file):
+        import os
+        import nibabel as nib
+        from nipype.pipeline import engine as pe
+        from nipype.interfaces import fsl, utility as niu
+        from nipype.utils.filemanip import fname_presuffix
+        from dipy.segment.mask import median_otsu
 
         mask_file = fname_presuffix(
             b0_file, suffix="_mask", newpath=os.path.abspath(".")
@@ -232,10 +242,17 @@ def init_dwi_preproc_wf(
 
     dwi_wf.connect(
         [
-            (inputnode, denoise, [("dwi_file", "in_file")]),
-            (denoise, unring, [("out_file", "in_file")]),
+            (
+                inputnode,
+                dwi_prep_wf,
+                [("dwi_file", "dwi_prep_inputnode.dwi_file")],
+            ),
+            (
+                dwi_prep_wf,
+                avg_b0_0,
+                [("dwi_prep_outputnode.out_file", "in_dwi")],
+            ),
             (inputnode, avg_b0_0, [("bval_file", "in_bval")]),
-            (unring, avg_b0_0, [("out_file", "in_dwi")]),
             (avg_b0_0, bet_dwi0, [("out_file", "in_file")]),
             (inputnode, gen_idx, [("dwi_file", "in_file")]),
             (
@@ -243,7 +260,7 @@ def init_dwi_preproc_wf(
                 acqp,
                 [("dwi_file", "in_file"), ("dwi_meta", "metadata")],
             ),
-            (unring, ecc, [("out_file", "in_file")]),
+            (dwi_prep_wf, ecc, [("dwi_prep_outputnode.out_file", "in_file")]),
             (
                 inputnode,
                 ecc,

@@ -88,6 +88,20 @@ class BIDSError(ValueError):
 class BIDSWarning(RuntimeWarning):
     pass
 
+class Parameters:
+    def __init__(self):
+        self.participant_label = ''
+        self.bids_dir = ''
+        self.work_dir = ''
+        self.layout = ''
+        self.subject_list = ''
+        self.output_dir = ''
+        self.eddy_niter = 5
+        self.bet_dwi = 0.3
+        self.bet_mag = 0.3
+        self.total_readout = None
+        self.ignore_nodes = ''
+        self.analysis_level = 'participant'
 
 def collect_participants(
     bids_dir, participant_label=None, strict=False, bids_validate=True

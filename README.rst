@@ -1,9 +1,7 @@
-[![Known Vulnerabilities](https://snyk.io/test/github/nipy/dmriprepoc/badge.svg)](https://snyk.io/test/github/nipy/dmriprepoc)
-[![Documentation Status](https://readthedocs.org/projects/dmriprepoc/badge/?version=latest)](httpsL//dmriprepoc.readthredocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/nipy/dmriprepoc.png?branch=master)](https://travis-ci.org/nipy/dmriprepoc)
-[![Coverage Status](https://coveralls.io/repos/github/nipy/dmriprepoc/badge.svg?branch=master)](https://coveralls.io/github/nipy/dmriprepoc?branch=master)
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+.. image:: https://codecov.io/gh/TIGRLab/dmripreproc/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/TIGRLab/dmripreproc
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/python/black
 
 # <img alt="dmriprepoc" src="docs/img/dmriprepoc_icon.svg" height="128"> dmriprepoc
 
@@ -52,7 +50,7 @@ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:pro
 
 # If you want to log into the image:
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:prod 
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:prod
 
 # Run this inside the docker image:
 dmriprepoc /inputs /outpus --participant-label 01
@@ -102,4 +100,3 @@ The imposter syndrome disclaimer was originally written by
 talk](https://www.youtube.com/watch?v=6Uj746j9Heo), and was
 adapted based on its use in the README file for the [MetPy
 project](https://github.com/Unidata/MetPy).
-
