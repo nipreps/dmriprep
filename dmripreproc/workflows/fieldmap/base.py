@@ -7,7 +7,13 @@ FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 
 def init_sdc_prep_wf(
-    fmaps, metadata, layout, bet_mag_frac, omp_nthreads=1, fmap_bspline=False
+    subject_id,
+    fmaps,
+    metadata,
+    layout,
+    bet_mag_frac,
+    omp_nthreads=1,
+    fmap_bspline=False,
 ):
 
     sdc_prep_wf = pe.Workflow(name="sdc_prep_wf")
@@ -37,7 +43,17 @@ def init_sdc_prep_wf(
     if fmap["suffix"] == "epi":
         from .pepolar import init_pepolar_wf
 
-        pepolar_wf = init_pepolar_wf()
+        epi_fmaps = [
+            (fmap_["epi"], fmap_["metadata"]["PhaseEncodingDirection"])
+            for fmap_ in fmaps
+            if fmap_["suffix"] == "epi"
+        ]
+
+        pepolar_wf = init_pepolar_wf(subject_id, metadata, epi_fmaps)
+
+        sdc_prep_wf.connect(
+            [(pepolar_wf, outputnode, [("outputnode.out_fmap", "out_fmap")])]
+        )
 
     if fmap["suffix"] == "fieldmap":
         from .fmap import init_fmap_wf

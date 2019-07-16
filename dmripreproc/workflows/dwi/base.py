@@ -32,7 +32,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         fmap["metadata"] = parameters.layout.get_metadata(fmap[fmap["suffix"]])
 
     sdc_wf = init_sdc_prep_wf(
-        fmaps, metadata, parameters.layout, parameters.bet_mag
+        subject_id, fmaps, metadata, parameters.layout, parameters.bet_mag
     )
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
