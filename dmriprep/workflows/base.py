@@ -41,7 +41,7 @@ def init_single_subject_wf(
         datatype="dwi",
         suffix="dwi",
         extensions=[".nii", ".nii.gz"],
-        return_type="filename",
+        return_type="filename"
     )
 
     if not dwi_files:

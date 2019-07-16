@@ -91,10 +91,10 @@ class BIDSWarning(RuntimeWarning):
 class Parameters:
     def __init__(self):
         self.participant_label = ''
+        self.layout = None
+        self.subject_list = ''
         self.bids_dir = ''
         self.work_dir = ''
-        self.layout = ''
-        self.subject_list = ''
         self.output_dir = ''
         self.eddy_niter = 5
         self.bet_dwi = 0.3
