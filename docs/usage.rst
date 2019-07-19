@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use dmriprepoc in a project::
+To use dmripreproc in a project::
 
-    import dmriprepoc
+    import dmripreproc

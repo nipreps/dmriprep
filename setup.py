@@ -45,9 +45,9 @@ setup(
     description="Preprocessing of neuroimaging data in preparation for AFQ analysis",
     entry_points={
         "console_scripts": [
-            "dmriprepoc=dmripreproc.cli:main",
-            "dmriprepoc-data=dmriprepoc.cli:data",
-            "dmriprepoc-upload=dmriprepoc.cli:upload",
+            "dmripreproc=dmripreproc.cli:main",
+            "dmripreproc-data=dmripreproc.cli:data",
+            "dmripreproc-upload=dmripreproc.cli:upload",
         ]
     },
     install_requires=requirements,
@@ -55,13 +55,13 @@ setup(
     license="BSD license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
-    keywords="dmriprepoc",
-    name="dmriprepoc",
+    keywords="dmripreproc",
+    name="dmripreproc",
     packages=find_packages(include=["dmripreproc*"]),
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    url="https://github.com/nipy/dmriprepoc",
+    url="https://github.com/nipy/dmripreproc",
     version="0.1.0",
     zip_safe=False,
 )

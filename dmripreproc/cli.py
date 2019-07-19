@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Console script for dmriprepoc."""
+"""Console script for dmripreproc."""
 import os
 import sys
 import warnings
@@ -115,7 +115,7 @@ def main(
     """
     if analysis_level is not "participant":
         raise NotImplementedError(
-            "The only valid analysis level for dmriprepoc "
+            "The only valid analysis level for dmripreproc "
             "is participant at the moment."
         )
 

@@ -1,4 +1,4 @@
-Welcome to dmriprepoc's documentation!
+Welcome to dmripreproc's documentation!
 ======================================
 
 .. toctree::

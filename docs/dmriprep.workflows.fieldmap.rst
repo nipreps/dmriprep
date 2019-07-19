@@ -1,29 +1,29 @@
-dmriprepoc.workflows.fieldmap package
+dmripreproc.workflows.fieldmap package
 ===================================
 
 Submodules
 ----------
 
-dmriprepoc.workflows.fieldmap.base module
+dmripreproc.workflows.fieldmap.base module
 ---------------------------------------
 
-.. automodule:: dmriprepoc.workflows.fieldmap.base
+.. automodule:: dmripreproc.workflows.fieldmap.base
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprepoc.workflows.fieldmap.fmap module
+dmripreproc.workflows.fieldmap.fmap module
 ---------------------------------------
 
-.. automodule:: dmriprepoc.workflows.fieldmap.fmap
+.. automodule:: dmripreproc.workflows.fieldmap.fmap
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprepoc.workflows.fieldmap.phasediff module
+dmripreproc.workflows.fieldmap.phasediff module
 --------------------------------------------
 
-.. automodule:: dmriprepoc.workflows.fieldmap.phasediff
+.. automodule:: dmripreproc.workflows.fieldmap.phasediff
    :members:
    :undoc-members:
    :show-inheritance:
@@ -32,7 +32,7 @@ dmriprepoc.workflows.fieldmap.phasediff module
 Module contents
 ---------------
 
-.. automodule:: dmriprepoc.workflows.fieldmap
+.. automodule:: dmripreproc.workflows.fieldmap
    :members:
    :undoc-members:
    :show-inheritance:

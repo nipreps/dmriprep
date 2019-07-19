@@ -1,7 +1,7 @@
-dmriprepoc
+dmripreproc
 ========
 
 .. toctree::
    :maxdepth: 4
 
-   dmriprepoc
+   dmripreproc

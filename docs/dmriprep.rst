@@ -1,4 +1,4 @@
-dmriprepoc package
+dmripreproc package
 ================
 
 Subpackages
@@ -6,32 +6,32 @@ Subpackages
 
 .. toctree::
 
-   dmriprepoc.interfaces
-   dmriprepoc.workflows
+   dmripreproc.interfaces
+   dmripreproc.workflows
 
 Submodules
 ----------
 
-dmriprepoc.cli module
+dmripreproc.cli module
 -------------------
 
-.. automodule:: dmriprepoc.cli
+.. automodule:: dmripreproc.cli
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprepoc.qc module
+dmripreproc.qc module
 ------------------
 
-.. automodule:: dmriprepoc.qc
+.. automodule:: dmripreproc.qc
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprepoc.utils module
+dmripreproc.utils module
 ---------------------
 
-.. automodule:: dmriprepoc.utils
+.. automodule:: dmripreproc.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,7 +40,7 @@ dmriprepoc.utils module
 Module contents
 ---------------
 
-.. automodule:: dmriprepoc
+.. automodule:: dmripreproc
    :members:
    :undoc-members:
    :show-inheritance:

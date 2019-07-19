@@ -37,7 +37,7 @@ def init_output_wf(subject_id, session_id, output_folder):
 
         return os.path.join(
             output_folder,
-            "dmriprepoc",
+            "dmripreproc",
             "sub-" + subject_id,
             "ses-" + session_id,
             "dwi",

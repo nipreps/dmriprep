@@ -3,12 +3,12 @@
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/python/black
 
-# <img alt="dmriprepoc" src="docs/img/dmriprepoc_icon.svg" height="128"> dmriprepoc
+# <img alt="dmripreproc" src="docs/img/dmripreproc_icon.svg" height="128"> dmripreproc
 
 Preprocessing of neuroimaging data in preparation for AFQ analysis
 
 * Free software: BSD license
-* Documentation: https://dmriprepoc.readthedocs.io.
+* Documentation: https://dmripreproc.readthedocs.io.
 
 ## Preparing your data
 
@@ -32,28 +32,28 @@ You should have raw data organized in the BIDS format. Also, you should have run
 ## Quickstart
 
 ```bash
-git clone https://github.com/nipy/dmriprepoc
-cd dmriprepoc
+git clone https://github.com/nipy/dmripreproc
+cd dmripreproc
 python setup.py install
 
-dmriprepoc $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
+dmripreproc $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
 ```
 
 ```bash
-git clone https://github.com/nipy/dmriprepoc
-cd dmriprepoc
+git clone https://github.com/nipy/dmripreproc
+cd dmripreproc
 make docker
 
 # If you don't want to log into the docker image:
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:prod dmriprepoc /inputs /outputs
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmripreproc:prod dmripreproc /inputs /outputs
 
 # If you want to log into the image:
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprepoc:prod
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmripreproc:prod
 
 # Run this inside the docker image:
-dmriprepoc /inputs /outpus --participant-label 01
+dmripreproc /inputs /outpus --participant-label 01
 ```
 
 ## Features
@@ -62,11 +62,11 @@ dmriprepoc /inputs /outpus --participant-label 01
 
 ## Contributing
 
-We love contributions! dmriprepoc is open source, built on open source,
+We love contributions! dmripreproc is open source, built on open source,
 and we'd love to have you hang out in our community.
 
 We have developed some [guidelines](CONTRIBUTING.rst) for contributing to
-dmriprepoc.
+dmripreproc.
 
 **Imposter syndrome disclaimer**: We want your help. No, really.
 

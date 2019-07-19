@@ -1,21 +1,21 @@
-dmriprepoc.interfaces package
+dmripreproc.interfaces package
 ===========================
 
 Submodules
 ----------
 
-dmriprepoc.interfaces.fmap module
+dmripreproc.interfaces.fmap module
 -------------------------------
 
-.. automodule:: dmriprepoc.interfaces.fmap
+.. automodule:: dmripreproc.interfaces.fmap
    :members:
    :undoc-members:
    :show-inheritance:
 
-dmriprepoc.interfaces.mrtrix3 module
+dmripreproc.interfaces.mrtrix3 module
 ----------------------------------
 
-.. automodule:: dmriprepoc.interfaces.mrtrix3
+.. automodule:: dmripreproc.interfaces.mrtrix3
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,7 +24,7 @@ dmriprepoc.interfaces.mrtrix3 module
 Module contents
 ---------------
 
-.. automodule:: dmriprepoc.interfaces
+.. automodule:: dmripreproc.interfaces
    :members:
    :undoc-members:
    :show-inheritance:
