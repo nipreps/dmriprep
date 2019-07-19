@@ -14,11 +14,11 @@ with open("HISTORY.rst") as history_file:
 requirements = [
     "Click>=6.0",
     "dipy",
-    "nipype",
+    "nipype>=1.2.0",
     "pandas",
     "parse",
     "tqdm",
-    "pybids",
+    "pybids>=0.9.1",
     "matplotlib",
     "numba",
     "sphinx",
