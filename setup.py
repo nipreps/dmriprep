@@ -45,7 +45,7 @@ setup(
     description="Preprocessing of neuroimaging data in preparation for AFQ analysis",
     entry_points={
         "console_scripts": [
-            "dmriprepoc=dmriprepoc.cli:main",
+            "dmriprepoc=dmripreproc.cli:main",
             "dmriprepoc-data=dmriprepoc.cli:data",
             "dmriprepoc-upload=dmriprepoc.cli:upload",
         ]
@@ -57,7 +57,7 @@ setup(
     include_package_data=True,
     keywords="dmriprepoc",
     name="dmriprepoc",
-    packages=find_packages(include=["dmriprepoc*"]),
+    packages=find_packages(include=["dmripreproc*"]),
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,

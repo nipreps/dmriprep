@@ -8,14 +8,18 @@ def init_pepolar_wf(subject_id, dwi_meta, epi_fmaps):
 
     dwi_file_pe = dwi_meta["PhaseEncodingDirection"]
 
+    file2dir = dict()
+
     usable_fieldmaps_matching_pe = []
     usable_fieldmaps_opposite_pe = []
 
     for fmap, pe_dir in epi_fmaps:
         if pe_dir == dwi_file_pe:
             usable_fieldmaps_matching_pe.append(fmap)
+            file2dir[fmap] = pe_dir
         elif pe_dir[0] == dwi_file_pe[0]:
             usable_fieldmaps_opposite_pe.append(fmap)
+            file2dir[fmap] = pe_dir
 
     if not usable_fieldmaps_opposite_pe:
         raise Exception("None of the discovered fieldmaps for "
@@ -24,12 +28,13 @@ def init_pepolar_wf(subject_id, dwi_meta, epi_fmaps):
 
     wf = pe.Workflow(name="pepolar_wf")
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped"]))
+    inputnode = pe.Node(niu.IdentityInterface(fields=["b0_stripped"]), name = "inputnode")
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["out_topup"]))
+    outputnode = pe.Node(niu.IdentityInterface(fields=["out_topup", "out_movpar", "out_fmap", "out_enc_file"]), name = "outputnode")
 
     topup_wf = init_topup_wf()
-    topup_wf.inputnode.altepi_file = usable_fieldmaps_opposite_pe[0]
+    topup_wf.inputs.inputnode.altepi_file = usable_fieldmaps_opposite_pe[0]
+    wf.add_nodes([inputnode])
 
     if not usable_fieldmaps_matching_pe:
         wf.connect(
@@ -38,7 +43,33 @@ def init_pepolar_wf(subject_id, dwi_meta, epi_fmaps):
             ]
         )
     else:
-        topup_wf.inputnode.epi_file = usable_fieldmaps_matching_pe[0]
+        topup_wf.inputs.inputnode.epi_file = usable_fieldmaps_matching_pe[0]
+
+    epi_list = [topup_wf.inputs.inputnode.epi_file, topup_wf.inputs.inputnode.altepi_file]
+    dir_map = {
+        'i': 'x',
+        'i-': 'x-',
+        'j': 'y',
+        'j-': 'y-',
+        'k': 'z',
+        'k-': 'z-'
+    }
+    topup_wf.inputs.inputnode.encoding_directions = [dir_map[file2dir[file]] for file in epi_list]
+
+    wf.connect(
+        [
+            (
+                topup_wf,
+                outputnode,
+                [
+                    ("outputnode.out_fmap", "out_fmap"),
+                    ("outputnode.out_movpar", "out_movpar"),
+                    ("outputnode.out_base", "out_topup"),
+                    ("outputnode.out_enc_file", "out_enc_file"),
+                ]
+            ),
+        ]
+    )
 
     return wf
 
@@ -48,11 +79,12 @@ def init_topup_wf():
     wf = pe.Workflow(name="topup_wf")
 
     inputnode = pe.Node(
-        niu.IdentityInterface(fields=["epi_file", "altepi_file", "encoding_directions"]),
+        niu.IdentityInterface(fields=["epi_file", "altepi_file", "encoding_directions", "topup_name"]),
         name="inputnode")
+    inputnode.inputs.topup_name = "topup_base"
 
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["out_fmap"]),
+        niu.IdentityInterface(fields=["out_fmap", "out_movpar", "out_base", "out_enc_file"]),
         name="outputnode")
 
     list_merge = pe.Node(niu.Merge(numinputs=2), name="list_merge")
@@ -62,6 +94,8 @@ def init_topup_wf():
     topup = pe.Node(fsl.TOPUP(), name="topup")
     topup.inputs.readout_times = [0.05, 0.05]
 
+    get_base_movpar = lambda x: x.split("_movpar.txt")[0]
+
     wf.connect(
         [
             (
@@ -70,9 +104,18 @@ def init_topup_wf():
                 [("epi_file", "in1"), ("altepi_file", "in2")]
             ),
             (list_merge, merge, [("out", "in_files")]),
-            (merge, topup, [("merged_file", "in_file")]),
             (inputnode, topup, [("encoding_directions", "encoding_direction")]),
-            (topup, outputnode, [("out_field", "out_fmap")]),
+            (merge, topup, [("merged_file", "in_file")]),
+            (
+                topup,
+                outputnode,
+                [
+                    ("out_field", "out_fmap"),
+                    ("out_movpar", "out_movpar"),
+                    ("out_enc_file", "out_enc_file"),
+                    (("out_movpar", get_base_movpar), "out_base")
+                ]
+            ),
         ]
     )
 

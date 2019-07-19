@@ -26,12 +26,15 @@ def init_sdc_prep_wf(
         niu.IdentityInterface(
             fields=[
                 "out_fmap",
+                "out_topup",
                 "bold_ref",
                 "bold_mask",
                 "bold_ref_brain",
                 "out_warp",
                 "syn_bold_ref",
                 "method",
+                "out_movpar",
+                "out_enc_file",
             ]
         ),
         name="outputnode",
@@ -52,7 +55,23 @@ def init_sdc_prep_wf(
         pepolar_wf = init_pepolar_wf(subject_id, metadata, epi_fmaps)
 
         sdc_prep_wf.connect(
-            [(pepolar_wf, outputnode, [("outputnode.out_fmap", "out_fmap")])]
+            [
+                (
+                    inputnode,
+                    pepolar_wf,
+                    [("b0_stripped", "inputnode.b0_stripped")],
+                ),
+                (
+                    pepolar_wf,
+                    outputnode,
+                    [
+                        ("outputnode.out_topup", "out_topup"),
+                        ("outputnode.out_movpar", "out_movpar"),
+                        ("outputnode.out_enc_file", "out_enc_file"),
+                        ("outputnode.out_fmap", "out_fmap")
+                    ],
+                )
+            ]
         )
 
     if fmap["suffix"] == "fieldmap":

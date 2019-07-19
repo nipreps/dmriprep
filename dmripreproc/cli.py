@@ -9,7 +9,7 @@ from bids import BIDSLayout
 import click
 
 from . import utils
-from .workflows.base import init_dmriprepoc_wf
+from .workflows.base import init_dmripreproc_wf
 
 # Filter warnings that are visible whenever you import another package that
 # was compiled against an older numpy than is installed.
@@ -28,12 +28,11 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     "can be specified with a space separated list.",
     default=None,
 )
-@click.command()
-@click.option(
-    "--ignore",
-    help="Ignore selected parts of the workflow.",
-    type=click.Choice(["denoise", "unring"]),
-)
+#@click.option(
+#    "--ignore",
+#    help="Ignore selected parts of the workflow.",
+#    type=click.Choice(["denoise", "unring"]),
+#)
 @click.option(
     "--resize-scale", help="Scale factor to resize DWI image", type=(float)
 )
@@ -142,7 +141,7 @@ def main(
     parameters.ignore_nodes = ignore_nodes
     parameters.analysis_level = analysis_level
 
-    wf = init_dmriprep_wf(parameters)
+    wf = init_dmripreproc_wf(parameters)
     wf.write_graph(graph2use="colored")
     wf.config["execution"]["remove_unnecessary_outputs"] = False
     wf.config["execution"]["keep_inputs"] = True

@@ -33,6 +33,7 @@ def init_output_wf(subject_id, session_id, output_folder):
     )
 
     def build_path(output_folder, subject_id, session_id):
+        import os
 
         return os.path.join(
             output_folder,

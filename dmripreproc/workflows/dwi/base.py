@@ -13,9 +13,11 @@ from dipy.segment.mask import median_otsu
 from numba import cuda
 
 from ...interfaces import mrtrix3
+from ...interfaces import fsl as dmri_fsl
 from ..fieldmap.base import init_sdc_prep_wf
 from .dwiprep import init_dwiprep_wf
 
+FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
@@ -42,7 +44,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
             fields=[
                 "subject_id",
                 "dwi_file",
-                "di_meta",
+                "dwi_meta",
                 "bvec_file",
                 "bval_file",
                 "out_dir",
@@ -190,7 +192,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     # mrtrix3.MaskFilter
 
     ecc = pe.Node(
-        fsl.Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
+        dmri_fsl.Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
         name="fsl_eddy",
     )
 
@@ -238,6 +240,35 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="getB0Mask",
     )
 
+    # Decide what ecc will take: topup or fmap
+    fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap["suffix"]])
+    fmap = fmaps[0]
+    # If epi files detected
+    if fmap["suffix"] == "epi" or True:
+        dwi_wf.connect(
+            [
+                (
+                    sdc_wf,
+                    ecc,
+                    [
+                        ("outputnode.out_topup", "in_topup_fieldcoef"),
+                        ("outputnode.out_enc_file", "in_acqp"),
+                        ("outputnode.out_movpar", "in_topup_movpar"),
+                    ],
+                ),
+                (sdc_wf, eddy_quad, [("outputnode.out_enc_file", "param_file")])
+            ]
+        )
+    # Otherwise (fieldmaps)
+    else:
+        dwi_wf.connect(
+            [
+                (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
+                (acqp, ecc, [("out_file", "in_acqp")]),
+                (acqp, eddy_quad, [("out_file", "param_file")])
+            ]
+        )
+
     dtifit = pe.Node(fsl.DTIFit(save_tensor=True, sse=True), name="dtifit")
 
     dwi_wf.connect(
@@ -268,7 +299,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
             ),
             (bet_dwi0, ecc, [("mask_file", "in_mask")]),
             (gen_idx, ecc, [("out_file", "in_index")]),
-            (acqp, ecc, [("out_file", "in_acqp")]),
             (ecc, denoise_eddy, [("out_corrected", "in_file")]),
             (ecc, fslroi, [("out_corrected", "in_file")]),
             (fslroi, b0mask_node, [("roi_file", "b0_file")]),
@@ -284,12 +314,10 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
             (ecc, eddy_quad, [("out_rotated_bvecs", "bvec_file")]),
             (b0mask_node, eddy_quad, [("mask_file", "mask_file")]),
             (gen_idx, eddy_quad, [("out_file", "idx_file")]),
-            (acqp, eddy_quad, [("out_file", "param_file")]),
             (ecc, outputnode, [("out_corrected", "out_file")]),
             (b0mask_node, outputnode, [("mask_file", "out_mask")]),
             (ecc, outputnode, [("out_rotated_bvecs", "out_bvec")]),
             (bet_dwi0, sdc_wf, [("out_file", "inputnode.b0_stripped")]),
-            (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
             (sdc_wf, eddy_quad, [("outputnode.out_fmap", "field")]),
             (
                 ecc,

@@ -7,9 +7,9 @@ from nipype.pipeline import engine as pe
 from .dwi import init_dwi_preproc_wf, init_output_wf
 
 
-def init_dmriprep_wf(parameters):
-    dmriprep_wf = pe.Workflow(name="dmriprep_wf")
-    dmriprep_wf.base_dir = parameters.work_dir
+def init_dmripreproc_wf(parameters):
+    dmripreproc_wf = pe.Workflow(name="dmripreproc_wf")
+    dmripreproc_wf.base_dir = parameters.work_dir
 
     for subject_id in parameters.subject_list:
 
@@ -26,9 +26,9 @@ def init_dmriprep_wf(parameters):
         for node in single_subject_wf._get_all_nodes():
             node.config = deepcopy(single_subject_wf.config)
 
-        dmriprepoc_wf.add_nodes([single_subject_wf])
+        dmripreproc_wf.add_nodes([single_subject_wf])
 
-    return dmriprepoc_wf
+    return dmripreproc_wf
 
 
 def init_single_subject_wf(subject_id, name, parameters):
@@ -72,7 +72,7 @@ def init_single_subject_wf(subject_id, name, parameters):
         inputspec = dwi_preproc_wf.get_node("inputnode")
         inputspec.inputs.subject_id = subject_id
         inputspec.inputs.dwi_file = dwi_file
-        inputspec.inputs.metadata = metadata
+        inputspec.inputs.dwi_meta = metadata
         inputspec.inputs.bvec_file = parameters.layout.get_bvec(dwi_file)
         inputspec.inputs.bval_file = parameters.layout.get_bval(dwi_file)
         inputspec.inputs.out_dir = os.path.abspath(parameters.output_dir)
