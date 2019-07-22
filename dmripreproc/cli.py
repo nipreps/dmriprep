@@ -18,32 +18,52 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 
 class Parameters:
-    def __init__(self):
-        self.participant_label = ""
-        self.layout = None
-        self.subject_list = ""
-        self.bids_dir = ""
-        self.work_dir = ""
-        self.output_dir = ""
-        self.b0_thresh = 5
-        self.eddy_niter = 5
-        self.bet_dwi = 0.3
-        self.bet_mag = 0.3
-        self.total_readout = None
-        self.ignore_nodes = ""
-        self.analysis_level = "participant"
+    def __init__(
+        self,
+        layout,
+        subject_list,
+        bids_dir,
+        work_dir,
+        output_dir,
+        concat_shells,
+        b0_thresh,
+        resize_scale,
+        eddy_niter,
+        bet_dwi,
+        bet_mag,
+        total_readout,
+        ignore_nodes,
+        analysis_level,
+    ):
+        self.layout = layout
+        self.subject_list = subject_list
+        self.bids_dir = bids_dir
+        self.work_dir = work_dir
+        self.output_dir = output_dir
+        self.concat_shells = concat_shells
+        self.b0_thresh = b0_thresh
+        self.resize_scale = resize_scale
+        self.eddy_niter = eddy_niter
+        self.bet_dwi = bet_dwi
+        self.bet_mag = bet_mag
+        self.total_readout = total_readout
+        self.ignore_nodes = ignore_nodes
+        self.analysis_level = analysis_level
 
 
 @click.command()
-@click.argument("bids_dir")
-@click.argument("output_dir")
+@click.argument("bids_dir", type=click.Path())
+@click.argument("output_dir", type=click.Path())
 @click.argument(
     "analysis_level",
     type=click.Choice(["participant", "group"]),
     default="participant",
 )
 @click.option(
-    "--skip_bids_validation", help="Skip BIDS validation", default=False
+    "--skip_bids_validation",
+    help="Skip BIDS validation",
+    default=False,
+    type=(bool),
 )
 @click.option(
     "--participant_label",
@@ -60,16 +80,14 @@ class Parameters:
     help="A space delimited list of acq-<label>",
     default=None,
 )
-# @click.option(
-#    "--ignore",
-#    help="Specify which steps of the preprocessing pipeline to skip.",
-#    type=click.Choice(["denoise", "unring"]),
-# )
+@click.option(
+    "--b0_thresh", help="Threshold for b0 value", default=5, type=(int)
+)
 @click.option(
     "--resize_scale", help="Scale factor to resize DWI image", type=(float)
 )
 @click.option(
-    "--eddy-niter",
+    "--eddy_niter",
     help="Fixed number of eddy iterations. See "
     "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide"
     "#A--niter",
@@ -84,6 +102,7 @@ class Parameters:
     "If this parameter is not provided a default of 0.3 will "
     "be used.",
     default=0.3,
+    type=(float),
 )
 @click.option(
     "--bet_mag",
@@ -93,6 +112,7 @@ class Parameters:
     "If this parameter is not provided a default of 0.3 will "
     "be used.",
     default=0.3,
+    type=(float),
 )
 @click.option(
     "--total_readout",
@@ -110,24 +130,25 @@ class Parameters:
     "   d: denoise \n"
     "   u: unring \n"
     "   r: resize (upsample)",
-    default=None,
+    default="r",
     type=(str),
 )
-@click.option("--work_dir", help="working directory", default=None)
+@click.option("--work_dir", help="working directory", type=click.Path())
 def main(
     participant_label,
     bids_dir,
     output_dir,
+    work_dir,
     skip_bids_validation,
-    analysis_level="participant",
-    b0_thresh=5,
-    concat_shells=True,
-    resize_scale=2,
-    eddy_niter=5,
-    bet_dwi=0.3,
-    bet_mag=0.3,
-    total_readout=None,
-    ignore_nodes="",
+    analysis_level,
+    b0_thresh,
+    concat_shells,
+    resize_scale,
+    eddy_niter,
+    bet_dwi,
+    bet_mag,
+    total_readout,
+    ignore_nodes,
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to
@@ -142,7 +163,8 @@ def main(
     participant level analyses can be run independently
     (in parallel).
     """
-    if analysis_level is not "participant":
+
+    if analysis_level != "participant":
         raise NotImplementedError(
             "The only valid analysis level for dmripreproc "
             "is participant at the moment."
@@ -158,22 +180,26 @@ def main(
 
         validate_input_dir(bids_dir, all_subjects, subject_list)
 
-    work_dir = os.path.join(output_dir, "scratch")
+    if not work_dir:
+        work_dir = os.path.join(output_dir, "scratch")
 
     # Set parameters based on CLI, pass through object
-    parameters = Parameters()
-    parameters.participant_label = participant_label
-    parameters.layout = layout
-    parameters.subject_list = subject_list
-    parameters.bids_dir = bids_dir
-    parameters.work_dir = work_dir
-    parameters.output_dir = output_dir
-    parameters.eddy_niter = eddy_niter
-    parameters.bet_dwi = bet_dwi
-    parameters.bet_mag = bet_mag
-    parameters.total_readout = total_readout
-    parameters.ignore_nodes = ignore_nodes
-    parameters.analysis_level = analysis_level
+    parameters = Parameters(
+        layout=layout,
+        subject_list=subject_list,
+        bids_dir=bids_dir,
+        work_dir=work_dir,
+        output_dir=output_dir,
+        concat_shells=concat_shells,
+        b0_thresh=b0_thresh,
+        resize_scale=resize_scale,
+        eddy_niter=eddy_niter,
+        bet_dwi=bet_dwi,
+        bet_mag=bet_mag,
+        total_readout=total_readout,
+        ignore_nodes=ignore_nodes,
+        analysis_level=analysis_level,
+    )
 
     wf = init_dmripreproc_wf(parameters)
     wf.write_graph(graph2use="colored")
