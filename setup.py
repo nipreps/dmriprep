@@ -20,8 +20,7 @@ requirements = [
     "tqdm",
     "pybids>=0.9.1",
     "matplotlib",
-    "numba",
-    "sphinx",
+    "numba"
 ]
 
 extras_require = {"dev": ["flake8", "pytest", "pytest-cov", "pre-commit"]}

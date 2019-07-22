@@ -32,7 +32,7 @@ You should have raw data organized in the BIDS format. Also, you should have run
 ## Quickstart
 
 ```bash
-git clone https://github.com/nipy/dmripreproc
+git clone https://github.com/tigrlab/dmripreproc
 cd dmripreproc
 python setup.py install
 
@@ -40,7 +40,7 @@ dmripreproc $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
 ```
 
 ```bash
-git clone https://github.com/nipy/dmripreproc
+git clone https://github.com/tigrlab/dmripreproc
 cd dmripreproc
 make docker
 
