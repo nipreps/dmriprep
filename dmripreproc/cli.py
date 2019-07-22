@@ -81,6 +81,21 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     default=None,
     type=(str),
 )
+@click.option(
+    "--synb0_dir",
+    help="If you want to use Synb0-DISCO for preprocessing.",
+    #is_flag=True
+    default=None,
+    type=(str),
+)
+@click.option(
+    "--acqp_file",
+    help="If you want to pass in an acqp file for topup/eddy instead of"
+    "generating it from the json by default.",
+    #is_flag=True
+    default=None,
+    type=(str),
+)
 @click.argument("bids_dir")
 @click.argument("output_dir")
 @click.argument(
@@ -99,6 +114,8 @@ def main(
     total_readout=None,
     ignore_nodes="",
     analysis_level="participant",
+    synb0_dir=None,
+    acqp_file=None,
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to
@@ -113,6 +130,7 @@ def main(
     participant level analyses can be run independently
     (in parallel).
     """
+
     if analysis_level is not "participant":
         raise NotImplementedError(
             "The only valid analysis level for dmripreproc "
@@ -120,6 +138,7 @@ def main(
         )
 
     layout = BIDSLayout(bids_dir, validate=False)
+    print(layout)
     subject_list = utils.collect_participants(
         layout, participant_label=participant_label
     )
@@ -140,6 +159,8 @@ def main(
     parameters.total_readout = total_readout
     parameters.ignore_nodes = ignore_nodes
     parameters.analysis_level = analysis_level
+    parameters.synb0_dir = synb0_dir
+    parameters.acqp_file = acqp_file
 
     wf = init_dmripreproc_wf(parameters)
     wf.write_graph(graph2use="colored")

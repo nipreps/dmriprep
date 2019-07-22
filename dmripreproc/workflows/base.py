@@ -4,8 +4,8 @@ import os
 from copy import deepcopy
 
 from nipype.pipeline import engine as pe
-from .dwi import init_dwi_preproc_wf, init_output_wf
-
+from .dwi.base import init_dwi_preproc_wf
+from .dwi.outputs import init_output_wf
 
 def init_dmripreproc_wf(parameters):
     dmripreproc_wf = pe.Workflow(name="dmripreproc_wf")
@@ -51,7 +51,10 @@ def init_single_subject_wf(subject_id, name, parameters):
 
     for dwi_file in dwi_files:
         entities = parameters.layout.parse_file_entities(dwi_file)
-        session_id = entities["session"]
+        if "session" in entities:
+            session_id = entities["session"]
+        else:
+            session_id = "01"
         metadata = parameters.layout.get_metadata(dwi_file)
         dwi_preproc_wf = init_dwi_preproc_wf(
             subject_id=subject_id,

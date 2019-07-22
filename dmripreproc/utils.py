@@ -102,6 +102,8 @@ class Parameters:
         self.total_readout = None
         self.ignore_nodes = ''
         self.analysis_level = 'participant'
+        self.synb0_dir = ''
+        self.acqp_file = ''
 
 def collect_participants(
     bids_dir, participant_label=None, strict=False, bids_validate=True
