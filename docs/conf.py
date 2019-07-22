@@ -48,8 +48,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'dmripreproc'
-copyright = u"2018, Anisha Keshavan"
-author = u"Anisha Keshavan"
+copyright = u"2019, Michael Joseph"
+author = u"Michael Joseph"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -130,7 +130,7 @@ latex_elements = {
 latex_documents = [
     (master_doc, 'dmripreproc.tex',
      u'dmripreproc Documentation',
-     u'Anisha Keshavan', 'manual'),
+     u'Michael Joseph', 'manual'),
 ]
 
 

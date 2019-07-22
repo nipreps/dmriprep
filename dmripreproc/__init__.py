@@ -2,8 +2,8 @@
 
 """Top-level package for dmripreproc."""
 
-__author__ = """Anisha Keshavan"""
-__email__ = "anishakeshavan@gmail.com"
+__author__ = """Michael Joseph"""
+__email__ = "michael.joseph@camh.ca"
 __version__ = "0.1.0"
 
 import errno

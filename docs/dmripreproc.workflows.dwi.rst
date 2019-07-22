@@ -12,6 +12,14 @@ dmripreproc.workflows.dwi.base module
    :undoc-members:
    :show-inheritance:
 
+dmripreproc.workflows.dwi.dwiprep module
+----------------------------------------
+
+.. automodule:: dmripreproc.workflows.dwi.dwiprep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dmripreproc.workflows.dwi.outputs module
 ----------------------------------------
 

@@ -4,15 +4,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Interfaces to deal with the various types of fieldmap sources
-
-    .. testsetup::
-
-        >>> tmpdir = getfixture('tmpdir')
-        >>> tmp = tmpdir.chdir() # changing to a temporary directory
-        >>> nb.Nifti1Image(np.zeros((90, 90, 60)), None, None).to_filename(
-        ...     tmpdir.join('epi.nii.gz').strpath)
-
-
 """
 
 import numpy as np

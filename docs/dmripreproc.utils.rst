@@ -12,10 +12,10 @@ dmripreproc.utils.bids module
    :undoc-members:
    :show-inheritance:
 
-dmripreproc.utils.image module
-------------------------------
+dmripreproc.utils.hemisphere module
+-----------------------------------
 
-.. automodule:: dmripreproc.utils.image
+.. automodule:: dmripreproc.utils.hemisphere
    :members:
    :undoc-members:
    :show-inheritance:

@@ -29,14 +29,6 @@ dmripreproc.qc module
    :undoc-members:
    :show-inheritance:
 
-dmripreproc.utils module
-------------------------
-
-.. automodule:: dmripreproc.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------

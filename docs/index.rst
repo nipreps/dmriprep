@@ -1,5 +1,5 @@
 Welcome to dmripreproc's documentation!
-======================================
+=======================================
 
 .. toctree::
    :maxdepth: 2
