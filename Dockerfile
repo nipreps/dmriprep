@@ -17,6 +17,7 @@ RUN apt-get update && \
         unzip \
         gcc \
         git \
+        bzip2 \
         libstdc++6
 
 # Neurodocker Setup
@@ -131,6 +132,13 @@ RUN apt-get update -qq \
     && sed -i '$iecho If you are considering commercial use of this container, please consult the relevant license:' $ND_ENTRYPOINT \
     && sed -i '$iecho https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence' $ND_ENTRYPOINT \
     && sed -i '$isource $FSLDIR/etc/fslconf/fsl.sh' $ND_ENTRYPOINT
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g svgo
+
+# Installing bids-validator
+RUN npm install -g bids-validator@1.2.5
 
 RUN echo '{ \
     \n  "pkg_manager": "apt", \
