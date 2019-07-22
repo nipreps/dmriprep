@@ -109,7 +109,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="gen_index",
     )
 
-    def gen_acqparams(in_file, metadata, total_readout_time):
+    def gen_acqparams(in_file, metadata):
         import os
         import numpy as np
         import nibabel as nib
@@ -133,10 +133,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
         pe_dir = metadata.get("PhaseEncodingDirection")
 
-        if total_readout_time:
-            total_readout = total_readout_time
-        else:
-            total_readout = metadata.get("TotalReadoutTime")
+        total_readout = metadata.get("TotalReadoutTime")
 
         acq_param_lines = acq_param_dict[pe_dir] % total_readout
 
@@ -147,14 +144,12 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     acqp = pe.Node(
         niu.Function(
-            input_names=["in_file", "metadata", "total_readout_time"],
+            input_names=["in_file", "metadata"],
             output_names=["out_file"],
             function=gen_acqparams,
         ),
         name="acqp",
     )
-
-    acqp.inputs.total_readout_time = parameters.total_readout
 
     def b0_average(in_dwi, in_bval, b0_thresh, out_file=None):
         """
