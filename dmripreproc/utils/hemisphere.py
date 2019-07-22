@@ -1,14 +1,7 @@
-"""
-Utility functions for other submodules
-
-"""
-
 import itertools
 import logging
 
 import numpy as np
-
-mod_logger = logging.getLogger(__name__)
 
 
 def is_hemispherical(vecs):

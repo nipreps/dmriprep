@@ -5,7 +5,7 @@
 
 import numpy as np
 
-from dmripreproc.utils import is_hemispherical
+from dmripreproc.utils.hemisphere import is_hemispherical
 
 
 def uniform_points_on_sphere(npoints=1, hemisphere=True, rotate=(0, 0, 0)):
