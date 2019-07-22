@@ -19,6 +19,7 @@ from .dwiprep import init_dwiprep_wf
 
 FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
+
 def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     fmaps = []
@@ -139,7 +140,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     acqp.inputs.total_readout_time = parameters.total_readout
 
-    def b0_average(in_dwi, in_bval, b0_thresh=10.0, out_file=None):
+    def b0_average(in_dwi, in_bval, b0_thresh, out_file=None):
         """
         A function that averages the *b0* volumes from a DWI dataset.
         As current dMRI data are being acquired with all b-values > 0.0,
@@ -176,12 +177,13 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     avg_b0_0 = pe.Node(
         niu.Function(
-            input_names=["in_dwi", "in_bval"],
+            input_names=["in_dwi", "in_bval", "b0_thresh"],
             output_names=["out_file"],
             function=b0_average,
         ),
         name="b0_avg_pre",
     )
+    avg_b0_0.inputs.b0_thresh = parameters.b0_thresh
 
     # dilate mask
     bet_dwi0 = pe.Node(
@@ -244,7 +246,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap["suffix"]])
     fmap = fmaps[0]
     # If epi files detected
-    if fmap["suffix"] == "epi" or True:
+    if fmap["suffix"] == "epi":
         dwi_wf.connect(
             [
                 (
@@ -256,7 +258,11 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
                         ("outputnode.out_movpar", "in_topup_movpar"),
                     ],
                 ),
-                (sdc_wf, eddy_quad, [("outputnode.out_enc_file", "param_file")])
+                (
+                    sdc_wf,
+                    eddy_quad,
+                    [("outputnode.out_enc_file", "param_file")],
+                ),
             ]
         )
     # Otherwise (fieldmaps)
@@ -265,7 +271,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
             [
                 (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
                 (acqp, ecc, [("out_file", "in_acqp")]),
-                (acqp, eddy_quad, [("out_file", "param_file")])
+                (acqp, eddy_quad, [("out_file", "param_file")]),
             ]
         )
 
