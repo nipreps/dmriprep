@@ -11,6 +11,7 @@ from nipype.utils import NUMPY_MMAP
 from nipype.utils.filemanip import fname_presuffix
 from dipy.segment.mask import median_otsu
 from numba import cuda
+from bids import BIDSLayout
 
 from ...interfaces import mrtrix3
 from ...interfaces import fsl as dmri_fsl
@@ -23,19 +24,34 @@ FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     fmaps = []
-    fmaps = parameters.layout.get_fieldmap(dwi_file, return_list=True)
+    synb0 = ""
 
-    if not fmaps:
-        raise Exception(
-            "No fieldmaps found for participant {}. "
-            "All workflows require fieldmaps".format(subject_id)
+    # If use_synb0 set, get synb0 from files
+    if parameters.synb0_dir:
+        synb0_layout = BIDSLayout(
+            parameters.synb0_dir, validate=False, derivatives=True
         )
+        synb0 = synb0_layout.get(subject=subject_id, return_type="file")[0]
+    else:
+        fmaps = parameters.layout.get_fieldmap(dwi_file, return_list=True)
+        if not fmaps:
+            raise Exception(
+                "No fieldmaps found for participant {}. "
+                "All workflows require fieldmaps".format(subject_id)
+            )
 
-    for fmap in fmaps:
-        fmap["metadata"] = parameters.layout.get_metadata(fmap[fmap["suffix"]])
+        for fmap in fmaps:
+            fmap["metadata"] = parameters.layout.get_metadata(
+                fmap[fmap["suffix"]]
+            )
 
     sdc_wf = init_sdc_prep_wf(
-        subject_id, fmaps, metadata, parameters.layout, parameters.bet_mag
+        subject_id,
+        fmaps,
+        metadata,
+        parameters.layout,
+        parameters.bet_mag,
+        synb0,
     )
 
     dwi_wf = pe.Workflow(name="dwi_preproc_wf")
@@ -242,11 +258,8 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="getB0Mask",
     )
 
-    # Decide what ecc will take: topup or fmap
-    fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap["suffix"]])
-    fmap = fmaps[0]
-    # If epi files detected
-    if fmap["suffix"] == "epi":
+    # If synb0 is meant to be used
+    if parameters.synb0_dir:
         dwi_wf.connect(
             [
                 (
@@ -254,7 +267,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
                     ecc,
                     [
                         ("outputnode.out_topup", "in_topup_fieldcoef"),
-                        ("outputnode.out_enc_file", "in_acqp"),
                         ("outputnode.out_movpar", "in_topup_movpar"),
                     ],
                 ),
@@ -265,15 +277,44 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
                 ),
             ]
         )
-    # Otherwise (fieldmaps)
+        ecc.inputs.in_acqp = parameters.acqp_file
     else:
-        dwi_wf.connect(
-            [
-                (sdc_wf, ecc, [(("outputnode.out_fmap", get_path), "field")]),
-                (acqp, ecc, [("out_file", "in_acqp")]),
-                (acqp, eddy_quad, [("out_file", "param_file")]),
-            ]
-        )
+        # Decide what ecc will take: topup or fmap
+        fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap["suffix"]])
+        fmap = fmaps[0]
+        # Else If epi files detected
+        if fmap["suffix"] == "epi":
+            dwi_wf.connect(
+                [
+                    (
+                        sdc_wf,
+                        ecc,
+                        [
+                            ("outputnode.out_topup", "in_topup_fieldcoef"),
+                            ("outputnode.out_enc_file", "in_acqp"),
+                            ("outputnode.out_movpar", "in_topup_movpar"),
+                        ],
+                    ),
+                    (
+                        sdc_wf,
+                        eddy_quad,
+                        [("outputnode.out_enc_file", "param_file")],
+                    ),
+                ]
+            )
+        # Otherwise (fieldmaps)
+        else:
+            dwi_wf.connect(
+                [
+                    (
+                        sdc_wf,
+                        ecc,
+                        [(("outputnode.out_fmap", get_path), "field")],
+                    ),
+                    (acqp, ecc, [("out_file", "in_acqp")]),
+                    (acqp, eddy_quad, [("out_file", "param_file")]),
+                ]
+            )
 
     dtifit = pe.Node(fsl.DTIFit(save_tensor=True, sse=True), name="dtifit")
 

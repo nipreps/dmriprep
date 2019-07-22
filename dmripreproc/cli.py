@@ -31,24 +31,26 @@ class Parameters:
         eddy_niter,
         bet_dwi,
         bet_mag,
-        total_readout,
         ignore_nodes,
         analysis_level,
+        synb0_dir,
+        acqp_file,
     ):
+        self.bids_dir = bids_dir
+        self.output_dir = output_dir
+        self.analysis_level = analysis_level
         self.layout = layout
         self.subject_list = subject_list
-        self.bids_dir = bids_dir
         self.work_dir = work_dir
-        self.output_dir = output_dir
         self.concat_shells = concat_shells
-        self.b0_thresh = b0_thresh
+        self.ignore_nodes = ignore_nodes
         self.resize_scale = resize_scale
-        self.eddy_niter = eddy_niter
+        self.b0_thresh = b0_thresh
         self.bet_dwi = bet_dwi
         self.bet_mag = bet_mag
-        self.total_readout = total_readout
-        self.ignore_nodes = ignore_nodes
-        self.analysis_level = analysis_level
+        self.eddy_niter = eddy_niter
+        self.synb0_dir = synb0_dir
+        self.acqp_file = acqp_file
 
 
 @click.command()
@@ -56,14 +58,11 @@ class Parameters:
 @click.argument("output_dir", type=click.Path())
 @click.argument(
     "analysis_level",
-    type=click.Choice(["participant", "group"]),
     default="participant",
+    type=click.Choice(["participant", "group"]),
 )
 @click.option(
-    "--skip_bids_validation",
-    help="Skip BIDS validation",
-    default=False,
-    type=(bool),
+    "--skip_bids_validation", help="Skip BIDS validation", is_flag=True
 )
 @click.option(
     "--participant_label",
@@ -115,12 +114,11 @@ class Parameters:
     type=(float),
 )
 @click.option(
-    "--total_readout",
-    help="Manual option for what value will be used in acquired params step. "
-    "If this parameter is not provided the value will be taken from the "
-    "TotalReadoutTime field in the dwi json. ",
+    "--acqp_file",
+    help="If you want to pass in an acqp file for topup/eddy instead of"
+    "generating it from the json by default.",
     default=None,
-    type=(float),
+    type=click.Path(),
 )
 @click.option(
     "--ignore_nodes",
@@ -134,6 +132,12 @@ class Parameters:
     type=(str),
 )
 @click.option("--work_dir", help="working directory", type=click.Path())
+@click.option(
+    "--synb0_dir",
+    help="If you want to use Synb0-DISCO for preprocessing.",
+    default=None,
+    type=click.Path(),
+)
 def main(
     participant_label,
     bids_dir,
@@ -147,8 +151,9 @@ def main(
     eddy_niter,
     bet_dwi,
     bet_mag,
-    total_readout,
     ignore_nodes,
+    synb0_dir,
+    acqp_file,
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to
@@ -196,9 +201,10 @@ def main(
         eddy_niter=eddy_niter,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
-        total_readout=total_readout,
         ignore_nodes=ignore_nodes,
         analysis_level=analysis_level,
+        synb0_dir=synb0_dir,
+        acqp_file=acqp_file,
     )
 
     wf = init_dmripreproc_wf(parameters)
