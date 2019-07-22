@@ -20,7 +20,7 @@ requirements = [
     "tqdm",
     "pybids>=0.9.1",
     "matplotlib",
-    "numba"
+    "numba",
 ]
 
 extras_require = {"dev": ["flake8", "pytest", "pytest-cov", "pre-commit"]}
@@ -60,7 +60,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    url="https://github.com/nipy/dmripreproc",
+    url="https://github.com/tigrlab/dmripreproc",
     version="0.1.0",
     zip_safe=False,
 )
