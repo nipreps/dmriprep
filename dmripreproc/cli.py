@@ -8,7 +8,7 @@ from bids import BIDSLayout
 
 import click
 
-from . import utils
+from .utils.bids import collect_participants
 from .workflows.base import init_dmripreproc_wf
 
 # Filter warnings that are visible whenever you import another package that
@@ -17,24 +17,56 @@ warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
 
 
+class Parameters:
+    def __init__(self):
+        self.participant_label = ""
+        self.layout = None
+        self.subject_list = ""
+        self.bids_dir = ""
+        self.work_dir = ""
+        self.output_dir = ""
+        self.b0_thresh = 5
+        self.eddy_niter = 5
+        self.bet_dwi = 0.3
+        self.bet_mag = 0.3
+        self.total_readout = None
+        self.ignore_nodes = ""
+        self.analysis_level = "participant"
+
+
 @click.command()
+@click.argument("bids_dir")
+@click.argument("output_dir")
+@click.argument(
+    "analysis_level",
+    type=click.Choice(["participant", "group"]),
+    default="participant",
+)
 @click.option(
-    "--participant-label",
+    "--skip_bids_validation", help="Skip BIDS validation", default=False
+)
+@click.option(
+    "--participant_label",
     help="The label(s) of the participant(s) that should be "
     "analyzed. The label corresponds to "
-    "sub-<participant_label> from the BIDS spec (so it does "
-    "not include 'sub-'). If this parameter is not provided "
+    "sub-<participant_label> from the BIDS spec (the 'sub-' "
+    "prefix can be removed). If this parameter is not provided "
     "all subjects will be analyzed. Multiple participants "
-    "can be specified with a space separated list.",
+    "can be specified with a space delimited list.",
     default=None,
 )
-#@click.option(
-#    "--ignore",
-#    help="Ignore selected parts of the workflow.",
-#    type=click.Choice(["denoise", "unring"]),
-#)
 @click.option(
-    "--resize-scale", help="Scale factor to resize DWI image", type=(float)
+    "--concat_shells",
+    help="A space delimited list of acq-<label>",
+    default=None,
+)
+# @click.option(
+#    "--ignore",
+#    help="Specify which steps of the preprocessing pipeline to skip.",
+#    type=click.Choice(["denoise", "unring"]),
+# )
+@click.option(
+    "--resize_scale", help="Scale factor to resize DWI image", type=(float)
 )
 @click.option(
     "--eddy-niter",
@@ -45,7 +77,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     type=(int),
 )
 @click.option(
-    "--bet-dwi",
+    "--bet_dwi",
     help="Fractional intensity threshold for BET on the DWI. "
     "A higher value will be more strict; it will cut off more "
     "around what it analyzes the brain to be. "
@@ -54,7 +86,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     default=0.3,
 )
 @click.option(
-    "--bet-mag",
+    "--bet_mag",
     help="Fractional intensity threshold for BET on the magnitude. "
     "A higher value will be more strict; it will cut off more "
     "around what it analyzes the brain to be. "
@@ -63,7 +95,7 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     default=0.3,
 )
 @click.option(
-    "--total-readout",
+    "--total_readout",
     help="Manual option for what value will be used in acquired params step. "
     "If this parameter is not provided the value will be taken from the "
     "TotalReadoutTime field in the dwi json. ",
@@ -81,24 +113,21 @@ warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     default=None,
     type=(str),
 )
-@click.argument("bids_dir")
-@click.argument("output_dir")
-@click.argument(
-    "analysis_level",
-    type=click.Choice(["participant", "group"]),
-    default="participant",
-)
+@click.option("--work_dir", help="working directory", default=None)
 def main(
     participant_label,
     bids_dir,
     output_dir,
-    resize_scale,
+    skip_bids_validation,
+    analysis_level="participant",
+    b0_thresh=5,
+    concat_shells=True,
+    resize_scale=2,
     eddy_niter=5,
     bet_dwi=0.3,
     bet_mag=0.3,
     total_readout=None,
     ignore_nodes="",
-    analysis_level="participant",
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to
@@ -120,14 +149,19 @@ def main(
         )
 
     layout = BIDSLayout(bids_dir, validate=False)
-    subject_list = utils.collect_participants(
+    all_subjects, subject_list = collect_participants(
         layout, participant_label=participant_label
     )
+
+    if not skip_bids_validation:
+        from .utils.bids import validate_input_dir
+
+        validate_input_dir(bids_dir, all_subjects, subject_list)
 
     work_dir = os.path.join(output_dir, "scratch")
 
     # Set parameters based on CLI, pass through object
-    parameters = utils.Parameters()
+    parameters = Parameters()
     parameters.participant_label = participant_label
     parameters.layout = layout
     parameters.subject_list = subject_list
