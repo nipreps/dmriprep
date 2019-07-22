@@ -1,10 +1,17 @@
 # Config file for automatic testing at travis-ci.org
 
 language: python
-python:
-  - 3.7
-  - 3.6
-  - 3.5
+matrix:
+  include:
+    - python: 3.5
+      dist: trusty
+      sudo: false
+    - python: 3.6
+      dist: trusty
+      sudo: false
+    - python: 3.7
+      dist: xenial
+      sudo: true
 
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -U tox-travis
@@ -24,5 +31,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: tigrlab/dmripreprocroc
+    repo: tigrlab/dmripreproc
     python: 3.7
