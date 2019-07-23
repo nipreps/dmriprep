@@ -54,89 +54,104 @@ class Parameters:
 
 
 @click.command()
-@click.argument("bids_dir", type=click.Path())
-@click.argument("output_dir", type=click.Path())
+# arguments as specified by BIDS-Apps
+@click.argument("bids_dir", type=click.Path(exists=True, file_okay=False))
+@click.argument(
+    "output_dir", type=click.Path(exists=True, file_okay=False, writable=True)
+)
 @click.argument(
     "analysis_level",
     default="participant",
     type=click.Choice(["participant", "group"]),
 )
+# optional arguments
+# options for filtering BIDS queries
 @click.option(
     "--skip_bids_validation", help="Skip BIDS validation", is_flag=True
 )
 @click.option(
     "--participant_label",
+    default=None,
     help="The label(s) of the participant(s) that should be "
     "analyzed. The label corresponds to "
     "sub-<participant_label> from the BIDS spec (the 'sub-' "
     "prefix can be removed). If this parameter is not provided "
     "all subjects will be analyzed. Multiple participants "
     "can be specified with a space delimited list.",
-    default=None,
 )
+# options for prepping dwi scans
 @click.option(
     "--concat_shells",
-    help="A space delimited list of acq-<label>",
     default=None,
+    help="A space delimited list of acq-<label>",
 )
 @click.option(
-    "--b0_thresh", help="Threshold for b0 value", default=5, type=(int)
+    "--b0_thresh",
+    default=5,
+    help="Threshold for b0 value",
+    type=click.IntRange(min=0, max=10),
 )
 @click.option(
-    "--resize_scale", help="Scale factor to resize DWI image", type=(float)
+    "--resize_scale", help="Scale factor to resize DWI image", type=float
 )
+# specific options for eddy
 @click.option(
     "--eddy_niter",
+    default=5,
     help="Fixed number of eddy iterations. See "
     "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide"
     "#A--niter",
-    default=5,
-    type=(int),
+    type=int,
 )
 @click.option(
     "--bet_dwi",
+    default=0.3,
     help="Fractional intensity threshold for BET on the DWI. "
     "A higher value will be more strict; it will cut off more "
     "around what it analyzes the brain to be. "
     "If this parameter is not provided a default of 0.3 will "
     "be used.",
-    default=0.3,
-    type=(float),
+    type=click.FloatRange(min=0, max=1),
 )
 @click.option(
     "--bet_mag",
+    default=0.3,
     help="Fractional intensity threshold for BET on the magnitude. "
     "A higher value will be more strict; it will cut off more "
     "around what it analyzes the brain to be. "
     "If this parameter is not provided a default of 0.3 will "
     "be used.",
-    default=0.3,
-    type=(float),
+    type=click.FloatRange(min=0, max=1),
 )
 @click.option(
     "--acqp_file",
+    default=None,
     help="If you want to pass in an acqp file for topup/eddy instead of"
     "generating it from the json by default.",
-    default=None,
-    type=click.Path(),
+    type=click.Path(exists=True, dir_okay=False),
 )
+# workflow configuration
 @click.option(
     "--ignore_nodes",
+    default="r",
     help="Specify which node(s) to skip during the preprocessing of the dwi."
     "Example: If you want to skip unring and resize, use '--ignore_nodes ur'."
     "Options are: \n"
     "   d: denoise \n"
     "   u: unring \n"
     "   r: resize (upsample)",
-    default="r",
-    type=(str),
+    type=str,
 )
-@click.option("--work_dir", help="working directory", type=click.Path())
+@click.option(
+    "--work_dir",
+    help="working directory",
+    type=click.Path(exists=True, file_okay=False, writable=True),
+)
 @click.option(
     "--synb0_dir",
-    help="If you want to use Synb0-DISCO for preprocessing.",
     default=None,
-    type=click.Path(),
+    help="If you want to use Synb0-DISCO for preprocessing.",
+    type=click.Path(exists=True, file_okay=False),
 )
 def main(
     participant_label,
@@ -156,17 +171,15 @@ def main(
     acqp_file,
 ):
     """
-    BIDS_DIR: The directory with the input dataset formatted according to
-    the BIDS standard.
+    BIDS_DIR: The directory with the input dataset formatted according to the
+    BIDS standard.
 
-    OUTPUT_DIR: The directory where the output files should be stored.
-    If you are running a group level analysis, this folder
-    should be prepopulated with the results of
-    the participant level analysis.
+    OUTPUT_DIR: The directory where the output files should be stored. If you
+    are running a group level analysis, this folder should be prepopulated with
+    the results of the participant level analysis.
 
     ANALYSIS_LEVEL: Level of the analysis that will be performed. Multiple
-    participant level analyses can be run independently
-    (in parallel).
+    participant level analyses can be run independently (in parallel).
     """
 
     if analysis_level != "participant":

@@ -23,11 +23,11 @@ requirements = [
     "numba",
 ]
 
-extras_require = {"dev": ["flake8", "pytest", "pytest-cov", "pre-commit"]}
-
 setup_requirements = ["pytest-runner"]
 
 test_requirements = ["pytest"]
+
+extras_require = {"dev": ["flake8", "pytest", "pytest-cov", "pre-commit"]}
 
 setup(
     # project information
@@ -55,7 +55,7 @@ setup(
     # cli
     entry_points={"console_scripts": ["dmripreproc=dmripreproc.cli:main"]},
     # metadata
-    keywords="diffusion bids",
+    keywords="diffusion-mri diffusion-preprocessing bids",
     project_urls={
         "Documentation": "https://dmripreproc.readthedocs.io/en/latest/",
         "Tracker": "https://github.com/TIGRLab/dmripreproc/issues/",
