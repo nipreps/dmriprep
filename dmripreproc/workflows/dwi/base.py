@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 
-import os
-import multiprocessing
-
-import numpy as np
-import nibabel as nib
+from bids import BIDSLayout
 from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, utility as niu
-from nipype.utils import NUMPY_MMAP
-from nipype.utils.filemanip import fname_presuffix
-from dipy.segment.mask import median_otsu
 from numba import cuda
-from bids import BIDSLayout
 
-from ...interfaces import mrtrix3
-from ...interfaces import fsl as dmri_fsl
+from ...interfaces import mrtrix3, fsl as dmri_fsl
 from ..fieldmap.base import init_sdc_prep_wf
 from .dwiprep import init_dwiprep_wf
 
@@ -77,14 +68,12 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     )
 
     # Create the dwi prep workflow
-    dwi_prep_wf = init_dwiprep_wf(parameters.ignore_nodes)
+    dwi_prep_wf = init_dwiprep_wf(parameters.ignore)
 
     def gen_index(in_file):
         import os
         import numpy as np
         import nibabel as nib
-        from nipype.pipeline import engine as pe
-        from nipype.interfaces import fsl, utility as niu
         from nipype.utils import NUMPY_MMAP
         from nipype.utils.filemanip import fname_presuffix
 
@@ -111,8 +100,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     def gen_acqparams(in_file, metadata):
         import os
-        import numpy as np
-        import nibabel as nib
         from nipype.utils.filemanip import fname_presuffix
 
         out_file = fname_presuffix(
@@ -162,8 +149,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         import os
         import numpy as np
         import nibabel as nib
-        from nipype.pipeline import engine as pe
-        from nipype.interfaces import fsl, utility as niu
         from nipype.utils import NUMPY_MMAP
         from nipype.utils.filemanip import fname_presuffix
 
@@ -210,6 +195,8 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     )
 
     # if nthreads not specified, do this
+    import multiprocessing
+
     ecc.inputs.num_threads = multiprocessing.cpu_count()
 
     try:
@@ -230,8 +217,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     def get_b0_mask_fn(b0_file):
         import os
         import nibabel as nib
-        from nipype.pipeline import engine as pe
-        from nipype.interfaces import fsl, utility as niu
         from nipype.utils.filemanip import fname_presuffix
         from dipy.segment.mask import median_otsu
 

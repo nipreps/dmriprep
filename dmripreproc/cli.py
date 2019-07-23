@@ -31,7 +31,7 @@ class Parameters:
         eddy_niter,
         bet_dwi,
         bet_mag,
-        ignore_nodes,
+        ignore,
         analysis_level,
         synb0_dir,
         acqp_file,
@@ -43,7 +43,7 @@ class Parameters:
         self.subject_list = subject_list
         self.work_dir = work_dir
         self.concat_shells = concat_shells
-        self.ignore_nodes = ignore_nodes
+        self.ignore = ignore
         self.resize_scale = resize_scale
         self.b0_thresh = b0_thresh
         self.bet_dwi = bet_dwi
@@ -88,6 +88,7 @@ class Parameters:
 @click.option(
     "--b0_thresh",
     default=5,
+    show_default=True,
     help="Threshold for b0 value",
     type=click.IntRange(min=0, max=10),
 )
@@ -98,6 +99,7 @@ class Parameters:
 @click.option(
     "--eddy_niter",
     default=5,
+    show_default=True,
     help="Fixed number of eddy iterations. See "
     "https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide"
     "#A--niter",
@@ -106,6 +108,7 @@ class Parameters:
 @click.option(
     "--bet_dwi",
     default=0.3,
+    show_default=True,
     help="Fractional intensity threshold for BET on the DWI. "
     "A higher value will be more strict; it will cut off more "
     "around what it analyzes the brain to be. "
@@ -116,6 +119,7 @@ class Parameters:
 @click.option(
     "--bet_mag",
     default=0.3,
+    show_default=True,
     help="Fractional intensity threshold for BET on the magnitude. "
     "A higher value will be more strict; it will cut off more "
     "around what it analyzes the brain to be. "
@@ -132,18 +136,17 @@ class Parameters:
 )
 # workflow configuration
 @click.option(
-    "--ignore_nodes",
-    default="r",
-    help="Specify which node(s) to skip during the preprocessing of the dwi."
-    "Example: If you want to skip unring and resize, use '--ignore_nodes ur'."
-    "Options are: \n"
-    "   d: denoise \n"
-    "   u: unring \n"
-    "   r: resize (upsample)",
-    type=str,
+    "--ignore",
+    "-i",
+    default="resample",
+    show_default=True,
+    help="Specify which node(s) to skip during the preprocessing of the dwi.",
+    type=click.Choice(["denoise", "unring", "resample"]),
+    multiple=True,
 )
 @click.option(
     "--work_dir",
+    "-w",
     help="working directory",
     type=click.Path(exists=True, file_okay=False, writable=True),
 )
@@ -166,7 +169,7 @@ def main(
     eddy_niter,
     bet_dwi,
     bet_mag,
-    ignore_nodes,
+    ignore,
     synb0_dir,
     acqp_file,
 ):
@@ -214,7 +217,7 @@ def main(
         eddy_niter=eddy_niter,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
-        ignore_nodes=ignore_nodes,
+        ignore=ignore,
         analysis_level=analysis_level,
         synb0_dir=synb0_dir,
         acqp_file=acqp_file,
