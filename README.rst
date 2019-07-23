@@ -1,6 +1,6 @@
-======
+========
 dmriprep
-======
+========
 
 
 .. image:: https://img.shields.io/pypi/v/dmriprep.svg
