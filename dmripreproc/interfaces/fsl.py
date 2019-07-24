@@ -28,6 +28,12 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr="--mask=%s",
         desc="Mask to indicate brain",
     )
+    in_acqp = File(
+        exists=True,
+        mandatory=True,
+        argstr="--acqp=%s",
+        desc="File containing acquisition parameters",
+    )
     in_index = File(
         exists=True,
         mandatory=True,
@@ -37,11 +43,10 @@ class EddyInputSpec(FSLCommandInputSpec):
             "into --acqp and --topup"
         ),
     )
-    in_acqp = File(
+    session = File(
         exists=True,
-        mandatory=True,
-        argstr="--acqp=%s",
-        desc="File containing acquisition parameters",
+        argstr="--session=%s",
+        desc=("File containing session indices for all volumes in " "--imain"),
     )
     in_bvec = File(
         exists=True,
@@ -55,19 +60,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr="--bvals=%s",
         desc=("File containing the b-values for all volumes in " "--imain"),
     )
-    out_base = traits.Str(
-        "eddy_corrected",
-        argstr="--out=%s",
-        usedefault=True,
-        desc=("basename for output (warped) image"),
-    )
-    session = File(
-        exists=True,
-        argstr="--session=%s",
-        desc=("File containing session indices for all volumes in " "--imain"),
-    )
     in_topup_fieldcoef = File(
-        # exists=True,
+        exists=True,
         argstr="--topup=%s",
         requires=["in_topup_movpar"],
         desc=("topup file containing the field " "coefficients"),
@@ -77,15 +71,83 @@ class EddyInputSpec(FSLCommandInputSpec):
         requires=["in_topup_fieldcoef"],
         desc="topup movpar.txt file",
     )
-
+    field = traits.Str(
+        argstr="--field=%s",
+        desc="NonTOPUP fieldmap scaled in Hz - filename has "
+        "to be provided without an extension. TOPUP is "
+        "strongly recommended",
+        min_ver="5.0.10",
+    )
+    field_mat = File(
+        exists=True,
+        argstr="--field_mat=%s",
+        desc="Matrix that specifies the relative locations of "
+        "the field specified by --field and first volume "
+        "in file --imain",
+        min_ver="5.0.10",
+    )
+    out_base = traits.Str(
+        "eddy_corrected",
+        argstr="--out=%s",
+        usedefault=True,
+        desc=("basename for output (warped) image"),
+    )
+    mb = traits.Int(
+        argstr="--mb=%s", desc="Multi-band factor", min_ver="5.0.10"
+    )
+    mb_offs = traits.Enum(
+        -1,
+        1,
+        argstr="--mb_offs=%s",
+        desc="Multi-band offset (-1 if bottom slice removed, 1 if top slice removed",
+        requires=["mb"],
+        min_ver="5.0.10",
+    )
+    slspec = traits.File(
+        argstr="--slspec=%s",
+        desc="Name of text file completely specifying slice/group acquisition",
+        xor=["json"],
+        min_ver="5.0.11",
+    )
+    json = traits.File(
+        argstr="--json=%s",
+        desc="Name of .json text file with information about slice timing",
+        xor=["slspec"],
+        min_ver="6.0.1",
+    )
+    mporder = traits.Int(
+        argstr="--mporder=%s",
+        desc="Order of slice-to-vol movement model",
+        requires=["slspec"],
+        min_ver="5.0.11",
+    )
+    s2v_lambda = traits.Int(
+        1,
+        usedefault=True,
+        agstr="--s2v_lambda",
+        desc="Regularisation weight for slice-to-vol movement (reasonable range 1-10)",
+        requires=["slspec"],
+        min_ver="5.0.11",
+    )
     flm = traits.Enum(
-        "linear",
         "quadratic",
+        "linear",
         "cubic",
+        use_default=True,
         argstr="--flm=%s",
         desc="First level EC model",
+        max_ver="5.0.10",
     )
-
+    new_flm = traits.Enum(
+        "quadratic",
+        "movement",
+        "linear",
+        "cubic",
+        use_default=True,
+        argstr="--flm=%s",
+        desc="First level EC model",
+        min_ver="5.0.11",
+    )
     slm = traits.Enum(
         "none",
         "linear",
@@ -93,32 +155,148 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr="--slm=%s",
         desc="Second level EC model",
     )
-
+    fwhm = traits.Float(
+        argstr="--fwhm=%s",
+        desc=(
+            "FWHM for conditioning filter when estimating " "the parameters"
+        ),
+    )
+    niter = traits.Int(
+        5, usedefault=True, argstr="--niter=%s", desc="Number of iterations"
+    )
+    s2v_niter = traits.Int(
+        5,
+        usedefault=True,
+        argstr="--s2v_niter=%s",
+        desc="Number of iterations for slice-to-vol",
+        requires=["slspec"],
+        min_ver="5.0.11",
+    )
+    cnr_maps = traits.Bool(
+        False, desc="Output CNR-Maps", argstr="--cnr_maps", min_ver="5.0.10"
+    )
+    residuals = traits.Bool(
+        False, desc="Output Residuals", argstr="--residuals", min_ver="5.0.10"
+    )
     fep = traits.Bool(
         False, argstr="--fep", desc="Fill empty planes in x- or y-directions"
     )
-
     interp = traits.Enum(
         "spline",
         "trilinear",
+        use_default=True,
         argstr="--interp=%s",
         desc="Interpolation model for estimation step",
     )
-
+    s2v_interp = traits.Enum(
+        "trilinear",
+        "spline",
+        use_default=True,
+        argstr="--s2v_interp=%s",
+        desc="Slice-to-vol interpolation model for estimation step",
+        requires=["slspec"],
+        min_ver="5.0.11",
+    )
+    method = traits.Enum(
+        "jac",
+        "lsr",
+        use_default=True,
+        argstr="--resamp=%s",
+        desc=("Final resampling method (jacobian/least " "squares)"),
+    )
     nvoxhp = traits.Int(
         1000,
         usedefault=True,
         argstr="--nvoxhp=%s",
         desc=("# of voxels used to estimate the " "hyperparameters"),
     )
-
+    initrand = traits.Bool(
+        False,
+        argstr="--initrand",
+        desc="Resets rand for when selecting voxels",
+        min_ver="5.0.10",
+    )
     fudge_factor = traits.Float(
         10.0,
         usedefault=True,
         argstr="--ff=%s",
         desc=("Fudge factor for hyperparameter " "error variance"),
     )
-
+    repol = traits.Bool(
+        False,
+        argstr="--repol",
+        desc="Detect and replace outlier slices",
+        min_ver="5.0.10",
+    )
+    outlier_nstd = traits.Int(
+        4,
+        usedefault=True,
+        argstr="--ol_nstd",
+        desc="Number of std off to qualify as outlier",
+        requires=["repol"],
+        min_ver="5.0.10",
+    )
+    outlier_nvox = traits.Int(
+        250,
+        usedefault=True,
+        argstr="--ol_nvox",
+        desc="Min # of voxels in a slice for inclusion in outlier detection",
+        requires=["repol"],
+        min_ver="5.0.10",
+    )
+    outlier_type = traits.Enum(
+        "sw",
+        "gw",
+        "both",
+        argstr="--ol_type",
+        desc="Type of outliers, slicewise (sw), groupwise (gw) or both (both)",
+        requires=["repol"],
+        min_ver="5.0.10",
+    )
+    outlier_pos = traits.Bool(
+        False,
+        argstr="--ol_pos",
+        desc="Consider both positive and negative outliers if set",
+        requires=["repol"],
+        min_ver="5.0.10",
+    )
+    outlier_sqr = traits.Bool(
+        False,
+        argstr="--ol_sqr",
+        desc="Consider outliers among sums-of-squared differences if set",
+        requires=["repol"],
+        min_ver="5.0.10",
+    )
+    estimate_move_by_susceptibility = traits.Bool(
+        False,
+        argstr="--estimate_move_by_susceptibility",
+        desc="Estimate how susceptibility field changes with subject movement",
+        min_ver="6.0.1",
+    )
+    mbs_niter = traits.Int(
+        10,
+        use_default=True,
+        argstr="--mbs_niter=%s",
+        desc="Number of iterations for MBS estimation",
+        requires=["estimate_move_by_susceptibility"],
+        min_ver="6.0.1",
+    )
+    mbs_lambda = traits.int(
+        10,
+        use_default=True,
+        argstr="--mbs_lambda=%s",
+        desc="Weighting of regularisation for MBS estimation",
+        requires=["estimate_move_by_susceptibility"],
+        min_ver="6.0.1",
+    )
+    mbs_ksp = traits.Int(
+        10,
+        use_default=True,
+        argstr="--mbs_ksp=%smm",
+        desc="Knot-spacing for MBS field estimation",
+        requires=["estimate_move_by_susceptibility"],
+        min_ver="6.0.1",
+    )
     dont_sep_offs_move = traits.Bool(
         False,
         argstr="--dont_sep_offs_move",
@@ -128,35 +306,10 @@ class EddyInputSpec(FSLCommandInputSpec):
             "movement"
         ),
     )
-
     dont_peas = traits.Bool(
         False,
         argstr="--dont_peas",
         desc="Do NOT perform a post-eddy alignment of " "shells",
-    )
-
-    fwhm = traits.Float(
-        desc=(
-            "FWHM for conditioning filter when estimating " "the parameters"
-        ),
-        argstr="--fwhm=%s",
-    )
-
-    niter = traits.Int(
-        5, usedefault=True, argstr="--niter=%s", desc="Number of iterations"
-    )
-
-    method = traits.Enum(
-        "jac",
-        "lsr",
-        argstr="--resamp=%s",
-        desc=("Final resampling method (jacobian/least " "squares)"),
-    )
-    repol = traits.Bool(
-        False, argstr="--repol", desc="Detect and replace outlier slices"
-    )
-    num_threads = traits.Int(
-        1, usedefault=True, nohash=True, desc="Number of openmp threads to use"
     )
     is_shelled = traits.Bool(
         False,
@@ -164,27 +317,13 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc="Override internal check to ensure that "
         "date are acquired on a set of b-value "
         "shells",
+        min_ver="5.0.10",
     )
-    field = traits.Str(
-        argstr="--field=%s",
-        desc="NonTOPUP fieldmap scaled in Hz - filename has "
-        "to be provided without an extension. TOPUP is "
-        "strongly recommended",
-    )
-    field_mat = File(
-        exists=True,
-        argstr="--field_mat=%s",
-        desc="Matrix that specifies the relative locations of "
-        "the field specified by --field and first volume "
-        "in file --imain",
+
+    num_threads = traits.Int(
+        1, usedefault=True, nohash=True, desc="Number of openmp threads to use"
     )
     use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
-    cnr_maps = traits.Bool(
-        False, desc="Output CNR-Maps", argstr="--cnr_maps", min_ver="5.0.10"
-    )
-    residuals = traits.Bool(
-        False, desc="Output Residuals", argstr="--residuals", min_ver="5.0.10"
-    )
 
 
 class EddyOutputSpec(TraitedSpec):

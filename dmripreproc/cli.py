@@ -111,9 +111,7 @@ class Parameters:
     show_default=True,
     help="Fractional intensity threshold for BET on the DWI. "
     "A higher value will be more strict; it will cut off more "
-    "around what it analyzes the brain to be. "
-    "If this parameter is not provided a default of 0.3 will "
-    "be used.",
+    "around what it analyzes the brain to be.",
     type=click.FloatRange(min=0, max=1),
 )
 @click.option(
@@ -122,9 +120,7 @@ class Parameters:
     show_default=True,
     help="Fractional intensity threshold for BET on the magnitude. "
     "A higher value will be more strict; it will cut off more "
-    "around what it analyzes the brain to be. "
-    "If this parameter is not provided a default of 0.3 will "
-    "be used.",
+    "around what it analyzes the brain to be.",
     type=click.FloatRange(min=0, max=1),
 )
 @click.option(
@@ -138,8 +134,6 @@ class Parameters:
 @click.option(
     "--ignore",
     "-i",
-    default="resample",
-    show_default=True,
     help="Specify which node(s) to skip during the preprocessing of the dwi.",
     type=click.Choice(["denoise", "unring", "resample"]),
     multiple=True,

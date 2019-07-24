@@ -190,7 +190,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     # mrtrix3.MaskFilter
 
     ecc = pe.Node(
-        dmri_fsl.Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
+        dmri_fsl.Eddy(repol=True, cnr_maps=True, residuals=True),
         name="fsl_eddy",
     )
 
