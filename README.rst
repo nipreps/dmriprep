@@ -1,7 +1,12 @@
 .. image:: https://codecov.io/gh/TIGRLab/dmripreproc/branch/master/graph/badge.svg
+  :alt: Codecov Badge
   :target: https://codecov.io/gh/TIGRLab/dmripreproc
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/python/black
+  :alt: Black Badge
+  :target: https://github.com/python/black
+.. image:: https://api.codacy.com/project/badge/Grade/f45ec5c64894427a8860cc87cda1910a
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/josephmje/dmripreproc?utm_source=github.com&utm_medium=referral&utm_content=TIGRLab/dmripreproc&utm_campaign=Badge_Grade_Dashboard
 
 # <img alt="dmripreproc" src="docs/img/dmripreproc_icon.svg" height="128"> dmripreproc
 
