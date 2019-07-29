@@ -14,38 +14,37 @@ from nipype.interfaces.mrtrix3.base import MRTrix3BaseInputSpec, MRTrix3Base
 class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True,
-        argstr="%s",
+        argstr='%s',
         position=-2,
         mandatory=True,
-        desc="input DWI image",
-    )
-    mask = File(exists=True, argstr="-mask %s", position=1, desc="mask image")
+        desc='input DWI image')
+    mask = File(
+        exists=True,
+        argstr='-mask %s',
+        position=1,
+        desc='mask image')
     extent = traits.Tuple(
         (traits.Int, traits.Int, traits.Int),
-        argstr="-extent %d,%d,%d",
-        desc="set the window size of the denoising filter. (default = 5,5,5)",
-    )
+        argstr='-extent %d,%d,%d',
+        desc='set the window size of the denoising filter. (default = 5,5,5)')
     noise = File(
-        argstr="-noise %s",
-        name_template="%s_noise",
-        name_source=["in_file"],
+        argstr='-noise %s',
+        name_template='%s_noise',
+        name_source='in_file',
         keep_extension=True,
-        desc="the output noise map",
-    )
+        desc='the output noise map')
     out_file = File(
-        argstr="%s",
-        name_template="%s_denoised",
-        name_source=["in_file"],
-        keep_extension=True,
+        argstr='%s',
         position=-1,
-        desc="the output denoised DWI image",
-    )
+        name_template='%s_denoised',
+        name_source='in_file',
+        keep_extension=True,
+        desc='the output denoised DWI image')
 
 
 class DWIDenoiseOutputSpec(TraitedSpec):
-    out_file = File(desc="the output denoised DWI image", exists=True)
-    noise = File(desc="the output noise map (if generated)", exists=True)
-
+    noise = File(desc='the output noise map', exists=True)
+    out_file = File(desc='the output denoised DWI image', exists=True)
 
 class DWIDenoise(MRTrix3Base):
     """
@@ -67,12 +66,13 @@ class DWIDenoise(MRTrix3Base):
     >>> denoise = mrt.DWIDenoise()
     >>> denoise.inputs.in_file = 'dwi.mif'
     >>> denoise.inputs.mask = 'mask.mif'
+    >>> denoise.inputs.noise = 'noise.mif'
     >>> denoise.cmdline                               # doctest: +ELLIPSIS
-    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
+    'dwidenoise -mask mask.mif -noise noise.mif dwi.mif dwi_denoised.mif'
     >>> denoise.run()                                 # doctest: +SKIP
     """
 
-    _cmd = "dwidenoise"
+    _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
 
@@ -80,55 +80,46 @@ class DWIDenoise(MRTrix3Base):
 class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True,
-        argstr="%s",
+        argstr='%s',
         position=-2,
         mandatory=True,
-        desc="input DWI image",
-    )
+        desc='input DWI image')
     axes = traits.ListInt(
         default_value=[0, 1],
         usedefault=True,
-        sep=",",
+        sep=',',
         minlen=2,
         maxlen=2,
-        argstr="-axes %s",
-        desc="indicate the plane in which the data was acquired (axial = 0,1; "
-        "coronal = 0,2; sagittal = 1,2",
-    )
+        argstr='-axes %s',
+        desc='indicate the plane in which the data was acquired (axial = 0,1; '
+             'coronal = 0,2; sagittal = 1,2')
     nshifts = traits.Int(
         default_value=20,
         usedefault=True,
-        argstr="-nshifts %d",
-        desc="discretization of subpixel spacing (default = 20)",
-    )
+        argstr='-nshifts %d',
+        desc='discretization of subpixel spacing (default = 20)')
     minW = traits.Int(
         default_value=1,
         usedefault=True,
-        argstr="-minW %d",
-        desc="left border of window used for total variation (TV) computation "
-        "(default = 1)",
-    )
+        argstr='-minW %d',
+        desc='left border of window used for total variation (TV) computation '
+             '(default = 1)')
     maxW = traits.Int(
         default_value=3,
         usedefault=True,
-        argstr="-maxW %d",
-        desc="right border of window used for total variation (TV) computation "
-        "(default = 3)",
-    )
+        argstr='-maxW %d',
+        desc='right border of window used for total variation (TV) computation '
+             '(default = 3)')
     out_file = File(
-        name_template="%s_unr",
-        name_source="in_file",
+        name_template='%s_unr',
+        name_source='in_file',
         keep_extension=True,
-        argstr="%s",
+        argstr='%s',
         position=-1,
-        desc="the output unringed DWI image",
-        genfile=True,
-    )
-
+        desc='the output unringed DWI image')
 
 class MRDeGibbsOutputSpec(TraitedSpec):
-    out_file = File(desc="the output unringed DWI image", exists=True)
-
+    out_file = File(desc='the output unringed DWI image', exists=True)
 
 class MRDeGibbs(MRTrix3Base):
     """
@@ -160,7 +151,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring.run()                                 # doctest: +SKIP
     """
 
-    _cmd = "mrdegibbs"
+    _cmd = 'mrdegibbs'
     input_spec = MRDeGibbsInputSpec
     output_spec = MRDeGibbsOutputSpec
 
@@ -214,10 +205,8 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         desc="the output resized DWI image",
     )
 
-
 class MRResizeOutputSpec(TraitedSpec):
     out_file = File(desc="the output resized DWI image", exists=True)
-
 
 class MRResize(MRTrix3Base):
     """
