@@ -1,5 +1,6 @@
 Click>=7.0
 dipy==0.16.0
+duecredit==0.7.0
 nipype==1.2.0
 pandas==0.25.0
 parse==1.12.0

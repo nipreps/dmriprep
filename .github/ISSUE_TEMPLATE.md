@@ -1,4 +1,4 @@
-* dmripreproc version:
+* dmriprep version:
 * Python version:
 * Operating System:
 

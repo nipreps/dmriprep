@@ -1,77 +1,88 @@
-.. image:: https://codecov.io/gh/TIGRLab/dmripreproc/branch/master/graph/badge.svg
+.. highlight:: shell
+
+===========
+dmriprep
+===========
+
+.. image:: https://codecov.io/gh/TIGRLab/dmriprep/branch/master/graph/badge.svg
   :alt: Codecov Badge
-  :target: https://codecov.io/gh/TIGRLab/dmripreproc
+  :target: https://codecov.io/gh/TIGRLab/dmriprep
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
   :alt: Black Badge
   :target: https://github.com/python/black
 .. image:: https://api.codacy.com/project/badge/Grade/f45ec5c64894427a8860cc87cda1910a
    :alt: Codacy Badge
-   :target: https://app.codacy.com/app/josephmje/dmripreproc?utm_source=github.com&utm_medium=referral&utm_content=TIGRLab/dmripreproc&utm_campaign=Badge_Grade_Dashboard
-
-# <img alt="dmripreproc" src="docs/img/dmripreproc_icon.svg" height="128"> dmripreproc
+   :target: https://app.codacy.com/app/josephmje/dmriprep?utm_source=github.com&utm_medium=referral&utm_content=TIGRLab/dmriprep&utm_campaign=Badge_Grade_Dashboard
 
 Preprocessing of neuroimaging data in preparation for AFQ analysis
+------------------------------------------------------------------
 
 * Free software: BSD license
-* Documentation: https://dmripreproc.readthedocs.io.
+* Documentation: https://dmriprep.readthedocs.io.
 
-## Preparing your data
+Preparing your data
+-------------------
 
 You should have raw data organized in the BIDS format. Also, you should have run Freesurfer and the results should be in a derivatives/ folder:
 
-    BIDS_input_dir
-    ├── sub-01
-    │   ├── dwi
-    │   │   ├── sub-01_ses-01_dwi.nii.gz
-    │   │   ├── sub-01_ses-01_dwi.bval
-    │   │   ├── sub-01_ses-01_dwi.bvec
-    │   ├── fmap
-    │   │   ├── sub-01_ses-01_acq-dwi_dir-AP_epi.nii.gz
-    │   │   ├── sub-01_ses-01_acq-dwi_dir-PA_epi.nii.gz
-    │   │   ├── sub-01_ses-01_acq-dwi_dir-AP_epi.json
-    │   │   ├── sub-01_ses-01_acq-dwi_dir-PA_epi.json
-    ├── derivatives
-    │   ├── sub-01
-    │   │   ├── freesurfer
-
-## Quickstart
-
-```bash
-git clone https://github.com/tigrlab/dmripreproc
-cd dmripreproc
-python setup.py install
-
-dmripreproc $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
+```
+bids
+├── derivatives
+│   └── sub-01
+│       └── freesurfer
+└── sub-01
+  ├── dwi
+  │   ├── sub-01_ses-01_dwi.bval
+  │   ├── sub-01_ses-01_dwi.bvec
+  │   ├── sub-01_ses-01_dwi.json
+  │   └── sub-01_ses-01_dwi.nii.gz
+  └── fmap
+      ├── sub-01_ses-01_acq-dwi_dir-AP_epi.json
+      ├── sub-01_ses-01_acq-dwi_dir-AP_epi.nii.gz
+      ├── sub-01_ses-01_acq-dwi_dir-PA_epi.json
+      └── sub-01_ses-01_acq-dwi_dir-PA_epi.nii.gz
 ```
 
-```bash
-git clone https://github.com/tigrlab/dmripreproc
-cd dmripreproc
+Quickstart
+----------
+
+.. code-block:: bash
+  git clone https://github.com/tigrlab/dmriprep
+  cd dmriprep
+  python setup.py install
+
+  dmriprep $BIDS_INPUT_DIR $OUTPUT_DIR --participant-label 01
+
+.. code-block:: bash
+git clone https://github.com/tigrlab/dmriprep
+cd dmriprep
 make docker
 
-# If you don't want to log into the docker image:
+If you don't want to log into the docker image:
+.. code-block:: bash
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmripreproc:prod dmripreproc /inputs /outputs
+If you want to log into the image:
+.. code-block:: bash
+docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod
 
-# If you want to log into the image:
+Run this inside the docker image:
+.. code-block:: bash
+dmriprep /inputs /output --participant-label 01
 
-docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmripreproc:prod
-
-# Run this inside the docker image:
-dmripreproc /inputs /outpus --participant-label 01
-```
-
-## Features
+Features
+--------
 
 * TODO
 
-## Contributing
+Contributing
+------------
 
-We love contributions! dmripreproc is open source, built on open source,
+We love contributions! dmriprep is open source, built on open source,
 and we'd love to have you hang out in our community.
 
 We have developed some [guidelines](CONTRIBUTING.rst) for contributing to
-dmripreproc.
+dmriprep.
 
 **Imposter syndrome disclaimer**: We want your help. No, really.
 
@@ -96,7 +107,8 @@ most valuable to the project as a whole, because you're coming to the
 project with fresh eyes, so you can see the errors and assumptions that
 seasoned contributors have glossed over.
 
-## Credits
+Credits
+-------
 
 This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the [`audreyr/cookiecutter-pypackage`](https://github.com/audreyr/cookiecutter-pypackage) project template.
 

@@ -1,4 +1,5 @@
-FROM poldracklab/fmriprep:1.3.2
+# Use Ubuntu 16.04 LTS
+FROM ubuntu:xenial-20190610
 
 # Used command:
 # neurodocker generate docker --base=debian:stretch --pkg-manager=apt
@@ -8,16 +9,19 @@ FROM poldracklab/fmriprep:1.3.2
 # Getting required installation tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        apt-utils \
+        bzip2 \
+        ca-certificates \
+        curl \
+        locales \
+        unzip \
         bc \
         libtool \
         tar \
         dpkg \
-        curl \
         wget \
-        unzip \
         gcc \
         git \
-        bzip2 \
         libstdc++6
 
 # Neurodocker Setup
@@ -52,10 +56,12 @@ RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
 
 ENTRYPOINT ["/neurodocker/startup.sh"]
 
+# install ANTS v2.3.1
+curl -sSL https://github.com/ANTsX/ANTs/archive/v2.3.1.tar.gz
+
+
 # ANTS (used from BIDS-Apps https://github.com/BIDS-Apps/dockerfile-templates/blob/master/ANTs/Dockerfile)
-RUN apt-get update && \
-    apt-get install -y curl && \
-		mkdir -p /opt/ants && \
+RUN mkdir -p /opt/ants && \
     curl -sSL "https://github.com/stnava/ANTs/releases/download/v2.1.0/Linux_Ubuntu14.04.tar.bz2" \
     | tar -xjC /opt/ants --strip-components 1 && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -193,12 +199,12 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libopenblas-base
 
-# setting up an install of dmripreproc (manual version) inside the container
-ADD https://api.github.com/repos/TIGRLab/dmripreproc/git/refs/heads/master version.json
-RUN git clone -b master https://github.com/TIGRLab/dmripreproc.git
-#RUN mkdir dmripreproc
-#COPY ./ dmripreproc/
-RUN cd dmripreproc && ls && python setup.py install && pip list
+# setting up an install of dmriprep (manual version) inside the container
+ADD https://api.github.com/repos/TIGRLab/dmriprep/git/refs/heads/master version.json
+RUN git clone -b master https://github.com/TIGRLab/dmriprep.git
+#RUN mkdir dmriprep
+#COPY ./ dmriprep/
+RUN cd dmriprep && ls && python setup.py install && pip list
 RUN pip install pybids==0.9.1 && pip list
 
 ENTRYPOINT ["dmriprep"]

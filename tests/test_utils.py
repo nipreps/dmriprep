@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `dmripreproc` package."""
+"""Tests for `dmriprep` package."""
 
 import numpy as np
 
-from dmripreproc.utils.hemisphere import is_hemispherical
+from dmriprep.utils.hemisphere import is_hemispherical
 
 
 def uniform_points_on_sphere(npoints=1, hemisphere=True, rotate=(0, 0, 0)):

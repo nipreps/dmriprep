@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""The setup script."""
+""" dmriprep setup script """
 
+import sys
 from setuptools import setup, find_packages
+from setuptools.extension import Extension
+import versioneer
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
@@ -31,11 +34,11 @@ extras_require = {"dev": ["flake8", "pytest", "pytest-cov", "pre-commit"]}
 
 setup(
     # project information
-    name="dmripreproc",
+    name="dmriprep",
     version="0.1.0",
     author="Michael Joseph",
     author_email="michael.joseph@camh.ca",
-    url="https://github.com/tigrlab/dmripreproc",
+    url="https://github.com/tigrlab/dmriprep",
     license="BSD license",
     # description
     description="Preprocessing of diffusion MRI data",
@@ -46,19 +49,19 @@ setup(
     setup_requires=setup_requirements,
     extras_require=extras_require,
     # packaging
-    packages=find_packages(include=["dmripreproc*"]),
+    packages=find_packages(include=["dmriprep*"]),
     include_package_data=True,
     zip_safe=False,
     # tests
     test_suite="tests",
     tests_require=test_requirements,
     # cli
-    entry_points={"console_scripts": ["dmripreproc=dmripreproc.cli:main"]},
+    entry_points={"console_scripts": ["dmriprep=dmriprep.cli:main"]},
     # metadata
     keywords="diffusion-mri diffusion-preprocessing bids",
     project_urls={
-        "Documentation": "https://dmripreproc.readthedocs.io/en/latest/",
-        "Tracker": "https://github.com/TIGRLab/dmripreproc/issues/",
+        "Documentation": "https://dmriprep.readthedocs.io/en/latest/",
+        "Tracker": "https://github.com/TIGRLab/dmriprep/issues/",
     },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
