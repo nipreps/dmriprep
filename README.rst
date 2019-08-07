@@ -1,18 +1,18 @@
-.. highlight:: shell
-
-===========
+========
 dmriprep
-===========
+========
 
-.. image:: https://codecov.io/gh/TIGRLab/dmriprep/branch/master/graph/badge.svg
-  :alt: Codecov Badge
-  :target: https://codecov.io/gh/TIGRLab/dmriprep
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-  :alt: Black Badge
-  :target: https://github.com/python/black
-.. image:: https://api.codacy.com/project/badge/Grade/f45ec5c64894427a8860cc87cda1910a
-   :alt: Codacy Badge
-   :target: https://app.codacy.com/app/josephmje/dmriprep?utm_source=github.com&utm_medium=referral&utm_content=TIGRLab/dmriprep&utm_campaign=Badge_Grade_Dashboard
+
+.. image:: https://img.shields.io/pypi/v/dmriprep.svg
+        :target: https://pypi.python.org/pypi/dmriprep
+
+.. image:: https://img.shields.io/travis/akeshavan/dmriprep.svg
+        :target: https://travis-ci.org/akeshavan/dmriprep
+
+.. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
+        :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
+
 
 Preprocessing of neuroimaging data in preparation for AFQ analysis
 ------------------------------------------------------------------

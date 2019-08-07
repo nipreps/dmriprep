@@ -4,9 +4,9 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3, utility as niu
 
 
-def init_unring_wf():
+def init_resample_wf():
 
-    wf = pe.Workflow(name="unring_wf")
+    wf = pe.Workflow(name="resample_wf")
 
     inputnode = pe.Node(
         niu.IdentityInterface(fields=["dwi_file"]), name="inputnode"
@@ -16,7 +16,7 @@ def init_unring_wf():
         niu.IdentityInterface(fields=["out_file"]), name="outputnode"
     )
 
-    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
+    resample = pe.Node(mrtrix3.MRResize(), name="resample")
 
     wf.connect(
         [

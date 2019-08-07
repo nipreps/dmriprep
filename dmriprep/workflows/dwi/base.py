@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 
+"""
+Orchestrating the dwi preprocessing workflows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: init_dwi_preproc_wf
+
+"""
+
 from bids import BIDSLayout
 from nipype.pipeline import engine as pe
 from nipype.interfaces import ants, fsl, mrtrix3, utility as niu
 from numba import cuda
 
-from .denoise import init_denoise_wf
-from .unring import init_unring_wf
+from .remove_artefacts import init_remove_artefacts_wf
 from .tensor import init_tensor_wf
 
 # from ..fieldmap.base import init_sdc_prep_wf

@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+Denoising, unringing and upsampling of dwi images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: init_remove_artefacts_wf
+
+"""
+
 from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3, utility as niu
 
