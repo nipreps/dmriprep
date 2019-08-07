@@ -4,6 +4,8 @@
 Orchestrating the dwi preprocessing workflows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. autofunction:: init_dwi_preproc_wf
+
 """
 
 from bids import BIDSLayout
@@ -91,130 +93,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="outputnode",
     )
 
-    denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
-
-    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
-
-    resample = pe.Node(
-        mrtrix3.MRResize(voxel_size=parameters.output_resolution), name="resample"
-    )
-
-    def gen_index(in_file):
-        import os
-        import numpy as np
-        import nibabel as nib
-        from nipype.utils import NUMPY_MMAP
-        from nipype.utils.filemanip import fname_presuffix
-
-        out_file = fname_presuffix(
-            in_file, suffix="_index.txt", newpath=os.path.abspath("."), use_ext=False
-        )
-        vols = nib.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
-        index_lines = np.ones((vols,))
-        index_lines_reshape = index_lines.reshape(1, index_lines.shape[0])
-        np.savetxt(out_file, index_lines_reshape, fmt="%i")
-        return out_file
-
-    gen_idx = pe.Node(
-        niu.Function(
-            input_names=["in_file"], output_names=["out_file"], function=gen_index
-        ),
-        name="gen_index",
-    )
-
-    def gen_acqparams(in_file, metadata):
-        import os
-        from nipype.utils.filemanip import fname_presuffix
-
-        out_file = fname_presuffix(
-            in_file,
-            suffix="_acqparams.txt",
-            newpath=os.path.abspath("."),
-            use_ext=False,
-        )
-
-        acq_param_dict = {
-            "j": "0 1 0 %.7f",
-            "j-": "0 -1 0 %.7f",
-            "i": "1 0 0 %.7f",
-            "i-": "-1 0 0 %.7f",
-            "k": "0 0 1 %.7f",
-            "k-": "0 0 -1 %.7f",
-        }
-
-        pe_dir = metadata.get("PhaseEncodingDirection")
-        total_readout = metadata.get("TotalReadoutTime")
-        acq_param_lines = acq_param_dict[pe_dir] % total_readout
-
-        with open(out_file, "w") as f:
-            f.write(acq_param_lines)
-
-        return out_file
-
-    acqp = pe.Node(
-        niu.Function(
-            input_names=["in_file", "metadata"],
-            output_names=["out_file"],
-            function=gen_acqparams,
-        ),
-        name="acqp",
-    )
-
-    dwi_wf.connect(
-        [
-            (inputnode, gen_idx, [("dwi_file", "in_file")]),
-            (inputnode, acqp, [("dwi_file", "in_file"), ("dwi_meta", "metadata")]),
-        ]
-    )
-
-    def b0_average(in_dwi, in_bval, b0_thresh, out_file=None):
-        """
-        A function that averages the *b0* volumes from a DWI dataset.
-        As current dMRI data are being acquired with all b-values > 0.0,
-        the *lowb* volumes are selected by specifying the parameter b0_thresh.
-        .. warning:: *b0* should be already registered (head motion artifact
-        should be corrected).
-        """
-        import os
-        import numpy as np
-        import nibabel as nib
-        from nipype.utils import NUMPY_MMAP
-        from nipype.utils.filemanip import fname_presuffix
-
-        if out_file is None:
-            out_file = fname_presuffix(
-                in_dwi, suffix="_avg_b0", newpath=os.path.abspath(".")
-            )
-
-        imgs = np.array(nib.four_to_three(nib.load(in_dwi, mmap=NUMPY_MMAP)))
-        bval = np.loadtxt(in_bval)
-        index = np.argwhere(bval <= b0_thresh).flatten().tolist()
-
-        b0s = [im.get_data().astype(np.float32) for im in imgs[index]]
-        b0 = np.average(np.array(b0s), axis=0)
-
-        hdr = imgs[0].header.copy()
-        hdr.set_data_shape(b0.shape)
-        hdr.set_xyzt_units("mm")
-        hdr.set_data_dtype(np.float32)
-        nib.Nifti1Image(b0, imgs[0].affine, hdr).to_filename(out_file)
-        return out_file
-
-    avg_b0_0 = pe.Node(
-        niu.Function(
-            input_names=["in_dwi", "in_bval", "b0_thresh"],
-            output_names=["out_file"],
-            function=b0_average,
-        ),
-        name="b0_avg_pre",
-    )
-
-    avg_b0_0.inputs.b0_thresh = parameters.b0_thresh
-
-    bet_dwi0 = pe.Node(
-        fsl.BET(frac=parameters.bet_dwi, mask=True, robust=True), name="bet_dwi_pre"
-    )
-
     ecc = pe.Node(fsl.Eddy(repol=True, cnr_maps=True, residuals=True), name="fsl_eddy")
 
     if parameters.omp_nthreads:
@@ -232,54 +110,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     get_path = lambda x: x.split(".nii.gz")[0].split("_fix")[0]
     get_qc_path = lambda x: x.split(".nii.gz")[0] + ".qc"
-
-    if set(parameters.ignore) == set(["denoise", "unring"]):
-        wf.connect(
-            [
-                (inputnode, avg_b0_0, [("dwi_file", "in_file")])(
-                    inputnode, ecc, [("dwi_file", "in_file")]
-                )
-            ]
-        )
-
-    if "denoise" in parameters.ignore:
-        unring_wf = init_unring_wf()
-
-        dwi_wf.connect(
-            [
-                (inputnode, unring_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (unring_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (unring_wf, ecc, [("outputnode.out_file", "in_file")]),
-            ]
-        )
-
-    elif "unring" in parameters.ignore:
-        denoise_wf = init_denoise_wf()
-
-        dwi_wf.connect(
-            [
-                (inputnode, denoise_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (denoise_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (denoise_wf, ecc, [("outputnode.out_file", "in_file")]),
-            ]
-        )
-
-    else:
-        denoise_wf = init_denoise_wf()
-        unring_wf = init_unring_wf()
-
-        dwi_wf.connect(
-            [
-                (inputnode, denoise_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (
-                    denoise_wf,
-                    unring_wf,
-                    [("outputnode.out_file", "inputnode.dwi_file")],
-                ),
-                (unring_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (unring_wf, ecc, [("outputnode.out_file", "in_file")]),
-            ]
-        )
 
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
 

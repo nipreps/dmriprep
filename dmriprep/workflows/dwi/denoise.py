@@ -8,13 +8,9 @@ def init_denoise_wf():
 
     wf = pe.Workflow(name="denoise_wf")
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["dwi_file"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_file"]), name="inputnode")
 
-    outputnode = pe.Node(
-        niu.IdentityInterface(fields=["out_file"]), name="outputnode"
-    )
+    outputnode = pe.Node(niu.IdentityInterface(fields=["out_file"]), name="outputnode")
 
     denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
 

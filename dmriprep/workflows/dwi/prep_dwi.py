@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Denoising, unringing and upsampling of dwi images
+Denoising, unringing and resampling of dwi images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: init_remove_artefacts_wf
 
 """
 
@@ -12,7 +10,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3, utility as niu
 
 
-def init_remove_artefacts_wf(ignore_nodes):
+def init_remove_artefacts_wf(parameters):
 
     dwi_prep_wf = pe.Workflow(name="remove_artefacts_wf")
 
@@ -20,19 +18,17 @@ def init_remove_artefacts_wf(ignore_nodes):
 
     unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["dwi_file"]), name="inputnode"
+    resample = pe.Node(
+        mrtrix3.MRResize(voxel_size=parameters.output_resolution), name="resample"
     )
 
-    outputnode = pe.Node(
-        niu.IdentityInterface(fields=["out_file"]), name="outputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_file"]), name="inputnode")
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=["out_file"]), name="outputnode")
 
     prep_full = ["denoise", "unring"]
 
-    prep_wanted_str = [
-        node for node in prep_full if not (node in ignore_nodes)
-    ]
+    prep_wanted_str = [node for node in prep_full if not (node in ignore_nodes)]
 
     # Translate string input to node names
     str2node = {"denoise": denoise, "unring": unring}
@@ -41,17 +37,13 @@ def init_remove_artefacts_wf(ignore_nodes):
 
     # If no steps selected, just connect input to output
     if not (prep_wanted):
-        dwi_prep_wf.connect(
-            [(inputnode, outputnode, [("dwi_file", "out_file")])]
-        )
+        dwi_prep_wf.connect([(inputnode, outputnode, [("dwi_file", "out_file")])])
 
     # If there are steps
     else:
         # Must at least connect input node to first node
         first_node = prep_wanted[0]
-        dwi_prep_wf.connect(
-            [(inputnode, first_node, [("dwi_file", "in_file")])]
-        )
+        dwi_prep_wf.connect([(inputnode, first_node, [("dwi_file", "in_file")])])
         # Loop through the prep order
         # Note: only works if each node has in_file and out_file
         # Can work around this by wrapping in node/workflow with in_file+out_file
@@ -61,8 +53,6 @@ def init_remove_artefacts_wf(ignore_nodes):
             prev = curr_node
         # Connect last node to output node
         last_node = prep_wanted[-1]
-        dwi_prep_wf.connect(
-            [(last_node, outputnode, [("out_file", "out_file")])]
-        )
+        dwi_prep_wf.connect([(last_node, outputnode, [("out_file", "out_file")])])
 
     return dwi_prep_wf
