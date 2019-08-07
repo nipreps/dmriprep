@@ -19,7 +19,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc="input DWI image",
     )
-    size = traits.List(
+    image_size = traits.List(
         traits.Int(),
         argstr="-size %s",
         desc="define the new image size for the output image. This should be "
@@ -33,7 +33,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         "dimensions, or as a comma-separated list of the size for each "
         "voxel dimension.",
     )
-    scale = traits.Float(
+    scale_factor = traits.Float(
         argstr="-scale %s",
         desc="scale the image resolution by the supplied factor. This can be "
         "specified either as a single value to be used for all "
@@ -75,10 +75,10 @@ class MRResize(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> resize = mrt.MRResize()
     >>> resize.inputs.in_file = 'dwi.mif'
-    >>> denoise.inputs.mask = 'mask.mif'
-    >>> denoise.cmdline                               # doctest: +ELLIPSIS
-    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
-    >>> denoise.run()                                 # doctest: +SKIP
+    >>> resize.inputs.scal_factor = 2
+    >>> resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -scale 2 dwi.mif dwi_resized.mif'
+    >>> resize.run()                                 # doctest: +SKIP
     """
 
     _cmd = "mrresize"

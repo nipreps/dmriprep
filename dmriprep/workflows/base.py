@@ -54,7 +54,7 @@ def init_single_subject_wf(subject_id, name, parameters):
         if "session" in entities:
             session_id = entities["session"]
         else:
-            session_id = ""
+            session_id = None
         metadata = parameters.layout.get_metadata(dwi_file)
         dwi_preproc_wf = init_dwi_preproc_wf(
             subject_id=subject_id,
@@ -86,7 +86,10 @@ def init_single_subject_wf(subject_id, name, parameters):
         ds_inputspec.inputs.output_folder = parameters.output_dir
         ds_inputspec.inputs.metadata = metadata
 
-        wf_name = "sub_" + subject_id + "_ses_" + session_id + "_preproc_wf"
+        if session_id:
+            wf_name = "sub_" + subject_id + "_ses_" + session_id + "_preproc_wf"
+        else:
+            wf_name = "sub_" + subject_id + "_preproc_wf"
         full_wf = pe.Workflow(name=wf_name)
 
         full_wf.connect(

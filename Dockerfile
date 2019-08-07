@@ -1,27 +1,35 @@
 # Use Ubuntu 16.04 LTS
 FROM ubuntu:xenial-20190610
 
-# Used command:
-# neurodocker generate docker --base=debian:stretch --pkg-manager=apt
-# --ants version=latest method=source --mrtrix3 version=3.0_RC3
-# --freesurfer version=6.0.0 method=binaries --fsl version=6.0.1 method=binaries
+# Prepare environment
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+                    curl \
+                    bzip2 \
+                    ca-certificates \
+                    xvfb \
+                    cython3 \
+                    build-essential \
+                    autoconf \
+                    libtool \
+                    pkg-config \
+                    git && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get install -y --no-install-recommends \
+                    nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Getting required installation tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         apt-utils \
-        bzip2 \
-        ca-certificates \
-        curl \
         locales \
         unzip \
         bc \
-        libtool \
         tar \
         dpkg \
         wget \
         gcc \
-        git \
         libstdc++6
 
 # Neurodocker Setup
@@ -56,27 +64,21 @@ RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
 
 ENTRYPOINT ["/neurodocker/startup.sh"]
 
-# install ANTS v2.3.1
-curl -sSL https://github.com/ANTsX/ANTs/archive/v2.3.1.tar.gz
+# Installing ANTS v2.3.1
+ENV ANTSPATH=/opt/ants
+RUN mkdir -p $ANTSPATH && \
+    curl -sSL https://github.com/ANTsX/ANTs/archive/v2.3.1.tar.gz
+    | tar -xzC $ANTSPATH --strip-components 1
+ENV PATH=$ANTSPATH:$PATH
 
-
-# ANTS (used from BIDS-Apps https://github.com/BIDS-Apps/dockerfile-templates/blob/master/ANTs/Dockerfile)
-RUN mkdir -p /opt/ants && \
-    curl -sSL "https://github.com/stnava/ANTs/releases/download/v2.1.0/Linux_Ubuntu14.04.tar.bz2" \
-    | tar -xjC /opt/ants --strip-components 1 && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-ENV ANTSPATH /opt/ants
-ENV PATH $ANTSPATH:$PATH
-
-# MRtrix3 generated from Neurodocker
+# Installing MRtrix3
 ENV PATH="/opt/mrtrix3-3.0_RC3/bin:$PATH"
 RUN echo "Downloading MRtrix3 ..." \
     && mkdir -p /opt/mrtrix3-3.0_RC3 \
     && curl -fsSL --retry 5 https://dl.dropbox.com/s/2oh339ehcxcf8xf/mrtrix3-3.0_RC3-Linux-centos6.9-x86_64.tar.gz \
     | tar -xz -C /opt/mrtrix3-3.0_RC3 --strip-components 1
 
-# Freesurfer generated from Neurodocker
+# Installing Freesurfer
 ENV FREESURFER_HOME="/opt/freesurfer-6.0.0" \
     PATH="/opt/freesurfer-6.0.0/bin:$PATH"
 RUN apt-get update -qq \
@@ -108,6 +110,7 @@ RUN apt-get update -qq \
          --exclude='freesurfer/trctrain' \
     && sed -i '$isource "/opt/freesurfer-6.0.0/SetUpFreeSurfer.sh"' "$ND_ENTRYPOINT"
 
+# Installing FSL
 ENV FSLDIR="/opt/fsl-6.0.1" \
     PATH="/opt/fsl-6.0.1/bin:$PATH"
 RUN apt-get update -qq \
@@ -182,15 +185,6 @@ RUN echo '{ \
     \n    ] \
     \n  ] \
     \n}' > /neurodocker/neurodocker_specs.json
-
-#All of the examples below use debian:stretch as the base image, but any Docker image can be used as a base.
-#Common base images (and their packages managers) are ubuntu:16.04 (apt), centos:7 (yum), neurodebian:nd16.04 (apt), and neurodebian:stretch (apt).
-
-# FSL 6.0.1
-# Freesurfer 6.0.0
-# MRtrix3
-# ANTS
-# Python 3
 
 # add credentials on build
 RUN mkdir ~/.ssh && ln -s /run/secrets/host_ssh_key ~/.ssh/id_rsa

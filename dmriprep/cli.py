@@ -23,30 +23,29 @@ class Parameters:
         layout,
         subject_list,
         bids_dir,
-        work_dir,
         output_dir,
-        # concat_shells,
+        analysis_level,
+        work_dir,
+        ignore,
         b0_thresh,
-        resize_scale,
-        omp_nthreads,
-        eddy_niter,
+        output_resolution,
         bet_dwi,
         bet_mag,
-        ignore,
-        analysis_level,
+        omp_nthreads,
+        eddy_niter,
         synb0_dir,
-        acqp_file,
+        acqp_file
     ):
+
+        self.layout = layout
+        self.subject_list = subject_list
         self.bids_dir = bids_dir
         self.output_dir = output_dir
         self.analysis_level = analysis_level
-        self.layout = layout
-        self.subject_list = subject_list
         self.work_dir = work_dir
-        # self.concat_shells = concat_shells
         self.ignore = ignore
-        self.resize_scale = resize_scale
         self.b0_thresh = b0_thresh
+        self.output_resolution = resize_scale
         self.bet_dwi = bet_dwi
         self.bet_mag = bet_mag
         self.omp_nthreads = omp_nthreads
@@ -95,7 +94,9 @@ class Parameters:
     type=click.IntRange(min=0, max=10),
 )
 @click.option(
-    "--resize_scale", help="Scale factor to resize DWI image", type=float
+    "--output_resolution",
+    help="The isotropic voxel size in mm the data will be resampled to before eddy.",
+    type=float
 )
 # specific options for eddy
 @click.option(
@@ -154,6 +155,18 @@ class Parameters:
     type=click.Path(exists=True, file_okay=False, writable=True),
 )
 @click.option(
+    "--tbss",
+    help="Run TBSS"
+    is_flag=True
+)
+@click.option(
+    "--diffusivity_meas",
+    help="Specify which measures to calculate.",
+    default=("FA",),
+    type=click.Choice(["FA", "MD", "AD", "RD"]),
+    multiple=True
+)
+@click.option(
     "--synb0_dir",
     default=None,
     help="If you want to use Synb0-DISCO for preprocessing.",
@@ -163,17 +176,16 @@ def main(
     participant_label,
     bids_dir,
     output_dir,
-    work_dir,
-    skip_bids_validation,
     analysis_level,
+    skip_bids_validation,
+    work_dir,
+    ignore,
     b0_thresh,
-    # concat_shells,
-    resize_scale,
-    omp_nthreads,
-    eddy_niter,
+    output_resolution,
     bet_dwi,
     bet_mag,
-    ignore,
+    omp_nthreads,
+    eddy_niter,
     synb0_dir,
     acqp_file,
 ):
@@ -195,7 +207,7 @@ def main(
             "is participant at the moment."
         )
 
-    layout = BIDSLayout(bids_dir, validate=False)
+    layout = BIDSLayout(bids_dir, validate=True)
     all_subjects, subject_list = collect_participants(
         layout, participant_label=participant_label
     )
@@ -213,17 +225,16 @@ def main(
         layout=layout,
         subject_list=subject_list,
         bids_dir=bids_dir,
-        work_dir=work_dir,
         output_dir=output_dir,
-        # concat_shells=concat_shells,
+        analysis_level=analysis_level,
+        work_dir=work_dir,
+        ignore=list(ignore),
         b0_thresh=b0_thresh,
-        resize_scale=resize_scale,
-        omp_nthreads=omp_nthreads,
-        eddy_niter=eddy_niter,
+        output_resolution=output_resolution,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
-        ignore=list(ignore),
-        analysis_level=analysis_level,
+        omp_nthreads=omp_nthreads,
+        eddy_niter=eddy_niter,
         synb0_dir=synb0_dir,
         acqp_file=acqp_file,
     )
