@@ -7,10 +7,12 @@ Welcome to dmriprep's documentation!
 
    readme
    installation
+   changes
    usage
+   workflows
+   outputs
    contributing
    authors
-   history
 
 Indices and tables
 ==================

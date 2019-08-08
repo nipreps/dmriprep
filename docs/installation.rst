@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/tigrlab/dmriprep
+    $ git clone git://github.com/josephmje/dmriprep
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/tigrlab/dmriprep/tarball/master
+    $ curl  -OL https://github.com/josephmje/dmriprep/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,32 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/tigrlab/dmriprep
-.. _tarball: https://github.com/tigrlab/dmriprep/tarball/master
+.. _Github repo: https://github.com/josephmje/dmriprep
+.. _tarball: https://github.com/josephmje/dmriprep/tarball/master
+
+Docker container
+----------------
+
+.. code-block:: console
+
+    $ git clone https://github.com/josephmje/dmriprep
+    $ cd dmriprep
+    $ make docker
+
+If you don't want to log into the docker image:
+
+.. code-block:: console
+
+    $ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
+
+If you want to log into the image:
+
+.. code-block:: console
+
+    $ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod
+
+Run this inside the docker image:
+
+.. code-block:: console
+
+    $ dmriprep /inputs /output --participant-label 01
