@@ -11,7 +11,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import ants, fsl, mrtrix3, utility as niu
 from numba import cuda
 
-from .remove_artefacts import init_remove_artefacts_wf
+from .prep_dwi import init_prep_dwi_wf
 from .tensor import init_tensor_wf
 
 # from ..fieldmap.base import init_sdc_prep_wf
@@ -91,13 +91,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="outputnode",
     )
 
-    denoise = pe.Node(mrtrix3.DWIDenoise(), name="denoise")
-
-    unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
-
-    resample = pe.Node(
-        mrtrix3.MRResize(voxel_size=parameters.output_resolution), name="resample"
-    )
+    dwi_prep_wf = init_prep_dwi_wf(parameters.ignore, parameters.output_resolution)
 
     def gen_index(in_file):
         import os
@@ -242,51 +236,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
             ]
         )
 
-    if "denoise" in parameters.ignore:
-        unring_wf = init_unring_wf()
-
-        dwi_wf.connect(
-            [
-                (inputnode, unring_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (unring_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (unring_wf, ecc, [("outputnode.out_file", "in_file")]),
-            ]
-        )
-
-    elif "unring" in parameters.ignore:
-        denoise_wf = init_denoise_wf()
-
-        dwi_wf.connect(
-            [
-                (inputnode, denoise_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (denoise_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (denoise_wf, ecc, [("outputnode.out_file", "in_file")]),
-            ]
-        )
-
-    else:
-        denoise_wf = init_denoise_wf()
-        unring_wf = init_unring_wf()
-
-        dwi_wf.connect(
-            [
-                (inputnode, denoise_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (
-                    denoise_wf,
-                    unring_wf,
-                    [("outputnode.out_file", "inputnode.dwi_file")],
-                ),
-                (unring_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (unring_wf, ecc, [("outputnode.out_file", "in_file")]),
-            ]
-        )
-
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
 
-    bias_correct = pe.Node(
-        ants.N4BiasFieldCorrection(save_bias=True, copy_header=True, dimension=3),
-        name="bias_correct",
-    )
+    bias_correct = pe.Node(mrtrix3.DWIBiasCorrect(use_ants=True), name="bias_correct")
 
     def get_b0_mask_fn(b0_file):
         import os
@@ -312,16 +264,24 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     dwi_wf.connect(
         [
+            (inputnode, dwi_prep_wf, [("dwi_file", "inputnode.dwi_file")]),
+            (dwi_prep_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
             (inputnode, avg_b0_0, [("bval_file", "in_bval")]),
             (avg_b0_0, bet_dwi0, [("out_file", "in_file")]),
+            (dwi_prep_wf, ecc, [("outputnode.out_file", "in_file")]),
             (inputnode, ecc, [("bval_file", "in_bval"), ("bvec_file", "in_bvec")]),
             (bet_dwi0, ecc, [("mask_file", "in_mask")]),
             (gen_idx, ecc, [("out_file", "in_index")]),
             (acqp, ecc, [("out_file", "in_acqp")]),
             (ecc, denoise_eddy, [("out_corrected", "in_file")]),
-            (ecc, fslroi, [("out_corrected", "in_file")]),
-            (fslroi, bias_correct, [("roi_file", "input_image")]),
-            (bias_correct, b0mask_node, [("output_image", "b0_file")]),
+            (
+                ecc,
+                bias_correct,
+                [("out_corrected", "in_file"), ("out_rotated_bvecs", "in_bvec")],
+            ),
+            (inputnode, bias_correct, [("bval_file", "in_bval")]),
+            (bias_correct, fslroi, [("out_file", "in_file")]),
+            (fslroi, b0mask_node, [("roi_file", "b0_file")]),
             (
                 ecc,
                 eddy_quad,

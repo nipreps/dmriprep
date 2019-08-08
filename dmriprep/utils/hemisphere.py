@@ -5,26 +5,26 @@ import numpy as np
 
 
 def is_hemispherical(vecs):
-    """Test whether all points on a unit sphere lie in the same hemisphere.
+    """
+    Test whether all points on a unit sphere lie in the same hemisphere.
 
-    Parameters
-    ----------
+    **Inputs**
+
     vecs : numpy.ndarray
         2D numpy array with shape (N, 3) where N is the number of points.
         All points must lie on the unit sphere.
 
-    Returns
-    -------
+    **Outputs**
+
     is_hemi : bool
         If True, one can find a hemisphere that contains all the points.
         If False, then the points do not lie in any hemisphere
-
     pole : numpy.ndarray
         If `is_hemi == True`, then pole is the "central" pole of the
         input vectors. Otherwise, pole is the zero vector.
 
-    References
-    ----------
+    **References**
+
     https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html  # noqa
     """
     if vecs.shape[1] != 3:

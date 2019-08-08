@@ -34,7 +34,9 @@ class Parameters:
         omp_nthreads,
         eddy_niter,
         synb0_dir,
-        acqp_file
+        acqp_file,
+        tbss,
+        diffusivity_meas,
     ):
 
         self.layout = layout
@@ -45,13 +47,15 @@ class Parameters:
         self.work_dir = work_dir
         self.ignore = ignore
         self.b0_thresh = b0_thresh
-        self.output_resolution = resize_scale
+        self.output_resolution = output_resolution
         self.bet_dwi = bet_dwi
         self.bet_mag = bet_mag
         self.omp_nthreads = omp_nthreads
         self.eddy_niter = eddy_niter
         self.synb0_dir = synb0_dir
         self.acqp_file = acqp_file
+        self.tbss = (tbss,)
+        self.diffusivity_meas = diffusivity_meas
 
 
 @click.command()
@@ -61,15 +65,11 @@ class Parameters:
     "output_dir", type=click.Path(exists=True, file_okay=False, writable=True)
 )
 @click.argument(
-    "analysis_level",
-    default="participant",
-    type=click.Choice(["participant", "group"]),
+    "analysis_level", default="participant", type=click.Choice(["participant", "group"])
 )
 # optional arguments
 # options for filtering BIDS queries
-@click.option(
-    "--skip_bids_validation", help="Skip BIDS validation", is_flag=True
-)
+@click.option("--skip_bids_validation", help="Skip BIDS validation", is_flag=True)
 @click.option(
     "--participant_label",
     default=None,
@@ -96,7 +96,7 @@ class Parameters:
 @click.option(
     "--output_resolution",
     help="The isotropic voxel size in mm the data will be resampled to before eddy.",
-    type=float
+    type=float,
 )
 # specific options for eddy
 @click.option(
@@ -154,17 +154,13 @@ class Parameters:
     help="working directory",
     type=click.Path(exists=True, file_okay=False, writable=True),
 )
-@click.option(
-    "--tbss",
-    help="Run TBSS"
-    is_flag=True
-)
+@click.option("--tbss", help="Run TBSS", is_flag=True)
 @click.option(
     "--diffusivity_meas",
     help="Specify which measures to calculate.",
     default=("FA",),
     type=click.Choice(["FA", "MD", "AD", "RD"]),
-    multiple=True
+    multiple=True,
 )
 @click.option(
     "--synb0_dir",
@@ -188,6 +184,8 @@ def main(
     eddy_niter,
     synb0_dir,
     acqp_file,
+    tbss,
+    diffusivity_meas,
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to the
@@ -237,10 +235,12 @@ def main(
         eddy_niter=eddy_niter,
         synb0_dir=synb0_dir,
         acqp_file=acqp_file,
+        tbss=tbss,
+        diffusivity_meas=list(diffusivity_meas),
     )
 
     wf = init_dmriprep_wf(parameters)
-    wf.write_graph(graph2use="colored")
+    wf.write_graph()
     wf.config["execution"]["remove_unnecessary_outputs"] = False
     wf.config["execution"]["keep_inputs"] = True
     wf.config["execution"]["crashfile_format"] = "txt"
