@@ -228,7 +228,7 @@ def main(
         work_dir=work_dir,
         ignore=list(ignore),
         b0_thresh=b0_thresh,
-        output_resolution=output_resolution,
+        output_resolution=(output_resolution, output_resolution, output_resolution),
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
         omp_nthreads=omp_nthreads,

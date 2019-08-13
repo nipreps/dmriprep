@@ -22,7 +22,7 @@ def init_prep_dwi_wf(ignore, output_resolution):
 
     unring = pe.Node(mrtrix3.MRDeGibbs(), name="unring")
 
-    resample = pe.Node(mrtrix3.MRResize(voxel_size=[1, 1, 1]), name="resample")
+    resample = pe.Node(mrtrix3.MRResize(voxel_size=output_resolution), name="resample")
 
     prep_full = ["denoise", "unring", "resample"]
 
