@@ -2,8 +2,8 @@
 
 """Top-level package for dmriprep."""
 
-__author__ = """Michael Joseph"""
-__email__ = "michael.joseph@camh.ca"
+__author__ = """Anisha Keshavan"""
+__email__ = "anishakeshavan@fmail.com"
 __version__ = "0.1.0"
 
 import errno
@@ -22,7 +22,7 @@ module_logger = logging.getLogger(__name__)
 
 # get the log level from environment variable
 if "DMIRPREP_LOGLEVEL" in os.environ:
-    loglevel = os.environ["dmriprep_LOGLEVEL"]
+    loglevel = os.environ["DMRIPREP_LOGLEVEL"]
     module_logger.setLevel(getattr(logging, loglevel.upper()))
 else:
     module_logger.setLevel(logging.WARNING)
@@ -45,9 +45,7 @@ handler = logging.FileHandler(logpath, mode="w")
 handler.setLevel(logging.DEBUG)
 
 # create a logging format
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -55,5 +53,6 @@ module_logger.addHandler(handler)
 module_logger.info("Started new dmriprep session")
 
 from ._version import get_versions
-__version__ = get_versions()['version']
+
+__version__ = get_versions()["version"]
 del get_versions
