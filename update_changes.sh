@@ -8,7 +8,7 @@
 #
 # Usage /bin/bash update_changes.sh 1.0.1
 #
-# Copyright (c) 2015-2018, the CRN developers team.
+# Copyright (c) 2015-2019, the CRN developers team.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
