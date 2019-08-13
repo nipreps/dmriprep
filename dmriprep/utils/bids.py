@@ -1,3 +1,8 @@
+"""
+Utilities to handle BIDS inputs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""
+
 import warnings
 import json
 import sys
@@ -51,7 +56,7 @@ def collect_participants(
     ...     str(datadir / 'ds114'), participant_label=['02', '14'],
     ...     strict=True, bids_validate=False)  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
-    fmriprep.utils.bids.BIDSError:
+    dmriprep.utils.bids.BIDSError:
     ...
     """
 
@@ -91,9 +96,7 @@ def collect_participants(
     found_label = sorted(set(participant_label) & all_participants)
     if not found_label:
         raise BIDSError(
-            "Could not find participants [{}]".format(
-                ", ".join(participant_label)
-            ),
+            "Could not find participants [{}]".format(", ".join(participant_label)),
             bids_dir,
         )
 
@@ -101,9 +104,7 @@ def collect_participants(
     notfound_label = sorted(set(participant_label) - all_participants)
     if notfound_label:
         exc = BIDSError(
-            "Some participants were not found: {}".format(
-                ", ".join(notfound_label)
-            ),
+            "Some participants were not found: {}".format(", ".join(notfound_label)),
             bids_dir,
         )
         if strict:
@@ -114,7 +115,7 @@ def collect_participants(
 
 
 def validate_input_dir(bids_dir, all_subjects, subject_list):
-    # Ignore issues and warnings that should not influence FMRIPREP
+    # Ignore issues and warnings that should not influence DMRIPREP
     import tempfile
     import subprocess
 
@@ -162,18 +163,11 @@ def validate_input_dir(bids_dir, all_subjects, subject_list):
     ignored_subjects = all_subjects.difference(subject_list)
     if ignored_subjects:
         for subject in ignored_subjects:
-            validator_config_dict["ignoredFiles"].append(
-                "/sub-%s/**" % subject
-            )
+            validator_config_dict["ignoredFiles"].append("/sub-%s/**" % subject)
     with tempfile.NamedTemporaryFile("w+") as temp:
         temp.write(json.dumps(validator_config_dict))
         temp.flush()
         try:
-            subprocess.check_call(
-                ["bids-validator", bids_dir, "-c", temp.name]
-            )
+            subprocess.check_call(["bids-validator", bids_dir, "-c", temp.name])
         except FileNotFoundError:
-            print(
-                "bids-validator does not appear to be installed",
-                file=sys.stderr,
-            )
+            print("bids-validator does not appear to be installed", file=sys.stderr)

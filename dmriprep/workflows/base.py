@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+"""
+dMRIprep base processing workflows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: init_dmriprep_wf
+.. autofunction:: init_single_subject_wf
+
+"""
+
 import os
 from copy import deepcopy
 
@@ -106,14 +115,8 @@ def init_single_subject_wf(subject_id, name, parameters):
                         ("outputnode.out_mask", "inputnode.mask"),
                         ("outputnode.out_b0_pre", "inputnode.b0"),
                         ("outputnode.out_b0_mask_pre", "inputnode.b0_mask"),
-                        (
-                            "outputnode.out_eddy_quad_json",
-                            "inputnode.eddy_quad_json",
-                        ),
-                        (
-                            "outputnode.out_eddy_quad_pdf",
-                            "inputnode.eddy_quad_pdf",
-                        ),
+                        ("outputnode.out_eddy_quad_json", "inputnode.eddy_quad_json"),
+                        ("outputnode.out_eddy_quad_pdf", "inputnode.eddy_quad_pdf"),
                         ("outputnode.out_dtifit_FA", "inputnode.dtifit_FA"),
                         ("outputnode.out_dtifit_V1", "inputnode.dtifit_V1"),
                         ("outputnode.out_dtifit_sse", "inputnode.dtifit_sse"),
