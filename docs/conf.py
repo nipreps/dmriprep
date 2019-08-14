@@ -37,7 +37,8 @@ import dmriprep
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinx_click.ext"
+    "sphinx.ext.napoleon",
+    "sphinx_click.ext",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -132,13 +133,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (
-        master_doc,
-        "dmriprep.tex",
-        "dmriprep Documentation",
-        author,
-        "manual",
-    )
+    (master_doc, "dmriprep.tex", "dmriprep Documentation", author, "manual")
 ]
 
 
