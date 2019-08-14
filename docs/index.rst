@@ -1,13 +1,10 @@
-..include:: links.rst
-..include:: ../README.rst
-../include:: license.rst
-
-Contents
---------
+.. include:: links.rst
+.. include:: ../README.rst
+.. include:: license.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    installation
    changes
