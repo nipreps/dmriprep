@@ -4,9 +4,44 @@
 Installation
 ============
 
+Docker Container
+================
 
-Stable release
---------------
+.. code-block:: console
+
+    $ git clone https://github.com/josephmje/dmriprep
+    $ cd dmriprep
+    $ make docker
+
+If you don't want to log into the docker image:
+
+.. code-block:: console
+
+    $ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
+
+If you want to log into the image:
+
+.. code-block:: console
+
+    $ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod
+
+Run this inside the docker image:
+
+.. code-block:: console
+
+    $ dmriprep /inputs /output --participant-label 01
+
+Singularity Container
+=====================
+
+Preparing a Singularity image (Singularity version < 2.5)
+---------------------------------------------------------
+
+Running a Singularity Image
+---------------------------
+
+Manually Prepared Environment (Python 3.5+)
+===========================================
 
 To install dmriprep, run this command in your terminal:
 
@@ -50,29 +85,5 @@ Once you have a copy of the source, you can install it with:
 .. _Github repo: https://github.com/josephmje/dmriprep
 .. _tarball: https://github.com/josephmje/dmriprep/tarball/master
 
-Docker container
-----------------
-
-.. code-block:: console
-
-    $ git clone https://github.com/josephmje/dmriprep
-    $ cd dmriprep
-    $ make docker
-
-If you don't want to log into the docker image:
-
-.. code-block:: console
-
-    $ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod dmriprep /inputs /outputs
-
-If you want to log into the image:
-
-.. code-block:: console
-
-    $ docker run -ti -v $BIDS_INPUT_DIR:/inputs -v $OUTPUT_DIR:/outputs dmriprep:prod
-
-Run this inside the docker image:
-
-.. code-block:: console
-
-    $ dmriprep /inputs /output --participant-label 01
+External Dependencies
+---------------------

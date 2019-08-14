@@ -38,7 +38,7 @@ The common parts of the command follow the `BIDS-Apps
 
 Example: ::
 
-    dmriprep data/bids_root/ out/ participant -w work/
+    dmriprep data/bids out/ participant -w work/
 
 
 Command-Line Arguments
