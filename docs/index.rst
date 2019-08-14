@@ -1,18 +1,20 @@
-Welcome to dmriprep's documentation!
-====================================
+..include:: links.rst
+..include:: ../README.rst
+../include:: license.rst
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   readme
    installation
    changes
    usage
    workflows
    outputs
    contributing
-   authors
 
 Indices and tables
 ==================

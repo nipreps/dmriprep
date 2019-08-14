@@ -1,2 +1,2 @@
-Workflows
-=========
+Processing pipeline details
+===========================
