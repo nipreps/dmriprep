@@ -13,6 +13,7 @@ Contents
    changes
    usage
    workflows
+   sdc
    outputs
    contributing
 
