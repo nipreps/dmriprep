@@ -17,7 +17,7 @@ def init_tensor_wf():
 
     outputnode = pe.Node(
         niu.IdentityInterface(
-            fields=["FA_file", "MD_file", "AD_file", "RD_file", "sse_file", "V1_file"]
+            fields=["FA_file", "MD_file", "AD_file", "RD_file", "V1_file", "sse_file"]
         ),
         name="outputnode",
     )
@@ -50,8 +50,8 @@ def init_tensor_wf():
                     ("FA", "FA_file"),
                     ("MD", "MD_file"),
                     ("L1", "AD_file"),
-                    ("sse", "sse_file"),
                     ("V1", "V1_file"),
+                    ("sse", "sse_file"),
                 ],
             ),
         ]

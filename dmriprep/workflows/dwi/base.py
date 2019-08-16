@@ -94,6 +94,21 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     dwi_prep_wf = init_prep_dwi_wf(parameters.ignore, parameters.output_resolution)
 
     def gen_index(in_file):
+        """
+        Create an index file that tells `eddy` which line/lines in the
+        `acqparams.txt` file are relevant for the dwi data passed into `eddy`
+
+        **Inputs**
+
+        in_file
+            The bval file.
+
+        **Outputs**
+
+        out_file
+            The output index file.
+        """
+
         import os
         import numpy as np
         import nibabel as nib
@@ -393,6 +408,9 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
                 outputnode,
                 [
                     ("outputnode.FA_file", "out_dtifit_FA"),
+                    ("outputnode.MD_file", "out_dtifit_MD"),
+                    ("outputnode.AD_file", "out_dtifit_AD"),
+                    ("outputnode.RD_file", "out_dtifit_RD"),
                     ("outputnode.V1_file", "out_dtifit_V1"),
                     ("outputnode.sse_file", "out_dtifit_sse"),
                 ],

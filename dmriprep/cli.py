@@ -97,6 +97,7 @@ class Parameters:
     "--output_resolution",
     help="The isotropic voxel size in mm the data will be resampled to before eddy.",
     type=float,
+    multiple=True
 )
 # specific options for eddy
 @click.option(
@@ -218,6 +219,9 @@ def main(
     if not work_dir:
         work_dir = os.path.join(output_dir, "scratch")
 
+    if len(output_resolution) == 1:
+        output_resolution = output_resolution * 3
+
     # Set parameters based on CLI, pass through object
     parameters = Parameters(
         layout=layout,
@@ -228,7 +232,7 @@ def main(
         work_dir=work_dir,
         ignore=list(ignore),
         b0_thresh=b0_thresh,
-        output_resolution=(output_resolution, output_resolution, output_resolution),
+        output_resolution=output_resolution,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
         omp_nthreads=omp_nthreads,

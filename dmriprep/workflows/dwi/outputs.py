@@ -24,6 +24,9 @@ def init_output_wf(subject_id, session_id, output_folder):
                 "eddy_quad_json",
                 "eddy_quad_pdf",
                 "dtifit_FA",
+                "dtifit_MD",
+                "dtifit_AD",
+                "dtifit_RD",
                 "dtifit_V1",
                 "dtifit_sse",
                 "noise",
@@ -77,6 +80,8 @@ def init_output_wf(subject_id, session_id, output_folder):
                     ("dtifit_MD", "@result.@md"),
                     ("dtifit_AD", "@result.@ad"),
                     ("dtifit_RD", "@result.@rd"),
+                    ("dtifit_V1", "@result.@v1"),
+                    ("dtifit_sse", "@result.@sse"),
                 ],
             ),
         ]
