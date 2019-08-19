@@ -25,7 +25,7 @@ def init_dmriprep_wf(parameters):
         single_subject_wf = init_single_subject_wf(
             subject_id=subject_id,
             name="single_subject_" + subject_id + "_wf",
-            parameters=parameters,
+            parameters=parameters
         )
 
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
@@ -47,7 +47,7 @@ def init_single_subject_wf(subject_id, name, parameters):
         datatype="dwi",
         suffix="dwi",
         extensions=[".nii", ".nii.gz"],
-        return_type="filename",
+        return_type="filename"
     )
 
     if not dwi_files:
@@ -69,12 +69,12 @@ def init_single_subject_wf(subject_id, name, parameters):
             subject_id=subject_id,
             dwi_file=dwi_file,
             metadata=metadata,
-            parameters=parameters,
+            parameters=parameters
         )
         datasink_wf = init_output_wf(
             subject_id=subject_id,
             session_id=session_id,
-            output_folder=parameters.output_dir,
+            output_folder=parameters.output_dir
         )
 
         dwi_preproc_wf.base_dir = os.path.join(
@@ -120,8 +120,8 @@ def init_single_subject_wf(subject_id, name, parameters):
                         ("outputnode.out_dtifit_FA", "inputnode.dtifit_FA"),
                         ("outputnode.out_dtifit_V1", "inputnode.dtifit_V1"),
                         ("outputnode.out_dtifit_sse", "inputnode.dtifit_sse"),
-                        ("outputnode.out_noise", "inputnode.noise"),
-                    ],
+                        ("outputnode.out_noise", "inputnode.noise")
+                    ]
                 )
             ]
         )

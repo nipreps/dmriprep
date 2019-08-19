@@ -4,6 +4,8 @@
 Orchestrating the dwi preprocessing workflows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. autofunction:: init_dwi_preproc_wf
+
 """
 
 from bids import BIDSLayout
@@ -52,7 +54,16 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     #     synb0,
     # )
 
-    dwi_wf = pe.Workflow(name="dwi_preproc_wf")
+    multiple_runs = isinstance(dwi_file, list)
+
+    if multiple_runs:
+        ref_file = dwi_file[0]
+    else:
+        ref_file = dwi_file
+
+    wf_name = _get_wf_name(ref_file)
+
+    dwi_wf = pe.Workflow(name=wf_name)
 
     inputnode = pe.Node(
         niu.IdentityInterface(
@@ -419,3 +430,19 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     )
 
     return dwi_wf
+
+
+def _get_wf_name(dwi_fname):
+    """
+    Derives the workflow name from the supplied dwi file.
+    """
+
+    from nipype.utils.filemanip import split_filename
+
+    fname = split_filename(dwi_fname)[1]
+    fname_nosub = "_".join(fname.split("_")[1:])
+    name = "func_preproc_" + fname_nosub.replace(".", "_").replace(" ", "").replace(
+        "-", "_"
+    ).replace("_dwi", "_wf")
+
+    return name

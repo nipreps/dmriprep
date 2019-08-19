@@ -28,4 +28,4 @@ segmentation, skullstripping etc.) providing outputs that can be
 easily submitted to a variety of tractography algorithms.
 
 [Documentation `dmriprep.org <https://dmriprep.readthedocs.io>`_]
-[Support `neurostars.org <https://neurostars.org/tags/fmriprep>`_]
+[Support `neurostars.org <https://neurostars.org/tags/dmriprep>`_]

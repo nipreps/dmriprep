@@ -34,9 +34,7 @@ class Parameters:
         omp_nthreads,
         eddy_niter,
         synb0_dir,
-        acqp_file,
-        tbss,
-        diffusivity_meas,
+        acqp_file
     ):
 
         self.layout = layout
@@ -54,8 +52,6 @@ class Parameters:
         self.eddy_niter = eddy_niter
         self.synb0_dir = synb0_dir
         self.acqp_file = acqp_file
-        self.tbss = (tbss,)
-        self.diffusivity_meas = diffusivity_meas
 
 
 @click.command()
@@ -155,14 +151,6 @@ class Parameters:
     help="working directory",
     type=click.Path(exists=True, file_okay=False, writable=True),
 )
-@click.option("--tbss", help="Run TBSS", is_flag=True)
-@click.option(
-    "--diffusivity_meas",
-    help="Specify which measures to calculate.",
-    default=("FA",),
-    type=click.Choice(["FA", "MD", "AD", "RD"]),
-    multiple=True,
-)
 @click.option(
     "--synb0_dir",
     default=None,
@@ -184,9 +172,7 @@ def main(
     omp_nthreads,
     eddy_niter,
     synb0_dir,
-    acqp_file,
-    tbss,
-    diffusivity_meas,
+    acqp_file
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to the
@@ -238,9 +224,7 @@ def main(
         omp_nthreads=omp_nthreads,
         eddy_niter=eddy_niter,
         synb0_dir=synb0_dir,
-        acqp_file=acqp_file,
-        tbss=tbss,
-        diffusivity_meas=list(diffusivity_meas),
+        acqp_file=acqp_file
     )
 
     wf = init_dmriprep_wf(parameters)
