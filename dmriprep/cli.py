@@ -4,9 +4,9 @@
 import os
 import sys
 import warnings
-from bids import BIDSLayout
 
 import click
+from bids import BIDSLayout
 
 from .utils.bids import collect_participants
 from .workflows.base import init_dmriprep_wf
@@ -15,44 +15,6 @@ from .workflows.base import init_dmriprep_wf
 # was compiled against an older numpy than is installed.
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
-
-
-class Parameters:
-    def __init__(
-        self,
-        layout,
-        subject_list,
-        bids_dir,
-        output_dir,
-        analysis_level,
-        work_dir,
-        ignore,
-        b0_thresh,
-        output_resolution,
-        bet_dwi,
-        bet_mag,
-        omp_nthreads,
-        eddy_niter,
-        synb0_dir,
-        acqp_file
-    ):
-
-        self.layout = layout
-        self.subject_list = subject_list
-        self.bids_dir = bids_dir
-        self.output_dir = output_dir
-        self.analysis_level = analysis_level
-        self.work_dir = work_dir
-        self.ignore = ignore
-        self.b0_thresh = b0_thresh
-        self.output_resolution = output_resolution
-        self.bet_dwi = bet_dwi
-        self.bet_mag = bet_mag
-        self.omp_nthreads = omp_nthreads
-        self.eddy_niter = eddy_niter
-        self.synb0_dir = synb0_dir
-        self.acqp_file = acqp_file
-
 
 @click.command()
 # arguments as specified by BIDS-Apps
@@ -65,7 +27,11 @@ class Parameters:
 )
 # optional arguments
 # options for filtering BIDS queries
-@click.option("--skip_bids_validation", help="Skip BIDS validation", is_flag=True)
+@click.option(
+    "--skip_bids_validation",
+    help="Assume the input dataset is BIDS compliant and skip the validation",
+    is_flag=True
+)
 @click.option(
     "--participant_label",
     default=None,
@@ -74,7 +40,7 @@ class Parameters:
     "sub-<participant_label> from the BIDS spec (the 'sub-' "
     "prefix can be removed). If this parameter is not provided "
     "all subjects will be analyzed. Multiple participants "
-    "can be specified with a space delimited list.",
+    "can be specified with a space delimited list."
 )
 # options for prepping dwi scans
 # @click.option(
@@ -208,13 +174,10 @@ def main(
     if len(output_resolution) == 1:
         output_resolution = output_resolution * 3
 
-    # Set parameters based on CLI, pass through object
-    parameters = Parameters(
-        layout=layout,
+    wf = init_dmriprep_wf(
         subject_list=subject_list,
-        bids_dir=bids_dir,
+        layout=layout,
         output_dir=output_dir,
-        analysis_level=analysis_level,
         work_dir=work_dir,
         ignore=list(ignore),
         b0_thresh=b0_thresh,
@@ -222,12 +185,8 @@ def main(
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
         omp_nthreads=omp_nthreads,
-        eddy_niter=eddy_niter,
-        synb0_dir=synb0_dir,
-        acqp_file=acqp_file
+        synb0_dir=synb0_dir
     )
-
-    wf = init_dmriprep_wf(parameters)
     wf.write_graph()
     wf.config["execution"]["remove_unnecessary_outputs"] = False
     wf.config["execution"]["keep_inputs"] = True

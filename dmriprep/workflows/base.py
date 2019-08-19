@@ -13,10 +13,22 @@ import os
 from copy import deepcopy
 
 from nipype.pipeline import engine as pe
-from .dwi import init_dwi_preproc_wf, init_output_wf
+from .dwi import init_dwi_preproc_wf, init_dwi_derivatives_wf
 
 
-def init_dmriprep_wf(parameters):
+def init_dmriprep_wf(
+    subject_list,
+    layout,
+    output_dir,
+    work_dir,
+    ignore,
+    b0_thresh,
+    output_resolution,
+    bet_dwi,
+    bet_mag,
+    omp_nthreads,
+    synb0_dir
+):
     """
     This workflow organizes the execusion of dMRIPrep, with a sub-workflow for
     each subject.
@@ -31,18 +43,27 @@ def init_dmriprep_wf(parameters):
 
     """
     dmriprep_wf = pe.Workflow(name="dmriprep_wf")
-    dmriprep_wf.base_dir = parameters.work_dir
+    dmriprep_wf.base_dir = work_dir
 
-    for subject_id in parameters.subject_list:
+    for subject_id in subject_list:
 
         single_subject_wf = init_single_subject_wf(
             subject_id=subject_id,
             name="single_subject_" + subject_id + "_wf",
-            parameters=parameters
+            layout=layout,
+            output_dir=output_dir,
+            work_dir=work_dir,
+            ignore=ignore,
+            b0_thresh=b0_thresh,
+            output_resolution=output_resolution,
+            bet_dwi=bet_dwi,
+            bet_mag=bet_mag,
+            omp_nthreads=omp_nthreads,
+            synb0_dir=synb0_dir
         )
 
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
-            parameters.output_dir, "dmriprep", "sub-" + subject_id, "log"
+            output_dir, "dmriprep", "sub-" + subject_id, "log"
         )
         single_subject_wf.config["execution"]["remove_unnecessary_outputs"] = False
         single_subject_wf.config["execution"]["keep_inputs"] = True
@@ -56,7 +77,20 @@ def init_dmriprep_wf(parameters):
     return dmriprep_wf
 
 
-def init_single_subject_wf(subject_id, name, parameters):
+def init_single_subject_wf(
+    subject_id,
+    name,
+    layout,
+    output_dir,
+    work_dir,
+    ignore,
+    b0_thresh,
+    output_resolution,
+    bet_dwi,
+    bet_mag,
+    omp_nthreads,
+    synb0_dir
+):
     """
     This workflow organizes the preprocessing pipeline for a single subject.
     It collects and reports information about the subject, and prepares
@@ -77,7 +111,7 @@ def init_single_subject_wf(subject_id, name, parameters):
 
     """
 
-    dwi_files = parameters.layout.get(
+    dwi_files = layout.get(
         subject=subject_id,
         datatype="dwi",
         suffix="dwi",
@@ -94,40 +128,49 @@ def init_single_subject_wf(subject_id, name, parameters):
     subject_wf = pe.Workflow(name=name)
 
     for dwi_file in dwi_files:
-        entities = parameters.layout.parse_file_entities(dwi_file)
+        entities = layout.parse_file_entities(dwi_file)
         if "session" in entities:
             session_id = entities["session"]
         else:
             session_id = None
-        metadata = parameters.layout.get_metadata(dwi_file)
+        metadata = layout.get_metadata(dwi_file)
         dwi_preproc_wf = init_dwi_preproc_wf(
             subject_id=subject_id,
             dwi_file=dwi_file,
             metadata=metadata,
-            parameters=parameters
+            layout=layout,
+            output_dir=output_dir,
+            work_dir=work_dir,
+            ignore=ignore,
+            b0_thresh=b0_thresh,
+            output_resolution=output_resolution,
+            bet_dwi=bet_dwi,
+            bet_mag=bet_mag,
+            omp_nthreads=omp_nthreads,
+            synb0_dir=synb0_dir
         )
-        datasink_wf = init_output_wf(
+        datasink_wf = init_dwi_derivatives_wf(
             subject_id=subject_id,
             session_id=session_id,
-            output_folder=parameters.output_dir
+            output_folder=output_dir
         )
 
         dwi_preproc_wf.base_dir = os.path.join(
-            os.path.abspath(parameters.work_dir), subject_id
+            os.path.abspath(work_dir), subject_id
         )
 
         inputspec = dwi_preproc_wf.get_node("inputnode")
         inputspec.inputs.subject_id = subject_id
         inputspec.inputs.dwi_file = dwi_file
         inputspec.inputs.dwi_meta = metadata
-        inputspec.inputs.bvec_file = parameters.layout.get_bvec(dwi_file)
-        inputspec.inputs.bval_file = parameters.layout.get_bval(dwi_file)
-        inputspec.inputs.out_dir = os.path.abspath(parameters.output_dir)
+        inputspec.inputs.bvec_file = layout.get_bvec(dwi_file)
+        inputspec.inputs.bval_file = layout.get_bval(dwi_file)
+        inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
         ds_inputspec = datasink_wf.get_node("inputnode")
         ds_inputspec.inputs.subject_id = subject_id
         ds_inputspec.inputs.session_id = session_id
-        ds_inputspec.inputs.output_folder = parameters.output_dir
+        ds_inputspec.inputs.output_folder = output_dir
         ds_inputspec.inputs.metadata = metadata
 
         if session_id:
