@@ -2,33 +2,34 @@
     "title": "dMRIPrep: a robust preprocessing pipeline for diffusion MRI",
     "description": "<p>dMRIPrep is a robust and easy-to-use pipeline for preprocessing of dMRI data. The transparent workflow dispenses of manual intervention, thereby ensuring the reproducibility of the results.</p>",
     "creators": [
-    {
-    "name": "Richie-Halford, Adam",
-    "affiliation": "University of Washington",
-    "orcid": "0000-0001-9276-9084"
-    },
-    {
-    "name": "Rokem, Ariel",
-    "affiliation": "The University of Washington eScience Institute",
-    "orcid": "0000-0003-0679-1985"
-    },
-    {
-    "name": "Yeatman, Jason",
-    "affiliation": "Stanford University",
-    "orcid": "0000-0002-2686-1293"
-    },
-    {
-    "name": "Joseph, Michael",
-    "affiliation": "The Centre for Addiction and Mental Health",
-    "orcid": "0000-0002-0068-230X"
-    },
-    {
-    "name": "Mansour, Salim",
-    "affiliation": "The Centre for Addiction and Mental Health"
-    },
-    {
-    "name": "Keshavan, Anisha",
-    "affiliation": "Child Mind Institute",
-    "orcid": "0000-0003-3554-043X"
-    }
-]
+        {
+        "name": "Richie-Halford, Adam",
+        "affiliation": "University of Washington",
+        "orcid": "0000-0001-9276-9084"
+        },
+        {
+        "name": "Rokem, Ariel",
+        "affiliation": "The University of Washington eScience Institute",
+        "orcid": "0000-0003-0679-1985"
+        },
+        {
+        "name": "Yeatman, Jason",
+        "affiliation": "Stanford University",
+        "orcid": "0000-0002-2686-1293"
+        },
+        {
+        "name": "Joseph, Michael",
+        "affiliation": "The Centre for Addiction and Mental Health",
+        "orcid": "0000-0002-0068-230X"
+        },
+        {
+        "name": "Mansour, Salim",
+        "affiliation": "The Centre for Addiction and Mental Health"
+        },
+        {
+        "name": "Keshavan, Anisha",
+        "affiliation": "Child Mind Institute",
+        "orcid": "0000-0003-3554-043X"
+        }
+    ]
+}
