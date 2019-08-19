@@ -10,49 +10,61 @@ Orchestrating the dwi preprocessing workflows
 
 from bids import BIDSLayout
 from nipype.pipeline import engine as pe
-from nipype.interfaces import ants, fsl, mrtrix3, utility as niu
+from nipype.interfaces import fsl, mrtrix3, utility as niu
 from numba import cuda
 
-from .prep_dwi import init_prep_dwi_wf
-from .tensor import init_tensor_wf
+from .artifacts import init_dwi_artifacts_wf
+from .tensor import init_dwi_tensor_wf
 
-# from ..fieldmap.base import init_sdc_prep_wf
+from ..fieldmap.base import init_sdc_prep_wf
 
 FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 
-def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
+def init_dwi_preproc_wf(
+    subject_id,
+    dwi_file,
+    metadata,
+    layout,
+    ignore,
+    b0_thresh,
+    output_resolution,
+    bet_dwi,
+    bet_mag,
+    omp_nthreads,
+    synb0_dir
+):
 
-    # fmaps = []
-    # synb0 = ""
-    #
-    # # If use_synb0 set, get synb0 from files
-    # if parameters.synb0_dir:
-    #     synb0_layout = BIDSLayout(
-    #         parameters.synb0_dir, validate=False, derivatives=True
-    #     )
-    #     synb0 = synb0_layout.get(subject=subject_id, return_type="file")[0]
-    # else:
-    #     fmaps = parameters.layout.get_fieldmap(dwi_file, return_list=True)
-    #     if not fmaps:
-    #         raise Exception(
-    #             "No fieldmaps found for participant {}. "
-    #             "All workflows require fieldmaps".format(subject_id)
-    #         )
-    #
-    #     for fmap in fmaps:
-    #         fmap["metadata"] = parameters.layout.get_metadata(
-    #             fmap[fmap["suffix"]]
-    #         )
-    #
-    # sdc_wf = init_sdc_prep_wf(
-    #     subject_id,
-    #     fmaps,
-    #     metadata,
-    #     parameters.layout,
-    #     parameters.bet_mag,
-    #     synb0,
-    # )
+    fmaps = []
+    synb0 = ""
+
+    # If use_synb0 set, get synb0 from files
+    if synb0_dir:
+        synb0_layout = BIDSLayout(
+            synb0_dir, validate=False, derivatives=True
+        )
+        synb0 = synb0_layout.get(subject=subject_id, return_type="file")[0]
+    else:
+        fmaps = layout.get_fieldmap(dwi_file, return_list=True)
+        if not fmaps:
+            raise Exception(
+                "No fieldmaps found for participant {}. "
+                "All workflows require fieldmaps".format(subject_id)
+            )
+
+        for fmap in fmaps:
+            fmap["metadata"] = layout.get_metadata(
+                fmap[fmap["suffix"]]
+            )
+
+    sdc_wf = init_sdc_prep_wf(
+        subject_id,
+        fmaps,
+        metadata,
+        layout,
+        bet_mag,
+        synb0,
+    )
 
     multiple_runs = isinstance(dwi_file, list)
 
@@ -102,7 +114,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="outputnode",
     )
 
-    dwi_prep_wf = init_prep_dwi_wf(parameters.ignore, parameters.output_resolution)
+    dwi_artifacts_wf = init_dwi_artifacts_wf(ignore)
 
     def gen_index(in_file):
         """
@@ -118,6 +130,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
         out_file
             The output index file.
+
         """
 
         import os
@@ -143,6 +156,23 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     )
 
     def gen_acqparams(in_file, metadata):
+        """
+        Create an acquisition parameters file for ``eddy``
+
+        **Inputs**
+
+        in_file
+            The dwi file
+        metadata
+            The BIDS metadata of the dwi file
+
+        **Outputs**
+
+        out_file
+            The output acquisition parameters file
+
+        """
+
         import os
         from nipype.utils.filemanip import fname_presuffix
 
@@ -189,7 +219,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     def b0_average(in_dwi, in_bval, b0_thresh, out_file=None):
         """
-        A function that averages the *b0* volumes from a DWI dataset.
+        Averages the *b0* volumes from a DWI dataset.
         As current dMRI data are being acquired with all b-values > 0.0,
         the *lowb* volumes are selected by specifying the parameter b0_thresh.
         .. warning:: *b0* should be already registered (head motion artifact
@@ -229,16 +259,16 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
         name="b0_avg_pre",
     )
 
-    avg_b0_0.inputs.b0_thresh = parameters.b0_thresh
+    avg_b0_0.inputs.b0_thresh = b0_thresh
 
     bet_dwi0 = pe.Node(
-        fsl.BET(frac=parameters.bet_dwi, mask=True, robust=True), name="bet_dwi_pre"
+        fsl.BET(frac=bet_dwi, mask=True, robust=True), name="bet_dwi_pre"
     )
 
     ecc = pe.Node(fsl.Eddy(repol=True, cnr_maps=True, residuals=True), name="fsl_eddy")
 
-    if parameters.omp_nthreads:
-        ecc.inputs.num_threads = parameters.omp_nthreads
+    if omp_nthreads:
+        ecc.inputs.num_threads = omp_nthreads
 
     try:
         if cuda.gpus:
@@ -252,15 +282,6 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
 
     get_path = lambda x: x.split(".nii.gz")[0].split("_fix")[0]
     get_qc_path = lambda x: x.split(".nii.gz")[0] + ".qc"
-
-    if set(parameters.ignore) == set(["denoise", "unring"]):
-        wf.connect(
-            [
-                (inputnode, avg_b0_0, [("dwi_file", "in_file")])(
-                    inputnode, ecc, [("dwi_file", "in_file")]
-                )
-            ]
-        )
 
     fslroi = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name="fslroi")
 
@@ -342,7 +363,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     )
 
     # # If synb0 is meant to be used
-    # if parameters.synb0_dir:
+    # if synb0_dir:
     #     dwi_wf.connect(
     #         [
     #             (
@@ -360,7 +381,7 @@ def init_dwi_preproc_wf(subject_id, dwi_file, metadata, parameters):
     #             ),
     #         ]
     #     )
-    #     ecc.inputs.in_acqp = parameters.acqp_file
+    #     ecc.inputs.in_acqp = acqp_file
     # else:
     #     # Decide what ecc will take: topup or fmap
     #     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap["suffix"]])

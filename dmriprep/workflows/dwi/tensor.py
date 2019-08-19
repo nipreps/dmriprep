@@ -4,9 +4,9 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, utility as niu
 
 
-def init_tensor_wf():
+def init_dwi_tensor_wf():
 
-    wf = pe.Workflow(name="tensor_wf")
+    wf = pe.Workflow(name="dwi_tensor_wf")
 
     inputnode = pe.Node(
         niu.IdentityInterface(

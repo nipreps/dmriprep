@@ -4,6 +4,14 @@ dmriprep.workflows.dwi package
 Submodules
 ----------
 
+dmriprep.workflows.dwi.artifacts module
+---------------------------------------
+
+.. automodule:: dmriprep.workflows.dwi.artifacts
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dmriprep.workflows.dwi.base module
 ----------------------------------
 
@@ -28,26 +36,10 @@ dmriprep.workflows.dwi.outputs module
    :undoc-members:
    :show-inheritance:
 
-dmriprep.workflows.dwi.prep\_dwi module
----------------------------------------
-
-.. automodule:: dmriprep.workflows.dwi.prep_dwi
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 dmriprep.workflows.dwi.qc module
 --------------------------------
 
 .. automodule:: dmriprep.workflows.dwi.qc
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-dmriprep.workflows.dwi.tbss module
-----------------------------------
-
-.. automodule:: dmriprep.workflows.dwi.tbss
    :members:
    :undoc-members:
    :show-inheritance:

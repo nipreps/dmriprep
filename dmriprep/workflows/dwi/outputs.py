@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 
+"""
+Output dwi
+^^^^^^^^^^
+
+.. autofunction:: init_dwi_derivatives_wf
+
+"""
+
 from nipype.pipeline import engine as pe
 from nipype.interfaces import io as nio, utility as niu
 
 
-def init_output_wf(subject_id, session_id, output_folder):
+def init_dwi_derivatives_wf(subject_id, session_id, output_folder):
 
     output_wf = pe.Workflow(name="output_wf")
 
