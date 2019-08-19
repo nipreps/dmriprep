@@ -13,6 +13,7 @@
    sdc
    outputs
    contributing
+   authors
 
 Indices and tables
 ==================

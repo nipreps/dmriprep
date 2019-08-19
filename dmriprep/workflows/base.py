@@ -17,6 +17,19 @@ from .dwi import init_dwi_preproc_wf, init_output_wf
 
 
 def init_dmriprep_wf(parameters):
+    """
+    This workflow organizes the execusion of dMRIPrep, with a sub-workflow for
+    each subject.
+
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
+
+    wf = init_dmriprep_wf()
+
+    Parameters
+
+    """
     dmriprep_wf = pe.Workflow(name="dmriprep_wf")
     dmriprep_wf.base_dir = parameters.work_dir
 
@@ -31,6 +44,9 @@ def init_dmriprep_wf(parameters):
         single_subject_wf.config["execution"]["crashdump_dir"] = os.path.join(
             parameters.output_dir, "dmriprep", "sub-" + subject_id, "log"
         )
+        single_subject_wf.config["execution"]["remove_unnecessary_outputs"] = False
+        single_subject_wf.config["execution"]["keep_inputs"] = True
+        single_subject_wf.config["execution"]["crashfile_format"] = "txt"
 
         for node in single_subject_wf._get_all_nodes():
             node.config = deepcopy(single_subject_wf.config)
@@ -41,6 +57,25 @@ def init_dmriprep_wf(parameters):
 
 
 def init_single_subject_wf(subject_id, name, parameters):
+    """
+    This workflow organizes the preprocessing pipeline for a single subject.
+    It collects and reports information about the subject, and prepares
+    sub-workflows to perform diffusion preprocessing.
+
+    Diffusion preprocessing is performed using a separate workflow for each
+    individual dwi series.
+
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
+
+    wf = init_single_subject_wf()
+
+    Parameters
+
+    Inputs
+
+    """
 
     dwi_files = parameters.layout.get(
         subject=subject_id,

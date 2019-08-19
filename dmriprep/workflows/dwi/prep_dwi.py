@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Denoising, unringing and resampling of dwi images
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Artefact removal and resampling dwi images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: init_prep_dwi_wf
 
 """
 
@@ -10,9 +12,43 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3, utility as niu
 
 
-def init_prep_dwi_wf(ignore, output_resolution):
+def init_prep_dwi_wf(ignore, output_resolution, name="prep_dwi_wf"):
+    """
+    This workflow performs denoises and unrings the inputs dwi image and optionally
+    resamples the image to the desired output resolution.
 
-    prep_dwi_wf = pe.Workflow(name="prep_dwi_wf")
+    Denoising is done using Mrtrix3 using the MP-PCA algorithm [Veraart2016_].
+    Unringing is done using Mrtrix3 [Kellner2016]_.
+
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
+
+        from dmriprep.workflows.dwi import init_prep_dwi_wf
+        wf = init_prep_dwi_wf(ignore=[], output_resolution=(1, 1, 1))
+
+    **Parameters**
+
+        ignore : list
+            List of artefact removal steps to skip (default: None)
+        output_resolution : tuple
+            Tuple defining the new voxel size for the output image in the x, y, and z dimensions
+        name : str
+            Name of workflow (default: ``prep_dwi_wf``)
+
+    **Inputs**
+
+        dwi_file
+            dwi NIfTI file
+
+    **Outputs**
+
+        out_file
+            dwi NIfTI file after artefact removal and resizing
+
+    """
+
+    prep_dwi_wf = pe.Workflow(name=name)
 
     inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_file"]), name="inputnode")
 

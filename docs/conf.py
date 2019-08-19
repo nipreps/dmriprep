@@ -36,9 +36,12 @@ import dmriprep
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
-    "sphinx_click.ext",
+    "sphinx.ext.napoleon",  # support for reading numpy and Google style docstrings
+    "sphinx_click.ext",  # click extension
+    "nipype.sphinxext.plot_workflow"  # nipype extension to plot workflows
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -52,3 +52,4 @@ Credits
 -------
 
 This package was created with `Cookiecutter <https://github.com/audreyr/cookiecutter>`_ and the `audreyr/cookiecutter-pypackage <https://github.com/audreyr/cookiecutter-pypackage>`_ project template.
+Several pieces of code have been taken from `fmriprep <https://github.com/poldracklab/fmriprep>`_, `niworkflows <https://github.com/poldracklab/niworkflows>`_ and `sdcflows <https://github.com/poldracklab/sdcflows>`_.

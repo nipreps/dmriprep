@@ -2,4 +2,4 @@
 What's new
 ----------
 
-.. includes:: ../CHANGES.rst
+.. include:: ../CHANGES.rst

@@ -66,7 +66,7 @@ coverage: ## check code coverage quickly with the default Python
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/dmriprep.rst
+	rm -f docs/dmriprep*.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ dmriprep
 	$(MAKE) -C docs clean
@@ -86,3 +86,9 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+docker-dev: ## build the development environment
+	docker build -t dmriprep:dev -f docker/Dockerfile docker/.
+
+docker: docker-dev
+	docker build -t dmriprep:prod -f Dockerfile-dmriprep .

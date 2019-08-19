@@ -441,7 +441,7 @@ def _get_wf_name(dwi_fname):
 
     fname = split_filename(dwi_fname)[1]
     fname_nosub = "_".join(fname.split("_")[1:])
-    name = "func_preproc_" + fname_nosub.replace(".", "_").replace(" ", "").replace(
+    name = "dwi_preproc_" + fname_nosub.replace(".", "_").replace(" ", "").replace(
         "-", "_"
     ).replace("_dwi", "_wf")
 

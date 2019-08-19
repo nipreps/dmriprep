@@ -12,10 +12,10 @@ dmriprep.workflows.dwi.base module
    :undoc-members:
    :show-inheritance:
 
-dmriprep.workflows.dwi.denoise module
--------------------------------------
+dmriprep.workflows.dwi.eddy module
+----------------------------------
 
-.. automodule:: dmriprep.workflows.dwi.denoise
+.. automodule:: dmriprep.workflows.dwi.eddy
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,10 +28,18 @@ dmriprep.workflows.dwi.outputs module
    :undoc-members:
    :show-inheritance:
 
-dmriprep.workflows.dwi.remove\_artefacts module
------------------------------------------------
+dmriprep.workflows.dwi.prep\_dwi module
+---------------------------------------
 
-.. automodule:: dmriprep.workflows.dwi.remove_artefacts
+.. automodule:: dmriprep.workflows.dwi.prep_dwi
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dmriprep.workflows.dwi.qc module
+--------------------------------
+
+.. automodule:: dmriprep.workflows.dwi.qc
    :members:
    :undoc-members:
    :show-inheritance:
@@ -52,10 +60,10 @@ dmriprep.workflows.dwi.tensor module
    :undoc-members:
    :show-inheritance:
 
-dmriprep.workflows.dwi.unring module
-------------------------------------
+dmriprep.workflows.dwi.util module
+----------------------------------
 
-.. automodule:: dmriprep.workflows.dwi.unring
+.. automodule:: dmriprep.workflows.dwi.util
    :members:
    :undoc-members:
    :show-inheritance:

@@ -5,12 +5,12 @@ Credits
 Development Leads
 -----------------
 
-- Anisha Keshavan <keshavan@berkeley.edu> [Corresponding developer]
-- Adam Richie-Halford <richiehalford@gmail.com>
+- _Anisha Keshavan: keshavan@berkeley.edu [Corresponding developer]
+- _Adam Richie-Halford: richiehalford@gmail.com>
 
 Contributors
 ------------
 
-- Ariel Rokem <arokem@uw.edu>
-- Michael Joseph <michael.joseph@camh.ca>
-- Salim Mansour <salim.mansour@camh.ca>
+- _Ariel Rokem: arokem@uw.edu
+- _Michael Joseph: michael.joseph@camh.ca
+- _Salim Mansour: salim.mansour@camh.ca
