@@ -1,10 +1,55 @@
 # -*- coding: utf-8 -*-
 
+"""
+Tensor fitting
+^^^^^^^^^^^^^^
+
+.. autofunction:: init_dwi_tensor_wf
+
+"""
+
 from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, utility as niu
 
 
 def init_dwi_tensor_wf():
+    """
+    This workflow fits a tensor to the input dwi image.
+
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
+
+        from dmriprep.workflows.dwi import init_dwi_tensor_wf
+        wf = init_dwi_tensor_wf()
+
+    **Inputs**
+
+        dwi_file
+            dwi NIfTI file
+        bvec_file
+            bvec file
+        bval_file
+            bval file
+        mask_file
+            brain mask file
+
+    **Outputs**
+
+        FA_file
+            FA
+        MD_file
+            MD
+        AD_file
+            AD
+        RD_file
+            RD
+        V1_file
+            V1
+        sse_file
+            diffusion tensor fit residuals
+
+    """
 
     wf = pe.Workflow(name="dwi_tensor_wf")
 

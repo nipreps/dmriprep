@@ -14,6 +14,7 @@ from nipype.interfaces import fsl, mrtrix3, utility as niu
 from numba import cuda
 
 from .artifacts import init_dwi_artifacts_wf
+from .util import init_dwi_resize_wf
 from .tensor import init_dwi_tensor_wf
 
 from ..fieldmap.base import init_sdc_prep_wf
@@ -34,37 +35,31 @@ def init_dwi_preproc_wf(
     omp_nthreads,
     synb0_dir
 ):
+    """
+    This workflow controls the diffusion preprocessing stages of dMRIprep.
 
-    fmaps = []
-    synb0 = ""
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
 
-    # If use_synb0 set, get synb0 from files
-    if synb0_dir:
-        synb0_layout = BIDSLayout(
-            synb0_dir, validate=False, derivatives=True
+        from collections import namedtuple
+        from dmriprep.workflows.dwi import init_dwi_preproc_wf
+        BIDSLayout = namedtuple('BIDSLayout', ['root'])
+        wf = init_dwi_preproc_wf(
+            subjectid=,
+            dwi_file=,
+            metadata=,
+            layout=BIDSLayout('.'),
+            ignore=[],
+            b0_thresh=5,
+            output_resolution=(1, 1, 1),
+            bet_dwi=0.3,
+            bet_mag=0.3,
+            omp_nthreads=1,
+            synb0_dir='.'
         )
-        synb0 = synb0_layout.get(subject=subject_id, return_type="file")[0]
-    else:
-        fmaps = layout.get_fieldmap(dwi_file, return_list=True)
-        if not fmaps:
-            raise Exception(
-                "No fieldmaps found for participant {}. "
-                "All workflows require fieldmaps".format(subject_id)
-            )
 
-        for fmap in fmaps:
-            fmap["metadata"] = layout.get_metadata(
-                fmap[fmap["suffix"]]
-            )
-
-    sdc_wf = init_sdc_prep_wf(
-        subject_id,
-        fmaps,
-        metadata,
-        layout,
-        bet_mag,
-        synb0,
-    )
+    """
 
     multiple_runs = isinstance(dwi_file, list)
 
@@ -76,6 +71,35 @@ def init_dwi_preproc_wf(
     wf_name = _get_wf_name(ref_file)
 
     dwi_wf = pe.Workflow(name=wf_name)
+
+    synb0 = ""
+
+    # If use_synb0 set, get synb0 from files
+    if synb0_dir:
+        synb0_layout = BIDSLayout(
+            synb0_dir, validate=False, derivatives=True
+        )
+        synb0 = synb0_layout.get(subject=subject_id, return_type="file")[0]
+    else:
+        # Find fieldmaps. Options: (epi|fieldmap|phasediff|phase1|phase2|syn)
+        fmaps = []
+        if "fieldmaps" not in ignore:
+            for fmap in layout.get_fieldmap(ref_file, return_list=True):
+                fmap["metadata"] = layout.get_metadata(
+                    fmap[fmap["suffix"]]
+                )
+                fmaps.append(fmap)
+
+    sdc_wf = init_sdc_prep_wf(
+        subject_id,
+        fmaps,
+        metadata,
+        layout,
+        bet_mag,
+        synb0,
+    )
+
+
 
     inputnode = pe.Node(
         niu.IdentityInterface(
@@ -115,6 +139,27 @@ def init_dwi_preproc_wf(
     )
 
     dwi_artifacts_wf = init_dwi_artifacts_wf(ignore)
+
+    if output_resolution:
+        dwi_resize_wf = init_dwi_resize_wf(output_resolution)
+
+        dwi_wf.connect(
+            [
+                (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
+                (dwi_artifacts_wf, dwi_resize_wf, [("outputnode.out_file", "inputnode.in_file")]),
+                (dwi_resize_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
+                (dwi_resize_wf, ecc, [("outputnode.out_file", "in_file")])
+            ]
+        )
+
+    else:
+        dwi_wf.connect(
+            [
+                (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
+                (dwi_artifacts_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
+                (dwi_artifacts_wf, ecc, [("outputnode.out_file", "in_file")])
+            ]
+        )
 
     def gen_index(in_file):
         """
@@ -311,11 +356,8 @@ def init_dwi_preproc_wf(
 
     dwi_wf.connect(
         [
-            (inputnode, dwi_prep_wf, [("dwi_file", "inputnode.dwi_file")]),
-            (dwi_prep_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
             (inputnode, avg_b0_0, [("bval_file", "in_bval")]),
             (avg_b0_0, bet_dwi0, [("out_file", "in_file")]),
-            (dwi_prep_wf, ecc, [("outputnode.out_file", "in_file")]),
             (inputnode, ecc, [("bval_file", "in_bval"), ("bvec_file", "in_bvec")]),
             (bet_dwi0, ecc, [("mask_file", "in_mask")]),
             (gen_idx, ecc, [("out_file", "in_index")]),
@@ -345,7 +387,7 @@ def init_dwi_preproc_wf(
         ]
     )
 
-    tensor_wf = init_tensor_wf()
+    tensor_wf = init_dwi_tensor_wf()
 
     dwi_wf.connect(
         [

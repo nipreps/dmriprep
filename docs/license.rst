@@ -7,5 +7,5 @@ in the ``dmriprep`` distribution.
 
 All trademarks referenced herein are property of their respective holders.
 
-Copyright (c) 2018-2019, the dMRIPrep.
+Copyright (c) 2018-2019, the dMRIPrep developers.
 All rights reserved.

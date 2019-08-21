@@ -36,6 +36,8 @@ def init_dwi_eddy_wf(omp_nthreads):
     if omp_nthreads:
         ecc.inputs.num_threads = omp_nthreads
 
+    # this doesn't work well
+    # recognizes that a computer is cuda capable but failed if cuda isn't loaded
     try:
         if cuda.gpus:
             ecc.inputs.use_cuda = True
