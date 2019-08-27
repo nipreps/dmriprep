@@ -13,31 +13,73 @@ from nipype.interfaces import fsl, utility as niu
 from numba import cuda
 
 
-def init_dwi_eddy_wf(omp_nthreads):
+def init_dwi_eddy_wf(omp_nthreads, fmap_type):
+    """
+    This workflow runs eddy on the input dwi image.
 
-    wf = pe.Workflow(name="dwi_eddy_wf")
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_file",
-                                                      "bvec_file",
-                                                      "bval_file",
-                                                      "mask_file",
-                                                      "acqp",
-                                                      "index"]),
-                       name="inputnode")
+        from dmriprep.workflows.dwi import init_dwi_eddy_wf
+        wf = init_dwi_eddy_wf(omp_nthreads=1)
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["out_file", "out_bvec"]),
-                         name="outputnode")
+    **Parameters**
+
+        omp_nthreads: int
+            Number of threads to run eddy
+
+    **Inputs**
+
+        dwi_file
+            dwi NIfTI file
+        bvec_file
+            bvec file
+        bval_file
+            bval file
+        mask_file
+            brain mask file
+        fieldmap_file
+            fieldmap file
+        topup_fieldcoef
+            topup file containing field coefficients
+        topup_movpar
+            topup movpar.txt file
+        acqp
+            acquisition parameters file
+        index
+            index file
+
+    **Outputs**
+
+        out_file
+            output eddy-corrected dwi image
+        out_bvec
+            output rotated bvecs after eddy correction
+
+    """
+
+    wf = pe.Workflow(name='dwi_eddy_wf')
+
+    inputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file',
+                                                      'bvec_file',
+                                                      'bval_file',
+                                                      'mask_file',
+                                                      'fieldmap_file',
+                                                      'topup_fieldcoef',
+                                                      'topup_movpar',
+                                                      'acqp',
+                                                      'index']),
+                       name='inputnode')
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_bvec']),
+                         name='outputnode')
 
     ecc = pe.Node(
-        fsl.Eddy(num_threads=1, repol=True, cnr_maps=True, residuals=True),
-        name="fsl_eddy",
+        fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
+        name='fsl_eddy',
     )
 
-    if omp_nthreads:
-        ecc.inputs.num_threads = omp_nthreads
-
-    # this doesn't work well
-    # recognizes that a computer is cuda capable but failed if cuda isn't loaded
     try:
         if cuda.gpus:
             ecc.inputs.use_cuda = True
@@ -45,14 +87,25 @@ def init_dwi_eddy_wf(omp_nthreads):
         ecc.inputs.use_cuda = False
 
     wf.connect([
-        (inputnode, ecc, [("dwi_file", "in_file"),
-                          ("bval_file", "in_bval"),
-                          ("bvec_file", "in_bvec"),
-                          ("acqp", "in_acqp"),
-                          ("index", "in_index"),
-                          ("mask_file", "in_mask")]),
-        (ecc, outputnode, [("out_corrected", "out_file"),
-                           ("out_rotated_bvecs", "out_bvec")])
+        (inputnode, ecc, [('dwi_file', 'in_file'),
+                          ('bval_file', 'in_bval'),
+                          ('bvec_file', 'in_bvec'),
+                          ('acqp', 'in_acqp'),
+                          ('index', 'in_index'),
+                          ('mask_file', 'in_mask')]),
+        (ecc, outputnode, [('out_corrected', 'out_file'),
+                           ('out_rotated_bvecs', 'out_bvec')])
+        ])
+
+    if fmap_type == 'fieldmap':
+        wf.connect([
+            (inputnode, ecc, [('fieldmap_file', 'field')])
+        ])
+
+    if fmap_type == 'topup':
+        wf.connect([
+            (inputnode, ecc, [('topup_fieldcoef', 'in_topup_fieldcoef'),
+                              ('topup_movpar', 'in_topup_movpar')])
         ])
 
     return wf

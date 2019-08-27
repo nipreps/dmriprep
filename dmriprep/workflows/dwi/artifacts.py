@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Artefact removal
-^^^^^^^^^^^^^^^^
+Artefact removal and resizing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: init_dwi_artifacts_wf
 
@@ -12,7 +12,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3, utility as niu
 
 
-def init_dwi_artifacts_wf(ignore):
+def init_dwi_artifacts_wf(ignore, output_resolution):
     """
     This workflow performs denoising and unringing on the input dwi image.
 
@@ -25,7 +25,7 @@ def init_dwi_artifacts_wf(ignore):
         :simple_form: yes
 
         from dmriprep.workflows.dwi import init_dwi_artifacts_wf
-        wf = init_dwi_artifacts_wf(ignore=[])
+        wf = init_dwi_artifacts_wf(ignore=[], output_resolution=(1, 1, 1))
 
     **Parameters**
 
@@ -50,9 +50,13 @@ def init_dwi_artifacts_wf(ignore):
 
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']), name='outputnode')
 
+    dwibuffer = pe.Node(niu.IdentityInterface(fields=['dwi_file']), name='dwibuffer')
+
     denoise = pe.Node(mrtrix3.DWIDenoise(), name='denoise')
 
     unring = pe.Node(mrtrix3.MRDeGibbs(), name='unring')
+
+    resize = pe.Node(mrtrix3.MRResize(voxel_size=output_resolution), name='resize')
 
     if ignore == ['denoise']:
         wf.connect([

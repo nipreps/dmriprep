@@ -63,10 +63,17 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 )
 # specific options for eddy
 @click.option(
+    '--nthreads',
+    default=1,
+    show_default=True,
+    help='Maximum number of threads across all processes',
+    type=int,
+)
+@click.option(
     '--omp_nthreads',
     default=1,
     show_default=True,
-    help='Maximum number of threads for eddy',
+    help='Maximum number of threads per process',
     type=int,
 )
 @click.option(
@@ -136,6 +143,7 @@ def main(
     output_resolution,
     bet_dwi,
     bet_mag,
+    nthreads,
     omp_nthreads,
     eddy_niter,
     synb0_dir,

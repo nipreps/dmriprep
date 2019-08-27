@@ -31,7 +31,7 @@ def init_dmriprep_wf(
     synb0_dir
 ):
     """
-    This workflow organizes the execusion of dMRIPrep, with a sub-workflow for
+    This workflow organizes the execusion of dMRIprep, with a sub-workflow for
     each subject.
 
     .. workflow::
@@ -41,7 +41,19 @@ def init_dmriprep_wf(
     from collections import namedtuple
     from dmriprep.workflows.base import init_dmriprep_wf
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
-    wf = init_dmriprep_wf(subject_list=['dmripreptest'], layout=BIDSLayout('.'), output_dir='.', work_dir='.', ignore=[], b0_thresh=5, output_resolution=(1, 1, 1), bet_dwi=0.3, bet_mag=0.3, omp_nthreads=1, synb0_dir='')
+    wf = init_dmriprep_wf(
+        subject_list=['dmripreptest'],
+        layout=BIDSLayout('.'),
+        output_dir='.',
+        work_dir='.',
+        ignore=[],
+        b0_thresh=5,
+        output_resolution=(1, 1, 1),
+        bet_dwi=0.3,
+        bet_mag=0.3,
+        omp_nthreads=1,
+        synb0_dir=''
+    )
 
     Parameters
 
@@ -137,7 +149,20 @@ def init_single_subject_wf(
     from collections import namedtuple
     from dmriprep.workflows.base import init_single_subject_wf
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
-    wf = init_single_subject_wf(subject_id='test', name='single_subject_wf', layout=BIDSLayout, output_dir='.', work_dir='.', ignore=[], b0_thresh=5, output_resolution=(1, 1, 1), bet_dwi=0.3, bet_mag=0.3, omp_nthreads=1, synb0_dir='')
+    wf = init_single_subject_wf(
+        subject_id='test',
+        name='single_subject_wf',
+        layout=BIDSLayout,
+        output_dir='.',
+        work_dir='.',
+        ignore=[],
+        b0_thresh=5,
+        output_resolution=(1, 1, 1),
+        bet_dwi=0.3,
+        bet_mag=0.3,
+        omp_nthreads=1,
+        synb0_dir=''
+    )
 
     Parameters
 
@@ -167,14 +192,19 @@ def init_single_subject_wf(
             Direction in which synb0 derivatives are saved
 
     """
+    # for documentation purposes
+    if name in ('single_subject_wf', 'single_subject_dmripreptest_wf'):
+        dwi_files = ['/madeup/path/sub-01_dwi.nii.gz']
+    else:
+        sessions = layout.get_sessions(subject=subject_id)
 
-    dwi_files = layout.get(
-        subject=subject_id,
-        datatype='dwi',
-        suffix='dwi',
-        extensions=['.nii', '.nii.gz'],
-        return_type='filename'
-    )
+        dwi_files = layout.get(
+            subject=subject_id,
+            datatype='dwi',
+            suffix='dwi',
+            extensions=['.nii', '.nii.gz'],
+            return_type='filename'
+        )
 
     if not dwi_files:
         raise Exception(
@@ -184,7 +214,7 @@ def init_single_subject_wf(
 
     subject_wf = pe.Workflow(name=name)
 
-    dwi_files = group_dwis(dwi_files, concat_dwis)
+    dwi_files = group_dwis(dwi_files, sessions, concat_dwis)
 
     for dwi_file in dwi_files:
         entities = layout.parse_file_entities(dwi_file)
@@ -268,7 +298,7 @@ def init_single_subject_wf(
     return subject_wf
 
 
-def group_dwis(dwi_files, concat_dwis):
+def group_dwis(dwi_files, sessions, concat_dwis):
 
     all_dwis = []
 

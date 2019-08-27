@@ -14,7 +14,6 @@ from nipype.interfaces import fsl, mrtrix3, utility as niu
 from numba import cuda
 
 from .artifacts import init_dwi_artifacts_wf
-from .util import init_dwi_resize_wf
 from .tensor import init_dwi_tensor_wf
 
 from ..fieldmap.base import init_sdc_prep_wf
@@ -46,8 +45,8 @@ def init_dwi_preproc_wf(
         from dmriprep.workflows.dwi import init_dwi_preproc_wf
         BIDSLayout = namedtuple('BIDSLayout', ['root'])
         wf = init_dwi_preproc_wf(
-            subjectid=,
-            dwi_file=,
+            subjectid='dmripreptest',
+            dwi_file='/madeup/path/sub-01_dwi.nii.gz',
             metadata=,
             layout=BIDSLayout('.'),
             ignore=[],
@@ -56,7 +55,7 @@ def init_dwi_preproc_wf(
             bet_dwi=0.3,
             bet_mag=0.3,
             omp_nthreads=1,
-            synb0_dir='.'
+            synb0_dir=''
         )
 
     """
@@ -140,26 +139,13 @@ def init_dwi_preproc_wf(
 
     dwi_artifacts_wf = init_dwi_artifacts_wf(ignore)
 
-    if output_resolution:
-        dwi_resize_wf = init_dwi_resize_wf(output_resolution)
-
-        dwi_wf.connect(
-            [
-                (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (dwi_artifacts_wf, dwi_resize_wf, [("outputnode.out_file", "inputnode.in_file")]),
-                (dwi_resize_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (dwi_resize_wf, ecc, [("outputnode.out_file", "in_file")])
-            ]
-        )
-
-    else:
-        dwi_wf.connect(
-            [
-                (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
-                (dwi_artifacts_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-                (dwi_artifacts_wf, ecc, [("outputnode.out_file", "in_file")])
-            ]
-        )
+    dwi_wf.connect(
+        [
+            (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
+            (dwi_artifacts_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
+            (dwi_artifacts_wf, ecc, [("outputnode.out_file", "in_file")])
+        ]
+    )
 
     def gen_index(in_file):
         """
