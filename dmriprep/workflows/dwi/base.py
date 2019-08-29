@@ -31,6 +31,7 @@ def init_dwi_preproc_wf(
     output_resolution,
     bet_dwi,
     bet_mag,
+    nthreads,
     omp_nthreads,
     synb0_dir
 ):
@@ -54,8 +55,9 @@ def init_dwi_preproc_wf(
             output_resolution=(1, 1, 1),
             bet_dwi=0.3,
             bet_mag=0.3,
+            nthreads=4,
             omp_nthreads=1,
-            synb0_dir=''
+            synb0_dir='.'
         )
 
     """
@@ -98,8 +100,6 @@ def init_dwi_preproc_wf(
         synb0,
     )
 
-
-
     inputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
@@ -137,7 +137,7 @@ def init_dwi_preproc_wf(
         name="outputnode",
     )
 
-    dwi_artifacts_wf = init_dwi_artifacts_wf(ignore)
+    dwi_artifacts_wf = init_dwi_artifacts_wf(ignore, output_resolution)
 
     dwi_wf.connect(
         [

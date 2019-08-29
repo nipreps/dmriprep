@@ -22,6 +22,14 @@ dmriprep.cli module
    :undoc-members:
    :show-inheritance:
 
+dmriprep.due module
+-------------------
+
+.. automodule:: dmriprep.due
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dmriprep.qc module
 ------------------
 

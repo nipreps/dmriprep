@@ -13,11 +13,14 @@ import os
 from copy import deepcopy
 
 from nipype.pipeline import engine as pe
+
+from .utils.bids import collect_data
 from .dwi import init_dwi_preproc_wf, init_dwi_derivatives_wf
 
 
 def init_dmriprep_wf(
     subject_list,
+    session_list,
     layout,
     output_dir,
     work_dir,
@@ -27,6 +30,7 @@ def init_dmriprep_wf(
     output_resolution,
     bet_dwi,
     bet_mag,
+    nthreads,
     omp_nthreads,
     synb0_dir
 ):
@@ -42,23 +46,27 @@ def init_dmriprep_wf(
     from dmriprep.workflows.base import init_dmriprep_wf
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
     wf = init_dmriprep_wf(
-        subject_list=['dmripreptest'],
-        layout=BIDSLayout('.'),
-        output_dir='.',
-        work_dir='.',
-        ignore=[],
-        b0_thresh=5,
-        output_resolution=(1, 1, 1),
-        bet_dwi=0.3,
-        bet_mag=0.3,
-        omp_nthreads=1,
-        synb0_dir=''
+      subject_list=['dmripreptest'],
+      session_list=[],
+      layout=BIDSLayout('.', validate=False),
+      output_dir='.',
+      work_dir='.',
+      ignore=[],
+      b0_thresh=5,
+      output_resolution=(1, 1, 1),
+      bet_dwi=0.3,
+      bet_mag=0.3,
+      nthreads=4,
+      omp_nthreads=1,
+      synb0_dir='.'
     )
 
     Parameters
 
         subject_list: list
             List of subject labels
+        session_list: list
+            List of session labels
         layout: BIDSLayout object
             BIDS dataset layout
         output_dir: str
@@ -77,6 +85,8 @@ def init_dmriprep_wf(
             Fractional intensity threshold for BET on dwi image
         bet_mag: float
             Fractional intensity threshold for BET on magnitude image
+        nthreads: int
+            Maximum number of threads to use
         omp_nthreads: int
             Maximum number of threads an individual process may use
         synb0_dir: str
@@ -90,6 +100,7 @@ def init_dmriprep_wf(
 
         single_subject_wf = init_single_subject_wf(
             subject_id=subject_id,
+            session_list=session_list,
             name='single_subject_' + subject_id + '_wf',
             layout=layout,
             output_dir=output_dir,
@@ -121,6 +132,7 @@ def init_dmriprep_wf(
 
 def init_single_subject_wf(
     subject_id,
+    session_list,
     name,
     layout,
     output_dir,
@@ -151,6 +163,7 @@ def init_single_subject_wf(
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
     wf = init_single_subject_wf(
         subject_id='test',
+        session_list=[],
         name='single_subject_wf',
         layout=BIDSLayout,
         output_dir='.',
@@ -168,6 +181,8 @@ def init_single_subject_wf(
 
         subject_id: str
             Single subject label
+        session_list: list
+            List of sessions
         layout: BIDSLayout object
             BIDS dataset layout
         output_dir: str
@@ -189,32 +204,26 @@ def init_single_subject_wf(
         omp_nthreads: int
             Maximum number of threads an individual process may use
         synb0_dir: str
-            Direction in which synb0 derivatives are saved
+            Directory in which synb0 derivatives are saved
 
     """
     # for documentation purposes
     if name in ('single_subject_wf', 'single_subject_dmripreptest_wf'):
-        dwi_files = ['/madeup/path/sub-01_dwi.nii.gz']
+        subject_data = {
+            't1w': ['/madeup/path/sub-01_T1w.nii.gz'],
+            'dwi': ['/madeup/path/sub-01_dwi.nii.gz']
+        }
     else:
-        sessions = layout.get_sessions(subject=subject_id)
+        subject_data = collect_data(layout, subject_id, session_list)
 
-        dwi_files = layout.get(
-            subject=subject_id,
-            datatype='dwi',
-            suffix='dwi',
-            extensions=['.nii', '.nii.gz'],
-            return_type='filename'
-        )
-
-    if not dwi_files:
+    if subject_data['dwi'] == []:
         raise Exception(
-            'No dwi images found for participant {}. '
-            'All workflows require dwi images'.format(subject_id)
+            'No dwi images found for participant {} in session {}. '
+            'All workflows require dwi images'.format(
+                subject_id, session_list if session_list else '<all>')
         )
 
     subject_wf = pe.Workflow(name=name)
-
-    dwi_files = group_dwis(dwi_files, sessions, concat_dwis)
 
     for dwi_file in dwi_files:
         entities = layout.parse_file_entities(dwi_file)

@@ -40,13 +40,26 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     'sub-<participant_label> from the BIDS spec (the "sub-" '
     'prefix can be removed). If this parameter is not provided '
     'all subjects will be analyzed. Multiple participants '
-    'can be specified with a space delimited list.'
+    'can be specified with a space delimited list.',
+    multiple=True
+)
+@click.option(
+    '--session_label',
+    default=None,
+    help='The label(s) of session(s) that should be analyzed. '
+         'the label corresponds to ses-<session_label from the '
+         'BIDS spec (the "ses-" prefix can be removed). If this '
+         'parameter is not provided, all sessions will be '
+         'analyzed. Multiple sessions can be specified with '
+         'a space delimited list.',
+    multiple=True
 )
 # options for prepping dwi scans
 @click.option(
     '--concat_dwis',
     default=None,
     help='A space delimited list of acq-<label>',
+    multiple=True
 )
 @click.option(
     '--b0_thresh',
@@ -115,7 +128,7 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     '--ignore',
     '-i',
     help='Specify which node(s) to skip during the preprocessing of the dwi.',
-    type=click.Choice(['denoise', 'unring', 'fieldmaps']),
+    type=click.Choice(['denoising', 'unringing', 'fieldmaps']),
     multiple=True,
 )
 @click.option(
@@ -132,6 +145,7 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 )
 def main(
     participant_label,
+    session_label,
     bids_dir,
     output_dir,
     analysis_level,
@@ -185,6 +199,7 @@ def main(
 
     wf = init_dmriprep_wf(
         subject_list=subject_list,
+        session_list=session_label,
         layout=layout,
         output_dir=output_dir,
         work_dir=work_dir,
@@ -194,6 +209,7 @@ def main(
         output_resolution=output_resolution,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
+        nthreads=nthreads,
         omp_nthreads=omp_nthreads,
         synb0_dir=synb0_dir
     )

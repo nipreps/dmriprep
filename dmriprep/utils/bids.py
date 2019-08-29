@@ -114,6 +114,35 @@ def collect_participants(
     return all_participants, found_label
 
 
+def collect_data(bids_dir, participant_label, session_label=None, bids_validate=True):
+    """
+    Uses pybids to retrieve the input data for a given participant
+    """
+
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
+
+    queries = {
+        'fmap': {'datatype': 'fmap'},
+        'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
+        't1w': {'datatype': 'anat', 'suffix': 'T1w'}
+    }
+
+    if not session_label:
+        session_label = layout.get_sessions()
+
+    subj_data = {
+        dtype: sorted(layout.get(return_type='file',
+                                 subject=participant_label,
+                                 session=session_label,
+                                 extension=['nii', 'nii.gz'], **query))
+        for dtype, query in queries.items()}
+
+    return subj_data, layout
+
+
 def validate_input_dir(bids_dir, all_subjects, subject_list):
     # Ignore issues and warnings that should not influence DMRIPREP
     import tempfile
