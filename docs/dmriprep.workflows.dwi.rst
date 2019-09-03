@@ -52,6 +52,14 @@ dmriprep.workflows.dwi.tensor module
    :undoc-members:
    :show-inheritance:
 
+dmriprep.workflows.dwi.util module
+----------------------------------
+
+.. automodule:: dmriprep.workflows.dwi.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Module contents
 ---------------
