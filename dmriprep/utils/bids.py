@@ -114,7 +114,7 @@ def collect_participants(
     return all_participants, found_label
 
 
-def collect_data(bids_dir, participant_label, session_label=None, bids_validate=True):
+def collect_data(bids_dir, participant_label, concat_dwis, session_label=None):
     """
     Uses pybids to retrieve the input data for a given participant
     """
@@ -140,7 +140,35 @@ def collect_data(bids_dir, participant_label, session_label=None, bids_validate=
                                  extension=['nii', 'nii.gz'], **query))
         for dtype, query in queries.items()}
 
+    subj_data['dwi'] = group_dwi(subj_data['dwi'], session_label, concat_dwis)
+
     return subj_data, layout
+
+
+def group_dwi(dwi_files, session_list, concat_dwis):
+
+    all_dwis = []
+
+    if session_list:
+        for session in session_list:
+            session_groups = []
+            session_dwis = [img for img in dwi_files if 'ses-%s' % session in img]
+            for f in session_dwis:
+                if any(acq in f for acq in concat_dwis):
+                    session_groups.append(f)
+                else:
+                    all_dwis.append(f)
+            all_dwis.append(session_groups)
+    else:
+        session_groups = []
+        for f in dwi_files:
+            if any(acq in f for acq in concat_dwis):
+                session_groups.append(f)
+            else:
+                all_dwis.append(f)
+        all_dwis.append(session_groups)
+
+    return all_dwis
 
 
 def validate_input_dir(bids_dir, all_subjects, subject_list):

@@ -51,18 +51,20 @@ DWI preprocessing
     from collections import namedtuple
     from dmriprep.workflows.dwi import init_dwi_preproc_wf
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
+    from collections import namedtuple
+    from dmriprep.workflows.dwi import init_dwi_preproc_wf
+    BIDSLayout = namedtuple('BIDSLayout', ['root'])
     wf = init_dwi_preproc_wf(
-        subjectid='dmripreptest',
+        layout=BIDSLayout('.'),
+        subject_id='dmripreptest',
         dwi_file='/madeup/path/sub-01_dwi.nii.gz',
         metadata={},
-        layout=BIDSLayout('.'),
-        ignore=[],
         b0_thresh=5,
         output_resolution=(1, 1, 1),
         bet_dwi=0.3,
         bet_mag=0.3,
-        nthreads=4,
         omp_nthreads=1,
+        ignore=[],
         synb0_dir='.'
     )
 

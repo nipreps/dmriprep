@@ -12,14 +12,6 @@ dmriprep.interfaces.fmap module
    :undoc-members:
    :show-inheritance:
 
-dmriprep.interfaces.reportlets module
--------------------------------------
-
-.. automodule:: dmriprep.interfaces.reportlets
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------

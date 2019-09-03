@@ -14,24 +14,24 @@ from copy import deepcopy
 
 from nipype.pipeline import engine as pe
 
-from .utils.bids import collect_data
+from ..utils.bids import collect_data
 from .dwi import init_dwi_preproc_wf, init_dwi_derivatives_wf
 
 
 def init_dmriprep_wf(
-    subject_list,
-    session_list,
     layout,
     output_dir,
-    work_dir,
-    ignore,
+    subject_list,
+    session_list,
     concat_dwis,
     b0_thresh,
     output_resolution,
     bet_dwi,
     bet_mag,
-    nthreads,
     omp_nthreads,
+    acqp_file,
+    ignore,
+    work_dir,
     synb0_dir
 ):
     """
@@ -46,35 +46,32 @@ def init_dmriprep_wf(
     from dmriprep.workflows.base import init_dmriprep_wf
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
     wf = init_dmriprep_wf(
-      subject_list=['dmripreptest'],
-      session_list=[],
-      layout=BIDSLayout('.', validate=False),
-      output_dir='.',
-      work_dir='.',
-      ignore=[],
-      b0_thresh=5,
-      output_resolution=(1, 1, 1),
-      bet_dwi=0.3,
-      bet_mag=0.3,
-      nthreads=4,
-      omp_nthreads=1,
-      synb0_dir='.'
+        layout=BIDSLayout('.', validate=False),
+        output_dir='.',
+        subject_list=['dmripreptest'],
+        session_list=[],
+        concat_dwis=[],
+        b0_thresh=5,
+        output_resolution=(1, 1, 1),
+        bet_dwi=0.3,
+        bet_mag=0.3,
+        omp_nthreads=1,
+        acqp_file='',
+        ignore=[],
+        work_dir='.',
+        synb0_dir=''
     )
 
     Parameters
 
-        subject_list: list
-            List of subject labels
-        session_list: list
-            List of session labels
         layout: BIDSLayout object
             BIDS dataset layout
         output_dir: str
             Directory in which to save derivatives
-        work_dir: str
-            Directory in which to store workflow execution state and temporary files
-        ignore: list
-            Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps')
+        subject_list: list
+            List of subject labels
+        session_list: list
+            List of session labels
         concat_dwis: list
             List of dwi images to concatenate (specified with the 'acq-') tag
         b0_thresh: int
@@ -85,10 +82,14 @@ def init_dmriprep_wf(
             Fractional intensity threshold for BET on dwi image
         bet_mag: float
             Fractional intensity threshold for BET on magnitude image
-        nthreads: int
-            Maximum number of threads to use
         omp_nthreads: int
             Maximum number of threads an individual process may use
+        acqp_file: str
+            Optionally supply eddy acquisition parameters file
+        ignore: list
+            Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps'
+        work_dir: str
+            Directory in which to store workflow execution state and temporary files
         synb0_dir: str
             Direction in which synb0 derivatives are saved
 
@@ -99,28 +100,26 @@ def init_dmriprep_wf(
     for subject_id in subject_list:
 
         single_subject_wf = init_single_subject_wf(
-            subject_id=subject_id,
-            session_list=session_list,
             name='single_subject_' + subject_id + '_wf',
             layout=layout,
             output_dir=output_dir,
-            work_dir=work_dir,
-            ignore=ignore,
+            subject_id=subject_id,
+            session_list=session_list,
             concat_dwis=concat_dwis,
             b0_thresh=b0_thresh,
             output_resolution=output_resolution,
             bet_dwi=bet_dwi,
             bet_mag=bet_mag,
             omp_nthreads=omp_nthreads,
+            acqp_file=acqp_file,
+            ignore=ignore,
+            work_dir=work_dir,
             synb0_dir=synb0_dir
         )
 
         single_subject_wf.config['execution']['crashdump_dir'] = os.path.join(
             output_dir, 'dmriprep', 'sub-' + subject_id, 'log'
         )
-        single_subject_wf.config['execution']['remove_unnecessary_outputs'] = False
-        single_subject_wf.config['execution']['keep_inputs'] = True
-        single_subject_wf.config['execution']['crashfile_format'] = 'txt'
 
         for node in single_subject_wf._get_all_nodes():
             node.config = deepcopy(single_subject_wf.config)
@@ -131,19 +130,20 @@ def init_dmriprep_wf(
 
 
 def init_single_subject_wf(
-    subject_id,
-    session_list,
     name,
     layout,
     output_dir,
-    work_dir,
-    ignore,
+    subject_id,
+    session_list,
     concat_dwis,
     b0_thresh,
     output_resolution,
     bet_dwi,
     bet_mag,
     omp_nthreads,
+    acqp_file,
+    ignore,
+    work_dir,
     synb0_dir
 ):
     """
@@ -162,35 +162,34 @@ def init_single_subject_wf(
     from dmriprep.workflows.base import init_single_subject_wf
     BIDSLayout = namedtuple('BIDSLayout', ['root'])
     wf = init_single_subject_wf(
-        subject_id='test',
-        session_list=[],
         name='single_subject_wf',
         layout=BIDSLayout,
         output_dir='.',
-        work_dir='.',
-        ignore=[],
+        subject_id='test',
+        session_list=[],
+        concat_dwis=[],
         b0_thresh=5,
         output_resolution=(1, 1, 1),
         bet_dwi=0.3,
         bet_mag=0.3,
         omp_nthreads=1,
+        acqp_file='',
+        ignore=[],
+        work_dir='.',
         synb0_dir=''
     )
 
     Parameters
 
-        subject_id: str
-            Single subject label
-        session_list: list
-            List of sessions
+        name:
         layout: BIDSLayout object
             BIDS dataset layout
         output_dir: str
             Directory in which to save derivatives
-        work_dir: str
-            Directory in which to store workflow execution state and temporary files
-        ignore: list
-            Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps')
+        subject_id: str
+            Single subject label
+        session_list: list
+            List of sessions
         concat_dwis: list
             List of dwi images to concatenate (specified with the 'acq-') tag
         b0_thresh: int
@@ -203,6 +202,12 @@ def init_single_subject_wf(
             Fractional intensity threshold for BET on magnitude image
         omp_nthreads: int
             Maximum number of threads an individual process may use
+        acqp_file: str
+            Optional acquisition parameters file
+        ignore: list
+            Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps')
+        work_dir: str
+            Directory in which to store workflow execution state and temporary files
         synb0_dir: str
             Directory in which synb0 derivatives are saved
 
@@ -214,7 +219,7 @@ def init_single_subject_wf(
             'dwi': ['/madeup/path/sub-01_dwi.nii.gz']
         }
     else:
-        subject_data = collect_data(layout, subject_id, session_list)
+        subject_data = collect_data(layout, subject_id, concat_dwis, session_list)
 
     if subject_data['dwi'] == []:
         raise Exception(
@@ -225,28 +230,30 @@ def init_single_subject_wf(
 
     subject_wf = pe.Workflow(name=name)
 
-    for dwi_file in dwi_files:
+    for dwi_file in subject_data['dwi']:
         entities = layout.parse_file_entities(dwi_file)
         if 'session' in entities:
             session_id = entities['session']
         else:
             session_id = None
         metadata = layout.get_metadata(dwi_file)
+
         dwi_preproc_wf = init_dwi_preproc_wf(
+            layout=layout,
+            output_dir=output_dir,
             subject_id=subject_id,
             dwi_file=dwi_file,
             metadata=metadata,
-            layout=layout,
-            output_dir=output_dir,
-            work_dir=work_dir,
-            ignore=ignore,
             b0_thresh=b0_thresh,
             output_resolution=output_resolution,
             bet_dwi=bet_dwi,
             bet_mag=bet_mag,
             omp_nthreads=omp_nthreads,
+            acqp_file=acqp_file,
+            ignore=ignore,
             synb0_dir=synb0_dir
         )
+
         datasink_wf = init_dwi_derivatives_wf(
             subject_id=subject_id,
             session_id=session_id,

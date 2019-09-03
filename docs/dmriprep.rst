@@ -8,7 +8,6 @@ Subpackages
 
    dmriprep.interfaces
    dmriprep.utils
-   dmriprep.viz
    dmriprep.workflows
 
 Submodules

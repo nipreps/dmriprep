@@ -11,28 +11,27 @@ Orchestrating the dwi preprocessing workflows
 from bids import BIDSLayout
 from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, mrtrix3, utility as niu
-from numba import cuda
 
 from .artifacts import init_dwi_artifacts_wf
 from .tensor import init_dwi_tensor_wf
-
 from ..fieldmap.base import init_sdc_prep_wf
 
 FMAP_PRIORITY = {"epi": 0, "fieldmap": 1, "phasediff": 2, "phase": 3, "syn": 4}
 
 
 def init_dwi_preproc_wf(
+    layout,
+    output_dir,
     subject_id,
     dwi_file,
     metadata,
-    layout,
-    ignore,
     b0_thresh,
     output_resolution,
     bet_dwi,
     bet_mag,
-    nthreads,
     omp_nthreads,
+    acqp_file,
+    ignore,
     synb0_dir
 ):
     """
@@ -46,25 +45,26 @@ def init_dwi_preproc_wf(
         from dmriprep.workflows.dwi import init_dwi_preproc_wf
         BIDSLayout = namedtuple('BIDSLayout', ['root'])
         wf = init_dwi_preproc_wf(
-            subjectid='dmripreptest',
-            dwi_file='/madeup/path/sub-01_dwi.nii.gz',
-            metadata=,
             layout=BIDSLayout('.'),
-            ignore=[],
+            output_dir='.',
+            subject_id='dmripreptest',
+            dwi_file='/madeup/path/sub-01_dwi.nii.gz',
+            metadata={},
             b0_thresh=5,
             output_resolution=(1, 1, 1),
             bet_dwi=0.3,
             bet_mag=0.3,
-            nthreads=4,
             omp_nthreads=1,
-            synb0_dir='.'
+            acqp_file='',
+            ignore=[],
+            synb0_dir=''
         )
 
     """
 
-    multiple_runs = isinstance(dwi_file, list)
+    multiple_dwis = isinstance(dwi_file, list)
 
-    if multiple_runs:
+    if multiple_dwis:
         ref_file = dwi_file[0]
     else:
         ref_file = dwi_file
@@ -72,8 +72,6 @@ def init_dwi_preproc_wf(
     wf_name = _get_wf_name(ref_file)
 
     dwi_wf = pe.Workflow(name=wf_name)
-
-    synb0 = ""
 
     # If use_synb0 set, get synb0 from files
     if synb0_dir:
@@ -109,7 +107,6 @@ def init_dwi_preproc_wf(
                 "bvec_file",
                 "bval_file",
                 "out_dir",
-                "eddy_niter",
             ]
         ),
         name="inputnode",
@@ -135,16 +132,6 @@ def init_dwi_preproc_wf(
             ]
         ),
         name="outputnode",
-    )
-
-    dwi_artifacts_wf = init_dwi_artifacts_wf(ignore, output_resolution)
-
-    dwi_wf.connect(
-        [
-            (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
-            (dwi_artifacts_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")]),
-            (dwi_artifacts_wf, ecc, [("outputnode.out_file", "in_file")])
-        ]
     )
 
     def gen_index(in_file):
@@ -248,6 +235,8 @@ def init_dwi_preproc_wf(
         ]
     )
 
+    dwi_artifacts_wf = init_dwi_artifacts_wf(ignore, output_resolution)
+
     def b0_average(in_dwi, in_bval, b0_thresh, out_file=None):
         """
         Averages the *b0* volumes from a DWI dataset.
@@ -296,16 +285,12 @@ def init_dwi_preproc_wf(
         fsl.BET(frac=bet_dwi, mask=True, robust=True), name="bet_dwi_pre"
     )
 
-    ecc = pe.Node(fsl.Eddy(repol=True, cnr_maps=True, residuals=True), name="fsl_eddy")
-
-    if omp_nthreads:
-        ecc.inputs.num_threads = omp_nthreads
-
-    try:
-        if cuda.gpus:
-            ecc.inputs.use_cuda = True
-    except:
-        ecc.inputs.use_cuda = False
+    dwi_wf.connect(
+        [
+            (inputnode, dwi_artifacts_wf, [("dwi_file", "inputnode.dwi_file")]),
+            (dwi_artifacts_wf, avg_b0_0, [("outputnode.out_file", "in_dwi")])
+        ]
+    )
 
     denoise_eddy = pe.Node(mrtrix3.DWIDenoise(), name="denoise_eddy")
 

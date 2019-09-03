@@ -4,9 +4,11 @@
 import os
 import sys
 import warnings
+from multiprocessing import cpu_count
 
 import click
 from bids import BIDSLayout
+from nipype import config as ncfg
 
 from .utils.bids import collect_participants
 from .workflows.base import init_dmriprep_wf
@@ -16,6 +18,7 @@ from .workflows.base import init_dmriprep_wf
 warnings.filterwarnings('ignore', message='numpy.dtype size changed')
 warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 
+
 @click.command()
 # arguments as specified by BIDS-Apps
 @click.argument('bids_dir', type=click.Path(exists=True, file_okay=False))
@@ -23,7 +26,9 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     'output_dir', type=click.Path(exists=True, file_okay=False, writable=True)
 )
 @click.argument(
-    'analysis_level', default='participant', type=click.Choice(['participant', 'group'])
+    'analysis_level',
+    default='participant',
+    type=click.Choice(['participant', 'group'])
 )
 # optional arguments
 # options for filtering BIDS queries
@@ -66,37 +71,13 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     default=5,
     show_default=True,
     help='Threshold for b0 value',
-    type=click.IntRange(min=0, max=10),
+    type=click.IntRange(min=0, max=10)
 )
 @click.option(
     '--output_resolution',
     help='The isotropic voxel size in mm the data will be resampled to before eddy.',
     type=float,
     multiple=True
-)
-# specific options for eddy
-@click.option(
-    '--nthreads',
-    default=1,
-    show_default=True,
-    help='Maximum number of threads across all processes',
-    type=int,
-)
-@click.option(
-    '--omp_nthreads',
-    default=1,
-    show_default=True,
-    help='Maximum number of threads per process',
-    type=int,
-)
-@click.option(
-    '--eddy_niter',
-    default=5,
-    show_default=True,
-    help='Fixed number of eddy iterations. See '
-    'https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide'
-    '#A--niter',
-    type=int,
 )
 @click.option(
     '--bet_dwi',
@@ -105,7 +86,7 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     help='Fractional intensity threshold for BET on the DWI. '
     'A higher value will be more strict; it will cut off more '
     'around what it analyzes the brain to be.',
-    type=click.FloatRange(min=0, max=1),
+    type=click.FloatRange(min=0, max=1)
 )
 @click.option(
     '--bet_mag',
@@ -114,14 +95,29 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     help='Fractional intensity threshold for BET on the magnitude. '
     'A higher value will be more strict; it will cut off more '
     'around what it analyzes the brain to be.',
-    type=click.FloatRange(min=0, max=1),
+    type=click.FloatRange(min=0, max=1)
+)
+# specific options for eddy
+@click.option(
+    '--nthreads',
+    default=1,
+    show_default=True,
+    help='Maximum number of threads across all processes',
+    type=int
+)
+@click.option(
+    '--omp_nthreads',
+    default=1,
+    show_default=True,
+    help='Maximum number of threads per process',
+    type=int
 )
 @click.option(
     '--acqp_file',
     default=None,
     help='If you want to pass in an acqp file for topup/eddy instead of'
     'generating it from the json by default.',
-    type=click.Path(exists=True, dir_okay=False),
+    type=click.Path(exists=True, dir_okay=False)
 )
 # workflow configuration
 @click.option(
@@ -129,29 +125,32 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     '-i',
     help='Specify which node(s) to skip during the preprocessing of the dwi.',
     type=click.Choice(['denoising', 'unringing', 'fieldmaps']),
-    multiple=True,
+    multiple=True
 )
 @click.option(
     '--work_dir',
     '-w',
     help='working directory',
-    type=click.Path(exists=True, file_okay=False, writable=True),
+    type=click.Path(exists=True, file_okay=False, writable=True)
 )
 @click.option(
     '--synb0_dir',
     default=None,
     help='If you want to use Synb0-DISCO for preprocessing.',
-    type=click.Path(exists=True, file_okay=False),
+    type=click.Path(exists=True, file_okay=False)
+)
+@click.option(
+    '--write_graph',
+    default=False,
+    help='Write out nipype workflow graph.'
 )
 def main(
-    participant_label,
-    session_label,
     bids_dir,
     output_dir,
     analysis_level,
     skip_bids_validation,
-    work_dir,
-    ignore,
+    participant_label,
+    session_label,
     concat_dwis,
     b0_thresh,
     output_resolution,
@@ -159,9 +158,11 @@ def main(
     bet_mag,
     nthreads,
     omp_nthreads,
-    eddy_niter,
+    acqp_file,
+    ignore,
+    work_dir,
     synb0_dir,
-    acqp_file
+    write_graph
 ):
     """
     BIDS_DIR: The directory with the input dataset formatted according to the
@@ -188,7 +189,6 @@ def main(
 
     if not skip_bids_validation:
         from .utils.bids import validate_input_dir
-
         validate_input_dir(bids_dir, all_subjects, subject_list)
 
     if not work_dir:
@@ -197,27 +197,61 @@ def main(
     if len(output_resolution) == 1:
         output_resolution = output_resolution * 3
 
+    log_dir = os.path.join(output_dir, 'dmriprep', 'logs')
+
+    plugin_settings = {
+        'plugin': 'MultiProc',
+        'plugin_args': {
+            'raise_insufficient': False,
+            'maxtasksperchild': 1,
+            'n_procs': nthreads
+        }
+    }
+
+    if omp_nthreads == 0:
+        omp_nthreads = min(nthreads - 1 if nthreads > 1 else cpu_count(), 8)
+
+    ncfg.update_config({
+        'logging': {
+            'log_directory': log_dir,
+            'log_to_file': True
+        },
+        'execution': {
+            'crashdump_dir': log_dir,
+            'crashfile_format': 'txt',
+            'remove_unnecessary_outputs': False,
+            'keep_inputs': True,
+            'get_linked_libs': False,
+            'stop_on_first_crash': True
+        },
+        'monitoring': {
+            'enabled': True,
+            'sample_frequency': '0.5',
+            'summary_append': True
+        }
+    })
+
     wf = init_dmriprep_wf(
-        subject_list=subject_list,
-        session_list=session_label,
         layout=layout,
         output_dir=output_dir,
-        work_dir=work_dir,
-        ignore=list(ignore),
+        subject_list=subject_list,
+        session_list=list(session_label),
         concat_dwis=list(concat_dwis),
         b0_thresh=b0_thresh,
         output_resolution=output_resolution,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
-        nthreads=nthreads,
         omp_nthreads=omp_nthreads,
+        acqp_file=acqp_file,
+        ignore=list(ignore),
+        work_dir=work_dir,
         synb0_dir=synb0_dir
     )
-    wf.write_graph()
-    wf.config['execution']['remove_unnecessary_outputs'] = False
-    wf.config['execution']['keep_inputs'] = True
-    wf.config['execution']['crashfile_format'] = 'txt'
-    wf.run()
+
+    if write_graph:
+        wf.write_graph(graph2use='colored', format='svg', simple_form=True)
+
+    wf.run(**plugin_settings)
 
     return 0
 
