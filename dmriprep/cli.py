@@ -99,6 +99,14 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 )
 # specific options for eddy
 @click.option(
+    '--acqp_file',
+    default=None,
+    help='If you want to pass in an acqp file for topup/eddy instead of'
+    'generating it from the json by default.',
+    type=click.Path(exists=True, dir_okay=False)
+)
+# workflow configuration
+@click.option(
     '--nthreads',
     default=1,
     show_default=True,
@@ -112,14 +120,6 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     help='Maximum number of threads per process',
     type=int
 )
-@click.option(
-    '--acqp_file',
-    default=None,
-    help='If you want to pass in an acqp file for topup/eddy instead of'
-    'generating it from the json by default.',
-    type=click.Path(exists=True, dir_okay=False)
-)
-# workflow configuration
 @click.option(
     '--ignore',
     '-i',
@@ -141,8 +141,10 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 )
 @click.option(
     '--write_graph',
+    is_flag=True,
     default=False,
-    help='Write out nipype workflow graph.'
+    help='Write out nipype workflow graph.',
+    type=bool
 )
 def main(
     bids_dir,
@@ -156,9 +158,9 @@ def main(
     output_resolution,
     bet_dwi,
     bet_mag,
+    acqp_file,
     nthreads,
     omp_nthreads,
-    acqp_file,
     ignore,
     work_dir,
     synb0_dir,
@@ -183,13 +185,13 @@ def main(
         )
 
     layout = BIDSLayout(bids_dir, validate=True)
-    all_subjects, subject_list = collect_participants(
+    subject_list = collect_participants(
         layout, participant_label=participant_label
     )
 
     if not skip_bids_validation:
         from .utils.bids import validate_input_dir
-        validate_input_dir(bids_dir, all_subjects, subject_list)
+        validate_input_dir(bids_dir, subject_list)
 
     if not work_dir:
         work_dir = os.path.join(output_dir, 'scratch')
@@ -241,8 +243,8 @@ def main(
         output_resolution=output_resolution,
         bet_dwi=bet_dwi,
         bet_mag=bet_mag,
-        omp_nthreads=omp_nthreads,
         acqp_file=acqp_file,
+        omp_nthreads=omp_nthreads,
         ignore=list(ignore),
         work_dir=work_dir,
         synb0_dir=synb0_dir

@@ -28,8 +28,8 @@ def init_dmriprep_wf(
     output_resolution,
     bet_dwi,
     bet_mag,
-    omp_nthreads,
     acqp_file,
+    omp_nthreads,
     ignore,
     work_dir,
     synb0_dir
@@ -55,8 +55,8 @@ def init_dmriprep_wf(
         output_resolution=(1, 1, 1),
         bet_dwi=0.3,
         bet_mag=0.3,
-        omp_nthreads=1,
         acqp_file='',
+        omp_nthreads=1,
         ignore=[],
         work_dir='.',
         synb0_dir=''
@@ -87,13 +87,14 @@ def init_dmriprep_wf(
         acqp_file: str
             Optionally supply eddy acquisition parameters file
         ignore: list
-            Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps'
+            Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps')
         work_dir: str
             Directory in which to store workflow execution state and temporary files
         synb0_dir: str
             Direction in which synb0 derivatives are saved
 
     """
+
     dmriprep_wf = pe.Workflow(name='dmriprep_wf')
     dmriprep_wf.base_dir = work_dir
 
@@ -231,46 +232,99 @@ def init_single_subject_wf(
     subject_wf = pe.Workflow(name=name)
 
     for dwi_file in subject_data['dwi']:
+        multiple_dwis = isinstance(dwi_file, list)
+
+        if multiple_dwis:
+            print(dwi_file)
+            ref_file = dwi_file[0]
+
+            from .dwi import init_dwi_concat_wf
+
+            dwi_concat_wf = init_dwi_concat_wf(ref_file, dwi_file)
+
+            concat_spec = dwi_concat_wf.get_node('inputnode')
+            concat_spec.inputs.ref_file = ref_file
+            concat_spec.inputs.dwi_list = dwi_file
+            concat_spec.inputs.bvec_list = [layout.get_bvec(bvec) for bvec in dwi_file]
+            concat_spec.inputs.bval_list = [layout.get_bval(bval) for bval in dwi_file]
+
+            metadata = layout.get_metadata(ref_file)
+
+            dwi_preproc_wf = init_dwi_preproc_wf(
+                layout=layout,
+                output_dir=output_dir,
+                subject_id=subject_id,
+                dwi_file=dwi_file,
+                metadata=metadata,
+                b0_thresh=b0_thresh,
+                output_resolution=output_resolution,
+                bet_dwi=bet_dwi,
+                bet_mag=bet_mag,
+                omp_nthreads=omp_nthreads,
+                acqp_file=acqp_file,
+                ignore=ignore,
+                synb0_dir=synb0_dir
+            )
+
+            dwi_preproc_wf.base_dir = os.path.join(
+                os.path.abspath(work_dir), subject_id
+            )
+
+            inputspec = dwi_preproc_wf.get_node('inputnode')
+            inputspec.inputs.subject_id = subject_id
+            inputspec.inputs.dwi_meta = metadata
+            inputspec.inputs.out_dir = os.path.abspath(output_dir)
+
+            subject_wf.connect([
+                (dwi_concat_wf, dwi_preproc_wf, [('outputnode.dwi_file', 'inputnode.dwi_file'),
+                                                 ('outputnode.bvec_file', 'inputnode.bvec_file'),
+                                                 ('outputnode.bval_file', 'inputnode.bval_file')])
+            ])
+
+        else:
+            ref_file = dwi_file
+
+            metadata = layout.get_metadata(ref_file)
+
+            dwi_preproc_wf = init_dwi_preproc_wf(
+                layout=layout,
+                output_dir=output_dir,
+                subject_id=subject_id,
+                dwi_file=dwi_file,
+                metadata=metadata,
+                b0_thresh=b0_thresh,
+                output_resolution=output_resolution,
+                bet_dwi=bet_dwi,
+                bet_mag=bet_mag,
+                omp_nthreads=omp_nthreads,
+                acqp_file=acqp_file,
+                ignore=ignore,
+                synb0_dir=synb0_dir
+            )
+
+            dwi_preproc_wf.base_dir = os.path.join(
+                os.path.abspath(work_dir), subject_id
+            )
+
+            inputspec = dwi_preproc_wf.get_node('inputnode')
+            inputspec.inputs.subject_id = subject_id
+            inputspec.inputs.dwi_file = dwi_file
+            inputspec.inputs.dwi_meta = metadata
+            inputspec.inputs.bvec_file = layout.get_bvec(dwi_file)
+            inputspec.inputs.bval_file = layout.get_bval(dwi_file)
+            inputspec.inputs.out_dir = os.path.abspath(output_dir)
+
         entities = layout.parse_file_entities(dwi_file)
         if 'session' in entities:
             session_id = entities['session']
         else:
             session_id = None
-        metadata = layout.get_metadata(dwi_file)
-
-        dwi_preproc_wf = init_dwi_preproc_wf(
-            layout=layout,
-            output_dir=output_dir,
-            subject_id=subject_id,
-            dwi_file=dwi_file,
-            metadata=metadata,
-            b0_thresh=b0_thresh,
-            output_resolution=output_resolution,
-            bet_dwi=bet_dwi,
-            bet_mag=bet_mag,
-            omp_nthreads=omp_nthreads,
-            acqp_file=acqp_file,
-            ignore=ignore,
-            synb0_dir=synb0_dir
-        )
 
         datasink_wf = init_dwi_derivatives_wf(
             subject_id=subject_id,
             session_id=session_id,
             output_folder=output_dir
         )
-
-        dwi_preproc_wf.base_dir = os.path.join(
-            os.path.abspath(work_dir), subject_id
-        )
-
-        inputspec = dwi_preproc_wf.get_node('inputnode')
-        inputspec.inputs.subject_id = subject_id
-        inputspec.inputs.dwi_file = dwi_file
-        inputspec.inputs.dwi_meta = metadata
-        inputspec.inputs.bvec_file = layout.get_bvec(dwi_file)
-        inputspec.inputs.bval_file = layout.get_bval(dwi_file)
-        inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
         ds_inputspec = datasink_wf.get_node('inputnode')
         ds_inputspec.inputs.subject_id = subject_id
@@ -312,23 +366,3 @@ def init_single_subject_wf(
         subject_wf.add_nodes([full_wf])
 
     return subject_wf
-
-
-def group_dwis(dwi_files, sessions, concat_dwis):
-
-    all_dwis = []
-
-    if sessions:
-        session_dwi_groups = []
-        for session in sessions:
-            session_dwi_files = [img for img in dwi_files if 'ses-{}'.format(session) in img]
-            for f in session_dwi_files:
-                if any(acq in f for acq in concat_dwis):
-                    session_dwi_groups.append(f)
-                else:
-                    all_dwis.append(f)
-        all_dwis.append(session_dwi_groups)
-    else:
-        all_dwis.append(f)
-
-    return all_dwis

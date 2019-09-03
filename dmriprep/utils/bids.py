@@ -6,6 +6,7 @@ Utilities to handle BIDS inputs
 import warnings
 import json
 import sys
+from pathlib import Path
 
 from bids.layout import BIDSLayout
 
@@ -111,7 +112,7 @@ def collect_participants(
             raise exc
         warnings.warn(exc.msg, BIDSWarning)
 
-    return all_participants, found_label
+    return found_label
 
 
 def collect_data(bids_dir, participant_label, concat_dwis, session_label=None):
@@ -142,7 +143,7 @@ def collect_data(bids_dir, participant_label, concat_dwis, session_label=None):
 
     subj_data['dwi'] = group_dwi(subj_data['dwi'], session_label, concat_dwis)
 
-    return subj_data, layout
+    return subj_data
 
 
 def group_dwi(dwi_files, session_list, concat_dwis):
@@ -158,7 +159,8 @@ def group_dwi(dwi_files, session_list, concat_dwis):
                     session_groups.append(f)
                 else:
                     all_dwis.append(f)
-            all_dwis.append(session_groups)
+            if not session_groups == []:
+                all_dwis.append(session_groups)
     else:
         session_groups = []
         for f in dwi_files:
@@ -166,12 +168,13 @@ def group_dwi(dwi_files, session_list, concat_dwis):
                 session_groups.append(f)
             else:
                 all_dwis.append(f)
-        all_dwis.append(session_groups)
+        if not session_groups == []:
+            all_dwis.append(session_groups)
 
     return all_dwis
 
 
-def validate_input_dir(bids_dir, all_subjects, subject_list):
+def validate_input_dir(bids_dir, subject_list):
     # Ignore issues and warnings that should not influence DMRIPREP
     import tempfile
     import subprocess
@@ -217,7 +220,18 @@ def validate_input_dir(bids_dir, all_subjects, subject_list):
         "ignoredFiles": ["/dataset_description.json", "/participants.tsv"],
     }
     # Limit validation only to data from requested participants
-    ignored_subjects = all_subjects.difference(subject_list)
+    if subject_list:
+        bids_dir = Path(bids_dir)
+        all_subs = set([s.name[4:] for s in bids_dir.glob('sub-*')])
+        selected_subs = set([s[4:] if s.startswith('sub-') else s
+                             for s in subject_list])
+        bad_labels = selected_subs.difference(all_subs)
+        if bad_labels:
+            error_msg = 'Data for requested participant(s) label(s) not found. Could ' \
+                        'not find data for participant(s): %s. Please verify the requested ' \
+                        'participant labels.'
+            raise RuntimeError(error_msg % ','.join(bad_labels))
+    ignored_subjects = all_subs.difference(selected_subs)
     if ignored_subjects:
         for subject in ignored_subjects:
             validator_config_dict["ignoredFiles"].append("/sub-%s/**" % subject)
