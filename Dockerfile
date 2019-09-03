@@ -1,38 +1,23 @@
-# Use Ubuntu 16.04 LTS
-FROM ubuntu:xenial-20190610
+FROM ubuntu:xenial-20161213
 
-# Prepare environment
+# Used command:
+# neurodocker generate docker --base=debian:stretch --pkg-manager=apt
+# --ants version=latest method=source --mrtrix3 version=3.0_RC3
+# --freesurfer version=6.0.0 method=binaries --fsl version=6.0.1 method=binaries
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-                    curl \
-                    bzip2 \
-                    ca-certificates \
-                    xvfb \
-                    cython3 \
-                    build-essential \
-                    autoconf \
-                    libtool \
-                    pkg-config \
-                    git && \
-    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get install -y --no-install-recommends \
-                    nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Getting required installation tools
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        apt-utils \
-        locales \
-        unzip \
         bc \
+        libtool \
         tar \
         dpkg \
+        curl \
         wget \
+        unzip \
         gcc \
+        git \
         libstdc++6
 
-# Neurodocker Setup
 ARG DEBIAN_FRONTEND="noninteractive"
 
 ENV LANG="en_US.UTF-8" \
@@ -64,55 +49,73 @@ RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
 
 ENTRYPOINT ["/neurodocker/startup.sh"]
 
-# Installing ANTS v2.3.1
-ENV ANTSPATH=/opt/ants
-RUN mkdir -p $ANTSPATH && \
-    curl -sSL https://github.com/ANTsX/ANTs/archive/v2.3.1.tar.gz
-    | tar -xzC $ANTSPATH --strip-components 1
-ENV PATH=$ANTSPATH:$PATH
+# SETUP taken from fmriprep:latest, installs C compiler for ANTS
+# Prepare environment
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+                    curl \
+                    bzip2 \
+                    ca-certificates \
+                    xvfb \
+                    cython3 \
+                    build-essential \
+                    autoconf \
+                    libtool \
+                    pkg-config \
+                    git && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get install -y --no-install-recommends \
+                    nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Installing MRtrix3
-ENV PATH="/opt/mrtrix3-3.0_RC3/bin:$PATH"
-RUN echo "Downloading MRtrix3 ..." \
-    && mkdir -p /opt/mrtrix3-3.0_RC3 \
-    && curl -fsSL --retry 5 https://dl.dropbox.com/s/2oh339ehcxcf8xf/mrtrix3-3.0_RC3-Linux-centos6.9-x86_64.tar.gz \
-    | tar -xz -C /opt/mrtrix3-3.0_RC3 --strip-components 1
+# Install latest pandoc
+RUN curl -o pandoc-2.2.2.1-1-amd64.deb -sSL "https://github.com/jgm/pandoc/releases/download/2.2.2.1/pandoc-2.2.2.1-1-amd64.deb" && \
+    dpkg -i pandoc-2.2.2.1-1-amd64.deb && \
+    rm pandoc-2.2.2.1-1-amd64.deb
 
-# Installing Freesurfer
-ENV FREESURFER_HOME="/opt/freesurfer-6.0.0" \
-    PATH="/opt/freesurfer-6.0.0/bin:$PATH"
-RUN apt-get update -qq \
-    && apt-get install -y -q --no-install-recommends \
-           bc \
-           libgomp1 \
-           libxmu6 \
-           libxt6 \
-           perl \
-           tcsh \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "Downloading FreeSurfer ..." \
-    && mkdir -p /opt/freesurfer-6.0.0 \
-    && curl -fsSL --retry 5 ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz \
-    | tar -xz -C /opt/freesurfer-6.0.0 --strip-components 1 \
-         --exclude='freesurfer/average/mult-comp-cor' \
-         --exclude='freesurfer/lib/cuda' \
-         --exclude='freesurfer/lib/qt' \
-         --exclude='freesurfer/subjects/V1_average' \
-         --exclude='freesurfer/subjects/bert' \
-         --exclude='freesurfer/subjects/cvs_avg35' \
-         --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
-         --exclude='freesurfer/subjects/fsaverage3' \
-         --exclude='freesurfer/subjects/fsaverage4' \
-         --exclude='freesurfer/subjects/fsaverage5' \
-         --exclude='freesurfer/subjects/fsaverage6' \
-         --exclude='freesurfer/subjects/fsaverage_sym' \
-         --exclude='freesurfer/trctrain' \
-    && sed -i '$isource "/opt/freesurfer-6.0.0/SetUpFreeSurfer.sh"' "$ND_ENTRYPOINT"
+# ANTS
+# from https://github.com/kaczmarj/ANTs-builds/blob/master/Dockerfile
 
-# Installing FSL
+# Get CMake for ANTS
+RUN mkdir /cmake_temp
+WORKDIR /cmake_temp
+RUN wget https://cmake.org/files/v3.12/cmake-3.12.2.tar.gz \
+    && tar -xzvf cmake-3.12.2.tar.gz \
+    && echo 'done tar' \
+    && ls \
+    && cd cmake-3.12.2/ \
+    && ./bootstrap -- -DCMAKE_BUILD_TYPE:STRING=Release \
+    && make -j4 \
+    && make install \
+    && cd .. \
+    && rm -rf *
+
+RUN cmake --version
+
+RUN mkdir /ants
+RUN apt-get update && apt-get -y install zlib1g-dev
+
+RUN git clone https://github.com/ANTsX/ANTs.git --branch v2.3.1 /ants
+WORKDIR /ants
+
+RUN mkdir build \
+    && cd build \
+    && git config --global url."https://".insteadOf git:// \
+    && cmake .. \
+    && make -j1 \
+    && mkdir -p /opt/ants \
+    && mv bin/* /opt/ants && mv ../Scripts/* /opt/ants \
+    && cd .. \
+    && rm -rf build
+
+ENV ANTSPATH=/opt/ants/ \
+    PATH=/opt/ants:$PATH
+
+WORKDIR /
+
 ENV FSLDIR="/opt/fsl-6.0.1" \
-    PATH="/opt/fsl-6.0.1/bin:$PATH"
+    PATH="/opt/fsl-6.0.1/bin:$PATH" \
+    FSLOUTPUTTYPE="NIFTI_GZ"
 RUN apt-get update -qq \
     && apt-get install -y -q --no-install-recommends \
            bc \
@@ -130,61 +133,58 @@ RUN apt-get update -qq \
            libxrandr2 \
            libxrender1 \
            libxt6 \
+           python \
            wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && echo "Downloading FSL ..." \
-    && mkdir -p /opt/fsl-6.0.1 \
-    && curl -fsSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.1-centos6_64.tar.gz \
-    | tar -xz -C /opt/fsl-6.0.1 --strip-components 1 \
-    && sed -i '$iecho Some packages in this Docker container are non-free' $ND_ENTRYPOINT \
-    && sed -i '$iecho If you are considering commercial use of this container, please consult the relevant license:' $ND_ENTRYPOINT \
-    && sed -i '$iecho https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence' $ND_ENTRYPOINT \
-    && sed -i '$isource $FSLDIR/etc/fslconf/fsl.sh' $ND_ENTRYPOINT
+    && wget -q http://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py \
+    && chmod 775 fslinstaller.py
+RUN /fslinstaller.py -d /opt/fsl-6.0.1 -V 6.0.1 -q
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g svgo
+# FSL 6.0.1
+# Freesurfer 6.0.0
+# MRtrix3
+# ANTS
+# Python 3
 
-# Installing bids-validator
-RUN npm install -g bids-validator@1.2.5
+# MRtrix3
+# from https://hub.docker.com/r/neurology/mrtrix/dockerfile
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+    python \
+    python-numpy \
+    libeigen3-dev \
+    clang \
+    zlib1g-dev \
+    libqt4-opengl-dev \
+    libgl1-mesa-dev \
+    git \
+    ca-certificates
+RUN mkdir /mrtrix
+RUN git clone https://github.com/MRtrix3/mrtrix3.git --branch 3.0_RC3 /mrtrix
+WORKDIR /mrtrix
+# Checkout version used in the lab: 20180128
+RUN git checkout f098f097ccbb3e5efbb8f5552f13e0997d161cce
+ENV CXX=/usr/bin/clang++
+RUN ./configure
+RUN ./build
+RUN ./set_path
+ENV PATH=/mrtrix/bin:$PATH
 
-RUN echo '{ \
-    \n  "pkg_manager": "apt", \
-    \n  "instructions": [ \
-    \n    [ \
-    \n      "base", \
-    \n      "debian:stretch" \
-    \n    ], \
-    \n    [ \
-    \n      "ants", \
-    \n      { \
-    \n        "version": "latest", \
-    \n        "method": "source" \
-    \n      } \
-    \n    ], \
-    \n    [ \
-    \n      "mrtrix3", \
-    \n      { \
-    \n        "version": "3.0_RC3" \
-    \n      } \
-    \n    ], \
-    \n    [ \
-    \n      "freesurfer", \
-    \n      { \
-    \n        "version": "6.0.0", \
-    \n        "method": "binaries" \
-    \n      } \
-    \n    ], \
-    \n    [ \
-    \n      "fsl", \
-    \n      { \
-    \n        "version": "6.0.1", \
-    \n        "method": "binaries" \
-    \n      } \
-    \n    ] \
-    \n  ] \
-    \n}' > /neurodocker/neurodocker_specs.json
+WORKDIR /
+
+# Installing and setting up miniconda
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh && \
+    bash Miniconda3-4.5.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda3-4.5.11-Linux-x86_64.sh
+
+# Set CPATH for packages relying on compiled libs (e.g. indexed_gzip)
+ENV PATH="/usr/local/miniconda/bin:$PATH" \
+    CPATH="/usr/local/miniconda/include/:$CPATH" \
+    LANG="C.UTF-8" \
+    LC_ALL="C.UTF-8" \
+    PYTHONNOUSERSITE=1
 
 # add credentials on build
 RUN mkdir ~/.ssh && ln -s /run/secrets/host_ssh_key ~/.ssh/id_rsa
@@ -193,12 +193,43 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libopenblas-base
 
-# setting up an install of dmriprep (manual version) inside the container
-ADD https://api.github.com/repos/TIGRLab/dmriprep/git/refs/heads/master version.json
-RUN git clone -b master https://github.com/TIGRLab/dmriprep.git
-#RUN mkdir dmriprep
-#COPY ./ dmriprep/
-RUN cd dmriprep && ls && python setup.py install && pip list
-RUN pip install pybids==0.9.1 && pip list
+# Precaching atlases
+ENV TEMPLATEFLOW_HOME="/opt/templateflow"
+RUN mkdir -p $TEMPLATEFLOW_HOME
+RUN pip install --no-cache-dir "templateflow>=0.3.0,<0.4.0a0" && \
+    python -c "from templateflow import api as tfapi; \
+               tfapi.get('MNI152NLin6Asym', atlas=None); \
+               tfapi.get('MNI152NLin2009cAsym', atlas=None); \
+               tfapi.get('OASIS30ANTs');" && \
+    find $TEMPLATEFLOW_HOME -type d -exec chmod go=u {} + && \
+    find $TEMPLATEFLOW_HOME -type f -exec chmod go=u {} +
+
+RUN conda install -y python=3.7.3 \
+                     pip=19.1 \
+                     libxml2=2.9.8 \
+                     libxslt=1.1.32 \
+                     graphviz=2.40.1; sync && \
+    chmod -R a+rX /usr/local/miniconda; sync && \
+    chmod +x /usr/local/miniconda/bin/*; sync && \
+    conda build purge-all; sync && \
+    conda clean -tipsy && sync
+
+
+# Setting up an install of dmripreproc (manual version) inside the container
+#ADD https://api.github.com/repos/TIGRLab/dmripreproc/git/refs/heads/master version.json
+#RUN git clone -b master https://github.com/TIGRLab/dmripreproc.git dmripreproc
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g svgo
+
+# Installing bids-validator
+RUN npm install -g bids-validator@1.2.5
+
+RUN pip install --upgrade pip
+
+RUN mkdir dmriprep
+COPY ./ dmriprep/
+RUN cd dmriprep && python setup.py install
 
 ENTRYPOINT ["dmriprep"]
