@@ -29,8 +29,8 @@ def init_dwi_preproc_wf(
     output_resolution,
     bet_dwi,
     bet_mag,
-    omp_nthreads,
     acqp_file,
+    omp_nthreads,
     ignore,
     synb0_dir
 ):
@@ -54,8 +54,8 @@ def init_dwi_preproc_wf(
             output_resolution=(1, 1, 1),
             bet_dwi=0.3,
             bet_mag=0.3,
-            omp_nthreads=1,
             acqp_file='',
+            omp_nthreads=1,
             ignore=[],
             synb0_dir=''
         )

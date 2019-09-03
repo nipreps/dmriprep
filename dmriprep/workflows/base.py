@@ -111,8 +111,8 @@ def init_dmriprep_wf(
             output_resolution=output_resolution,
             bet_dwi=bet_dwi,
             bet_mag=bet_mag,
-            omp_nthreads=omp_nthreads,
             acqp_file=acqp_file,
+            omp_nthreads=omp_nthreads,
             ignore=ignore,
             work_dir=work_dir,
             synb0_dir=synb0_dir
@@ -173,8 +173,8 @@ def init_single_subject_wf(
         output_resolution=(1, 1, 1),
         bet_dwi=0.3,
         bet_mag=0.3,
-        omp_nthreads=1,
         acqp_file='',
+        omp_nthreads=1,
         ignore=[],
         work_dir='.',
         synb0_dir=''
@@ -201,10 +201,10 @@ def init_single_subject_wf(
             Fractional intensity threshold for BET on dwi image
         bet_mag: float
             Fractional intensity threshold for BET on magnitude image
-        omp_nthreads: int
-            Maximum number of threads an individual process may use
         acqp_file: str
             Optional acquisition parameters file
+        omp_nthreads: int
+            Maximum number of threads an individual process may use
         ignore: list
             Preprocessing steps to skip (may include 'denoise', 'unring', 'fieldmaps')
         work_dir: str
