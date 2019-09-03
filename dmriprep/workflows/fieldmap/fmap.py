@@ -21,7 +21,7 @@ def init_fmap_wf(bet_mag):
         fsl.BinaryMaths(operation='div', operand_value=6.28), name='radToHz'
     )
 
-    mag_bet = pe.Node(fsl.BET(frac=bet_mag, mask=True, robust=True),name='mag_bet')))
+    mag_bet = pe.Node(fsl.BET(frac=bet_mag, mask=True, robust=True), name='mag_bet')
 
     mag_flirt = pe.Node(fsl.FLIRT(dof=6), name='magFlirt')
 

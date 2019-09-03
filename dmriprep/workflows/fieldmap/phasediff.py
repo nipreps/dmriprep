@@ -76,7 +76,7 @@ def init_phdiff_wf(bet_mag):
         (delta, prep_fmap, [('out_value', 'delta_TE')]),
         (prep_fmap, fslroi, [('out_fieldmap', 'in_file')]),
         (fslroi, outputnode, [('roi_file', 'out_fmap')]),
-        (mag_bet, outputnode, [('magnitude1', 'out_mag')])
+        (mag_bet, outputnode, [('out_file', 'out_mag')])
     ])
 
     return wf

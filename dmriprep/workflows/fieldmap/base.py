@@ -13,8 +13,7 @@ def init_sdc_prep_wf(
     layout,
     bet_mag,
     #synb0,
-    omp_nthreads
-):
+    ):
 
     sdc_prep_wf = pe.Workflow(name='sdc_prep_wf')
 
