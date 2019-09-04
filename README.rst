@@ -9,16 +9,20 @@ dmriprep
 .. image:: https://img.shields.io/travis/akeshavan/dmriprep.svg
         :target: https://travis-ci.org/akeshavan/dmriprep
 
+.. image:: https://api.codacy.com/project/badge/Grade/01a2d18ee62846e3817c6dccd7f8f5f1
+    :target: https://www.codacy.com/app/josephmje/dmriprep?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=josephmje/dmriprep&amp;utm_campaign=Badge_Grade
+    :alt: Codacy Badge
+
 .. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
-        :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
+        :target: https://dmriprep-personal.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 
-Preprocessing of neuroimaging data in preparation for AFQ analysis
-------------------------------------------------------------------
+Preprocessing of neuroimaging dwi data
+--------------------------------------
 
 * Free software: BSD license
-* Documentation: https://dmriprep.readthedocs.io.
+* Documentation: https://dmriprep-personal.readthedocs.io.
 
 Preparing your data
 -------------------
@@ -29,8 +33,8 @@ You should have raw data organized in the BIDS format. Also, you should have run
 
     bids
     ├── derivatives
-    │   └── sub-01
-    │       └── freesurfer
+    │   └── freesurfer
+    │       └── sub-01
     └── sub-01
       ├── dwi
       │   ├── sub-01_ses-01_dwi.bval
