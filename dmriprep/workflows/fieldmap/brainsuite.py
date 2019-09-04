@@ -11,7 +11,8 @@ SDC using BrainSuite
 from nipype.pipeline import engine as pe
 from nipype.interfaces import brainsuite, utility as niu
 
-def init_fmap_wf():
+
+def init_brainsuite_wf():
 
     wf = pe.Workflow(name='brainsuite_wf')
 
@@ -21,7 +22,9 @@ def init_fmap_wf():
                 'T1w',
                 'T1w_mask',
                 'dwi_file',
-                'dwi_mask']),
+                'dwi_mask',
+                'bvec_file',
+                'bval_file']),
         name='inputnode')
 
     outputnode = pe.Node(
@@ -30,16 +33,14 @@ def init_fmap_wf():
 
     bias_corr = pe.Node(brainsuite.Bfc(minBias=0.5, maxBias=1.5), name='bias_corr')
 
+    # nipype spec doesn't have an output definition yet!
     bdp = pe.Node(brainsuite.BDP(), name='bdp')
 
-    wf.connect([])
-
-# bfc -i $indir2/brain.nii.gz -o T1.bfc.nii.gz
-
-# /KIMEL/tigrlab/quarantine/brainsuite/18a/build/bdp/bdp.sh \
-#   T1.bfc.nii.gz \
-#   --t1-mask $indir2/brainmaskautobet_mask.nii.gz \
-#   --nii $indir1/data.nii.gz \
-#   --dwi-mask $indir1/nodif_brain_mask.nii.gz \
-#   -b $indir1/bval.txt \
-#   -g $indir1/eddy_bvecs.txt
+    wf.connect([
+        (inputnode, bias_corr, [('T1w', 'inputMRIFile')]),
+        (bias_corr, bdp, [('outputMRIVolume', 'bfcFile'),
+                          ('T1w_mask', 't1Mask'),
+                          ('dwi_file', 'inputDiffusionData'),
+                          ('dwi_mask', 'dwiMask'),
+                          ('bvec_file', 'BVecBValPair')])
+    ])

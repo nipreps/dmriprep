@@ -4,6 +4,74 @@
 Contributing
 ============
 
+.. code-block:: console
+
+    dmriprep
+    ├── CHANGES.rst
+    ├── CONTRIBUTING.rst
+    ├── dmriprep
+    │   ├── __about__.py
+    │   ├── cli.py
+    │   ├── data
+    │   │   ├── boilerplate.bib
+    |   |   ├── eddy_parameters
+    │   │   └── ENIGMA_targets
+    │   ├── due.py
+    │   ├── __init__.py
+    │   ├── interfaces
+    │   │   ├── fmap.py
+    │   │   ├── __init__.py
+    │   │   └── reportlets.py
+    │   ├── qc.py
+    │   ├── utils
+    │   │   ├── bids.py
+    │   │   ├── hemisphere.py
+    │   │   └── __init__.py
+    │   ├── _version.py
+    │   ├── viz
+    │   │   ├── __init__.py
+    │   │   └── utils.py
+    │   └── workflows
+    │       ├── anatomical.py
+    │       ├── base.py
+    │       ├── dwi
+    │       │   ├── __init__.py
+    │       │   ├── artifacts.py
+    │       │   ├── base.py
+    │       │   ├── eddy.py
+    │       │   ├── outputs.py
+    │       │   ├── qc.py
+    │       │   ├── tensor.py
+    │       │   └── util.py
+    │       ├── fieldmap
+    │       │   ├── __init__.py
+    │       │   ├── ants.py
+    │       │   ├── base.py
+    │       │   ├── brainsuite.py
+    │       │   ├── fmap.py
+    │       │   ├── pepolar.py
+    │       │   ├── phasediff.py
+    │       │   └── synb0.py
+    │       └── __init__.py
+    ├── Dockerfile
+    ├── docs
+    ├── LICENSE
+    ├── long_description.rst
+    ├── Makefile
+    ├── MANIFEST.in
+    ├── pyproject.toml
+    ├── README.rst
+    ├── REFERENCES.rst
+    ├── setup.cfg
+    ├── setup.py
+    ├── tests
+    │   ├── __init__.py
+    │   ├── test_dmriprep.py
+    │   └── test_utils.py
+    ├── tox.ini
+    ├── update_changes.sh
+    └── versioneer.py
+
 We love contributions! dmriprep is open source, built on open source,
 and we'd love to have you hang out in our community.
 

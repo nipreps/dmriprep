@@ -14,7 +14,7 @@ from nipype.interfaces import utility as niu
 from niworkflows.anat.ants import init_brain_extraction_wf
 
 
-def init_anat_preproc_wf()
+def init_anat_preproc_wf():
     """
     """
 

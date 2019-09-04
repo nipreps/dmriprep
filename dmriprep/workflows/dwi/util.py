@@ -22,7 +22,7 @@ def init_dwi_concat_wf(ref_file):
         :simple_form: yes
 
         from dmriprep.workflows.dwi import init_dwi_concat_wf
-        wf = init_dwi_artifacts_wf(ref_file='/madeup/path/sub-01_dwi.nii.gz')
+        wf = init_dwi_concat_wf(ref_file='/madeup/path/sub-01_dwi.nii.gz')
 
     **Parameters**
 
