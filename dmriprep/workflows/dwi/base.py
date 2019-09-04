@@ -100,11 +100,8 @@ def init_dwi_preproc_wf(
                 'dwi_meta',
                 'bvec_file',
                 'bval_file',
-                'out_dir',
-            ]
-        ),
-        name='inputnode',
-    )
+                'out_dir']),
+        name='inputnode')
 
     outputnode = pe.Node(
         niu.IdentityInterface(
@@ -122,11 +119,8 @@ def init_dwi_preproc_wf(
                 'out_dtifit_FA',
                 'out_dtifit_V1',
                 'out_dtifit_sse',
-                'out_noise',
-            ]
-        ),
-        name='outputnode',
-    )
+                'out_noise']),
+        name='outputnode')
 
     def gen_index(in_file):
         """
@@ -162,10 +156,8 @@ def init_dwi_preproc_wf(
 
     gen_idx = pe.Node(
         niu.Function(
-            input_names=['in_file'], output_names=['out_file'], function=gen_index
-        ),
-        name='gen_index',
-    )
+            input_names=['in_file'], output_names=['out_file'], function=gen_index),
+        name='gen_index')
 
     def gen_acqparams(in_file, metadata):
         """
@@ -217,17 +209,8 @@ def init_dwi_preproc_wf(
         niu.Function(
             input_names=['in_file', 'metadata'],
             output_names=['out_file'],
-            function=gen_acqparams,
-        ),
-        name='acqp',
-    )
-
-    dwi_wf.connect(
-        [
-            (inputnode, gen_idx, [('dwi_file', 'in_file')]),
-            (inputnode, acqp, [('dwi_file', 'in_file'), ('dwi_meta', 'metadata')]),
-        ]
-    )
+            function=gen_acqparams),
+        name='acqp')
 
     dwi_artifacts_wf = init_dwi_artifacts_wf(ignore, output_resolution)
 
@@ -268,10 +251,8 @@ def init_dwi_preproc_wf(
         niu.Function(
             input_names=['in_dwi', 'in_bval', 'b0_thresh'],
             output_names=['out_file'],
-            function=b0_average,
-        ),
-        name='b0_avg_pre',
-    )
+            function=b0_average),
+        name='b0_avg_pre')
 
     avg_b0_0.inputs.b0_thresh = b0_thresh
 
@@ -281,21 +262,12 @@ def init_dwi_preproc_wf(
 
     ecc = pe.Node(
         fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
-        name='fsl_eddy',
-    )
+        name='fsl_eddy')
     try:
         if cuda.gpus:
             ecc.inputs.use_cuda = True
     except:
         ecc.inputs.use_cuda = False
-
-    dwi_wf.connect(
-        [
-            (inputnode, dwi_artifacts_wf, [('dwi_file', 'inputnode.dwi_file')]),
-            (dwi_artifacts_wf, avg_b0_0, [('outputnode.out_file', 'in_dwi')]),
-            (dwi_artifacts_wf, ecc, [('outputnode.out_file', 'in_file')])
-        ]
-    )
 
     denoise_eddy = pe.Node(mrtrix3.DWIDenoise(), name='denoise_eddy')
 
@@ -325,61 +297,42 @@ def init_dwi_preproc_wf(
 
     b0mask_node = pe.Node(
         niu.Function(
-            input_names=['b0_file'], output_names=['mask_file'], function=get_b0_mask_fn
-        ),
-        name='getB0Mask',
-    )
-
-    dwi_wf.connect(
-        [
-            (inputnode, avg_b0_0, [('bval_file', 'in_bval')]),
-            (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]),
-            (inputnode, ecc, [('bval_file', 'in_bval'),
-                              ('bvec_file', 'in_bvec')]),
-            (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
-            (gen_idx, ecc, [('out_file', 'in_index')]),
-            (acqp, ecc, [('out_file', 'in_acqp')]),
-            (ecc, denoise_eddy, [('out_corrected', 'in_file')]),
-            (
-                ecc,
-                bias_correct,
-                [('out_corrected', 'in_file'), ('out_rotated_bvecs', 'in_bvec')],
-            ),
-            (inputnode, bias_correct, [('bval_file', 'in_bval')]),
-            (bias_correct, fslroi, [('out_file', 'in_file')]),
-            (fslroi, b0mask_node, [('roi_file', 'b0_file')]),
-            (
-                ecc,
-                eddy_quad,
-                [
-                    (('out_corrected', get_path), 'base_name'),
-                    (('out_corrected', get_qc_path), 'output_dir'),
-                    ('out_rotated_bvecs', 'bvec_file'),
-                ],
-            ),
-            (inputnode, eddy_quad, [('bval_file', 'bval_file')]),
-            (b0mask_node, eddy_quad, [('mask_file', 'mask_file')]),
-            (gen_idx, eddy_quad, [('out_file', 'idx_file')]),
-            (acqp, eddy_quad, [('out_file', 'param_file')]),
-        ]
-    )
+            input_names=['b0_file'], output_names=['mask_file'], function=get_b0_mask_fn),
+        name='getB0Mask')
 
     tensor_wf = init_dwi_tensor_wf()
 
-    dwi_wf.connect(
-        [
-            (inputnode, tensor_wf, [('bval_file', 'inputnode.bval_file')]),
-            (b0mask_node, tensor_wf, [('mask_file', 'inputnode.mask_file')]),
-            (
-                ecc,
-                tensor_wf,
-                [
-                    ('out_corrected', 'inputnode.dwi_file'),
-                    ('out_rotated_bvecs', 'inputnode.bvec_file'),
-                ],
-            ),
-        ]
-    )
+    dwi_wf.connect([
+        (inputnode, gen_idx, [('dwi_file', 'in_file')]),
+        (inputnode, acqp, [('dwi_file', 'in_file'), ('dwi_meta', 'metadata')]),
+        (inputnode, dwi_artifacts_wf, [('dwi_file', 'inputnode.dwi_file')]),
+        (dwi_artifacts_wf, avg_b0_0, [('outputnode.out_file', 'in_dwi')]),
+        (dwi_artifacts_wf, ecc, [('outputnode.out_file', 'in_file')]),
+        (inputnode, avg_b0_0, [('bval_file', 'in_bval')]),
+        (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]),
+        (inputnode, ecc, [('bval_file', 'in_bval'),
+                          ('bvec_file', 'in_bvec')]),
+        (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
+        (gen_idx, ecc, [('out_file', 'in_index')]),
+        (acqp, ecc, [('out_file', 'in_acqp')]),
+        (ecc, denoise_eddy, [('out_corrected', 'in_file')]),
+        (ecc, bias_correct, [('out_corrected', 'in_file'),
+                             ('out_rotated_bvecs', 'in_bvec')]),
+        (inputnode, bias_correct, [('bval_file', 'in_bval')]),
+        (bias_correct, fslroi, [('out_file', 'in_file')]),
+        (fslroi, b0mask_node, [('roi_file', 'b0_file')]),
+        (ecc, eddy_quad, [(('out_corrected', get_path), 'base_name'),
+                          (('out_corrected', get_qc_path), 'output_dir'),
+                          ('out_rotated_bvecs', 'bvec_file')]),
+        (inputnode, eddy_quad, [('bval_file', 'bval_file')]),
+        (b0mask_node, eddy_quad, [('mask_file', 'mask_file')]),
+        (gen_idx, eddy_quad, [('out_file', 'idx_file')]),
+        (acqp, eddy_quad, [('out_file', 'param_file')]),
+        (inputnode, tensor_wf, [('bval_file', 'inputnode.bval_file')]),
+        (b0mask_node, tensor_wf, [('mask_file', 'inputnode.mask_file')]),
+        (ecc, tensor_wf, [('out_corrected', 'inputnode.dwi_file'),
+                          ('out_rotated_bvecs', 'inputnode.bvec_file')])
+    ])
 
     # # If synb0 is meant to be used
     # if synb0_dir:

@@ -108,6 +108,7 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 # workflow configuration
 @click.option(
     '--nthreads',
+    '--n_cpus',
     default=1,
     show_default=True,
     help='Maximum number of threads across all processes',

@@ -3,6 +3,9 @@
 """
 Utility workflows
 ^^^^^^^^^^^^^^^^^
+
+.. autofunction:: init_dwi_concat_wf
+
 """
 
 from nipype.pipeline import engine as pe
@@ -11,6 +14,40 @@ from nipype.interfaces import utility as niu
 
 def init_dwi_concat_wf(ref_file):
     """
+    This workflow concatenates a list of dwi images as well as their associated
+    bvecs and bvals.
+
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
+
+        from dmriprep.workflows.dwi import init_dwi_concat_wf
+        wf = init_dwi_artifacts_wf(ref_file='/madeup/path/sub-01_dwi.nii.gz')
+
+    **Parameters**
+
+        ref_file : :obj:`str`
+            reference dwi NIfTI file for naming outputs
+
+    **Inputs**
+
+        ref_file
+            reference dwi NIfTI file
+        dwi_list : :obj:`list`
+            list of dwi NIfTI files
+        bvec_list : :obj:`list`
+            list of associated bvec files
+        bval_list : :obj:`list`
+            list of associated bval files
+
+    **Outputs**
+
+        dwi_file : :obj:`str`
+            concatenated dwi NIfTI file
+        bvec_file
+            concatenated bvec file
+        bval_file
+            concatenated bval file
 
     """
 
@@ -20,7 +57,7 @@ def init_dwi_concat_wf(ref_file):
                                                       'dwi_list',
                                                       'bvec_list',
                                                       'bval_list']),
-                       name='inputnode')
+                        name='inputnode')
 
     outputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file',
                                                        'bvec_file',

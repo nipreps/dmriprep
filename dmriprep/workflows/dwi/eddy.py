@@ -79,8 +79,7 @@ def init_dwi_eddy_wf(omp_nthreads, sdc_method):
 
     ecc = pe.Node(
         fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
-        name='fsl_eddy',
-    )
+        name='fsl_eddy')
 
     try:
         if cuda.gpus:
@@ -97,7 +96,7 @@ def init_dwi_eddy_wf(omp_nthreads, sdc_method):
                           ('mask_file', 'in_mask')]),
         (ecc, outputnode, [('out_corrected', 'out_file'),
                            ('out_rotated_bvecs', 'out_bvec')])
-        ])
+    ])
 
     if sdc_method == 'fieldmap':
         wf.connect([

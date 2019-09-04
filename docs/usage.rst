@@ -17,7 +17,8 @@ a dwi series.
     bids
     └── sub-01
       ├── anat
-      │   └── sub-01_T1w.nii.gz
+      │   └── sub-01_T1w.json
+      │   └── sub-01_T1w.nii.gz
       ├── dwi
       │   ├── sub-01_dwi.bval
       │   ├── sub-01_dwi.bvec
@@ -54,5 +55,6 @@ Debugging
 Logs and crash files are output into the
 ``<output dir>/dmriprep/sub-<participant_label>/log`` directory.
 Information on how to customize and understand these files can be found on the
-`nipype debugging <http://nipype.readthedocs.io/en/latest/users/debug.html>`_
-page.
+`nipype errors and crashes <https://miykael.github.io/nipype_tutorial/notebooks/basic_error_and_crashes.html>`_
+and `nipype debugging <https://miykael.github.io/nipype_tutorial/notebooks/basic_debug.html>`_
+pages.
