@@ -44,21 +44,7 @@ def init_dwi_preproc_wf(
         from collections import namedtuple
         from dmriprep.workflows.dwi import init_dwi_preproc_wf
         BIDSLayout = namedtuple('BIDSLayout', ['root'])
-        wf = init_dwi_preproc_wf(
-            layout=BIDSLayout('.'),
-            output_dir='.',
-            subject_id='dmripreptest',
-            dwi_file='/madeup/path/sub-01_dwi.nii.gz',
-            metadata={},
-            b0_thresh=5,
-            output_resolution=(1, 1, 1),
-            bet_dwi=0.3,
-            bet_mag=0.3,
-            acqp_file='',
-            omp_nthreads=1,
-            ignore=[],
-            synb0_dir=''
-        )
+        wf = init_dwi_preproc_wf(layout=BIDSLayout('.'), output_dir='.', subject_id='dmripreptest', dwi_file='/madeup/path/sub-01_dwi.nii.gz', metadata={'PhaseEncodingDirection': 'j-', 'TotalReadoutTime': 0.05}, b0_thresh=5, output_resolution=(1, 1, 1), bet_dwi=0.3, bet_mag=0.3, acqp_file='', omp_nthreads=1, ignore=['fieldmaps'], synb0_dir='')
 
     """
 
@@ -314,7 +300,6 @@ def init_dwi_preproc_wf(
                           ('bvec_file', 'in_bvec')]),
         (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
         (gen_idx, ecc, [('out_file', 'in_index')]),
-        (acqp, ecc, [('out_file', 'in_acqp')]),
         (ecc, denoise_eddy, [('out_corrected', 'in_file')]),
         (ecc, bias_correct, [('out_corrected', 'in_file'),
                              ('out_rotated_bvecs', 'in_bvec')]),
@@ -327,12 +312,20 @@ def init_dwi_preproc_wf(
         (inputnode, eddy_quad, [('bval_file', 'bval_file')]),
         (b0mask_node, eddy_quad, [('mask_file', 'mask_file')]),
         (gen_idx, eddy_quad, [('out_file', 'idx_file')]),
-        (acqp, eddy_quad, [('out_file', 'param_file')]),
         (inputnode, tensor_wf, [('bval_file', 'inputnode.bval_file')]),
         (b0mask_node, tensor_wf, [('mask_file', 'inputnode.mask_file')]),
         (ecc, tensor_wf, [('out_corrected', 'inputnode.dwi_file'),
                           ('out_rotated_bvecs', 'inputnode.bvec_file')])
     ])
+
+    if acqp_file:
+        ecc.inputs.in_acqp = acqp_file
+        eddy_quad.inputs.param_file = acqp_file
+    else:
+        dwi_wf.connect([
+            (acqp, ecc, [('out_file', 'in_acqp')]),
+            (acqp, eddy_quad, [('out_file', 'param_file')])
+        ])
 
     # # If synb0 is meant to be used
     # if synb0_dir:
@@ -360,63 +353,35 @@ def init_dwi_preproc_wf(
     fmap = fmaps[0]
     # Else If epi files detected
     if fmap['suffix'] == 'epi':
-        dwi_wf.connect(
-            [
-                (
-                    sdc_wf,
-                    ecc,
-                    [
-                        ('outputnode.out_topup', 'in_topup_fieldcoef'),
-                        #('outputnode.out_enc_file', 'in_acqp'),
-                        ('outputnode.out_movpar', 'in_topup_movpar'),
-                    ],
-                ),
-                # (
-                #     sdc_wf,
-                #     eddy_quad,
-                #     [('outputnode.out_enc_file', 'param_file')],
-                # ),
-            ]
-        )
+        dwi_wf.connect([
+            (sdc_wf, ecc, [('outputnode.out_topup', 'in_topup_fieldcoef'),
+                           ('outputnode.out_movpar', 'in_topup_movpar')])
+        ])
     # Otherwise (fieldmaps)
     else:
         dwi_wf.connect([
             (bet_dwi0, sdc_wf, [('out_file', 'inputnode.b0_stripped')]),
-            (sdc_wf, ecc, [('outputnode.out_fmap', 'field')]),
-                #(acqp, ecc, [('out_file', 'in_acqp')]),
-                # (acqp, eddy_quad, [('out_file', 'param_file')]),
-            ]
-        )
+            (sdc_wf, ecc, [('outputnode.out_fmap', 'field')])
+        ])
 
-    dwi_wf.connect(
-        [
-            (ecc, outputnode, [('out_corrected', 'out_dwi')]),
-            (inputnode, outputnode, [('bval_file', 'out_bval')]),
-            (ecc, outputnode, [('out_rotated_bvecs', 'out_bvec')]),
-            (gen_idx, outputnode, [('out_file', 'index')]),
-            (acqp, outputnode, [('out_file', 'acq_params')]),
-            (b0mask_node, outputnode, [('mask_file', 'out_mask')]),
-            (avg_b0_0, outputnode, [('out_file', 'out_b0_pre')]),
-            (bet_dwi0, outputnode, [('mask_file', 'out_b0_mask_pre')]),
-            (
-                eddy_quad,
-                outputnode,
-                [('qc_json', 'out_eddy_quad_json'), ('qc_pdf', 'out_eddy_quad_pdf')],
-            ),
-            (
-                tensor_wf,
-                outputnode,
-                [
-                    ('outputnode.FA_file', 'out_dtifit_FA'),
-                    ('outputnode.MD_file', 'out_dtifit_MD'),
-                    ('outputnode.AD_file', 'out_dtifit_AD'),
-                    ('outputnode.RD_file', 'out_dtifit_RD'),
-                    ('outputnode.V1_file', 'out_dtifit_V1'),
-                    ('outputnode.sse_file', 'out_dtifit_sse'),
-                ],
-            ),
-        ]
-    )
+    dwi_wf.connect([
+        (ecc, outputnode, [('out_corrected', 'out_dwi')]),
+        (inputnode, outputnode, [('bval_file', 'out_bval')]),
+        (ecc, outputnode, [('out_rotated_bvecs', 'out_bvec')]),
+        (gen_idx, outputnode, [('out_file', 'index')]),
+        (acqp, outputnode, [('out_file', 'acq_params')]),
+        (b0mask_node, outputnode, [('mask_file', 'out_mask')]),
+        (avg_b0_0, outputnode, [('out_file', 'out_b0_pre')]),
+        (bet_dwi0, outputnode, [('mask_file', 'out_b0_mask_pre')]),
+        (eddy_quad, outputnode, [('qc_json', 'out_eddy_quad_json'),
+                                 ('qc_pdf', 'out_eddy_quad_pdf')]),
+        (tensor_wf, outputnode, [('outputnode.FA_file', 'out_dtifit_FA'),
+                                 ('outputnode.MD_file', 'out_dtifit_MD'),
+                                 ('outputnode.AD_file', 'out_dtifit_AD'),
+                                 ('outputnode.RD_file', 'out_dtifit_RD'),
+                                 ('outputnode.V1_file', 'out_dtifit_V1'),
+                                 ('outputnode.sse_file', 'out_dtifit_sse')])
+    ])
 
     return dwi_wf
 

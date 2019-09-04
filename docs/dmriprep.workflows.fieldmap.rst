@@ -4,6 +4,14 @@ dmriprep.workflows.fieldmap package
 Submodules
 ----------
 
+dmriprep.workflows.fieldmap.ants module
+---------------------------------------
+
+.. automodule:: dmriprep.workflows.fieldmap.ants
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dmriprep.workflows.fieldmap.base module
 ---------------------------------------
 

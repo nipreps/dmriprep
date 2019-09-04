@@ -4,6 +4,7 @@ Upcoming release (TBD)
 0.2.0 (September 6, 2019)
 =======================
 
+  * ENH: Add workflows for ANTs and BrainSuite nonlinear registration-based distortion correction
   * ENH: Add workflow for concatenating dwi scans based on ``--concat_dwis`` list
   * ENH: Enable parallel processing of nodes
   * ENH: Run ``bids-validator`` before pipeline start
