@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+dmriprep.workflows.anatomical module
+------------------------------------
+
+.. automodule:: dmriprep.workflows.anatomical
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dmriprep.workflows.base module
 ------------------------------
 
