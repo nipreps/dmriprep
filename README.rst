@@ -10,7 +10,7 @@ dmriprep
         :target: https://travis-ci.org/akeshavan/dmriprep
 
 .. image:: https://api.codacy.com/project/badge/Grade/01a2d18ee62846e3817c6dccd7f8f5f1
-    :target: https://www.codacy.com/app/josephmje/dmriprep?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=josephmje/dmriprep&amp;utm_campaign=Badge_Grade
+    :target: https://www.codacy.com/app/nipy/dmriprep?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nipy/dmriprep&amp;utm_campaign=Badge_Grade
     :alt: Codacy Badge
 
 .. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest

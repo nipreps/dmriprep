@@ -9,7 +9,7 @@ Docker Container
 
 .. code-block:: console
 
-    $ git clone https://github.com/josephmje/dmriprep
+    $ git clone https://github.com/nipy/dmriprep
     $ cd dmriprep
     $ make docker
 
@@ -67,13 +67,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/josephmje/dmriprep
+    $ git clone git://github.com/nipy/dmriprep
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/josephmje/dmriprep/tarball/master
+    $ curl  -OL https://github.com/nipy/dmriprep/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -82,8 +82,8 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/josephmje/dmriprep
-.. _tarball: https://github.com/josephmje/dmriprep/tarball/master
+.. _Github repo: https://github.com/nipy/dmriprep
+.. _tarball: https://github.com/nipy/dmriprep/tarball/master
 
 External Dependencies
 ---------------------
