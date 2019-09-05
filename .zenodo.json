@@ -1,0 +1,66 @@
+
+{
+  "title": "dMRIPrep: a robust preprocessing pipeline for diffusion MRI",
+  "description": "<p>dMRIPrep is a robust and easy-to-use pipeline for preprocessing of diverse dMRI data. The transparent workflow dispenses of manual intervention, thereby ensuring the reproducibility of the results.</p>",
+  "creators": [
+    {
+      "affiliation": "Stanford University",
+      "name": "Lerma-Usabiaga, Garikoitz",
+      "orcid": "0000-0001-9800-4816"
+    },
+    {
+      "affiliation": "The University of Washington eScience Institute",
+      "name": "Keshavan, Anisha",
+      "orcid": "0000-0003-3554-043X"
+    },
+    {
+      "affiliation": "The University of Washington eScience Institute",
+      "name": "Richie-Halford, Adam",
+      "orcid": "0000-0001-9276-9084"
+    },
+    {
+      "affiliation": "The University of Washington eScience Institute",
+      "name": "Rokem, Ariel",
+      "orcid": "0000-0003-0679-1985"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University, CA, USA",
+      "name": "Esteban, Oscar",
+      "orcid": "0000-0001-8435-6191"
+    }
+  ],
+  "contributors": [
+    {
+      "affiliation": "The Centre for Addiction and Mental Health",
+      "name": "Joseph, Michael",
+      "orcid": "0000-0002-0068-230X",
+      "type": "Researcher"
+    },
+    {
+      "name": "nrajamani3",
+      "type": "Researcher"
+    }
+  ],
+  "keywords": [
+    "neuroimaging",
+    "workflow",
+    "pipeline",
+    "preprocessing",
+    "dMRI",
+    "BIDS"
+  ],
+  "license": "Apache-2.0",
+  "related_identifiers": [
+    {
+      "identifier": "http://dmriprep.org",
+      "relation": "isPartOf",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.1038/s41592-018-0235-4",
+      "relation": "isPartOf",
+      "scheme": "doi"
+    }
+  ],
+  "upload_type": "software"
+}
