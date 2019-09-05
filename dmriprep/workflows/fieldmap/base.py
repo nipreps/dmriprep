@@ -6,7 +6,7 @@ from nipype.interfaces import utility as niu
 FMAP_PRIORITY = {'epi': 0, 'fieldmap': 1, 'phasediff': 2, 'phase': 3, 'syn': 4}
 
 
-def init_sdc_prep_wf(
+def init_sdc_wf(
     subject_id,
     fmaps,
     metadata,
@@ -15,7 +15,7 @@ def init_sdc_prep_wf(
     #synb0,
     ):
 
-    sdc_prep_wf = pe.Workflow(name='sdc_prep_wf')
+    sdc_wf = pe.Workflow(name='sdc_wf')
 
     inputnode = pe.Node(
         niu.IdentityInterface(fields=['b0_stripped']), name='inputnode')
@@ -76,7 +76,7 @@ def init_sdc_prep_wf(
 
         pepolar_wf = init_pepolar_wf(subject_id, metadata, epi_fmaps)
 
-        sdc_prep_wf.connect([
+        sdc_wf.connect([
             (inputnode, pepolar_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
             (pepolar_wf, outputnode, [('outputnode.out_topup', 'out_topup'),
                                       ('outputnode.out_movpar', 'out_movpar'),
@@ -91,7 +91,7 @@ def init_sdc_prep_wf(
         fmap_wf.inputs.inputnode.fieldmap = fmap['fieldmap']
         fmap_wf.inputs.inputnode.magnitude = fmap['magnitude']
 
-        sdc_prep_wf.connect([
+        sdc_wf.connect([
             (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
             (fmap_wf, outputnode, [('outputnode.out_fmap', 'out_fmap')])
         ])
@@ -113,7 +113,7 @@ def init_sdc_prep_wf(
 
             fmap_wf = init_fmap_wf(bet_mag)
 
-            sdc_prep_wf.connect([
+            sdc_wf.connect([
                 (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
                 (phase_wf, fmap_wf, [('outputnode.out_fmap', 'inputnode.fieldmap')]),
                 (phase_wf, fmap_wf, [('outputnode.out_mag', 'inputnode.magnitude')]),
@@ -138,7 +138,7 @@ def init_sdc_prep_wf(
 
             fmap_wf = init_fmap_wf()
 
-            sdc_prep_wf.connect([
+            sdc_wf.connect([
                 (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
                 (phase_wf, fmap_wf, [('outputnode.out_fmap', 'inputnode.fieldmap')]),
                 (phase_wf, fmap_wf, [('outputnode.out_mag', 'inputnode.magnitude')]),
@@ -146,4 +146,4 @@ def init_sdc_prep_wf(
             ])
     else:
         print('No sdc correction')
-    return sdc_prep_wf
+    return sdc_wf

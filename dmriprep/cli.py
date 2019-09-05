@@ -129,6 +129,20 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
     multiple=True
 )
 @click.option(
+    '--use_ants',
+    is_flag=True,
+    default=False,
+    help='Use ANTs SDC',
+    type=bool
+)
+@click.option(
+    '--use_brainsuite',
+    is_flag=True,
+    default=False,
+    help='Use BrainSuite SDC',
+    type=bool
+)
+@click.option(
     '--work_dir',
     '-w',
     help='working directory',
@@ -163,6 +177,8 @@ def main(
     nthreads,
     omp_nthreads,
     ignore,
+    use_ants,
+    use_syn,
     work_dir,
     synb0_dir,
     write_graph
@@ -247,6 +263,8 @@ def main(
         acqp_file=acqp_file,
         omp_nthreads=omp_nthreads,
         ignore=list(ignore),
+        use_ants=use_ants,
+        use_brainsuite=use_brainsuite,
         work_dir=work_dir,
         synb0_dir=synb0_dir
     )

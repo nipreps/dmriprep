@@ -10,11 +10,11 @@ Orchestrating the dwi preprocessing workflows
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, mrtrix3, utility as niu
-from numba import cuda
 
 from .artifacts import init_dwi_artifacts_wf
+from .eddy import init_dwi_eddy_wf
 from .tensor import init_dwi_tensor_wf
-from ..fieldmap.base import init_sdc_prep_wf
+from ..fieldmap.base import init_sdc_wf
 
 FMAP_PRIORITY = {'epi': 0, 'fieldmap': 1, 'phasediff': 2, 'phase': 3, 'syn': 4}
 
@@ -32,6 +32,8 @@ def init_dwi_preproc_wf(
     acqp_file,
     omp_nthreads,
     ignore,
+    use_ants,
+    use_brainsuite,
     synb0_dir
 ):
     """
@@ -49,6 +51,37 @@ def init_dwi_preproc_wf(
     """
 
     wf_name = _get_wf_name(dwi_file)
+
+    if isinstance(dwi_file, list):
+        ref_file = dwi_file[0]
+    else:
+        ref_file = dwi_file
+
+    # For doc building purposes
+    if not hasattr(layout, 'parse_file_entities'):
+        metadata = {
+            'PhaseEncodingDirection': 'j-',
+            'TotalReadoutTime': 0.05
+        }
+        fmaps = [{
+            'suffix': 'phasediff',
+            'phasediff': 'sub-01/fmap/sub-01_phasediff.nii.gz',
+            'magnitude1': 'sub-01/fmap/sub-01_magnitude1.nii.gz',
+            'magnitude2': 'sub-01/fmap/sub-01_magnitude2.nii.gz'
+        }]
+    else:
+        metadata = layout.get_metadata(ref_file)
+        # Find fieldmaps. Options: (epi|fieldmap|phasediff|phase1|phase2|syn)
+        fmaps = []
+        if 'fieldmaps' not in ignore:
+            for fmap in layout.get_fieldmap(ref_file, return_list=True):
+                fmap['metadata'] = layout.get_metadata(fmap[fmap['suffix']])
+                fmaps.append(fmap)
+
+        if (use_ants and not fmaps):
+            fmaps.append({'suffix': 'ants'})
+        if (use_brainsuite and not fmaps):
+            fmaps.append({'suffix': 'brainsuite'})
 
     dwi_wf = pe.Workflow(name=wf_name)
 
@@ -69,7 +102,7 @@ def init_dwi_preproc_wf(
             )
             fmaps.append(fmap)
 
-    sdc_wf = init_sdc_prep_wf(
+    dwi_sdc_wf = init_sdc_wf(
         subject_id,
         fmaps,
         metadata,
@@ -246,14 +279,16 @@ def init_dwi_preproc_wf(
         fsl.BET(frac=bet_dwi, mask=True, robust=True), name='bet_dwi_pre'
     )
 
-    ecc = pe.Node(
-        fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
-        name='fsl_eddy')
-    try:
-        if cuda.gpus:
-            ecc.inputs.use_cuda = True
-    except:
-        ecc.inputs.use_cuda = False
+    dwi_eddy_wf = init_dwi_eddy_wf()
+
+    # ecc = pe.Node(
+    #     fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
+    #     name='fsl_eddy')
+    # try:
+    #     if cuda.gpus:
+    #         ecc.inputs.use_cuda = True
+    # except:
+    #     ecc.inputs.use_cuda = False
 
     denoise_eddy = pe.Node(mrtrix3.DWIDenoise(), name='denoise_eddy')
 
@@ -286,44 +321,45 @@ def init_dwi_preproc_wf(
             input_names=['b0_file'], output_names=['mask_file'], function=get_b0_mask_fn),
         name='getB0Mask')
 
-    tensor_wf = init_dwi_tensor_wf()
+    dwi_tensor_wf = init_dwi_tensor_wf()
 
     dwi_wf.connect([
         (inputnode, gen_idx, [('dwi_file', 'in_file')]),
         (inputnode, acqp, [('dwi_file', 'in_file'), ('dwi_meta', 'metadata')]),
         (inputnode, dwi_artifacts_wf, [('dwi_file', 'inputnode.dwi_file')]),
         (dwi_artifacts_wf, avg_b0_0, [('outputnode.out_file', 'in_dwi')]),
-        (dwi_artifacts_wf, ecc, [('outputnode.out_file', 'in_file')]),
+        (dwi_artifacts_wf, dwi_eddy_wf, [('outputnode.out_file', 'inputnode.dwi_file')]),
         (inputnode, avg_b0_0, [('bval_file', 'in_bval')]),
         (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]),
-        (inputnode, ecc, [('bval_file', 'in_bval'),
-                          ('bvec_file', 'in_bvec')]),
-        (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
-        (gen_idx, ecc, [('out_file', 'in_index')]),
-        (ecc, denoise_eddy, [('out_corrected', 'in_file')]),
-        (ecc, bias_correct, [('out_corrected', 'in_file'),
-                             ('out_rotated_bvecs', 'in_bvec')]),
+        (inputnode, dwi_eddy_wf, [('bval_file', 'inputnode.bval_file'),
+                                  ('bvec_file', 'inputnode.bvec_file')]),
+        (bet_dwi0, dwi_eddy_wf, [('mask_file', 'inputnode.mask_file')]),
+        (gen_idx, dwi_eddy_wf, [('out_file', 'inputnode.index')]),
+        (dwi_eddy_wf, denoise_eddy, [('outputnode.out_file', 'in_file')]),
+        (dwi_eddy_wf, bias_correct, [('outputnode.out_file', 'in_file'),
+                                 ('outputnode.out_bvec', 'in_bvec')]),
         (inputnode, bias_correct, [('bval_file', 'in_bval')]),
         (bias_correct, fslroi, [('out_file', 'in_file')]),
         (fslroi, b0mask_node, [('roi_file', 'b0_file')]),
-        (ecc, eddy_quad, [(('out_corrected', get_path), 'base_name'),
-                          (('out_corrected', get_qc_path), 'output_dir'),
-                          ('out_rotated_bvecs', 'bvec_file')]),
+        (dwi_eddy_wf, eddy_quad, [(('outputnode.out_file', get_path), 'base_name'),
+                                  (('outputnode.out_file', get_qc_path), 'output_dir'),
+                                  ('outputnode.out_bvec', 'bvec_file')]),
         (inputnode, eddy_quad, [('bval_file', 'bval_file')]),
         (b0mask_node, eddy_quad, [('mask_file', 'mask_file')]),
         (gen_idx, eddy_quad, [('out_file', 'idx_file')]),
-        (inputnode, tensor_wf, [('bval_file', 'inputnode.bval_file')]),
-        (b0mask_node, tensor_wf, [('mask_file', 'inputnode.mask_file')]),
-        (ecc, tensor_wf, [('out_corrected', 'inputnode.dwi_file'),
-                          ('out_rotated_bvecs', 'inputnode.bvec_file')])
+        (inputnode, dwi_tensor_wf, [('bval_file', 'inputnode.bval_file')]),
+        (b0mask_node, dwi_tensor_wf, [('mask_file', 'inputnode.mask_file')]),
+        (dwi_eddy_wf, dwi_tensor_wf, [('outputnode.out_file', 'inputnode.dwi_file'),
+                                      ('outputnode.out_bvec', 'inputnode.bvec_file')])
     ])
 
     if acqp_file:
-        ecc.inputs.in_acqp = acqp_file
+        eddy_inputspec = dwi_eddy_wf.get_node('inputnode')
+        eddy_inputspec.inputs.acqp = acqp_file
         eddy_quad.inputs.param_file = acqp_file
     else:
         dwi_wf.connect([
-            (acqp, ecc, [('out_file', 'in_acqp')]),
+            (acqp, dwi_eddy_wf, [('out_file', 'inputnode.acqp')]),
             (acqp, eddy_quad, [('out_file', 'param_file')])
         ])
 
@@ -349,25 +385,26 @@ def init_dwi_preproc_wf(
     #     ecc.inputs.in_acqp = acqp_file
     # else:
     # Decide what ecc will take: topup or fmap
-    fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
-    fmap = fmaps[0]
-    # Else If epi files detected
-    if fmap['suffix'] == 'epi':
-        dwi_wf.connect([
-            (sdc_wf, ecc, [('outputnode.out_topup', 'in_topup_fieldcoef'),
-                           ('outputnode.out_movpar', 'in_topup_movpar')])
-        ])
-    # Otherwise (fieldmaps)
-    else:
-        dwi_wf.connect([
-            (bet_dwi0, sdc_wf, [('out_file', 'inputnode.b0_stripped')]),
-            (sdc_wf, ecc, [('outputnode.out_fmap', 'field')])
-        ])
+    if fmaps:
+        fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
+        fmap = fmaps[0]
+        # Else If epi files detected
+        if fmap['suffix'] == 'epi':
+            dwi_wf.connect([
+                (dwi_sdc_wf, dwi_eddy_wf, [('outputnode.out_topup', 'inputnode.topup_fieldcoef'),
+                                           ('outputnode.out_movpar', 'inputnode.topup_movpar')])
+            ])
+        # Otherwise (fieldmaps)
+        else:
+            dwi_wf.connect([
+                (bet_dwi0, dwi_sdc_wf, [('out_file', 'inputnode.b0_stripped')]),
+                (dwi_sdc_wf, dwi_eddy_wf, [('outputnode.out_fmap', 'inputnode.fieldmap_file')])
+            ])
 
     dwi_wf.connect([
-        (ecc, outputnode, [('out_corrected', 'out_dwi')]),
+        (dwi_eddy_wf, outputnode, [('outputnode.out_file', 'out_dwi')]),
         (inputnode, outputnode, [('bval_file', 'out_bval')]),
-        (ecc, outputnode, [('out_rotated_bvecs', 'out_bvec')]),
+        (dwi_eddy_wf, outputnode, [('outputnode.out_bvec', 'out_bvec')]),
         (gen_idx, outputnode, [('out_file', 'index')]),
         (acqp, outputnode, [('out_file', 'acq_params')]),
         (b0mask_node, outputnode, [('mask_file', 'out_mask')]),
@@ -375,12 +412,12 @@ def init_dwi_preproc_wf(
         (bet_dwi0, outputnode, [('mask_file', 'out_b0_mask_pre')]),
         (eddy_quad, outputnode, [('qc_json', 'out_eddy_quad_json'),
                                  ('qc_pdf', 'out_eddy_quad_pdf')]),
-        (tensor_wf, outputnode, [('outputnode.FA_file', 'out_dtifit_FA'),
-                                 ('outputnode.MD_file', 'out_dtifit_MD'),
-                                 ('outputnode.AD_file', 'out_dtifit_AD'),
-                                 ('outputnode.RD_file', 'out_dtifit_RD'),
-                                 ('outputnode.V1_file', 'out_dtifit_V1'),
-                                 ('outputnode.sse_file', 'out_dtifit_sse')])
+        (dwi_tensor_wf, outputnode, [('outputnode.FA_file', 'out_dtifit_FA'),
+                                     ('outputnode.MD_file', 'out_dtifit_MD'),
+                                     ('outputnode.AD_file', 'out_dtifit_AD'),
+                                     ('outputnode.RD_file', 'out_dtifit_RD'),
+                                     ('outputnode.V1_file', 'out_dtifit_V1'),
+                                     ('outputnode.sse_file', 'out_dtifit_sse')])
     ])
 
     return dwi_wf

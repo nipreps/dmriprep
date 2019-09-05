@@ -31,6 +31,8 @@ def init_dmriprep_wf(
     acqp_file,
     omp_nthreads,
     ignore,
+    use_ants,
+    use_brainsuite,
     work_dir,
     synb0_dir
 ):
@@ -58,6 +60,8 @@ def init_dmriprep_wf(
         acqp_file='',
         omp_nthreads=1,
         ignore=[],
+        use_ants=False,
+        use_brainsuite=False,
         work_dir='.',
         synb0_dir=''
     )
@@ -114,6 +118,8 @@ def init_dmriprep_wf(
             acqp_file=acqp_file,
             omp_nthreads=omp_nthreads,
             ignore=ignore,
+            use_ants=use_ants,
+            use_brainsuite=use_brainsuite,
             work_dir=work_dir,
             synb0_dir=synb0_dir
         )
@@ -144,6 +150,8 @@ def init_single_subject_wf(
     omp_nthreads,
     acqp_file,
     ignore,
+    use_ants,
+    use_brainsuite,
     work_dir,
     synb0_dir
 ):
@@ -176,6 +184,8 @@ def init_single_subject_wf(
         acqp_file='',
         omp_nthreads=1,
         ignore=[],
+        use_ants=False,
+        use_brainsuite=False,
         work_dir='.',
         synb0_dir=''
     )
@@ -263,6 +273,8 @@ def init_single_subject_wf(
                 omp_nthreads=omp_nthreads,
                 acqp_file=acqp_file,
                 ignore=ignore,
+                use_ants=use_ants,
+                use_brainsuite=use_brainsuite,
                 synb0_dir=synb0_dir
             )
 
@@ -276,9 +288,10 @@ def init_single_subject_wf(
             inputspec.inputs.out_dir = os.path.abspath(output_dir)
 
             subject_wf.connect([
-                (dwi_concat_wf, dwi_preproc_wf, [('outputnode.dwi_file', 'inputnode.dwi_file'),
-                                                 ('outputnode.bvec_file', 'inputnode.bvec_file'),
-                                                 ('outputnode.bval_file', 'inputnode.bval_file')])
+                (dwi_concat_wf, dwi_preproc_wf,
+                    [('outputnode.dwi_file', 'inputnode.dwi_file'),
+                     ('outputnode.bvec_file', 'inputnode.bvec_file'),
+                     ('outputnode.bval_file', 'inputnode.bval_file')])
             ])
 
         else:
@@ -299,6 +312,8 @@ def init_single_subject_wf(
                 omp_nthreads=omp_nthreads,
                 acqp_file=acqp_file,
                 ignore=ignore,
+                use_ants=use_ants,
+                use_brainsuite=use_brainsuite,
                 synb0_dir=synb0_dir
             )
 
@@ -332,37 +347,22 @@ def init_single_subject_wf(
         ds_inputspec.inputs.output_folder = output_dir
         ds_inputspec.inputs.metadata = metadata
 
-        if session_id:
-            wf_name = 'sub_' + subject_id + '_ses_' + session_id + '_preproc_wf'
-        else:
-            wf_name = 'sub_' + subject_id + '_preproc_wf'
-        full_wf = pe.Workflow(name=wf_name)
-
-        full_wf.connect(
-            [
-                (
-                    dwi_preproc_wf,
-                    datasink_wf,
-                    [
-                        ('outputnode.out_dwi', 'inputnode.dwi'),
-                        ('outputnode.out_bval', 'inputnode.bval'),
-                        ('outputnode.out_bvec', 'inputnode.bvec'),
-                        ('outputnode.index', 'inputnode.index'),
-                        ('outputnode.acq_params', 'inputnode.acq_params'),
-                        ('outputnode.out_mask', 'inputnode.mask'),
-                        ('outputnode.out_b0_pre', 'inputnode.b0'),
-                        ('outputnode.out_b0_mask_pre', 'inputnode.b0_mask'),
-                        ('outputnode.out_eddy_quad_json', 'inputnode.eddy_quad_json'),
-                        ('outputnode.out_eddy_quad_pdf', 'inputnode.eddy_quad_pdf'),
-                        ('outputnode.out_dtifit_FA', 'inputnode.dtifit_FA'),
-                        ('outputnode.out_dtifit_V1', 'inputnode.dtifit_V1'),
-                        ('outputnode.out_dtifit_sse', 'inputnode.dtifit_sse'),
-                        ('outputnode.out_noise', 'inputnode.noise')
-                    ]
-                )
-            ]
-        )
-
-        subject_wf.add_nodes([full_wf])
+        subject_wf.connect([
+            (dwi_preproc_wf, datasink_wf,
+                [('outputnode.out_dwi', 'inputnode.dwi'),
+                 ('outputnode.out_bval', 'inputnode.bval'),
+                 ('outputnode.out_bvec', 'inputnode.bvec'),
+                 ('outputnode.index', 'inputnode.index'),
+                 ('outputnode.acq_params', 'inputnode.acq_params'),
+                 ('outputnode.out_mask', 'inputnode.mask'),
+                 ('outputnode.out_b0_pre', 'inputnode.b0'),
+                 ('outputnode.out_b0_mask_pre', 'inputnode.b0_mask'),
+                 ('outputnode.out_eddy_quad_json', 'inputnode.eddy_quad_json'),
+                 ('outputnode.out_eddy_quad_pdf', 'inputnode.eddy_quad_pdf'),
+                 ('outputnode.out_dtifit_FA', 'inputnode.dtifit_FA'),
+                 ('outputnode.out_dtifit_V1', 'inputnode.dtifit_V1'),
+                 ('outputnode.out_dtifit_sse', 'inputnode.dtifit_sse'),
+                 ('outputnode.out_noise', 'inputnode.noise')])
+        ])
 
     return subject_wf
