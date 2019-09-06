@@ -6,14 +6,20 @@ dmriprep
 .. image:: https://img.shields.io/pypi/v/dmriprep.svg
         :target: https://pypi.python.org/pypi/dmriprep
 
+.. image:: https://circleci.com/gh/nipreps/dmriprep.svg?style=svg
+    :target: https://circleci.com/gh/nipreps/dmriprep
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg
+   :target: https://doi.org/10.5281/zenodo.3392201
+
 .. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
         :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 
-Preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
+The preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
 the data before fitting a particular model.
-Generally, researchers create ad hoc preprocessing workflows for each dataset,
+Generally, researchers create ad-hoc preprocessing workflows for each dataset,
 building upon a large inventory of available tools.
 The complexity of these workflows has snowballed with rapid advances in
 acquisition and processing.
