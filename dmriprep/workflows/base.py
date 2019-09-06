@@ -49,7 +49,6 @@ def init_dmriprep_wf(
     skull_strip_fixed_seed,
     skull_strip_template,
     subject_list,
-    use_bbr,
     use_syn,
     work_dir,
 ):
@@ -88,7 +87,6 @@ def init_dmriprep_wf(
             skull_strip_fixed_seed=False,
             skull_strip_template=('OASIS30ANTs', {}),
             subject_list=['dmripreptest'],
-            use_bbr=True,
             use_syn=True,
             work_dir='.',
         )
@@ -137,9 +135,6 @@ def init_dmriprep_wf(
             run-to-run replicability when used with --omp-nthreads 1
         subject_list : list
             List of subject labels
-        use_bbr : bool or None
-            Enable/disable boundary-based registration refinement.
-            If ``None``, test BBR result for distortion before accepting.
         use_syn : bool
             **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
             If fieldmaps are present and enabled, this is not run, by default.
@@ -179,7 +174,6 @@ def init_dmriprep_wf(
             skull_strip_fixed_seed=skull_strip_fixed_seed,
             skull_strip_template=skull_strip_template,
             subject_id=subject_id,
-            use_bbr=use_bbr,
             use_syn=use_syn,
         )
 
@@ -215,7 +209,6 @@ def init_single_subject_wf(
     skull_strip_fixed_seed,
     skull_strip_template,
     subject_id,
-    use_bbr,
     use_syn,
 ):
     """
@@ -256,7 +249,6 @@ def init_single_subject_wf(
             skull_strip_fixed_seed=False,
             skull_strip_template=('OASIS30ANTs', {}),
             subject_id='test',
-            use_bbr=True,
             use_syn=True,
         )
 
@@ -306,9 +298,6 @@ def init_single_subject_wf(
             and corresponding dictionary of output-space modifiers.
         subject_id : str
             List of subject labels
-        use_bbr : bool or None
-            Enable/disable boundary-based registration refinement.
-            If ``None``, test BBR result for distortion before accepting.
         use_syn : bool
             **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
             If fieldmaps are present and enabled, this is not run, by default.
@@ -476,7 +465,6 @@ It is released under the [CC0]\
     #         regressors_dvars_th=regressors_dvars_th,
     #         t2s_coreg=t2s_coreg,
     #         use_aroma=use_aroma,
-    #         use_bbr=use_bbr,
     #         use_syn=use_syn,
     #     )
 

@@ -562,7 +562,6 @@ def build_workflow(opts, retval):
         skull_strip_fixed_seed=opts.skull_strip_fixed_seed,
         skull_strip_template=opts.skull_strip_template,
         subject_list=subject_list,
-        use_bbr=opts.use_bbr,
         use_syn=opts.use_syn_sdc,
         work_dir=str(work_dir),
     )
