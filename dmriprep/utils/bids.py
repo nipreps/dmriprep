@@ -5,6 +5,40 @@ import os
 import sys
 import json
 from pathlib import Path
+from bids import BIDSLayout
+
+
+def collect_data(bids_dir, participant_label, task=None, echo=None,
+                 bids_validate=True):
+    """Replacement for niworkflows' version."""
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
+
+    queries = {
+        'fmap': {'datatype': 'fmap'},
+        'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
+        'bold': {'datatype': 'func', 'suffix': 'bold'},
+        'sbref': {'datatype': 'func', 'suffix': 'sbref'},
+        'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
+        't2w': {'datatype': 'anat', 'suffix': 'T2w'},
+        't1w': {'datatype': 'anat', 'suffix': 'T1w'},
+        'roi': {'datatype': 'anat', 'suffix': 'roi'},
+    }
+
+    if task:
+        queries['bold']['task'] = task
+
+    if echo:
+        queries['bold']['echo'] = echo
+
+    subj_data = {
+        dtype: sorted(layout.get(return_type='file', subject=participant_label,
+                                 extension=['nii', 'nii.gz'], **query))
+        for dtype, query in queries.items()}
+
+    return subj_data, layout
 
 
 def write_derivative_description(bids_dir, deriv_dir):
