@@ -73,6 +73,19 @@ jobs:
                 -t nipreps/dmriprep_devel \
                 -f Dockerfile_devel .
             fi
+
+      - run:
+          name: Docker save
+          no_output_timeout: 40m
+          command: |
+            mkdir -p /tmp/cache
+            docker save ubuntu:xenial-20161213 nipreps/dmriprep:latest \
+            | pigz -3 > /tmp/cache/docker.tar.gz
+      - save_cache:
+         key: docker-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         paths:
+            - /tmp/cache/docker.tar.gz
+
       - run:
           name: Smoke test Docker image
           command: |
@@ -85,22 +98,11 @@ jobs:
             echo "VERSION: \"$THISVERSION\""
             echo "DOCKERVERSION: \"${DOCKERVERSION}\""
             test "$DOCKERVERSION" = "$THISVERSION"
-      - run:
-          name: Docker save
-          no_output_timeout: 40m
-          command: |
-            mkdir -p /tmp/cache
-            docker save ubuntu:xenial-20161213 nipreps/dmriprep:latest \
-            | pigz -3 > /tmp/cache/docker.tar.gz
 
       - persist_to_workspace:
           root: /tmp
           paths:
             - src/dmriprep
-      - save_cache:
-         key: docker-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
-         paths:
-            - /tmp/cache/docker.tar.gz
 
   get_data:
     machine:

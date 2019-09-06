@@ -64,8 +64,7 @@ def get_parser():
     parser.add_argument('--version', action='version', version=verstr)
 
     g_bids = parser.add_argument_group('Options for filtering BIDS queries')
-    g_bids.add_argument('--skip_bids_validation', '--skip-bids-validation', action='store_true',
-                        default=False,
+    g_bids.add_argument('--skip-bids-validation', action='store_true', default=False,
                         help='assume the input dataset is BIDS compliant and skip the validation')
     g_bids.add_argument('--participant_label', '--participant-label', action='store', nargs='+',
                         help='a space delimited list of participant identifiers or a single '
@@ -187,7 +186,7 @@ https://dmriprep.readthedocs.io/en/%s/spaces.html""" % (
                               'the dMRIPrep developers. This information helps to '
                               'improve dMRIPrep and provides an indicator of real '
                               'world usage crucial for obtaining funding.')
-    g_other.add_argument('--sloppy', action='store_true', default=False,
+    g_other.add_argument('--sloppy', action='store_true', default=False, dest='debug',
                          help='Use low-quality tools for speed - TESTING ONLY')
 
     latest = check_latest()
@@ -548,15 +547,7 @@ def build_workflow(opts, retval):
 
     retval['workflow'] = init_dmriprep_wf(
         anat_only=opts.anat_only,
-        aroma_melodic_dim=opts.aroma_melodic_dimensionality,
-        bold2t1w_dof=opts.bold2t1w_dof,
-        cifti_output=opts.cifti_output,
-        debug=opts.sloppy,
-        dummy_scans=opts.dummy_scans,
-        echo_idx=opts.echo_idx,
-        err_on_aroma_warn=opts.error_on_aroma_warnings,
-        fmap_bspline=opts.fmap_bspline,
-        fmap_demean=opts.fmap_no_demean,
+        debug=opts.debug,
         force_syn=opts.force_syn,
         freesurfer=opts.run_reconall,
         hires=opts.hires,
@@ -564,20 +555,13 @@ def build_workflow(opts, retval):
         layout=layout,
         longitudinal=opts.longitudinal,
         low_mem=opts.low_mem,
-        medial_surface_nan=opts.medial_surface_nan,
         omp_nthreads=omp_nthreads,
         output_dir=str(output_dir),
         output_spaces=output_spaces,
         run_uuid=run_uuid,
-        regressors_all_comps=opts.return_all_components,
-        regressors_fd_th=opts.fd_spike_threshold,
-        regressors_dvars_th=opts.dvars_spike_threshold,
         skull_strip_fixed_seed=opts.skull_strip_fixed_seed,
         skull_strip_template=opts.skull_strip_template,
         subject_list=subject_list,
-        t2s_coreg=opts.t2s_coreg,
-        task_id=opts.task_id,
-        use_aroma=opts.use_aroma,
         use_bbr=opts.use_bbr,
         use_syn=opts.use_syn_sdc,
         work_dir=str(work_dir),
@@ -608,36 +592,11 @@ def build_workflow(opts, retval):
 
 
 def parse_spaces(opts):
-    """Ensures the spaces are correctly parsed"""
+    """Ensure the spaces are correctly parsed."""
     from sys import stderr
     from collections import OrderedDict
-    from templateflow.api import templates as get_templates
     # Set the default template to 'MNI152NLin2009cAsym'
     output_spaces = opts.output_spaces or OrderedDict([('MNI152NLin2009cAsym', {})])
-
-    if opts.template:
-        print("""\
-The ``--template`` option has been deprecated in version 1.4.0. Your selected template \
-"%s" will be inserted at the front of the ``--output-spaces`` argument list. Please update \
-your scripts to use ``--output-spaces``.""" % opts.template, file=stderr)
-        deprecated_tpl_arg = [(opts.template, {})]
-        # If output_spaces is not set, just replate the default - append otherwise
-        if opts.output_spaces is not None:
-            deprecated_tpl_arg += list(output_spaces.items())
-        output_spaces = OrderedDict(deprecated_tpl_arg)
-
-    if opts.output_space:
-        print("""\
-The ``--output_space`` option has been deprecated in version 1.4.0. Your selection of spaces \
-"%s" will be inserted at the front of the ``--output-spaces`` argument list. Please update \
-your scripts to use ``--output-spaces``.""" % ', '.join(opts.output_space), file=stderr)
-        missing = set(opts.output_space)
-        if 'template' in missing:
-            missing.remove('template')
-            if not opts.template:
-                missing.add('MNI152NLin2009cAsym')
-        missing = missing - set(output_spaces.keys())
-        output_spaces.update({tpl: {} for tpl in missing})
 
     FS_SPACES = set(['fsnative', 'fsaverage', 'fsaverage6', 'fsaverage5'])
     if opts.run_reconall and not list(FS_SPACES.intersection(output_spaces.keys())):
@@ -646,37 +605,6 @@ Although ``--fs-no-reconall`` was not set (i.e., FreeSurfer is to be run), no Fr
 output space (valid values are: %s) was selected. Adding default "fsaverage5" to the \
 list of output spaces.""" % ', '.join(FS_SPACES), file=stderr)
         output_spaces['fsaverage5'] = {}
-
-    # Validity of some inputs
-    # ERROR check if use_aroma was specified, but the correct template was not
-    if opts.use_aroma and 'MNI152NLin6Asym' not in output_spaces:
-        output_spaces['MNI152NLin6Asym'] = {'res': 2}
-        print("""\
-Option "--use-aroma" requires functional images to be resampled to MNI152NLin6Asym space. \
-The argument "MNI152NLin6Asym:res-2" has been automatically added to the list of output spaces \
-(option ``--output-spaces``).""", file=stderr)
-
-    if opts.cifti_output and 'MNI152NLin2009cAsym' not in output_spaces:
-        if 'MNI152NLin2009cAsym' not in output_spaces:
-            output_spaces['MNI152NLin2009cAsym'] = {'res': 2}
-            print("""Option ``--cifti-output`` requires functional images to be resampled to \
-``MNI152NLin2009cAsym`` space. Such template identifier has been automatically added to the \
-list of output spaces (option "--output-space").""", file=stderr)
-        if not [s for s in output_spaces if s in ('fsaverage5', 'fsaverage6')]:
-            output_spaces['fsaverage5'] = {}
-            print("""Option ``--cifti-output`` requires functional images to be resampled to \
-``fsaverage`` space. The argument ``fsaverage:den-10k`` (a.k.a ``fsaverage5``) has been \
-automatically added to the list of output spaces (option ``--output-space``).""", file=stderr)
-
-    if opts.template_resampling_grid is not None:
-        print("""Option ``--template-resampling-grid`` is deprecated, please specify \
-resampling grid options as modifiers to templates listed in ``--output-spaces``. \
-The configuration value will be applied to ALL output standard spaces.""")
-        if opts.template_resampling_grid != 'native':
-            for key in output_spaces.keys():
-                if key in get_templates():
-                    output_spaces[key]['res'] = opts.template_resampling_grid[0]
-
     return output_spaces
 
 

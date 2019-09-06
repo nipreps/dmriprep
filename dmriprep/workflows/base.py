@@ -26,9 +26,10 @@ from niworkflows.utils.bids import collect_data
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from smriprep.workflows.anatomical import init_anat_preproc_wf
 
-from ..interfaces import SubjectSummary, AboutSummary, DerivativesDataSink
+from ..interfaces import DerivativesDataSink
+from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..__about__ import __version__
-from .dwi import init_dwi_preproc_wf
+# from .dwi import init_dwi_preproc_wf
 
 
 def init_dmriprep_wf(
@@ -96,7 +97,7 @@ def init_dmriprep_wf(
     Parameters
     ----------
         anat_only : bool
-            Disable functional workflows
+            Disable diffusion MRI workflows
         debug : bool
             Enable debugging outputs
         force_syn : bool
@@ -198,15 +199,7 @@ def init_dmriprep_wf(
 
 def init_single_subject_wf(
     anat_only,
-    aroma_melodic_dim,
-    bold2t1w_dof,
-    cifti_output,
     debug,
-    dummy_scans,
-    echo_idx,
-    err_on_aroma_warn,
-    fmap_bspline,
-    fmap_demean,
     force_syn,
     freesurfer,
     hires,
@@ -214,28 +207,22 @@ def init_single_subject_wf(
     layout,
     longitudinal,
     low_mem,
-    medial_surface_nan,
     name,
     omp_nthreads,
     output_dir,
     output_spaces,
     reportlets_dir,
-    regressors_all_comps,
-    regressors_dvars_th,
-    regressors_fd_th,
     skull_strip_fixed_seed,
     skull_strip_template,
     subject_id,
-    t2s_coreg,
-    task_id,
-    use_aroma,
     use_bbr,
     use_syn,
 ):
     """
-    This workflow organizes the preprocessing pipeline for a single subject.
+    Set-up the preprocessing pipeline for a single subject.
+
     It collects and reports information about the subject, and prepares
-    sub-workflows to perform anatomical and functional preprocessing.
+    sub-workflows to perform anatomical and diffusion MRI preprocessing.
 
     Anatomical preprocessing is performed in a single workflow, regardless of
     the number of sessions.
@@ -251,15 +238,7 @@ def init_single_subject_wf(
         BIDSLayout = namedtuple('BIDSLayout', ['root'])
         wf = init_single_subject_wf(
             anat_only=False,
-            aroma_melodic_dim=-200,
-            bold2t1w_dof=9,
-            cifti_output=False,
             debug=False,
-            dummy_scans=None,
-            echo_idx=None,
-            err_on_aroma_warn=False,
-            fmap_bspline=False,
-            fmap_demean=True,
             force_syn=True,
             freesurfer=True,
             hires=True,
@@ -267,7 +246,6 @@ def init_single_subject_wf(
             layout=BIDSLayout('.'),
             longitudinal=False,
             low_mem=False,
-            medial_surface_nan=False,
             name='single_subject_wf',
             omp_nthreads=1,
             output_dir='.',
@@ -275,44 +253,20 @@ def init_single_subject_wf(
                 ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
                 ('T1w', {}), ('fsnative', {})]),
             reportlets_dir='.',
-            regressors_all_comps=False,
-            regressors_dvars_th=1.5,
-            regressors_fd_th=0.5,
             skull_strip_fixed_seed=False,
             skull_strip_template=('OASIS30ANTs', {}),
             subject_id='test',
-            t2s_coreg=False,
-            task_id='',
-            use_aroma=False,
             use_bbr=True,
             use_syn=True,
         )
 
 
     Parameters
-
+    ----------
         anat_only : bool
-            Disable functional workflows
-        aroma_melodic_dim : int
-            Maximum number of components identified by MELODIC within ICA-AROMA
-            (default is -200, i.e., no limitation).
-        bold2t1w_dof : 6, 9 or 12
-            Degrees-of-freedom for BOLD-T1w registration
-        cifti_output : bool
-            Generate bold CIFTI file in output spaces
+            Disable diffusion MRI workflows
         debug : bool
             Enable debugging outputs
-        dummy_scans : int or None
-            Number of volumes to consider as non steady state
-        echo_idx : int or None
-            Index of echo to preprocess in multiecho BOLD series,
-            or ``None`` to preprocess all
-        err_on_aroma_warn : bool
-            Do not fail on ICA-AROMA errors
-        fmap_bspline : bool
-            **Experimental**: Fit B-Spline field using least-squares
-        fmap_demean : bool
-            Demean voxel-shift map during unwarp
         force_syn : bool
             **Temporary**: Always run SyN-based SDC
         freesurfer : bool
@@ -328,8 +282,6 @@ def init_single_subject_wf(
             See sub-workflows for specific differences
         low_mem : bool
             Write uncompressed .nii files in some cases to reduce memory usage
-        medial_surface_nan : bool
-            Replace medial wall values with NaNs on functional GIFTI files
         name : str
             Name of workflow
         omp_nthreads : int
@@ -346,12 +298,6 @@ def init_single_subject_wf(
             resolution version of the selected template).
         reportlets_dir : str
             Directory in which to save reportlets
-        regressors_all_comps
-            Return all CompCor component time series instead of the top fraction
-        regressors_fd_th
-            Criterion for flagging framewise displacement outliers
-        regressors_dvars_th
-            Criterion for flagging DVARS outliers
         skull_strip_fixed_seed : bool
             Do not use a random seed for skull-stripping - will ensure
             run-to-run replicability when used with --omp-nthreads 1
@@ -360,12 +306,6 @@ def init_single_subject_wf(
             and corresponding dictionary of output-space modifiers.
         subject_id : str
             List of subject labels
-        t2s_coreg : bool
-            For multi-echo EPI, use the calculated T2*-map for T2*-driven coregistration
-        task_id : str or None
-            Task ID of BOLD series to preprocess, or ``None`` to preprocess all
-        use_aroma : bool
-            Perform ICA-AROMA on MNI-resampled functional series
         use_bbr : bool or None
             Enable/disable boundary-based registration refinement.
             If ``None``, test BBR result for distortion before accepting.
@@ -385,10 +325,10 @@ def init_single_subject_wf(
         # for documentation purposes
         subject_data = {
             't1w': ['/completely/made/up/path/sub-01_T1w.nii.gz'],
-            'bold': ['/completely/made/up/path/sub-01_task-nback_bold.nii.gz']
+            'dwi': ['/completely/made/up/path/sub-01_task-nback_bold.nii.gz']
         }
     else:
-        subject_data = collect_data(layout, subject_id, task_id, echo_idx)[0]
+        subject_data = collect_data(layout, subject_id)[0]
 
     # Make sure we always go through these two checks
     if not anat_only and subject_data['bold'] == []:
@@ -413,7 +353,7 @@ which is based on *Nipype* {nipype_ver}
 
 Many internal operations of *dMRIPrep* use
 *Nilearn* {nilearn_ver} [@nilearn, RRID:SCR_001362],
-mostly within the functional processing workflow.
+mostly within the diffusion MRI processing workflow.
 For more details of the pipeline, see [the section corresponding
 to workflows in *dMRIPrep*'s documentation]\
 (https://dmriprep.readthedocs.io/en/latest/workflows.html \
@@ -509,60 +449,60 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    for bold_file in subject_data['bold']:
-        func_preproc_wf = init_func_preproc_wf(
-            aroma_melodic_dim=aroma_melodic_dim,
-            bold2t1w_dof=bold2t1w_dof,
-            bold_file=bold_file,
-            cifti_output=cifti_output,
-            debug=debug,
-            dummy_scans=dummy_scans,
-            err_on_aroma_warn=err_on_aroma_warn,
-            fmap_bspline=fmap_bspline,
-            fmap_demean=fmap_demean,
-            force_syn=force_syn,
-            freesurfer=freesurfer,
-            ignore=ignore,
-            layout=layout,
-            low_mem=low_mem,
-            medial_surface_nan=medial_surface_nan,
-            num_bold=len(subject_data['bold']),
-            omp_nthreads=omp_nthreads,
-            output_dir=output_dir,
-            output_spaces=output_spaces,
-            reportlets_dir=reportlets_dir,
-            regressors_all_comps=regressors_all_comps,
-            regressors_fd_th=regressors_fd_th,
-            regressors_dvars_th=regressors_dvars_th,
-            t2s_coreg=t2s_coreg,
-            use_aroma=use_aroma,
-            use_bbr=use_bbr,
-            use_syn=use_syn,
-        )
+    # for bold_file in subject_data['bold']:
+    #     dwi_preproc_wf = init_dwi_preproc_wf(
+    #         aroma_melodic_dim=aroma_melodic_dim,
+    #         bold2t1w_dof=bold2t1w_dof,
+    #         bold_file=bold_file,
+    #         cifti_output=cifti_output,
+    #         debug=debug,
+    #         dummy_scans=dummy_scans,
+    #         err_on_aroma_warn=err_on_aroma_warn,
+    #         fmap_bspline=fmap_bspline,
+    #         fmap_demean=fmap_demean,
+    #         force_syn=force_syn,
+    #         freesurfer=freesurfer,
+    #         ignore=ignore,
+    #         layout=layout,
+    #         low_mem=low_mem,
+    #         medial_surface_nan=medial_surface_nan,
+    #         num_bold=len(subject_data['bold']),
+    #         omp_nthreads=omp_nthreads,
+    #         output_dir=output_dir,
+    #         output_spaces=output_spaces,
+    #         reportlets_dir=reportlets_dir,
+    #         regressors_all_comps=regressors_all_comps,
+    #         regressors_fd_th=regressors_fd_th,
+    #         regressors_dvars_th=regressors_dvars_th,
+    #         t2s_coreg=t2s_coreg,
+    #         use_aroma=use_aroma,
+    #         use_bbr=use_bbr,
+    #         use_syn=use_syn,
+    #     )
 
-        workflow.connect([
-            (anat_preproc_wf, func_preproc_wf,
-             [(('outputnode.t1_preproc', _pop), 'inputnode.t1_preproc'),
-              ('outputnode.t1_brain', 'inputnode.t1_brain'),
-              ('outputnode.t1_mask', 'inputnode.t1_mask'),
-              ('outputnode.t1_seg', 'inputnode.t1_seg'),
-              ('outputnode.t1_aseg', 'inputnode.t1_aseg'),
-              ('outputnode.t1_aparc', 'inputnode.t1_aparc'),
-              ('outputnode.t1_tpms', 'inputnode.t1_tpms'),
-              ('outputnode.template', 'inputnode.template'),
-              ('outputnode.forward_transform', 'inputnode.anat2std_xfm'),
-              ('outputnode.reverse_transform', 'inputnode.std2anat_xfm'),
-              ('outputnode.joint_template', 'inputnode.joint_template'),
-              ('outputnode.joint_forward_transform', 'inputnode.joint_anat2std_xfm'),
-              ('outputnode.joint_reverse_transform', 'inputnode.joint_std2anat_xfm'),
-              # Undefined if --no-freesurfer, but this is safe
-              ('outputnode.subjects_dir', 'inputnode.subjects_dir'),
-              ('outputnode.subject_id', 'inputnode.subject_id'),
-              ('outputnode.t1_2_fsnative_forward_transform',
-               'inputnode.t1_2_fsnative_forward_transform'),
-              ('outputnode.t1_2_fsnative_reverse_transform',
-               'inputnode.t1_2_fsnative_reverse_transform')]),
-        ])
+    #     workflow.connect([
+    #         (anat_preproc_wf, dwi_preproc_wf,
+    #          [(('outputnode.t1_preproc', _pop), 'inputnode.t1_preproc'),
+    #           ('outputnode.t1_brain', 'inputnode.t1_brain'),
+    #           ('outputnode.t1_mask', 'inputnode.t1_mask'),
+    #           ('outputnode.t1_seg', 'inputnode.t1_seg'),
+    #           ('outputnode.t1_aseg', 'inputnode.t1_aseg'),
+    #           ('outputnode.t1_aparc', 'inputnode.t1_aparc'),
+    #           ('outputnode.t1_tpms', 'inputnode.t1_tpms'),
+    #           ('outputnode.template', 'inputnode.template'),
+    #           ('outputnode.forward_transform', 'inputnode.anat2std_xfm'),
+    #           ('outputnode.reverse_transform', 'inputnode.std2anat_xfm'),
+    #           ('outputnode.joint_template', 'inputnode.joint_template'),
+    #           ('outputnode.joint_forward_transform', 'inputnode.joint_anat2std_xfm'),
+    #           ('outputnode.joint_reverse_transform', 'inputnode.joint_std2anat_xfm'),
+    #           # Undefined if --no-freesurfer, but this is safe
+    #           ('outputnode.subjects_dir', 'inputnode.subjects_dir'),
+    #           ('outputnode.subject_id', 'inputnode.subject_id'),
+    #           ('outputnode.t1_2_fsnative_forward_transform',
+    #            'inputnode.t1_2_fsnative_forward_transform'),
+    #           ('outputnode.t1_2_fsnative_reverse_transform',
+    #            'inputnode.t1_2_fsnative_reverse_transform')]),
+    #     ])
 
     return workflow
 
