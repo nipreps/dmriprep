@@ -320,10 +320,9 @@ def init_single_subject_wf(
         subject_data = collect_data(layout, subject_id)[0]
 
     # Make sure we always go through these two checks
-    if not anat_only and subject_data['bold'] == []:
-        raise Exception("No BOLD images found for participant {} and task {}. "
-                        "All workflows require BOLD images.".format(
-                            subject_id, task_id if task_id else '<all>'))
+    if not anat_only and subject_data['dwi'] == []:
+        raise Exception("No DWI data found for participant {}. "
+                        "All workflows require DWI images.".format(subject_id))
 
     if not subject_data['t1w']:
         raise Exception("No T1w images found for participant {}. "
@@ -333,7 +332,7 @@ def init_single_subject_wf(
     workflow.__desc__ = """
 Results included in this manuscript come from preprocessing
 performed using *dMRIPrep* {dmriprep_ver}
-(@dmriprep1; @dmriprep2; RRID:SCR_016216),
+(@dmriprep; RRID:SCR_017412),
 which is based on *Nipype* {nipype_ver}
 (@nipype1; @nipype2; RRID:SCR_002502).
 
@@ -346,7 +345,7 @@ mostly within the diffusion MRI processing workflow.
 For more details of the pipeline, see [the section corresponding
 to workflows in *dMRIPrep*'s documentation]\
 (https://dmriprep.readthedocs.io/en/latest/workflows.html \
-"FMRIPrep's documentation").
+"dMRIPrep's documentation").
 
 
 ### Copyright Waiver
