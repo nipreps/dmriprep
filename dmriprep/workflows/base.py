@@ -20,13 +20,13 @@ from nilearn import __version__ as nilearn_ver
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from niworkflows.interfaces.bids import (
-    BIDSInfo, BIDSDataGrabber, BIDSFreeSurferDir
+    BIDSInfo, BIDSFreeSurferDir
 )
 from niworkflows.utils.bids import collect_data
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from smriprep.workflows.anatomical import init_anat_preproc_wf
 
-from ..interfaces import DerivativesDataSink
+from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..__about__ import __version__
 # from .dwi import init_dwi_preproc_wf
@@ -309,7 +309,7 @@ def init_single_subject_wf(
             FreeSurfer SUBJECTS_DIR
 
     """
-    from .bold.resampling import NONSTANDARD_REFERENCES
+    from ..config import NONSTANDARD_REFERENCES
     if name in ('single_subject_wf', 'single_subject_dmripreptest_wf'):
         # for documentation purposes
         subject_data = {
@@ -417,7 +417,7 @@ It is released under the [CC0]\
         (inputnode, summary, [('subjects_dir', 'subjects_dir')]),
         (bidssrc, summary, [('t1w', 't1w'),
                             ('t2w', 't2w'),
-                            ('bold', 'bold')]),
+                            ('dwi', 'dwi')]),
         (bids_info, summary, [('subject', 'subject_id')]),
         (bids_info, anat_preproc_wf, [(('subject', _prefix), 'inputnode.subject_id')]),
         (bidssrc, anat_preproc_wf, [('t1w', 'inputnode.t1w'),
@@ -438,7 +438,7 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    # for bold_file in subject_data['bold']:
+    # for dwi_file in subject_data['dwi']:
     #     dwi_preproc_wf = init_dwi_preproc_wf(
     #         aroma_melodic_dim=aroma_melodic_dim,
     #         bold2t1w_dof=bold2t1w_dof,
