@@ -178,7 +178,7 @@ def main(
     omp_nthreads,
     ignore,
     use_ants,
-    use_syn,
+    use_brainsuite,
     work_dir,
     synb0_dir,
     write_graph

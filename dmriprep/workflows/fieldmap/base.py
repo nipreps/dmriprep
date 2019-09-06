@@ -63,7 +63,10 @@ def init_sdc_wf(
     #     )
     # else:
     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
-    fmap = fmaps[0]
+    try:
+        fmap = fmaps[0]
+    except:
+        return
 
     if fmap['suffix'] == 'epi':
         from .pepolar import init_pepolar_wf

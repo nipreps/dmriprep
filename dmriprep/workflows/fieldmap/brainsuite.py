@@ -28,7 +28,7 @@ def init_brainsuite_wf():
         name='inputnode')
 
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=['out_fmap']), name='outputnode'
+        niu.IdentityInterface(fields=['out_dwi']), name='outputnode'
     )
 
     bias_corr = pe.Node(brainsuite.Bfc(minBias=0.5, maxBias=1.5), name='bias_corr')

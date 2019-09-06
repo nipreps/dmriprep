@@ -57,6 +57,8 @@ def init_dwi_preproc_wf(
     else:
         ref_file = dwi_file
 
+    sdc_method = None
+
     # For doc building purposes
     if not hasattr(layout, 'parse_file_entities'):
         metadata = {
@@ -80,8 +82,18 @@ def init_dwi_preproc_wf(
 
         if (use_ants and not fmaps):
             fmaps.append({'suffix': 'ants'})
+            sdc_method = 'nonlinear_reg'
         if (use_brainsuite and not fmaps):
             fmaps.append({'suffix': 'brainsuite'})
+            sdc_method = 'nonlinear_reg'
+
+        if fmaps:
+            fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
+            fmap = fmaps[0]
+            if fmap['suffix'] == 'epi':
+                sdc_method = 'topup'
+            if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
+                sdc_method = 'fieldmap'
 
     dwi_wf = pe.Workflow(name=wf_name)
 
@@ -92,15 +104,6 @@ def init_dwi_preproc_wf(
     #         synb0_dir, validate=False, derivatives=True
     #     )
     #     synb0 = synb0_layout.get(subject=subject_id, return_type='file')[0]
-    # else:
-    # Find fieldmaps. Options: (epi|fieldmap|phasediff|phase1|phase2|syn)
-    fmaps = []
-    if 'fieldmaps' not in ignore:
-        for fmap in layout.get_fieldmap(dwi_file, return_list=True):
-            fmap['metadata'] = layout.get_metadata(
-                fmap[fmap['suffix']]
-            )
-            fmaps.append(fmap)
 
     dwi_sdc_wf = init_sdc_wf(
         subject_id,
@@ -279,7 +282,7 @@ def init_dwi_preproc_wf(
         fsl.BET(frac=bet_dwi, mask=True, robust=True), name='bet_dwi_pre'
     )
 
-    dwi_eddy_wf = init_dwi_eddy_wf()
+    dwi_eddy_wf = init_dwi_eddy_wf(omp_nthreads, sdc_method)
 
     # ecc = pe.Node(
     #     fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
@@ -385,17 +388,15 @@ def init_dwi_preproc_wf(
     #     ecc.inputs.in_acqp = acqp_file
     # else:
     # Decide what ecc will take: topup or fmap
+    # Else If epi files detected
     if fmaps:
-        fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
-        fmap = fmaps[0]
-        # Else If epi files detected
         if fmap['suffix'] == 'epi':
             dwi_wf.connect([
                 (dwi_sdc_wf, dwi_eddy_wf, [('outputnode.out_topup', 'inputnode.topup_fieldcoef'),
                                            ('outputnode.out_movpar', 'inputnode.topup_movpar')])
             ])
-        # Otherwise (fieldmaps)
-        else:
+    # Otherwise (fieldmaps)
+        if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
             dwi_wf.connect([
                 (bet_dwi0, dwi_sdc_wf, [('out_file', 'inputnode.b0_stripped')]),
                 (dwi_sdc_wf, dwi_eddy_wf, [('outputnode.out_fmap', 'inputnode.fieldmap_file')])
