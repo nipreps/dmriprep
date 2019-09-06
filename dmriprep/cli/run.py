@@ -37,7 +37,7 @@ def get_parser():
     from templateflow.api import templates
     from packaging.version import Version
     from ..__about__ import __version__
-    from ..workflows.bold.resampling import NONSTANDARD_REFERENCES
+    from ..config import NONSTANDARD_REFERENCES
     from .version import check_latest, is_flagged
 
     verstr = 'dmriprep v{}'.format(__version__)
@@ -280,7 +280,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
         work_dir = Path(retval.get('work_dir'))
         plugin_settings = retval.get('plugin_settings', None)
         subject_list = retval.get('subject_list', None)
-        fmriprep_wf = retval.get('workflow', None)
+        dmriprep_wf = retval.get('workflow', None)
         run_uuid = retval.get('run_uuid', None)
 
     if opts.reports_only:
@@ -289,15 +289,15 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     if opts.boilerplate:
         sys.exit(int(retcode > 0))
 
-    if fmriprep_wf and opts.write_graph:
-        fmriprep_wf.write_graph(graph2use="colored", format='svg', simple_form=True)
+    if dmriprep_wf and opts.write_graph:
+        dmriprep_wf.write_graph(graph2use="colored", format='svg', simple_form=True)
 
-    retcode = retcode or int(fmriprep_wf is None)
+    retcode = retcode or int(dmriprep_wf is None)
     if retcode != 0:
         sys.exit(retcode)
 
     # Check workflow for missing commands
-    missing = check_deps(fmriprep_wf)
+    missing = check_deps(dmriprep_wf)
     if missing:
         print("Cannot run dMRIPrep. Missing dependencies:", file=sys.stderr)
         for iface, cmd in missing:
@@ -313,7 +313,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
 
     errno = 1  # Default is error exit unless otherwise set
     try:
-        fmriprep_wf.run(**plugin_settings)
+        dmriprep_wf.run(**plugin_settings)
     except Exception as e:
         if not opts.notrack:
             from ..utils.sentry import process_crashfile
@@ -417,7 +417,7 @@ def build_workflow(opts, retval):
     from niworkflows.utils.bids import collect_participants
     from niworkflows.reports import generate_reports
     from ..__about__ import __version__
-    from ..workflows.base import init_fmriprep_wf
+    from ..workflows.base import init_dmriprep_wf
 
     build_log = nlogging.getLogger('nipype.workflow')
 
@@ -546,7 +546,7 @@ def build_workflow(opts, retval):
         uuid=run_uuid)
     )
 
-    retval['workflow'] = init_fmriprep_wf(
+    retval['workflow'] = init_dmriprep_wf(
         anat_only=opts.anat_only,
         aroma_melodic_dim=opts.aroma_melodic_dimensionality,
         bold2t1w_dof=opts.bold2t1w_dof,
