@@ -5,6 +5,3 @@ include LICENSE
 # versioneer
 include versioneer.py
 include dmriprep/_version.py
-
-recursive-exclude __pycache__
-recursive-exclude *.py[co]
