@@ -6,6 +6,9 @@ dmriprep
 .. image:: https://img.shields.io/pypi/v/dmriprep.svg
         :target: https://pypi.python.org/pypi/dmriprep
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg
+   :target: https://doi.org/10.5281/zenodo.3392201
+
 .. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
         :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
