@@ -136,7 +136,6 @@ jobs:
          key: data-v0-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
-            - /tmp/ds005/derivatives/freesurfer
 
   deploy_docker_patches:
     machine:
@@ -283,13 +282,12 @@ jobs:
       - run:
           name: Build dMRIPrep
           command: |
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/src/dmriprep
+            sudo setfacl -m group:$(id -gn):rwx /tmp/src/dmriprep
             pyenv local 3.5.2
             THISVERSION=$( python get_version.py )
-            virtualenv --python=python build
-            source build/bin/activate
-            pip install --upgrade "pip>=19.1" numpy
             echo "${CIRCLE_TAG:-$THISVERSION}" > dmriprep/VERSION
-            python setup.py sdist
+            docker run --rm=false --entrypoint=/bin/bash -v `pwd`:/io -w /io python:3.6.9 -c "pip install numpy && python setup.py sdist"
             docker run --rm=false -e PLAT='manylinux1_x86_64' -e PKGNAME='dmriprep' -v `pwd`:/io \
                 quay.io/pypa/manylinux1_x86_64 /io/.circleci/pypi_wheel/build-wheels.sh
       - run:
