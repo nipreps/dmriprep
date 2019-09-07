@@ -1,55 +1,9 @@
+# Use Ubuntu 16.04 LTS
 FROM ubuntu:xenial-20161213
 
-# Used command:
-# neurodocker generate docker --base=debian:stretch --pkg-manager=apt
-# --ants version=latest method=source --mrtrix3 version=3.0_RC3
-# --freesurfer version=6.0.0 method=binaries --fsl version=6.0.1 method=binaries
+# Pre-cache neurodebian key
+COPY .docker/neurodebian.gpg /usr/local/etc/neurodebian.gpg
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        bc \
-        libtool \
-        tar \
-        dpkg \
-        curl \
-        wget \
-        unzip \
-        gcc \
-        git \
-        libstdc++6
-
-ARG DEBIAN_FRONTEND="noninteractive"
-
-ENV LANG="en_US.UTF-8" \
-    LC_ALL="en_US.UTF-8" \
-    ND_ENTRYPOINT="/neurodocker/startup.sh"
-RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
-    && apt-get update -qq \
-    && apt-get install -y -q --no-install-recommends \
-           apt-utils \
-           bzip2 \
-           ca-certificates \
-           curl \
-           locales \
-           unzip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
-    && dpkg-reconfigure --frontend=noninteractive locales \
-    && update-locale LANG="en_US.UTF-8" \
-    && chmod 777 /opt && chmod a+s /opt \
-    && mkdir -p /neurodocker \
-    && if [ ! -f "$ND_ENTRYPOINT" ]; then \
-         echo '#!/usr/bin/env bash' >> "$ND_ENTRYPOINT" \
-    &&   echo 'set -e' >> "$ND_ENTRYPOINT" \
-    &&   echo 'export USER="${USER:=`whoami`}"' >> "$ND_ENTRYPOINT" \
-    &&   echo 'if [ -n "$1" ]; then "$@"; else /usr/bin/env bash; fi' >> "$ND_ENTRYPOINT"; \
-    fi \
-    && chmod -R 777 /neurodocker && chmod a+s /neurodocker
-
-ENTRYPOINT ["/neurodocker/startup.sh"]
-
-# SETUP taken from fmriprep:latest, installs C compiler for ANTS
 # Prepare environment
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -73,106 +27,98 @@ RUN curl -o pandoc-2.2.2.1-1-amd64.deb -sSL "https://github.com/jgm/pandoc/relea
     dpkg -i pandoc-2.2.2.1-1-amd64.deb && \
     rm pandoc-2.2.2.1-1-amd64.deb
 
-# ANTS
-# from https://github.com/kaczmarj/ANTs-builds/blob/master/Dockerfile
+# Installing freesurfer
+RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
+    --exclude='freesurfer/diffusion' \
+    --exclude='freesurfer/docs' \
+    --exclude='freesurfer/fsfast' \
+    --exclude='freesurfer/lib/cuda' \
+    --exclude='freesurfer/lib/qt' \
+    --exclude='freesurfer/matlab' \
+    --exclude='freesurfer/mni/share/man' \
+    --exclude='freesurfer/subjects/fsaverage_sym' \
+    --exclude='freesurfer/subjects/fsaverage3' \
+    --exclude='freesurfer/subjects/fsaverage4' \
+    --exclude='freesurfer/subjects/cvs_avg35' \
+    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
+    --exclude='freesurfer/subjects/bert' \
+    --exclude='freesurfer/subjects/lh.EC_average' \
+    --exclude='freesurfer/subjects/rh.EC_average' \
+    --exclude='freesurfer/subjects/sample-*.mgz' \
+    --exclude='freesurfer/subjects/V1_average' \
+    --exclude='freesurfer/trctrain'
 
-# Get CMake for ANTS
-RUN mkdir /cmake_temp
-WORKDIR /cmake_temp
-RUN wget https://cmake.org/files/v3.12/cmake-3.12.2.tar.gz \
-    && tar -xzvf cmake-3.12.2.tar.gz \
-    && echo 'done tar' \
-    && ls \
-    && cd cmake-3.12.2/ \
-    && ./bootstrap -- -DCMAKE_BUILD_TYPE:STRING=Release \
-    && make -j4 \
-    && make install \
-    && cd .. \
-    && rm -rf *
+ENV FSL_DIR="/usr/share/fsl/5.0" \
+    OS="Linux" \
+    FS_OVERRIDE=0 \
+    FIX_VERTEX_AREA="" \
+    FSF_OUTPUT_FORMAT="nii.gz" \
+    FREESURFER_HOME="/opt/freesurfer"
+ENV SUBJECTS_DIR="$FREESURFER_HOME/subjects" \
+    FUNCTIONALS_DIR="$FREESURFER_HOME/sessions" \
+    MNI_DIR="$FREESURFER_HOME/mni" \
+    LOCAL_DIR="$FREESURFER_HOME/local" \
+    MINC_BIN_DIR="$FREESURFER_HOME/mni/bin" \
+    MINC_LIB_DIR="$FREESURFER_HOME/mni/lib" \
+    MNI_DATAPATH="$FREESURFER_HOME/mni/data"
+ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
+    PATH="$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
 
-RUN cmake --version
+# Installing Neurodebian packages (FSL, AFNI, git)
+RUN curl -sSL "http://neuro.debian.net/lists/$( lsb_release -c | cut -f2 ).us-ca.full" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-key add /usr/local/etc/neurodebian.gpg && \
+    (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true)
 
-RUN mkdir /ants
-RUN apt-get update && apt-get -y install zlib1g-dev
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+                    fsl-core=5.0.9-5~nd16.04+1 \
+                    fsl-mni152-templates=5.0.7-2 \
+                    afni=16.2.07~dfsg.1-5~nd16.04+1 \
+                    convert3d \
+                    git-annex-standalone && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN git clone https://github.com/ANTsX/ANTs.git --branch v2.3.1 /ants
-WORKDIR /ants
+ENV FSLDIR="/usr/share/fsl/5.0" \
+    FSLOUTPUTTYPE="NIFTI_GZ" \
+    FSLMULTIFILEQUIT="TRUE" \
+    POSSUMDIR="/usr/share/fsl/5.0" \
+    LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH" \
+    FSLTCLSH="/usr/bin/tclsh" \
+    FSLWISH="/usr/bin/wish" \
+    AFNI_MODELPATH="/usr/lib/afni/models" \
+    AFNI_IMSAVE_WARNINGS="NO" \
+    AFNI_TTATLAS_DATASET="/usr/share/afni/atlases" \
+    AFNI_PLUGINPATH="/usr/lib/afni/plugins"
+ENV PATH="/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH"
 
-RUN mkdir build \
-    && cd build \
-    && git config --global url."https://".insteadOf git:// \
-    && cmake .. \
-    && make -j1 \
-    && mkdir -p /opt/ants \
-    && mv bin/* /opt/ants && mv ../Scripts/* /opt/ants \
-    && cd .. \
-    && rm -rf build
+# Installing ANTs 2.2.0 (NeuroDocker build)
+ENV ANTSPATH=/usr/lib/ants
+RUN mkdir -p $ANTSPATH && \
+    curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz" \
+    | tar -xzC $ANTSPATH --strip-components 1
+ENV PATH=$ANTSPATH:$PATH
 
-ENV ANTSPATH=/opt/ants/ \
-    PATH=/opt/ants:$PATH
+# Create a shared $HOME directory
+RUN useradd -m -s /bin/bash -G users dmriprep
+WORKDIR /home/dmriprep
+ENV HOME="/home/dmriprep"
 
-WORKDIR /
+# Installing SVGO
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g svgo
 
-ENV FSLDIR="/opt/fsl-6.0.1" \
-    PATH="/opt/fsl-6.0.1/bin:$PATH" \
-    FSLOUTPUTTYPE="NIFTI_GZ"
-RUN apt-get update -qq \
-    && apt-get install -y -q --no-install-recommends \
-           bc \
-           dc \
-           file \
-           libfontconfig1 \
-           libfreetype6 \
-           libgl1-mesa-dev \
-           libglu1-mesa-dev \
-           libgomp1 \
-           libice6 \
-           libxcursor1 \
-           libxft2 \
-           libxinerama1 \
-           libxrandr2 \
-           libxrender1 \
-           libxt6 \
-           python \
-           wget \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "Downloading FSL ..." \
-    && wget -q http://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py \
-    && chmod 775 fslinstaller.py
-RUN /fslinstaller.py -d /opt/fsl-6.0.1 -V 6.0.1 -q
+# Installing bids-validator
+RUN npm install -g bids-validator@1.2.3
 
-# FSL 6.0.1
-# Freesurfer 6.0.0
-# MRtrix3
-# ANTS
-# Python 3
+# Installing and setting up ICA_AROMA
+RUN mkdir -p /opt/ICA-AROMA && \
+  curl -sSL "https://github.com/maartenmennes/ICA-AROMA/archive/v0.4.4-beta.tar.gz" \
+  | tar -xzC /opt/ICA-AROMA --strip-components 1 && \
+  chmod +x /opt/ICA-AROMA/ICA_AROMA.py
 
-# MRtrix3
-# from https://hub.docker.com/r/neurology/mrtrix/dockerfile
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
-    python \
-    python-numpy \
-    libeigen3-dev \
-    clang \
-    zlib1g-dev \
-    libqt4-opengl-dev \
-    libgl1-mesa-dev \
-    git \
-    ca-certificates
-RUN mkdir /mrtrix
-RUN git clone https://github.com/MRtrix3/mrtrix3.git --branch 3.0_RC3 /mrtrix
-WORKDIR /mrtrix
-# Checkout version used in the lab: 20180128
-RUN git checkout f098f097ccbb3e5efbb8f5552f13e0997d161cce
-ENV CXX=/usr/bin/clang++
-RUN ./configure
-RUN ./build
-RUN ./set_path
-ENV PATH=/mrtrix/bin:$PATH
-
-WORKDIR /
+ENV PATH=/opt/ICA-AROMA:$PATH
 
 # Installing and setting up miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh && \
@@ -186,50 +132,69 @@ ENV PATH="/usr/local/miniconda/bin:$PATH" \
     LC_ALL="C.UTF-8" \
     PYTHONNOUSERSITE=1
 
-# add credentials on build
-RUN mkdir ~/.ssh && ln -s /run/secrets/host_ssh_key ~/.ssh/id_rsa
-# Getting required installation tools
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libopenblas-base
-
-# Precaching atlases
-ENV TEMPLATEFLOW_HOME="/opt/templateflow"
-RUN mkdir -p $TEMPLATEFLOW_HOME
-RUN pip install --no-cache-dir "templateflow>=0.3.0,<0.4.0a0" && \
-    python -c "from templateflow import api as tfapi; \
-               tfapi.get('MNI152NLin6Asym', atlas=None); \
-               tfapi.get('MNI152NLin2009cAsym', atlas=None); \
-               tfapi.get('OASIS30ANTs');" && \
-    find $TEMPLATEFLOW_HOME -type d -exec chmod go=u {} + && \
-    find $TEMPLATEFLOW_HOME -type f -exec chmod go=u {} +
-
-RUN conda install -y python=3.7.3 \
+# Installing precomputed python packages
+RUN conda install -y python=3.7.1 \
                      pip=19.1 \
+                     mkl=2018.0.3 \
+                     mkl-service \
+                     numpy=1.15.4 \
+                     scipy=1.1.0 \
+                     scikit-learn=0.19.1 \
+                     matplotlib=2.2.2 \
+                     pandas=0.23.4 \
                      libxml2=2.9.8 \
                      libxslt=1.1.32 \
-                     graphviz=2.40.1; sync && \
+                     graphviz=2.40.1 \
+                     traits=4.6.0 \
+                     zlib; sync && \
     chmod -R a+rX /usr/local/miniconda; sync && \
     chmod +x /usr/local/miniconda/bin/*; sync && \
     conda build purge-all; sync && \
     conda clean -tipsy && sync
 
+# Unless otherwise specified each process should only use one thread - nipype
+# will handle parallelization
+ENV MKL_NUM_THREADS=1 \
+    OMP_NUM_THREADS=1
 
-# Setting up an install of dmripreproc (manual version) inside the container
-#ADD https://api.github.com/repos/TIGRLab/dmripreproc/git/refs/heads/master version.json
-#RUN git clone -b master https://github.com/TIGRLab/dmripreproc.git dmripreproc
+# Precaching fonts, set 'Agg' as default backend for matplotlib
+RUN python -c "from matplotlib import font_manager" && \
+    sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g svgo
+# Precaching atlases
+RUN pip install --no-cache-dir "templateflow>=0.4.0,<0.5.0a0" && \
+    python -c "from templateflow import api as tfapi; \
+               tfapi.get('MNI152NLin6Asym', atlas=None, extension=['.nii', '.nii.gz']); \
+               tfapi.get('MNI152NLin2009cAsym', atlas=None, extension=['.nii', '.nii.gz']); \
+               tfapi.get('OASIS30ANTs', extension=['.nii', '.nii.gz']);" && \
+    find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
+    find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
 
-# Installing bids-validator
-RUN npm install -g bids-validator@1.2.5
+# Installing DMRIPREP
+COPY . /src/dmriprep
+ARG VERSION
+# Force static versioning within container
+RUN echo "${VERSION}" > /src/dmriprep/dmriprep/VERSION && \
+    echo "include dmriprep/VERSION" >> /src/dmriprep/MANIFEST.in && \
+    pip install --no-cache-dir "/src/dmriprep[all]"
 
-RUN pip install --upgrade pip
+RUN find $HOME -type d -exec chmod go=u {} + && \
+    find $HOME -type f -exec chmod go=u {} +
 
-RUN mkdir dmriprep
-COPY ./ dmriprep/
-RUN cd dmriprep && python setup.py install
+ENV IS_DOCKER_8395080871=1
 
-ENTRYPOINT ["dmriprep"]
+RUN ldconfig
+WORKDIR /tmp/
+ENTRYPOINT ["/usr/local/miniconda/bin/dmriprep"]
+
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="dMRIPrep" \
+      org.label-schema.description="dMRIPrep - robust dMRI preprocessing tool" \
+      org.label-schema.url="http://dmriprep.org" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/nipreps/dmriprep" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"

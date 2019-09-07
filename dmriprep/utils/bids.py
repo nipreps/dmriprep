@@ -1,125 +1,16 @@
-"""
-Utilities to handle BIDS inputs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-"""
-
-import warnings
-import json
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Utilities to handle BIDS inputs."""
+import os
 import sys
+import json
 from pathlib import Path
-
-from bids.layout import BIDSLayout
-
-
-class BIDSError(ValueError):
-    def __init__(self, message, bids_root):
-        indent = 10
-        header = '{sep} BIDS root folder: "{bids_root}" {sep}'.format(
-            bids_root=bids_root, sep="".join(["-"] * indent)
-        )
-        self.msg = "\n{header}\n{indent}{message}\n{footer}".format(
-            header=header,
-            indent="".join([" "] * (indent + 1)),
-            message=message,
-            footer="".join(["-"] * len(header)),
-        )
-        super(BIDSError, self).__init__(self.msg)
-        self.bids_root = bids_root
+from bids import BIDSLayout
 
 
-class BIDSWarning(RuntimeWarning):
-    pass
-
-
-def collect_participants(
-    bids_dir, participant_label=None, strict=False, bids_validate=True
-):
-    """
-    List the participants under the BIDS root and checks that participants
-    designated with the participant_label argument exist in that folder.
-    Returns the list of participants to be finally processed.
-    Requesting all subjects in a BIDS directory root:
-    >>> collect_participants(str(datadir / 'ds114'), bids_validate=False)
-    ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
-    Requesting two subjects, given their IDs:
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '04'],
-    ...                      bids_validate=False)
-    ['02', '04']
-    Requesting two subjects, given their IDs (works with 'sub-' prefixes):
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['sub-02', 'sub-04'],
-    ...                      bids_validate=False)
-    ['02', '04']
-    Requesting two subjects, but one does not exist:
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '14'],
-    ...                      bids_validate=False)
-    ['02']
-    >>> collect_participants(
-    ...     str(datadir / 'ds114'), participant_label=['02', '14'],
-    ...     strict=True, bids_validate=False)  # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-    dmriprep.utils.bids.BIDSError:
-    ...
-    """
-
-    if isinstance(bids_dir, BIDSLayout):
-        layout = bids_dir
-    else:
-        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
-
-    all_participants = set(layout.get_subjects())
-
-    # Error: bids_dir does not contain subjects
-    if not all_participants:
-        raise BIDSError(
-            "Could not find participants. Please make sure the BIDS data "
-            "structure is present and correct. Datasets can be validated online "
-            "using the BIDS Validator (http://bids-standard.github.io/bids-validator/).\n"
-            "If you are using Docker for Mac or Docker for Windows, you "
-            'may need to adjust your "File sharing" preferences.',
-            bids_dir,
-        )
-
-    # No --participant-label was set, return all
-    if not participant_label:
-        return sorted(all_participants)
-
-    if isinstance(participant_label, str):
-        participant_label = [participant_label]
-
-    # Drop sub- prefixes
-    participant_label = [
-        sub[4:] if sub.startswith("sub-") else sub for sub in participant_label
-    ]
-    # Remove duplicates
-    participant_label = sorted(set(participant_label))
-
-    # Remove labels not found
-    found_label = sorted(set(participant_label) & all_participants)
-    if not found_label:
-        raise BIDSError(
-            "Could not find participants [{}]".format(", ".join(participant_label)),
-            bids_dir,
-        )
-
-    # Warn if some IDs were not found
-    notfound_label = sorted(set(participant_label) - all_participants)
-    if notfound_label:
-        exc = BIDSError(
-            "Some participants were not found: {}".format(", ".join(notfound_label)),
-            bids_dir,
-        )
-        if strict:
-            raise exc
-        warnings.warn(exc.msg, BIDSWarning)
-
-    return found_label
-
-
-def collect_data(bids_dir, participant_label, concat_dwis, session_label=None):
-    """
-    Uses pybids to retrieve the input data for a given participant
-    """
-
+def collect_data(bids_dir, participant_label, task=None, echo=None,
+                 bids_validate=True):
+    """Replacement for niworkflows' version."""
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
@@ -128,57 +19,78 @@ def collect_data(bids_dir, participant_label, concat_dwis, session_label=None):
     queries = {
         'fmap': {'datatype': 'fmap'},
         'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
-        't1w': {'datatype': 'anat', 'suffix': 'T1w'}
+        'bold': {'datatype': 'func', 'suffix': 'bold'},
+        'sbref': {'datatype': 'func', 'suffix': 'sbref'},
+        'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
+        't2w': {'datatype': 'anat', 'suffix': 'T2w'},
+        't1w': {'datatype': 'anat', 'suffix': 'T1w'},
+        'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
 
-    if not session_label:
-        session_label = layout.get_sessions()
+    if task:
+        queries['bold']['task'] = task
+
+    if echo:
+        queries['bold']['echo'] = echo
 
     subj_data = {
-        dtype: sorted(layout.get(return_type='file',
-                                 subject=participant_label,
-                                 session=session_label,
+        dtype: sorted(layout.get(return_type='file', subject=participant_label,
                                  extension=['nii', 'nii.gz'], **query))
         for dtype, query in queries.items()}
 
-    subj_data['dwi'] = group_dwi(subj_data['dwi'], session_label, concat_dwis)
-
-    return subj_data
+    return subj_data, layout
 
 
-def group_dwi(dwi_files, session_list, concat_dwis):
+def write_derivative_description(bids_dir, deriv_dir):
+    from ..__about__ import __version__, __url__, DOWNLOAD_URL
 
-    all_dwis = []
+    bids_dir = Path(bids_dir)
+    deriv_dir = Path(deriv_dir)
+    desc = {
+        'Name': 'dMRIPrep - dMRI PREProcessing workflow',
+        'BIDSVersion': '1.1.1',
+        'PipelineDescription': {
+            'Name': 'dMRIPrep',
+            'Version': __version__,
+            'CodeURL': DOWNLOAD_URL,
+        },
+        'CodeURL': __url__,
+        'HowToAcknowledge':
+            'Please cite https://doi.org/10.5281/zenodo.3392201.',
+    }
 
-    if session_list:
-        for session in session_list:
-            session_groups = []
-            session_dwis = [img for img in dwi_files if 'ses-%s' % session in img]
-            for f in session_dwis:
-                if any(acq in f for acq in concat_dwis):
-                    session_groups.append(f)
-                else:
-                    all_dwis.append(f)
-            if not session_groups == []:
-                all_dwis.append(session_groups)
-    else:
-        session_groups = []
-        for f in dwi_files:
-            if any(acq in f for acq in concat_dwis):
-                session_groups.append(f)
-            else:
-                all_dwis.append(f)
-        if not session_groups == []:
-            all_dwis.append(session_groups)
+    # Keys that can only be set by environment
+    if 'DMRIPREP_DOCKER_TAG' in os.environ:
+        desc['DockerHubContainerTag'] = os.environ['DMRIPREP_DOCKER_TAG']
+    if 'DMRIPREP_SINGULARITY_URL' in os.environ:
+        singularity_url = os.environ['DMRIPREP_SINGULARITY_URL']
+        desc['SingularityContainerURL'] = singularity_url
 
-    return all_dwis
+        singularity_md5 = _get_shub_version(singularity_url)
+        if singularity_md5 and singularity_md5 is not NotImplemented:
+            desc['SingularityContainerMD5'] = _get_shub_version(singularity_url)
+
+    # Keys deriving from source dataset
+    orig_desc = {}
+    fname = bids_dir / 'dataset_description.json'
+    if fname.exists():
+        with fname.open() as fobj:
+            orig_desc = json.load(fobj)
+
+    if 'DatasetDOI' in orig_desc:
+        desc['SourceDatasetsURLs'] = ['https://doi.org/{}'.format(
+            orig_desc['DatasetDOI'])]
+    if 'License' in orig_desc:
+        desc['License'] = orig_desc['License']
+
+    with (deriv_dir / 'dataset_description.json').open('w') as fobj:
+        json.dump(desc, fobj, indent=4)
 
 
-def validate_input_dir(bids_dir, subject_list):
+def validate_input_dir(exec_env, bids_dir, participant_label):
     # Ignore issues and warnings that should not influence DMRIPREP
     import tempfile
     import subprocess
-
     validator_config_dict = {
         "ignore": [
             "EVENTS_COLUMN_ONSET",
@@ -195,6 +107,7 @@ def validate_input_dir(bids_dir, subject_list):
             "STIMULUS_FILE_MISSING",
             "BOLD_NOT_4D",
             "EVENTS_TSV_MISSING",
+            "TSV_IMPROPER_NA",
             "ACQTIME_FMT",
             "Participants age 89 or higher",
             "DATASET_DESCRIPTION_JSON_MISSING",
@@ -214,31 +127,45 @@ def validate_input_dir(bids_dir, subject_list):
             "SUSPICIOUSLY_LONG_EVENT_DESIGN",
             "SUSPICIOUSLY_SHORT_EVENT_DESIGN",
             "MISSING_TSV_COLUMN_EEG_ELECTRODES",
-            "MISSING_SESSION",
+            "MISSING_SESSION"
         ],
         "error": ["NO_T1W"],
-        "ignoredFiles": ["/dataset_description.json", "/participants.tsv"],
+        "ignoredFiles": ['/dataset_description.json', '/participants.tsv']
     }
     # Limit validation only to data from requested participants
-    if subject_list:
-        bids_dir = Path(bids_dir)
+    if participant_label:
         all_subs = set([s.name[4:] for s in bids_dir.glob('sub-*')])
         selected_subs = set([s[4:] if s.startswith('sub-') else s
-                             for s in subject_list])
+                             for s in participant_label])
         bad_labels = selected_subs.difference(all_subs)
         if bad_labels:
             error_msg = 'Data for requested participant(s) label(s) not found. Could ' \
                         'not find data for participant(s): %s. Please verify the requested ' \
                         'participant labels.'
+            if exec_env == 'docker':
+                error_msg += ' This error can be caused by the input data not being ' \
+                             'accessible inside the docker container. Please make sure all ' \
+                             'volumes are mounted properly (see https://docs.docker.com/' \
+                             'engine/reference/commandline/run/#mount-volume--v---read-only)'
+            if exec_env == 'singularity':
+                error_msg += ' This error can be caused by the input data not being ' \
+                             'accessible inside the singularity container. Please make sure ' \
+                             'all paths are mapped properly (see https://www.sylabs.io/' \
+                             'guides/3.0/user-guide/bind_paths_and_mounts.html)'
             raise RuntimeError(error_msg % ','.join(bad_labels))
-    ignored_subjects = all_subs.difference(selected_subs)
-    if ignored_subjects:
-        for subject in ignored_subjects:
-            validator_config_dict["ignoredFiles"].append("/sub-%s/**" % subject)
-    with tempfile.NamedTemporaryFile("w+") as temp:
+
+        ignored_subs = all_subs.difference(selected_subs)
+        if ignored_subs:
+            for sub in ignored_subs:
+                validator_config_dict["ignoredFiles"].append("/sub-%s/**" % sub)
+    with tempfile.NamedTemporaryFile('w+') as temp:
         temp.write(json.dumps(validator_config_dict))
         temp.flush()
         try:
-            subprocess.check_call(["bids-validator", bids_dir, "-c", temp.name])
+            subprocess.check_call(['bids-validator', bids_dir, '-c', temp.name])
         except FileNotFoundError:
             print("bids-validator does not appear to be installed", file=sys.stderr)
+
+
+def _get_shub_version(singularity_url):
+    return NotImplemented

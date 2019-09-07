@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """dMRIPrep's setup script."""
 import sys
 from setuptools import setup

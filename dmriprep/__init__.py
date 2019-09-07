@@ -1,17 +1,23 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Top-level package for dmriprep."""
-
+import warnings as _warnings
 from .__about__ import (
     __version__,
+    __copyright__,
     __credits__,
-    __packagename__
+    __packagename__,
 )
 
-import warnings
 
-# Filter warnings that are visible whenever you import another package that
-# was compiled against an older numpy than is installed.
-warnings.filterwarnings('ignore', message='numpy.dtype size changed')
-warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
+__all__ = [
+    '__version__',
+    '__copyright__',
+    '__credits__',
+    '__packagename__',
+]
+
+# cmp is not used by dmriprep, so ignore nipype-generated warnings
+_warnings.filterwarnings('ignore', r'cmp not installed')
+_warnings.filterwarnings('ignore', r'This has not been fully tested. Please report any failures.')
+_warnings.filterwarnings('ignore', r"can't resolve package from __spec__ or __package__")
+_warnings.simplefilter('ignore', DeprecationWarning)
+_warnings.simplefilter('ignore', ResourceWarning)
