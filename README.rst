@@ -2,7 +2,9 @@
 dmriprep
 ========
 
-
+.. image:: https://badgen.net/badge/chat/on%20mattermost/blue
+   :target: https://mattermost.brainhack.org/brainhack/channels/dmriprep
+   
 .. image:: https://img.shields.io/pypi/v/dmriprep.svg
         :target: https://pypi.python.org/pypi/dmriprep
 
