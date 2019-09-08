@@ -11,8 +11,7 @@ def init_sdc_wf(
     fmaps,
     metadata,
     layout,
-    bet_mag,
-    #synb0,
+    bet_mag
     ):
 
     sdc_wf = pe.Workflow(name='sdc_wf')

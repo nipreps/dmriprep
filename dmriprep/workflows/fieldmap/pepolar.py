@@ -133,7 +133,6 @@ def init_synb0_wf(subject_id, dwi_meta, synb0):
 
 
 def init_topup_wf(use_acqp=False):
-    from ...interfaces import mrtrix3
 
     wf = pe.Workflow(name='topup_wf')
 
@@ -163,9 +162,6 @@ def init_topup_wf(use_acqp=False):
     list_merge = pe.Node(niu.Merge(numinputs=2), name='list_merge')
 
     merge = pe.Node(fsl.Merge(dimension='t'), name='mergeAPPA')
-
-    # Resize (make optional)
-    resize = pe.Node(mrtrix3.MRResize(voxel_size=[1]), name='epi_resize')
 
     topup = pe.Node(fsl.TOPUP(), name='topup')
 

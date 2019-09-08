@@ -1,171 +1,146 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utilities to handle BIDS inputs."""
-import os
-import sys
-import json
-from pathlib import Path
-from bids import BIDSLayout
+import warnings
 
 
-def collect_data(bids_dir, participant_label, task=None, echo=None,
-                 bids_validate=True):
-    """Replacement for niworkflows' version."""
+def get_bids_dict(layout, participant_label=None, session=None):
+    def merge_dicts(x, y):
+        """
+        A function to merge two dictionaries, making it easier for us to make
+        modality specific queries for dwi images (since they have variable
+        extensions due to having an nii.gz, bval, and bvec file).
+        """
+        z = x.copy()
+        z.update(y)
+        return z
+
+    # get all files matching the specific modality we are using
+    if not participant_label:
+        # list of all the subjects
+        subjs = layout.get_subjects()
+    else:
+        # make it a list so we can iterate
+        if not isinstance(participant_label, list):
+            subjs = [participant_label]
+            assert participant_label in subjs, "subject {} is not in the bids folder".format(participant_label)
+        else:
+            subjs = participant_label
+            assert participant_label[0] in subjs, "subject {} is not in the bids folder".format(participant_label)
+
+    print('\n')
+    print("%s%s" % ('Subject:', subjs))
+    for sub in subjs:
+        if not session:
+            seshs = layout.get_sessions(subject=sub, derivatives=False)
+            # in case there are non-session level inputs
+            seshs += [None]
+        else:
+            # make a list so we can iterate
+            if not isinstance(session, list):
+                seshs = [session]
+                assert session in seshs, "session {} is not in the bids folder".format(session)
+            else:
+                seshs = session
+                assert session[0] in seshs, "session {} is not in the bids folder".format(session)
+
+        print("%s%s" % ('Sessions:', seshs))
+        print('\n')
+        # all the combinations of sessions and tasks that are possible
+        bids_dict = dict()
+        bids_dict[sub] = {}
+        for ses in seshs:
+            # the attributes for our modality img
+            mod_attributes = [sub, ses]
+            # the keys for our modality img
+            mod_keys = ['subject', 'session']
+            # our query we will use for each modality img
+            mod_query = {'datatype': 'dwi'}
+            for attr, key in zip(mod_attributes, mod_keys):
+                if attr:
+                    mod_query[key] = attr
+                    
+            dwi = layout.get(**merge_dicts(mod_query, {'extension': ['nii', 'nii.gz']}))
+            bval = layout.get(**merge_dicts(mod_query, {'extension': 'bval'}))
+            bvec = layout.get(**merge_dicts(mod_query, {'extension': 'bvec'}))
+            jso = layout.get(**merge_dicts(mod_query, {'extension': 'json'}))
+
+            bids_dict[sub][ses] = {}
+            for acq_ix in range(1, len(dwi) + 1):
+                bids_dict[sub][ses][acq_ix] = {}
+                bids_dict[sub][ses][acq_ix]['dwi_file'] = dwi[acq_ix - 1].path
+                bids_dict[sub][ses][acq_ix]['fbval'] = bval[acq_ix - 1].path
+                bids_dict[sub][ses][acq_ix]['fbvec'] = bvec[acq_ix - 1].path
+                bids_dict[sub][ses][acq_ix]['metadata'] = jso[acq_ix - 1].path
+    return bids_dict
+
+
+class BIDSError(ValueError):
+    def __init__(self, message, bids_root):
+        indent = 10
+        header = '{sep} BIDS root folder: "{bids_root}" {sep}'.format(
+            bids_root=bids_root, sep=''.join(['-'] * indent))
+        self.msg = '\n{header}\n{indent}{message}\n{footer}'.format(
+            header=header, indent=''.join([' '] * (indent + 1)),
+            message=message, footer=''.join(['-'] * len(header))
+        )
+        super(BIDSError, self).__init__(self.msg)
+        self.bids_root = bids_root
+
+
+class BIDSWarning(RuntimeWarning):
+    pass
+
+
+def collect_sessions(bids_dir, session=None, strict=False, bids_validate=True):
+    """
+    List the sessions under the BIDS root and checks that sessions
+    designated with the participant_label argument exist in that folder.
+    Returns the list of sessions to be finally processed.
+    Requesting all sessions in a BIDS directory root:
+    ...
+    """
+    from bids import BIDSLayout
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
         layout = BIDSLayout(str(bids_dir), validate=bids_validate)
 
-    queries = {
-        'fmap': {'datatype': 'fmap'},
-        'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
-        'bold': {'datatype': 'func', 'suffix': 'bold'},
-        'sbref': {'datatype': 'func', 'suffix': 'sbref'},
-        'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
-        't2w': {'datatype': 'anat', 'suffix': 'T2w'},
-        't1w': {'datatype': 'anat', 'suffix': 'T1w'},
-        'roi': {'datatype': 'anat', 'suffix': 'roi'},
-    }
+    all_sessions = set(layout.get_sessions())
 
-    if task:
-        queries['bold']['task'] = task
+    # Error: bids_dir does not contain subjects
+    if not all_sessions:
+        raise BIDSError(
+            'Could not find session. Please make sure the BIDS data '
+            'structure is present and correct. Datasets can be validated online '
+            'using the BIDS Validator (http://bids-standard.github.io/bids-validator/).\n'
+            'If you are using Docker for Mac or Docker for Windows, you '
+            'may need to adjust your "File sharing" preferences.', bids_dir)
 
-    if echo:
-        queries['bold']['echo'] = echo
+    # No --participant-label was set, return all
+    if not session:
+        return sorted(all_sessions)
 
-    subj_data = {
-        dtype: sorted(layout.get(return_type='file', subject=participant_label,
-                                 extension=['nii', 'nii.gz'], **query))
-        for dtype, query in queries.items()}
+    if isinstance(session, int):
+        session = [session]
 
-    return subj_data, layout
+    # Drop ses- prefixes
+    session = [ses[4:] if ses.startswith('ses-') else ses for ses in session]
+    # Remove duplicates
+    session = sorted(set(session))
+    # Remove labels not found
+    found_label = sorted(set(session) & all_sessions)
+    if not found_label:
+        raise BIDSError('Could not find session [{}]'.format(
+            ', '.join(session)), bids_dir)
 
+    # Warn if some IDs were not found
+    notfound_label = sorted(set(session) - all_sessions)
+    if notfound_label:
+        exc = BIDSError('Some sessions were not found: {}'.format(
+            ', '.join(notfound_label)), bids_dir)
+        if strict:
+            raise exc
+        warnings.warn(exc.msg, BIDSWarning)
 
-def write_derivative_description(bids_dir, deriv_dir):
-    from ..__about__ import __version__, __url__, DOWNLOAD_URL
-
-    bids_dir = Path(bids_dir)
-    deriv_dir = Path(deriv_dir)
-    desc = {
-        'Name': 'dMRIPrep - dMRI PREProcessing workflow',
-        'BIDSVersion': '1.1.1',
-        'PipelineDescription': {
-            'Name': 'dMRIPrep',
-            'Version': __version__,
-            'CodeURL': DOWNLOAD_URL,
-        },
-        'CodeURL': __url__,
-        'HowToAcknowledge':
-            'Please cite https://doi.org/10.5281/zenodo.3392201.',
-    }
-
-    # Keys that can only be set by environment
-    if 'DMRIPREP_DOCKER_TAG' in os.environ:
-        desc['DockerHubContainerTag'] = os.environ['DMRIPREP_DOCKER_TAG']
-    if 'DMRIPREP_SINGULARITY_URL' in os.environ:
-        singularity_url = os.environ['DMRIPREP_SINGULARITY_URL']
-        desc['SingularityContainerURL'] = singularity_url
-
-        singularity_md5 = _get_shub_version(singularity_url)
-        if singularity_md5 and singularity_md5 is not NotImplemented:
-            desc['SingularityContainerMD5'] = _get_shub_version(singularity_url)
-
-    # Keys deriving from source dataset
-    orig_desc = {}
-    fname = bids_dir / 'dataset_description.json'
-    if fname.exists():
-        with fname.open() as fobj:
-            orig_desc = json.load(fobj)
-
-    if 'DatasetDOI' in orig_desc:
-        desc['SourceDatasetsURLs'] = ['https://doi.org/{}'.format(
-            orig_desc['DatasetDOI'])]
-    if 'License' in orig_desc:
-        desc['License'] = orig_desc['License']
-
-    with (deriv_dir / 'dataset_description.json').open('w') as fobj:
-        json.dump(desc, fobj, indent=4)
-
-
-def validate_input_dir(exec_env, bids_dir, participant_label):
-    # Ignore issues and warnings that should not influence DMRIPREP
-    import tempfile
-    import subprocess
-    validator_config_dict = {
-        "ignore": [
-            "EVENTS_COLUMN_ONSET",
-            "EVENTS_COLUMN_DURATION",
-            "TSV_EQUAL_ROWS",
-            "TSV_EMPTY_CELL",
-            "TSV_IMPROPER_NA",
-            "INCONSISTENT_SUBJECTS",
-            "INCONSISTENT_PARAMETERS",
-            "PARTICIPANT_ID_COLUMN",
-            "PARTICIPANT_ID_MISMATCH",
-            "TASK_NAME_MUST_DEFINE",
-            "PHENOTYPE_SUBJECTS_MISSING",
-            "STIMULUS_FILE_MISSING",
-            "BOLD_NOT_4D",
-            "EVENTS_TSV_MISSING",
-            "TSV_IMPROPER_NA",
-            "ACQTIME_FMT",
-            "Participants age 89 or higher",
-            "DATASET_DESCRIPTION_JSON_MISSING",
-            "TASK_NAME_CONTAIN_ILLEGAL_CHARACTER",
-            "FILENAME_COLUMN",
-            "WRONG_NEW_LINE",
-            "MISSING_TSV_COLUMN_CHANNELS",
-            "MISSING_TSV_COLUMN_IEEG_CHANNELS",
-            "MISSING_TSV_COLUMN_IEEG_ELECTRODES",
-            "UNUSED_STIMULUS",
-            "CHANNELS_COLUMN_SFREQ",
-            "CHANNELS_COLUMN_LOWCUT",
-            "CHANNELS_COLUMN_HIGHCUT",
-            "CHANNELS_COLUMN_NOTCH",
-            "CUSTOM_COLUMN_WITHOUT_DESCRIPTION",
-            "ACQTIME_FMT",
-            "SUSPICIOUSLY_LONG_EVENT_DESIGN",
-            "SUSPICIOUSLY_SHORT_EVENT_DESIGN",
-            "MISSING_TSV_COLUMN_EEG_ELECTRODES",
-            "MISSING_SESSION"
-        ],
-        "error": ["NO_T1W"],
-        "ignoredFiles": ['/dataset_description.json', '/participants.tsv']
-    }
-    # Limit validation only to data from requested participants
-    if participant_label:
-        all_subs = set([s.name[4:] for s in bids_dir.glob('sub-*')])
-        selected_subs = set([s[4:] if s.startswith('sub-') else s
-                             for s in participant_label])
-        bad_labels = selected_subs.difference(all_subs)
-        if bad_labels:
-            error_msg = 'Data for requested participant(s) label(s) not found. Could ' \
-                        'not find data for participant(s): %s. Please verify the requested ' \
-                        'participant labels.'
-            if exec_env == 'docker':
-                error_msg += ' This error can be caused by the input data not being ' \
-                             'accessible inside the docker container. Please make sure all ' \
-                             'volumes are mounted properly (see https://docs.docker.com/' \
-                             'engine/reference/commandline/run/#mount-volume--v---read-only)'
-            if exec_env == 'singularity':
-                error_msg += ' This error can be caused by the input data not being ' \
-                             'accessible inside the singularity container. Please make sure ' \
-                             'all paths are mapped properly (see https://www.sylabs.io/' \
-                             'guides/3.0/user-guide/bind_paths_and_mounts.html)'
-            raise RuntimeError(error_msg % ','.join(bad_labels))
-
-        ignored_subs = all_subs.difference(selected_subs)
-        if ignored_subs:
-            for sub in ignored_subs:
-                validator_config_dict["ignoredFiles"].append("/sub-%s/**" % sub)
-    with tempfile.NamedTemporaryFile('w+') as temp:
-        temp.write(json.dumps(validator_config_dict))
-        temp.flush()
-        try:
-            subprocess.check_call(['bids-validator', bids_dir, '-c', temp.name])
-        except FileNotFoundError:
-            print("bids-validator does not appear to be installed", file=sys.stderr)
-
-
-def _get_shub_version(singularity_url):
-    return NotImplemented
+    return found_label

@@ -103,6 +103,3 @@ ENV/
 
 # Mac OS nonsense:
 .DS_Store
-
-# miscellaneous
-references/

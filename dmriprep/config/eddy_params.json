@@ -1,0 +1,18 @@
+{
+  "flm": "quadratic",
+  "fep": false,
+  "interp": "spline",
+  "nvoxhp": 1000,
+  "fudge_factor": 10,
+  "dont_sep_offs_move": false,
+  "dont_peas": false,
+  "niter": 5,
+  "method": "jac",
+  "repol": true,
+  "num_threads": 1,
+  "is_shelled": false,
+  "use_cuda": false,
+  "cnr_maps": true,
+  "residuals": true,
+  "output_type": "NIFTI_GZ"
+}

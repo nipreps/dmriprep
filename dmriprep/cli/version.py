@@ -63,8 +63,8 @@ def is_flagged():
     # https://raw.githubusercontent.com/poldracklab/dmriprep/master/.versions.json
     flagged = tuple()
     try:
-        response = requests.get(url="""\
-https://raw.githubusercontent.com/poldracklab/dmriprep/master/.versions.json""", timeout=1.0)
+        response = requests.get(url="""https://raw.githubusercontent.com/poldracklab/dmriprep/master/.versions.json""",
+                                timeout=1.0)
     except Exception:
         response = None
 

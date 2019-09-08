@@ -37,8 +37,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx_click.ext',  # click extension
-    'nipype.sphinxext.plot_workflow'  # nipype extension to plot workflows
+    'sphinxarg.ext',  # argparse extension
+    'nipype.sphinxext.plot_workflow'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'dmriprep'
-author = 'The dMRIprep developers'
+author = 'The dMRIPrep developers'
 copyright = '2018-%s, %s' % (datetime.now().year, author)
 
 
@@ -133,7 +133,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'dmriprep.tex', 'dmriprep Documentation', author, 'manual')
+    (master_doc, 'dmriprep.tex', 'dMRIPrep Documentation', author, 'manual')
 ]
 
 
@@ -141,7 +141,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, 'dmriprep', u'dmriprep Documentation', [author], 1)]
+man_pages = [(master_doc, 'dmriprep', u'dMRIPrep Documentation', [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -153,7 +153,7 @@ texinfo_documents = [
     (
         master_doc,
         'dmriprep',
-        'dMRIprep Documentation',
+        'dMRIPrep Documentation',
         author,
         'dmriprep',
         'One line description of project.',

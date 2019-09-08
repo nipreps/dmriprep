@@ -2,7 +2,7 @@
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, ants, utility as niu
-from ...interfaces import Phases2Fieldmap
+from ...interfaces.fmap import Phases2Fieldmap
 
 
 def init_phase_wf(bet_mag):
@@ -27,7 +27,7 @@ def init_phase_wf(bet_mag):
         (inputnode, phases2fmap, [('phasediff', 'phase_files')]),
         (inputnode, phdiff_wf, [('magnitude1', 'inputnode.magnitude1'),
                                 ('phases_meta', 'inputnode.phases_meta')]),
-        (phases2fmap, phdiff_wf, [('out_file', 'inputnode.phasediff')])
+        (phases2fmap, phdiff_wf, [('out_file', 'inputnode.phasediff')]),
         (phdiff_wf, outputnode, [('outputnode.out_fmap', 'out_fmap'),
                                  ('outputnode.out_mag', 'out_mag')])
     ])

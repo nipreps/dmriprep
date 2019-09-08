@@ -4,6 +4,11 @@
   "description": "<p>dMRIPrep is a robust and easy-to-use pipeline for preprocessing of diverse dMRI data. The transparent workflow dispenses of manual intervention, thereby ensuring the reproducibility of the results.</p>",
   "creators": [
     {
+      "affiliation": "University of Texas at Austin",
+      "name": "Pisner, Derek",
+      "orcid": "0000-0002-1228-0201"
+    },
+    {
       "affiliation": "Stanford University",
       "name": "Lerma-Usabiaga, Garikoitz",
       "orcid": "0000-0001-9800-4816"
