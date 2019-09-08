@@ -9,9 +9,10 @@ Artefact removal and resizing
 """
 
 from nipype.pipeline import engine as pe
-from nipype.interfaces import mrtrix3, utility as niu
+from nipype.interfaces import utility as niu
 
 from dmriprep.due import due, BibTeX
+from dmriprep.interfaces import mrtrix3
 
 
 @due.dcite(BibTeX(
