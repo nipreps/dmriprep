@@ -29,11 +29,15 @@ from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
 from ..__about__ import __version__
-# from .dwi import init_dwi_preproc_wf
+from .dwi import init_dwi_preproc_wf
 
 
 def init_dmriprep_wf(
+    acq_id,
+    acqp_file,
     anat_only,
+    b0_thresh,
+    concat_dwis,
     debug,
     force_syn,
     freesurfer,
@@ -44,6 +48,7 @@ def init_dmriprep_wf(
     low_mem,
     omp_nthreads,
     output_dir,
+    output_resolution,
     output_spaces,
     run_uuid,
     skull_strip_fixed_seed,
@@ -69,7 +74,11 @@ def init_dmriprep_wf(
         from dmriprep.workflows.base import init_dmriprep_wf
         os.environ['FREESURFER_HOME'] = os.getcwd()
         wf = init_dmriprep_wf(
+            acq_id=[],
+            acqp_file='',
             anat_only=False,
+            b0_thresh=5,
+            concat_dwis=[],
             debug=False,
             force_syn=True,
             freesurfer=True,
@@ -80,6 +89,7 @@ def init_dmriprep_wf(
             low_mem=False,
             omp_nthreads=1,
             output_dir='.',
+            output_resolution=1,
             output_spaces=OrderedDict([
                 ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
                 ('T1w', {}), ('fsnative', {})]),
@@ -105,7 +115,7 @@ def init_dmriprep_wf(
         hires : bool
             Enable sub-millimeter preprocessing in FreeSurfer
         ignore : list
-            Preprocessing steps to skip (may include "slicetiming", "fieldmaps")
+            Preprocessing steps to skip (may include "denoising", "unringing", "fieldmaps")
         layout : BIDSLayout object
             BIDS dataset layout
         longitudinal : bool
@@ -314,7 +324,7 @@ def init_single_subject_wf(
         # for documentation purposes
         subject_data = {
             't1w': ['/completely/made/up/path/sub-01_T1w.nii.gz'],
-            'dwi': ['/completely/made/up/path/sub-01_task-nback_bold.nii.gz']
+            'dwi': ['/completely/made/up/path/sub-01_dwi.nii.gz']
         }
     else:
         subject_data = collect_data(layout, subject_id)[0]
@@ -437,35 +447,27 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    # for dwi_file in subject_data['dwi']:
-    #     dwi_preproc_wf = init_dwi_preproc_wf(
-    #         aroma_melodic_dim=aroma_melodic_dim,
-    #         bold2t1w_dof=bold2t1w_dof,
-    #         bold_file=bold_file,
-    #         cifti_output=cifti_output,
-    #         debug=debug,
-    #         dummy_scans=dummy_scans,
-    #         err_on_aroma_warn=err_on_aroma_warn,
-    #         fmap_bspline=fmap_bspline,
-    #         fmap_demean=fmap_demean,
-    #         force_syn=force_syn,
-    #         freesurfer=freesurfer,
-    #         ignore=ignore,
-    #         layout=layout,
-    #         low_mem=low_mem,
-    #         medial_surface_nan=medial_surface_nan,
-    #         num_bold=len(subject_data['bold']),
-    #         omp_nthreads=omp_nthreads,
-    #         output_dir=output_dir,
-    #         output_spaces=output_spaces,
-    #         reportlets_dir=reportlets_dir,
-    #         regressors_all_comps=regressors_all_comps,
-    #         regressors_fd_th=regressors_fd_th,
-    #         regressors_dvars_th=regressors_dvars_th,
-    #         t2s_coreg=t2s_coreg,
-    #         use_aroma=use_aroma,
-    #         use_syn=use_syn,
-    #     )
+    for dwi_file in subject_data['dwi']:
+        dwi_preproc_wf = init_dwi_preproc_wf(
+            acqp_file=acqp_file,
+            b0_thresh=b0_thresh,
+            debug=debug,
+            dwi_file=dwi_file,
+            fmap_bspline=fmap_bspline,
+            fmap_demean=fmap_demean,
+            force_syn=force_syn,
+            freesurfer=freesurfer,
+            ignore=ignore,
+            layout=layout,
+            low_mem=low_mem,
+            num_dwi=len(subject_data['dwi']),
+            omp_nthreads=omp_nthreads,
+            output_dir=output_dir,
+            output_resolution=output_resolution,
+            output_spaces=output_spaces,
+            reportlets_dir=reportlets_dir,
+            use_syn=use_syn,
+        )
 
     #     workflow.connect([
     #         (anat_preproc_wf, dwi_preproc_wf,

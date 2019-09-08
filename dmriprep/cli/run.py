@@ -69,7 +69,7 @@ def get_parser():
     g_bids.add_argument('--participant_label', '--participant-label', action='store', nargs='+',
                         help='a space delimited list of participant identifiers or a single '
                              'identifier (the sub- prefix can be removed)')
-    # Re-enable when option is actually implemented
+    Re-enable when option is actually implemented
     # g_bids.add_argument('-s', '--session-id', action='store', default='single_session',
     #                     help='select a specific session to be processed')
     # Re-enable when option is actually implemented
@@ -99,7 +99,8 @@ def get_parser():
 
     g_conf = parser.add_argument_group('Workflow configuration')
     g_conf.add_argument(
-        '--ignore', required=False, action='store', nargs="+", default=[], choices=['sdc'],
+        '--ignore', required=False, action='store', nargs="+", default=[],
+        choices=['denoising', 'unringing', 'fieldmaps'],
         help='ignore selected aspects of the input dataset to disable corresponding '
              'parts of the workflow (a space delimited list)')
     g_conf.add_argument(
@@ -131,6 +132,17 @@ https://dmriprep.readthedocs.io/en/%s/spaces.html""" % (
                         help='do not use a random seed for skull-stripping - will ensure '
                              'run-to-run replicability when used with --omp-nthreads 1')
 
+    # Dwi options
+    g_dwi = parser.add_argument_group('Specific options for handling dwi scans')
+    g_dwi.add_argument('--concat-dwis', required=False, action='store',
+                       nargs="+", default=[],
+                       help='space-delimited list of acq-<label>')
+    g_dwi.add_argument('--b0-thresh', required=False, action='store', default=5,
+                       help='Threshold for b0 value')
+    g_dwi.add_argumnet('--output-resolution', required=False, action='store',
+                       help='isotropic voxel size in mm the data will be resampled '
+                            'to before running eddy')
+
     # Fieldmap options
     g_fmap = parser.add_argument_group('Specific options for handling fieldmaps')
     g_fmap.add_argument('--fmap-bspline', action='store_true', default=False,
@@ -152,6 +164,12 @@ https://dmriprep.readthedocs.io/en/%s/spaces.html""" % (
         '--fs-license-file', metavar='PATH', type=Path,
         help='Path to FreeSurfer license key file. Get it (for free) by registering'
              ' at https://surfer.nmr.mgh.harvard.edu/registration.html')
+
+    # Eddy options
+    g_eddy = parser.add_argument_group('Specific options for FSL eddy preprocessing')
+    g_eddy.add_argument('--acqp-file', action='store', type=Path,
+                        help='Path to acquisition parameters file for topup/eddy '
+                             'instead of generating it from the dwi json')
 
     # Surface generation xor
     g_surfs = parser.add_argument_group('Surface preprocessing options')
@@ -548,7 +566,11 @@ def build_workflow(opts, retval):
     )
 
     retval['workflow'] = init_dmriprep_wf(
+        acq_id=opts.acq_id,
+        acqp_file=opts.acqp_file,
         anat_only=opts.anat_only,
+        b0_thresh=opts.b0_thresh,
+        concat_dwis=opts.concat_dwis,
         debug=opts.debug,
         force_syn=opts.force_syn,
         freesurfer=opts.run_reconall,
@@ -559,6 +581,7 @@ def build_workflow(opts, retval):
         low_mem=opts.low_mem,
         omp_nthreads=omp_nthreads,
         output_dir=str(output_dir),
+        output_resolution=opts.output_resolution,
         output_spaces=output_spaces,
         run_uuid=run_uuid,
         skull_strip_fixed_seed=opts.skull_strip_fixed_seed,
