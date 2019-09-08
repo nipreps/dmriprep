@@ -87,8 +87,8 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
-docker-dev: ## build the development environment
-	docker build -t dmriprep:dev -f docker/Dockerfile docker/.
-
-docker: docker-dev
-	docker build -t dmriprep:prod -f Dockerfile-dmriprep .
+docker: docker
+	docker build --rm -t nipreps/dmriprep:latest \
+		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+		--build-arg VCS_REF=`git rev-parse --short HEAD` \
+		--build-arg VERSION=$( python get_version.py ) .
