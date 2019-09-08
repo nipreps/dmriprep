@@ -69,7 +69,7 @@ def get_parser():
     g_bids.add_argument('--participant_label', '--participant-label', action='store', nargs='+',
                         help='a space delimited list of participant identifiers or a single '
                              'identifier (the sub- prefix can be removed)')
-    Re-enable when option is actually implemented
+    # Re-enable when option is actually implemented
     # g_bids.add_argument('-s', '--session-id', action='store', default='single_session',
     #                     help='select a specific session to be processed')
     # Re-enable when option is actually implemented
@@ -139,7 +139,7 @@ https://dmriprep.readthedocs.io/en/%s/spaces.html""" % (
                        help='space-delimited list of acq-<label>')
     g_dwi.add_argument('--b0-thresh', required=False, action='store', default=5,
                        help='Threshold for b0 value')
-    g_dwi.add_argumnet('--output-resolution', required=False, action='store',
+    g_dwi.add_argument('--output-resolution', required=False, action='store',
                        help='isotropic voxel size in mm the data will be resampled '
                             'to before running eddy')
 

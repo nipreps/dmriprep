@@ -104,8 +104,12 @@ def init_dmriprep_wf(
 
     Parameters
     ----------
+        acq_id : list
+        acqp_file : str
         anat_only : bool
             Disable diffusion MRI workflows
+        b0_thresh : int
+        concat_dwis : list
         debug : bool
             Enable debugging outputs
         force_syn : bool
@@ -127,6 +131,7 @@ def init_dmriprep_wf(
             Maximum number of threads an individual process may use
         output_dir : str
             Directory in which to save derivatives
+        output_resolution : float
         output_spaces : OrderedDict
             Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
             ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
