@@ -15,7 +15,7 @@ __all__ = [
     '__packagename__',
 ]
 
-# cmp is not used by fmriprep, so ignore nipype-generated warnings
+# cmp is not used by dmriprep, so ignore nipype-generated warnings
 _warnings.filterwarnings('ignore', r'cmp not installed')
 _warnings.filterwarnings('ignore', r'This has not been fully tested. Please report any failures.')
 _warnings.filterwarnings('ignore', r"can't resolve package from __spec__ or __package__")

@@ -8,8 +8,8 @@ build/**/*
 build
 dist/**/*
 dist
-fmriprep.egg-info/**/*
-fmriprep.egg-info
+dmriprep.egg-info/**/*
+dmriprep.egg-info
 .eggs/**/*
 .eggs
 
@@ -39,4 +39,4 @@ out/
 .zenodo.json
 .travis.yml
 .readthedocs.yml
-CONTRIBUTING.md
+CONTRIBUTING.rst

@@ -75,6 +75,8 @@ def get_parser():
     # Re-enable when option is actually implemented
     # g_bids.add_argument('-r', '--run-id', action='store', default='single_run',
     #                     help='select a specific run to be processed')
+    g_bids.add_argument('-a', '--acq-id', action='store',
+                        help='select a specific acquisition to be processed')
 
     g_perfm = parser.add_argument_group('Options to handle performance')
     g_perfm.add_argument('--nprocs', '--n_cpus', '-n-cpus', action='store', type=int,
