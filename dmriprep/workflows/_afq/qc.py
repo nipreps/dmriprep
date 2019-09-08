@@ -3,8 +3,7 @@ import os.path as op
 from io import BytesIO
 
 import matplotlib
-
-matplotlib.use("agg")
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
@@ -19,14 +18,15 @@ def reorient_array(data, aff):
     data_RAS = nib.orientations.apply_orientation(data, orientation)
     # In RAS
     return nib.orientations.apply_orientation(
-        data_RAS, nib.orientations.axcodes2ornt("IPL")
+        data_RAS,
+        nib.orientations.axcodes2ornt("IPL")
     )
 
 
 def mplfig(data, outfile=None, as_bytes=False):
     fig = plt.figure(frameon=False, dpi=data.shape[0])
-    fig.set_size_inches(float(data.shape[1]) / data.shape[0], 1)
-    ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
+    fig.set_size_inches(float(data.shape[1])/data.shape[0], 1)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.set_axis_off()
     fig.add_axes(ax)
     ax.imshow(data, aspect=1, cmap=plt.cm.Greys_r)  # previous aspect="normal"
@@ -36,7 +36,7 @@ def mplfig(data, outfile=None, as_bytes=False):
         return outfile
     if as_bytes:
         IObytes = BytesIO()
-        plt.savefig(IObytes, format="png", dpi=data.shape[0], transparent=True)
+        plt.savefig(IObytes, format='png', dpi=data.shape[0], transparent=True)
         IObytes.seek(0)
         base64_jpgData = base64.b64encode(IObytes.read())
         return base64_jpgData.decode("ascii")
@@ -44,8 +44,8 @@ def mplfig(data, outfile=None, as_bytes=False):
 
 def mplfigcontour(data, outfile=None, as_bytes=False):
     fig = plt.figure(frameon=False)
-    fig.set_size_inches(float(data.shape[1]) / data.shape[0], 1)
-    ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
+    fig.set_size_inches(float(data.shape[1])/data.shape[0], 1)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.set_axis_off()
     fig.add_axes(ax)
 
@@ -59,7 +59,7 @@ def mplfigcontour(data, outfile=None, as_bytes=False):
         return outfile
     if as_bytes:
         IObytes = BytesIO()
-        plt.savefig(IObytes, format="png", dpi=data.shape[0], transparent=True)
+        plt.savefig(IObytes, format='png', dpi=data.shape[0], transparent=True)
         IObytes.seek(0)
         base64_jpgData = base64.b64encode(IObytes.read())
         return base64_jpgData.decode("ascii")
@@ -73,42 +73,31 @@ def load_and_reorient(filename):
 
 
 def reshape3D(data, n=256):
-    return np.pad(
-        data,
+    return np.pad(data, (
         (
-            (
-                (n - data.shape[0]) // 2,
-                ((n - data.shape[0]) + (data.shape[0] % 2 > 0)) // 2,
-            ),
-            (
-                (n - data.shape[1]) // 2,
-                ((n - data.shape[1]) + (data.shape[1] % 2 > 0)) // 2,
-            ),
-            (0, 0),
+            (n-data.shape[0]) // 2,
+            ((n-data.shape[0]) + (data.shape[0] % 2 > 0)) // 2
         ),
-        "constant",
-        constant_values=(0, 0),
-    )
+        (
+            (n-data.shape[1]) // 2,
+            ((n-data.shape[1]) + (data.shape[1] % 2 > 0)) // 2
+        ),
+        (0, 0)
+    ), "constant", constant_values=(0, 0))
 
 
 def reshape4D(data, n=256):
-    return np.pad(
-        data,
+    return np.pad(data, (
         (
-            (
-                (n - data.shape[0]) // 2,
-                ((n - data.shape[0]) + (data.shape[0] % 2 > 0)) // 2,
-            ),
-            (
-                (n - data.shape[1]) // 2,
-                ((n - data.shape[1]) + (data.shape[1] % 2 > 0)) // 2,
-            ),
-            (0, 0),
-            (0, 0),
+            (n-data.shape[0]) // 2,
+            ((n-data.shape[0]) + (data.shape[0] % 2 > 0)) // 2
         ),
-        "constant",
-        constant_values=(0, 0),
-    )
+        (
+            (n-data.shape[1]) // 2,
+            ((n-data.shape[1]) + (data.shape[1] % 2 > 0)) // 2
+        ),
+        (0, 0), (0, 0)
+    ), "constant", constant_values=(0, 0))
 
 
 def get_middle_slices(data, slice_direction):
@@ -128,7 +117,7 @@ def get_middle_slices(data, slice_direction):
 
 def nearest_square(limit):
     answer = 0
-    while (answer + 1) ** 2 < limit:
+    while (answer+1)**2 < limit:
         answer += 1
     if (answer ** 2) == limit:
         return answer
@@ -139,17 +128,17 @@ def nearest_square(limit):
 def create_sprite_from_tiles(tile, out_file=None, as_bytes=False):
     num_slices = tile.shape[-1]
     N = nearest_square(num_slices)
-    M = int(np.ceil(num_slices / N))
+    M = int(np.ceil(num_slices/N))
     # tile is square, so just make a big arr
     pix = tile.shape[0]
 
     if len(tile.shape) == 3:
-        mosaic = np.zeros((N * tile.shape[0], M * tile.shape[0]))
+        mosaic = np.zeros((N*tile.shape[0], M*tile.shape[0]))
     else:
-        mosaic = np.zeros((N * tile.shape[0], M * tile.shape[0], tile.shape[-2]))
+        mosaic = np.zeros((N*tile.shape[0], M*tile.shape[0], tile.shape[-2]))
 
     mosaic[:] = np.nan
-    helper = np.arange(N * M).reshape((N, M))
+    helper = np.arange(N*M).reshape((N, M))
 
     for t in range(num_slices):
         x, y = np.nonzero(helper == t)
@@ -182,13 +171,13 @@ def createSprite4D(dwi_file):
     dwi = load_and_reorient(dwi_file)[:, :, :, 1:]
 
     # create tiles from center slice on each orientation
-    for orient in ["sag", "ax", "cor"]:
+    for orient in ['sag', 'ax', 'cor']:
         tile = get_middle_slices(dwi, orient)
 
         # create sprite images for each
         results = create_sprite_from_tiles(tile, as_bytes=True)
-        results["img_type"] = "4dsprite"
-        results["orientation"] = orient
+        results['img_type'] = '4dsprite'
+        results['orientation'] = orient
         output.append(results)
 
     return output
@@ -205,50 +194,45 @@ def createB0_ColorFA_Mask_Sprites(b0_file, colorFA_file, mask_file):
     b0 = reshape3D(b0, N)
     _, mask = median_otsu(b0)
     outb0 = create_sprite_from_tiles(b0, as_bytes=True)
-    outb0["img_type"] = "brainsprite"
+    outb0['img_type'] = 'brainsprite'
 
     # make a colorFA sprite, masked by b0
     Q = reshape4D(colorfa, N)
     Q[np.logical_not(mask)] = np.nan
-    Q = np.moveaxis(Q, -2, -1)
+    Q = np.moveaxis(Q,  -2, -1)
     outcolorFA = create_sprite_from_tiles(Q, as_bytes=True)
-    outcolorFA["img_type"] = "brainsprite"
+    outcolorFA['img_type'] = 'brainsprite'
 
     # make an anat mask contour sprite
     outmask = create_sprite_from_tiles(reshape3D(anat_mask, N))
     img = mplfigcontour(outmask.pop("mosaic"), as_bytes=True)
-    outmask["img"] = img
+    outmask['img'] = img
 
     return outb0, outcolorFA, outmask
 
 
-def create_report_json(
-    dwi_corrected_file,
-    eddy_rms,
-    eddy_report,
-    color_fa_file,
-    anat_mask_file,
-    outlier_indices,
-    eddy_qc_file,
-    outpath=op.abspath("./report.json"),
-):
+def create_report_json(dwi_corrected_file, eddy_rms, eddy_report,
+                       color_fa_file, anat_mask_file,
+                       outlier_indices,
+                       eddy_qc_file,
+                       outpath=op.abspath('./report.json')):
 
     report = {}
-    report["dwi_corrected"] = createSprite4D(dwi_corrected_file)
+    report['dwi_corrected'] = createSprite4D(dwi_corrected_file)
 
-    b0, colorFA, mask = createB0_ColorFA_Mask_Sprites(
-        dwi_corrected_file, color_fa_file, anat_mask_file
-    )
-    report["b0"] = b0
-    report["colorFA"] = colorFA
-    report["anat_mask"] = mask
-    report["outlier_volumes"] = outlier_indices.tolist()
+    b0, colorFA, mask = createB0_ColorFA_Mask_Sprites(dwi_corrected_file,
+                                                      color_fa_file,
+                                                      anat_mask_file)
+    report['b0'] = b0
+    report['colorFA'] = colorFA
+    report['anat_mask'] = mask
+    report['outlier_volumes'] = outlier_indices.tolist()
 
-    with open(eddy_report, "r") as f:
-        report["eddy_report"] = f.readlines()
+    with open(eddy_report, 'r') as f:
+        report['eddy_report'] = f.readlines()
 
-    report["eddy_params"] = np.genfromtxt(eddy_rms).tolist()
+    report['eddy_params'] = np.genfromtxt(eddy_rms).tolist()
     eddy_qc = load_json(eddy_qc_file)
-    report["eddy_quad"] = eddy_qc
+    report['eddy_quad'] = eddy_qc
     save_json(outpath, report)
     return outpath
