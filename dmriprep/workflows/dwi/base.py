@@ -8,8 +8,11 @@ Orchestrating the dwi preprocessing workflows
 
 """
 
+from nipype import logging
 from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, mrtrix3, utility as niu
+
+from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 
 from .artifacts import init_dwi_artifacts_wf
 from .eddy import init_dwi_eddy_wf
@@ -17,6 +20,9 @@ from .tensor import init_dwi_tensor_wf
 from ..fieldmap.base import init_sdc_wf
 
 FMAP_PRIORITY = {'epi': 0, 'fieldmap': 1, 'phasediff': 2, 'phase': 3, 'syn': 4}
+
+DEFAULT_MEMORY_MIN_GB = 0.01
+LOGGER = logging.getLogger('nipype.workflow')
 
 
 def init_dwi_preproc_wf(
@@ -40,7 +46,7 @@ def init_dwi_preproc_wf(
     use_syn,
 ):
     """
-    This workflow controls the diffusion preprocessing stages of dMRIprep.
+    This workflow controls the diffusion preprocessing stages of dMRIPrep.
 
     .. workflow::
         :graph2use: orig
@@ -49,7 +55,33 @@ def init_dwi_preproc_wf(
         from collections import namedtuple
         from dmriprep.workflows.dwi import init_dwi_preproc_wf
         BIDSLayout = namedtuple('BIDSLayout', ['root'])
-        wf = init_dwi_preproc_wf(layout=BIDSLayout('.'), output_dir='.', subject_id='dmripreptest', dwi_file='/madeup/path/sub-01_dwi.nii.gz', metadata={'PhaseEncodingDirection': 'j-', 'TotalReadoutTime': 0.05}, b0_thresh=5, output_resolution=(1, 1, 1), bet_dwi=0.3, bet_mag=0.3, acqp_file='', omp_nthreads=1, ignore=['fieldmaps'], synb0_dir='')
+        wf = init_dwi_preproc_wf(
+            acqp_file='',
+            b0_thresh=5,
+            debug=False,
+            dwi_file='/madeup/path/sub-01_dwi.nii.gz',
+            eddy_config='',
+            fmap_bspline=False,
+            force_syn=False,
+            freesurfer=True,
+            ignore=[],
+            layout=BIDSLayout('.'),
+            low_mem=False,
+            num_dwi=1,
+            omp_nthreads=1,
+            output_dir='.',
+            output_resolution=(1, 1, 1),
+            output_spaces=OrderedDict([('dwi', {})]),
+            reportlets_dir='.',
+            use_syn=True
+        )
+
+    **Subworkflows**
+
+        * :py:func:`~dmriprep.workflows.dwi.util.init_dwi_concat_wf`
+        * :py:func:`~dmriprep.workflows.dwi.artifacts.init_dwi_artifacts_wf`
+        * :py:func:`~dmriprep.workflows.dwi.eddy.init_dwi_eddy_wf`
+        * :py:func:`~dmriprep.workflows.dwi.tensor.init_dwi_tensor_wf`
 
     """
 
@@ -95,35 +127,25 @@ def init_dwi_preproc_wf(
             if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
                 sdc_method = 'fieldmap'
 
-    dwi_wf = pe.Workflow(name=wf_name)
+    dwi_wf = Workflow(name=wf_name)
+    dwi_wf.__desc__ = """
 
-    # # If use_synb0 set, get synb0 from files
-    # synb0 = ''
-    # if synb0_dir:
-    #     synb0_layout = BIDSLayout(
-    #         synb0_dir, validate=False, derivatives=True
-    #     )
-    #     synb0 = synb0_layout.get(subject=subject_id, return_type='file')[0]
+Diffusion data preprocessing
 
-    dwi_sdc_wf = init_sdc_wf(
-        subject_id,
-        fmaps,
-        metadata,
-        layout,
-        bet_mag,
-        # synb0,
-    )
+: For each of the {num_dwi} diffusion runs found per subject (across all
+sessions), the following preprocessing was performed.
+""".format(num_dwi=num_dwi)
 
     inputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                'subject_id',
                 'dwi_file',
-                'dwi_meta',
                 'bvec_file',
-                'bval_file',
-                'out_dir']),
+                'bval_file']),
         name='inputnode')
+    inputnode.inputs.dwi_file = dwi_file
+    inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
+    inputnode.inputs.bval_file = layout.get_bval(dwi_file)
 
     outputnode = pe.Node(
         niu.IdentityInterface(
@@ -279,19 +301,16 @@ def init_dwi_preproc_wf(
     avg_b0_0.inputs.b0_thresh = b0_thresh
 
     bet_dwi0 = pe.Node(
-        fsl.BET(frac=bet_dwi, mask=True, robust=True), name='bet_dwi_pre'
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre'
+    )
+
+    dwi_sdc_wf = init_sdc_wf(
+        fmaps,
+        layout,
+        metadata
     )
 
     dwi_eddy_wf = init_dwi_eddy_wf(omp_nthreads, sdc_method)
-
-    # ecc = pe.Node(
-    #     fsl.Eddy(num_threads=omp_nthreads, repol=True, cnr_maps=True, residuals=True),
-    #     name='fsl_eddy')
-    # try:
-    #     if cuda.gpus:
-    #         ecc.inputs.use_cuda = True
-    # except:
-    #     ecc.inputs.use_cuda = False
 
     denoise_eddy = pe.Node(mrtrix3.DWIDenoise(), name='denoise_eddy')
 
@@ -340,7 +359,7 @@ def init_dwi_preproc_wf(
         (gen_idx, dwi_eddy_wf, [('out_file', 'inputnode.index')]),
         (dwi_eddy_wf, denoise_eddy, [('outputnode.out_file', 'in_file')]),
         (dwi_eddy_wf, bias_correct, [('outputnode.out_file', 'in_file'),
-                                 ('outputnode.out_bvec', 'in_bvec')]),
+                                     ('outputnode.out_bvec', 'in_bvec')]),
         (inputnode, bias_correct, [('bval_file', 'in_bval')]),
         (bias_correct, fslroi, [('out_file', 'in_file')]),
         (fslroi, b0mask_node, [('roi_file', 'b0_file')]),
@@ -350,10 +369,10 @@ def init_dwi_preproc_wf(
         (inputnode, eddy_quad, [('bval_file', 'bval_file')]),
         (b0mask_node, eddy_quad, [('mask_file', 'mask_file')]),
         (gen_idx, eddy_quad, [('out_file', 'idx_file')]),
-        (inputnode, dwi_tensor_wf, [('bval_file', 'inputnode.bval_file')]),
+        (bias_correct, dwi_tensor_wf, [('out_file', 'inputnode.dwi_file')]),
         (b0mask_node, dwi_tensor_wf, [('mask_file', 'inputnode.mask_file')]),
-        (dwi_eddy_wf, dwi_tensor_wf, [('outputnode.out_file', 'inputnode.dwi_file'),
-                                      ('outputnode.out_bvec', 'inputnode.bvec_file')])
+        (inputnode, dwi_tensor_wf, [('bval_file', 'inputnode.bval_file')]),
+        (dwi_eddy_wf, dwi_tensor_wf, [('outputnode.out_bvec', 'inputnode.bvec_file')])
     ])
 
     if acqp_file:
@@ -366,29 +385,8 @@ def init_dwi_preproc_wf(
             (acqp, eddy_quad, [('out_file', 'param_file')])
         ])
 
-    # # If synb0 is meant to be used
-    # if synb0_dir:
-    #     dwi_wf.connect(
-    #         [
-    #             (
-    #                 sdc_wf,
-    #                 ecc,
-    #                 [
-    #                     ('outputnode.out_topup', 'in_topup_fieldcoef'),
-    #                     ('outputnode.out_movpar', 'in_topup_movpar'),
-    #                 ],
-    #             ),
-    #             (
-    #                 sdc_wf,
-    #                 eddy_quad,
-    #                 [('outputnode.out_enc_file', 'param_file')],
-    #             ),
-    #         ]
-    #     )
-    #     ecc.inputs.in_acqp = acqp_file
-    # else:
     # Decide what ecc will take: topup or fmap
-    # Else If epi files detected
+    # If epi files detected
     if fmaps:
         if fmap['suffix'] == 'epi':
             dwi_wf.connect([

@@ -8,7 +8,7 @@ from pathlib import Path
 from bids import BIDSLayout
 
 
-def collect_data(bids_dir, participant_label, task=None, echo=None,
+def collect_data(bids_dir, participant_label, acq_id=None, concat_dwis=None,
                  bids_validate=True):
     """Replacement for niworkflows' version."""
     if isinstance(bids_dir, BIDSLayout):
@@ -19,7 +19,6 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     queries = {
         'fmap': {'datatype': 'fmap'},
         'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
-        'bold': {'datatype': 'func', 'suffix': 'bold'},
         'sbref': {'datatype': 'func', 'suffix': 'sbref'},
         'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
         't2w': {'datatype': 'anat', 'suffix': 'T2w'},
@@ -27,16 +26,12 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
         'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
 
-    if task:
-        queries['bold']['task'] = task
-
-    if echo:
-        queries['bold']['echo'] = echo
-
     subj_data = {
         dtype: sorted(layout.get(return_type='file', subject=participant_label,
                                  extension=['nii', 'nii.gz'], **query))
         for dtype, query in queries.items()}
+
+    subj_data['dwi'] = group_dwi(subj_data['dwi'], acq_id, concat_dwis)
 
     return subj_data, layout
 
@@ -165,6 +160,13 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
             subprocess.check_call(['bids-validator', bids_dir, '-c', temp.name])
         except FileNotFoundError:
             print("bids-validator does not appear to be installed", file=sys.stderr)
+
+
+def group_dwi(dwi_files, acq_id=None, concat_dwis=None):
+
+    all_dwis = []
+
+    return all_dwis
 
 
 def _get_shub_version(singularity_url):
