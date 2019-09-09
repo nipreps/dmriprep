@@ -39,6 +39,17 @@
     {
       "name": "nrajamani3",
       "type": "Researcher"
+    },
+    {
+        "name": "Mansour, Salim",
+        "affiliation": "The Centre for Addiction and Mental Health",
+        "type": "Researcher"
+    },
+    {
+        "name": "Forde, Natalie",
+        "affiliation": "The Centre for Addiction and Mental Health",
+        "orcid": "0000-0002-2005-8774",
+        "type": "Researcher"
     }
   ],
   "keywords": [
