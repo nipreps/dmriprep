@@ -10,10 +10,8 @@ def init_sdc_wf(
     subject_id,
     fmaps,
     metadata,
-    layout,
-    bet_mag,
-    #synb0,
-    ):
+    layout
+):
 
     sdc_wf = pe.Workflow(name='sdc_wf')
 
@@ -37,31 +35,7 @@ def init_sdc_wf(
         ),
         name='outputnode',
     )
-    # if synb0:
-    #     from .pepolar import init_synb0_wf
-    #
-    #     synb0_wf = init_synb0_wf(subject_id, metadata, synb0)
-    #
-    #     sdc_prep_wf.connect(
-    #         [
-    #             (
-    #                 inputnode,
-    #                 synb0_wf,
-    #                 [('b0_stripped', 'inputnode.b0_stripped')],
-    #             ),
-    #             (
-    #                 synb0_wf,
-    #                 outputnode,
-    #                 [
-    #                     ('outputnode.out_topup', 'out_topup'),
-    #                     ('outputnode.out_movpar', 'out_movpar'),
-    #                     ('outputnode.out_enc_file', 'out_enc_file'),
-    #                     ('outputnode.out_fmap', 'out_fmap'),
-    #                 ],
-    #             ),
-    #         ]
-    #     )
-    # else:
+
     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
     try:
         fmap = fmaps[0]
@@ -90,7 +64,7 @@ def init_sdc_wf(
     elif fmap['suffix'] == 'fieldmap':
         from .fmap import init_fmap_wf
 
-        fmap_wf = init_fmap_wf(bet_mag)
+        fmap_wf = init_fmap_wf()
         fmap_wf.inputs.inputnode.fieldmap = fmap['fieldmap']
         fmap_wf.inputs.inputnode.magnitude = fmap['magnitude']
 
@@ -104,7 +78,7 @@ def init_sdc_wf(
         from .fmap import init_fmap_wf
 
         if fmap['suffix'] == 'phasediff':
-            phase_wf = init_phdiff_wf(bet_mag)
+            phase_wf = init_phdiff_wf()
             phase_wf.inputs.inputnode.phasediff = fmap['phasediff']
             phase_wf.inputs.inputnode.magnitude1 = [
                 fmap_
@@ -114,7 +88,7 @@ def init_sdc_wf(
             phase_wf.inputs.inputnode.phases_meta = layout.get_metadata(
                 phase_wf.inputs.inputnode.phasediff)
 
-            fmap_wf = init_fmap_wf(bet_mag)
+            fmap_wf = init_fmap_wf()
 
             sdc_wf.connect([
                 (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
@@ -124,7 +98,7 @@ def init_sdc_wf(
             ])
 
         elif fmap['suffix'] == 'phase':
-            phase_wf = init_phase_wf(bet_mag)
+            phase_wf = init_phase_wf()
             phase_wf.inputs.inputnode.phasediff = [
                 fmap['phase1'],
                 fmap['phase2']
