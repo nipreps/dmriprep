@@ -20,21 +20,24 @@ FMAP_PRIORITY = {'epi': 0, 'fieldmap': 1, 'phasediff': 2, 'phase': 3, 'syn': 4}
 
 
 def init_dwi_preproc_wf(
-    layout,
-    output_dir,
-    subject_id,
-    dwi_file,
-    metadata,
-    b0_thresh,
-    output_resolution,
-    bet_dwi,
-    bet_mag,
     acqp_file,
-    omp_nthreads,
+    b0_thresh,
+    debug,
+    dwi_file,
+    eddy_config,
+    fmap_bspline,
+    force_syn,
+    freesurfer,
     ignore,
-    use_ants,
-    use_brainsuite,
-    synb0_dir
+    layout,
+    low_mem,
+    num_dwi,
+    omp_nthreads,
+    output_dir,
+    output_resolution,
+    output_spaces,
+    reportlets_dir,
+    use_syn,
 ):
     """
     This workflow controls the diffusion preprocessing stages of dMRIprep.
@@ -80,11 +83,8 @@ def init_dwi_preproc_wf(
                 fmap['metadata'] = layout.get_metadata(fmap[fmap['suffix']])
                 fmaps.append(fmap)
 
-        if (use_ants and not fmaps):
-            fmaps.append({'suffix': 'ants'})
-            sdc_method = 'nonlinear_reg'
-        if (use_brainsuite and not fmaps):
-            fmaps.append({'suffix': 'brainsuite'})
+        if force_syn or (use_syn and not fmaps):
+            fmaps.append({'suffix': 'syn'})
             sdc_method = 'nonlinear_reg'
 
         if fmaps:

@@ -39,6 +39,8 @@ def init_dmriprep_wf(
     b0_thresh,
     concat_dwis,
     debug,
+    eddy_config,
+    fmap_bspline,
     force_syn,
     freesurfer,
     hires,
@@ -80,6 +82,8 @@ def init_dmriprep_wf(
             b0_thresh=5,
             concat_dwis=[],
             debug=False,
+            eddy_config='',
+            fmap_bspline=False,
             force_syn=True,
             freesurfer=True,
             hires=True,
@@ -105,13 +109,21 @@ def init_dmriprep_wf(
     Parameters
     ----------
         acq_id : list
+            List of acquisition labels of dwi scans to preprocess
         acqp_file : str
+            Custom acquisition parameter file for topup/eddy
         anat_only : bool
             Disable diffusion MRI workflows
         b0_thresh : int
+            Threshold of bvals to be classified as b0s
         concat_dwis : list
+            List of acquisition labels of dwi scans to concatenate
         debug : bool
             Enable debugging outputs
+        eddy_config : str
+            Path to json file of eddy input arguments
+        fmap_bspline : bool
+            Fit a B-Spline using least-squares (experimental)
         force_syn : bool
             **Temporary**: Always run SyN-based SDC
         freesurfer : bool
@@ -132,6 +144,7 @@ def init_dmriprep_wf(
         output_dir : str
             Directory in which to save derivatives
         output_resolution : float
+            Output resolution of dwi scan
         output_spaces : OrderedDict
             Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
             ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
@@ -172,8 +185,14 @@ def init_dmriprep_wf(
     reportlets_dir = os.path.join(work_dir, 'reportlets')
     for subject_id in subject_list:
         single_subject_wf = init_single_subject_wf(
+            acq_id=acq_id,
+            acqp_file=acqp_file,
             anat_only=anat_only,
+            b0_thresh=b0_thresh,
+            concat_dwis=concat_dwis,
             debug=debug,
+            eddy_config=eddy_config,
+            fmap_bspline=fmap_bspline,
             force_syn=force_syn,
             freesurfer=freesurfer,
             hires=hires,
@@ -184,6 +203,7 @@ def init_dmriprep_wf(
             name="single_subject_" + subject_id + "_wf",
             omp_nthreads=omp_nthreads,
             output_dir=output_dir,
+            output_resolution=output_resolution,
             output_spaces=output_spaces,
             reportlets_dir=reportlets_dir,
             skull_strip_fixed_seed=skull_strip_fixed_seed,
@@ -207,8 +227,14 @@ def init_dmriprep_wf(
 
 
 def init_single_subject_wf(
+    acq_id,
+    acqp_file,
     anat_only,
+    b0_thresh,
+    concat_dwis,
     debug,
+    eddy_config,
+    fmap_bspline,
     force_syn,
     freesurfer,
     hires,
@@ -219,6 +245,7 @@ def init_single_subject_wf(
     name,
     omp_nthreads,
     output_dir,
+    output_resolution,
     output_spaces,
     reportlets_dir,
     skull_strip_fixed_seed,
@@ -245,8 +272,14 @@ def init_single_subject_wf(
         from collections import namedtuple, OrderedDict
         BIDSLayout = namedtuple('BIDSLayout', ['root'])
         wf = init_single_subject_wf(
+            acq_id=[],
+            acqp_file='',
             anat_only=False,
+            b0_thresh=5,
+            concat_dwis=[],
             debug=False,
+            eddy_config='',
+            fmap_bspline=False,
             force_syn=True,
             freesurfer=True,
             hires=True,
@@ -257,6 +290,7 @@ def init_single_subject_wf(
             name='single_subject_wf',
             omp_nthreads=1,
             output_dir='.',
+            output_resolution=1,
             output_spaces=OrderedDict([
                 ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
                 ('T1w', {}), ('fsnative', {})]),
@@ -270,10 +304,22 @@ def init_single_subject_wf(
 
     Parameters
     ----------
+        acq_id : list
+            List of acquisition labels of dwi scans to preprocess
+        acqp_file : str
+            Custom acquisition parameter file for topup/eddy
         anat_only : bool
             Disable diffusion MRI workflows
+        b0_thresh : int
+            Threshold of bvals to be classified as b0s
+        concat_dwis : list
+            List of acquisition labels of dwi scans to concatenate
         debug : bool
             Enable debugging outputs
+        eddy_config : str
+            Path to json file of eddy input arguments
+        fmap_bspline : bool
+            Fit a B-Spline using least-squares (experimental)
         force_syn : bool
             **Temporary**: Always run SyN-based SDC
         freesurfer : bool
@@ -295,6 +341,8 @@ def init_single_subject_wf(
             Maximum number of threads an individual process may use
         output_dir : str
             Directory in which to save derivatives
+        output_resolution : float
+            Output resolution of dwi scan
         output_spaces : OrderedDict
             Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
             ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
@@ -458,8 +506,9 @@ It is released under the [CC0]\
             b0_thresh=b0_thresh,
             debug=debug,
             dwi_file=dwi_file,
+            eddy_config=eddy_config,
             fmap_bspline=fmap_bspline,
-            fmap_demean=fmap_demean,
+            # fmap_demean=fmap_demean,
             force_syn=force_syn,
             freesurfer=freesurfer,
             ignore=ignore,

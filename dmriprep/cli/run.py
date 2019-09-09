@@ -167,6 +167,9 @@ https://dmriprep.readthedocs.io/en/%s/spaces.html""" % (
 
     # Eddy options
     g_eddy = parser.add_argument_group('Specific options for FSL eddy preprocessing')
+    g_eddy.add_argument('--eddy-config', action='store', type=Path,
+                        help='Path to json file with input arguments for running '
+                             'eddy')
     g_eddy.add_argument('--acqp-file', action='store', type=Path,
                         help='Path to acquisition parameters file for topup/eddy '
                              'instead of generating it from the dwi json')
@@ -572,6 +575,8 @@ def build_workflow(opts, retval):
         b0_thresh=opts.b0_thresh,
         concat_dwis=opts.concat_dwis,
         debug=opts.debug,
+        eddy_config=opts.eddy_config,
+        fmap_bspline=opts.fmap_bspline,
         force_syn=opts.force_syn,
         freesurfer=opts.run_reconall,
         hires=opts.hires,
