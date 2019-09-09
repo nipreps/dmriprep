@@ -1,7 +1,46 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+.. _sdc_estimation :
+Fieldmap estimation and unwarping workflows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: dmriprep.workflows.fieldmap.base
+    :members:
+    :undoc-members:
+    :show-inheritance:
+.. automodule:: dmriprep.workflows.fieldmap.fmap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+.. automodule:: dmriprep.workflows.fieldmap.phdiff
+    :members:
+    :undoc-members:
+    :show-inheritance:
+.. automodule:: dmriprep.workflows.fieldmap.pepolar
+    :members:
+    :undoc-members:
+    :show-inheritance:
+.. automodule:: dmriprep.workflows.fieldmap.syn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+.. automodule:: dmriprep.workflows.fieldmap.unwarp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+"""
 
 from .base import init_sdc_wf
-from .pepolar import init_pepolar_wf
-from .fmap import init_fmap_wf
-from .phasediff import init_phase_wf, init_phdiff_wf
-from .brainsuite import init_brainsuite_wf
+from .unwarp import init_sdc_unwarp_wf, init_fmap_unwarp_report_wf
+from .pepolar import init_pepolar_unwarp_wf
+from .syn import init_syn_sdc_wf
+
+__all__ = [
+    'init_sdc_wf',
+    'init_sdc_unwarp_wf',
+    'init_fmap_unwarp_report_wf',
+    'init_pepolar_unwarp_wf',
+    'init_syn_sdc_wf',
+]
