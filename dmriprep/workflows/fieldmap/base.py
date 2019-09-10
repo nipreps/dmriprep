@@ -2,48 +2,69 @@
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
+from nipype import logging
 
-FMAP_PRIORITY = {'epi': 0, 'fieldmap': 1, 'phasediff': 2, 'phase': 3, 'syn': 4}
+from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+
+LOGGER = logging.getLogger('nipype.workflow')
+FMAP_PRIORITY = {
+    'epi': 0,
+    'fieldmap': 1,
+    'phasediff': 2,
+    'phase': 3,
+    'syn': 4
+}
 
 
 def init_sdc_wf(
     subject_id,
     fmaps,
     metadata,
-    layout
+    layout,
+    ignore
 ):
 
-    sdc_wf = pe.Workflow(name='sdc_wf')
+    sdc_wf = Workflow(name='sdc_wf')
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=['b0_stripped']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['dwi_ref', 'dwi_ref_brain', 'dwi_mask',
+                't1_brain', 'std2anat_xfm', 'template', 'templates']),
+        name='inputnode')
 
-    outputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=[
-                'out_fmap',
-                'out_topup',
-                'bold_ref',
-                'bold_mask',
-                'bold_ref_brain',
-                'out_warp',
-                'syn_bold_ref',
-                'method',
-                'out_movpar',
-                'out_enc_file'
-            ]
-        ),
-        name='outputnode',
-    )
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['dwi_ref', 'dwi_ref_brain', 'dwi_mask',
+                'out_fmap', 'out_topup', 'out_movpar', 'out_enc_file',
+                'out_warp', 'syn_dwi_ref', 'method']),
+        name='outputnode')
 
     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
-    try:
-        fmap = fmaps[0]
-    except:
-        return
 
+    # No fieldmaps
+    if not fmaps or 'fieldmaps' in ignore:
+        sdc_wf.__postdesc__ = """\
+Susceptibility distortion correction (SDC) has been skipped because the
+dataset does not contain extra field map acquisitions correctly described
+with metadata, and the experimental SDC-SyN method was not explicitly selected.
+"""
+
+    outputnode.inputs.method = 'None'
+    sdc_wf.connect([
+        (inputnode, outputnode, [('dwi_ref', 'dwi_ref'),
+                                 ('dwi_ref_brain', 'dwi_ref_brain'),
+                                 ('dwi_mask', 'dwi_mask')])
+    ])
+    return sdc_wf
+
+    sdc_wf.__postdesc__ = """\
+Creating fieldmap
+"""
+
+    fmap = fmaps[0]
+
+    # topup
     if fmap['suffix'] == 'epi':
         from .pepolar import init_pepolar_wf
+        outputnode.inputs.method = 'topup'
 
         epi_fmaps = [
             (fmap_['epi'], fmap_['metadata']['PhaseEncodingDirection'])
@@ -54,13 +75,14 @@ def init_sdc_wf(
         pepolar_wf = init_pepolar_wf(subject_id, metadata, epi_fmaps)
 
         sdc_wf.connect([
-            (inputnode, pepolar_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
+            (inputnode, pepolar_wf, [('dwi_ref_brain', 'inputnode.b0_stripped')]),
             (pepolar_wf, outputnode, [('outputnode.out_topup', 'out_topup'),
                                       ('outputnode.out_movpar', 'out_movpar'),
                                       ('outputnode.out_enc_file', 'out_enc_file'),
                                       ('outputnode.out_fmap', 'out_fmap')])
         ])
 
+    # fieldmap
     elif fmap['suffix'] == 'fieldmap':
         from .fmap import init_fmap_wf
 

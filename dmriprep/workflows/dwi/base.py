@@ -92,7 +92,7 @@ def init_dwi_preproc_wf(
     else:
         ref_file = dwi_file
 
-    sdc_method = None
+    # sdc_method = None
 
     # For doc building purposes
     if not hasattr(layout, 'parse_file_entities'):
@@ -117,15 +117,14 @@ def init_dwi_preproc_wf(
 
         if force_syn or (use_syn and not fmaps):
             fmaps.append({'suffix': 'syn'})
-            sdc_method = 'nonlinear_reg'
 
-        if fmaps:
-            fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
-            fmap = fmaps[0]
-            if fmap['suffix'] == 'epi':
-                sdc_method = 'topup'
-            if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
-                sdc_method = 'fieldmap'
+        # if fmaps:
+        #     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
+        #     fmap = fmaps[0]
+        #     if fmap['suffix'] == 'epi':
+        #         sdc_method = 'topup'
+        #     if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
+        #         sdc_method = 'fieldmap'
 
     dwi_wf = Workflow(name=wf_name)
     dwi_wf.__desc__ = """
@@ -136,12 +135,10 @@ Diffusion data preprocessing
 sessions), the following preprocessing was performed.
 """.format(num_dwi=num_dwi)
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=[
-                'dwi_file',
-                'bvec_file',
-                'bval_file']),
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['dwi_file', 'bvec_file', 'bval_file',
+                'subjects_dir', 'subject_id',
+                't1_brain', 'template', 'std2anat_xfm']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
     inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)

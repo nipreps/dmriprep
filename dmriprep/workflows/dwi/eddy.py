@@ -13,7 +13,7 @@ from nipype.interfaces import fsl, utility as niu
 from numba import cuda
 
 
-def init_dwi_eddy_wf(omp_nthreads, sdc_method):
+def init_dwi_eddy_wf(omp_nthreads, sdc_method=None):
     """
     This workflow runs eddy on the input dwi image.
 
@@ -22,14 +22,14 @@ def init_dwi_eddy_wf(omp_nthreads, sdc_method):
         :simple_form: yes
 
         from dmriprep.workflows.dwi import init_dwi_eddy_wf
-        wf = init_dwi_eddy_wf(omp_nthreads=1, sdc_method='nonlinear_reg')
+        wf = init_dwi_eddy_wf(omp_nthreads=1, sdc_method=None)
 
     **Parameters**
 
         omp_nthreads: int
             Number of threads to run eddy
         sdc_type: str
-            Synthetic distortion correction method (may include 'fieldmap, 'topup', 'nonlinear_reg')
+            Synthetic distortion correction method (may include 'fieldmap, 'topup')
 
     **Inputs**
 
