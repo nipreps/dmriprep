@@ -12,7 +12,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 
-def init_dwi_concat_wf(ref_file):
+def init_dwi_concat_wf(layout):
     """
     This workflow concatenates a list of dwi images as well as their associated
     bvecs and bvals.
@@ -21,13 +21,15 @@ def init_dwi_concat_wf(ref_file):
         :graph2use: orig
         :simple_form: yes
 
+        from collections import namedtuple
         from dmriprep.workflows.dwi import init_dwi_concat_wf
-        wf = init_dwi_concat_wf(ref_file='/madeup/path/sub-01_dwi.nii.gz')
+        BIDSLayout = namedtuple('BIDSLayout', ['root'])
+        wf = init_dwi_concat_wf(layout=BIDSLayout('.'))
 
     **Parameters**
 
-        ref_file : :obj:`str`
-            reference dwi NIfTI file for naming outputs
+        layout : BIDSLayout object
+            BIDS dataset layout
 
     **Inputs**
 
@@ -35,10 +37,6 @@ def init_dwi_concat_wf(ref_file):
             reference dwi NIfTI file
         dwi_list : :obj:`list`
             list of dwi NIfTI files
-        bvec_list : :obj:`list`
-            list of associated bvec files
-        bval_list : :obj:`list`
-            list of associated bval files
 
     **Outputs**
 
@@ -53,16 +51,27 @@ def init_dwi_concat_wf(ref_file):
 
     wf = pe.Workflow(name='dwi_concat_wf')
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['ref_file',
-                                                      'dwi_list',
-                                                      'bvec_list',
-                                                      'bval_list']),
-                        name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['ref_file', 'dwi_list']),
+        name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file',
-                                                       'bvec_file',
-                                                       'bval_file']),
-                         name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['dwi_file', 'bvec_file', 'bval_file']),
+        name='outputnode')
+
+    def gather_bvec_bval(layout, dwi_list):
+        bvec_list = [layout.get_bvec(bvec) for bvec in dwi_list]
+        bval_list = [layout.get_bval(bval) for bval in dwi_list]
+        return bvec_list, bval_list
+
+    gather_bvec_bval = pe.Node(
+        niu.Function(
+            input_names=['layout', 'dwi_list'],
+            output_names=['bvec_list', 'bval_list'],
+            function=gather_bvec_bval
+        ),
+        name='gather_bvec_bval')
+    gather_bvec_bval.inputs.layout = layout
 
     def concat_dwis(ref_file, dwi_list):
         import os
@@ -96,10 +105,6 @@ def init_dwi_concat_wf(ref_file):
         name='concat_dwis')
 
     def concat_bvecs(ref_file, bvec_list):
-        """
-
-        """
-
         import os
         import numpy as np
         from nipype.utils.filemanip import fname_presuffix
@@ -129,10 +134,6 @@ def init_dwi_concat_wf(ref_file):
         name='concat_bvecs')
 
     def concat_bvals(ref_file, bval_list):
-        """
-
-        """
-
         import os
         import numpy as np
         from nipype.utils.filemanip import fname_presuffix
@@ -163,12 +164,13 @@ def init_dwi_concat_wf(ref_file):
         name='concat_bvals')
 
     wf.connect([
+        (inputnode, gather_bvec_bval, [('dwi_list', 'dwi_list')]),
         (inputnode, concat_dwis, [('ref_file', 'ref_file'),
                                   ('dwi_list', 'dwi_list')]),
-        (inputnode, concat_bvecs, [('ref_file', 'ref_file'),
-                                   ('bvec_list', 'bvec_list')]),
-        (inputnode, concat_bvals, [('ref_file', 'ref_file'),
-                                   ('bval_list', 'bval_list')]),
+        (inputnode, concat_bvecs, [('ref_file', 'ref_file')]),
+        (gather_bvec_bval, concat_bvecs, [('bvec_list', 'bvec_list')]),
+        (inputnode, concat_bvals, [('ref_file', 'ref_file')]),
+        (gather_bvec_bval, concat_bvals, [('bval_list', 'bval_list')]),
         (concat_dwis, outputnode, [('merged_file', 'dwi_file')]),
         (concat_bvecs, outputnode, [('out_file', 'bvec_file')]),
         (concat_bvals, outputnode, [('out_file', 'bval_file')])
