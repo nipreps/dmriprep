@@ -112,14 +112,6 @@ RUN npm install -g svgo
 # Installing bids-validator
 RUN npm install -g bids-validator@1.2.3
 
-# Installing and setting up ICA_AROMA
-RUN mkdir -p /opt/ICA-AROMA && \
-  curl -sSL "https://github.com/maartenmennes/ICA-AROMA/archive/v0.4.4-beta.tar.gz" \
-  | tar -xzC /opt/ICA-AROMA --strip-components 1 && \
-  chmod +x /opt/ICA-AROMA/ICA_AROMA.py
-
-ENV PATH=/opt/ICA-AROMA:$PATH
-
 # Installing and setting up miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh && \
     bash Miniconda3-4.5.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
@@ -162,9 +154,10 @@ RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
 # Precaching atlases
-RUN pip install --no-cache-dir "templateflow>=0.4.0,<0.5.0a0" && \
+COPY setup.cfg fmriprep-setup.cfg
+RUN pip install --no-cache-dir "$( grep templateflow fmriprep-setup.cfg | xargs )" && \
     python -c "from templateflow import api as tfapi; \
-               tfapi.get('MNI152NLin6Asym', atlas=None, extension=['.nii', '.nii.gz']); \
+               tfapi.get('MNI152NLin6Asym', atlas=None, resolution=[1, 2], extension=['.nii', '.nii.gz']); \
                tfapi.get('MNI152NLin2009cAsym', atlas=None, extension=['.nii', '.nii.gz']); \
                tfapi.get('OASIS30ANTs', extension=['.nii', '.nii.gz']);" && \
     find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
