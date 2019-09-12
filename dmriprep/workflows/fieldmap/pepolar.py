@@ -4,7 +4,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import fsl, utility as niu
 
 
-def init_pepolar_wf(subject_id, dwi_meta, epi_fmaps):
+def init_pepolar_wf(dwi_meta, epi_fmaps):
 
     dwi_file_pe = dwi_meta['PhaseEncodingDirection']
 
@@ -23,9 +23,8 @@ def init_pepolar_wf(subject_id, dwi_meta, epi_fmaps):
 
     if not usable_fieldmaps_opposite_pe:
         raise Exception(
-            'None of the discovered fieldmaps for '
-            'participant {} has the right phase '
-            'encoding direction'.format(subject_id)
+            'None of the discovered fieldmaps has '
+            'the right phase encoding direction'
         )
 
     wf = pe.Workflow(name='pepolar_wf')

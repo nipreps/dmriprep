@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
+from nipype.interfaces import fsl, utility as niu
 from nipype import logging
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
@@ -17,7 +17,6 @@ FMAP_PRIORITY = {
 
 
 def init_sdc_wf(
-    subject_id,
     fmaps,
     metadata,
     layout,
@@ -72,7 +71,7 @@ Creating fieldmap
             if fmap_['suffix'] == 'epi'
         ]
 
-        pepolar_wf = init_pepolar_wf(subject_id, metadata, epi_fmaps)
+        pepolar_wf = init_pepolar_wf(metadata, epi_fmaps)
 
         sdc_wf.connect([
             (inputnode, pepolar_wf, [('dwi_ref_brain', 'inputnode.b0_stripped')]),
@@ -85,19 +84,29 @@ Creating fieldmap
     # fieldmap
     elif fmap['suffix'] == 'fieldmap':
         from .fmap import init_fmap_wf
+        outputnode.inputs.method = 'fieldmap'
 
         fmap_wf = init_fmap_wf()
         fmap_wf.inputs.inputnode.fieldmap = fmap['fieldmap']
         fmap_wf.inputs.inputnode.magnitude = fmap['magnitude']
 
+        mag_flirt = pe.Node(fsl.FLIRT(dof=6), name='magFlirt')
+
+        fmap_flirt = pe.Node(fsl.FLIRT(apply_xfm=True), name='fmapFlirt')
+
         sdc_wf.connect([
-            (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
-            (fmap_wf, outputnode, [('outputnode.out_fmap', 'out_fmap')])
+            (inputnode, mag_flirt, [('dwi_ref_brain', 'reference')]),
+            (fmap_wf, mag_flirt, [('outputnode.fmap_ref', 'in_file')]),
+            (inputnode, fmap_flirt, [('dwi_ref_brain', 'reference')]),
+            (fmap_wf, fmap_flirt, [('outputnode.fmap', 'in_file')]),
+            (mag_flirt, fmap_flirt, [('out_matrix_file', 'in_matrix_file')]),
+            (fmap_flirt, outputnode, [('out_file', 'out_fmap')])
         ])
 
     elif fmap['suffix'] in ('phasediff', 'phase'):
         from .phasediff import init_phase_wf, init_phdiff_wf
         from .fmap import init_fmap_wf
+        outputnode.inputs.method = 'fieldmap'
 
         if fmap['suffix'] == 'phasediff':
             phase_wf = init_phdiff_wf()
@@ -113,7 +122,7 @@ Creating fieldmap
             fmap_wf = init_fmap_wf()
 
             sdc_wf.connect([
-                (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
+                (inputnode, fmap_wf, [('dwi_ref_brain', 'inputnode.b0_stripped')]),
                 (phase_wf, fmap_wf, [('outputnode.out_fmap', 'inputnode.fieldmap')]),
                 (phase_wf, fmap_wf, [('outputnode.out_mag', 'inputnode.magnitude')]),
                 (fmap_wf, outputnode, [('outputnode.out_fmap', 'out_fmap')])
@@ -138,11 +147,12 @@ Creating fieldmap
             fmap_wf = init_fmap_wf()
 
             sdc_wf.connect([
-                (inputnode, fmap_wf, [('b0_stripped', 'inputnode.b0_stripped')]),
+                (inputnode, fmap_wf, [('dwi_ref_brain', 'inputnode.b0_stripped')]),
                 (phase_wf, fmap_wf, [('outputnode.out_fmap', 'inputnode.fieldmap')]),
                 (phase_wf, fmap_wf, [('outputnode.out_mag', 'inputnode.magnitude')]),
                 (fmap_wf, outputnode, [('outputnode.out_fmap', 'out_fmap')])
             ])
+
     else:
         print('No sdc correction')
     return sdc_wf

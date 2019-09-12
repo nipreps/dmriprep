@@ -14,6 +14,7 @@ from nipype.interfaces import fsl, mrtrix3, utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 
+from .util import init_dwi_concat_wf
 from .artifacts import init_dwi_artifacts_wf
 from .eddy import init_dwi_eddy_wf
 from .tensor import init_dwi_tensor_wf
@@ -87,12 +88,10 @@ def init_dwi_preproc_wf(
 
     wf_name = _get_wf_name(dwi_file)
 
+    ref_file = dwi_file
+
     if isinstance(dwi_file, list):
         ref_file = dwi_file[0]
-    else:
-        ref_file = dwi_file
-
-    # sdc_method = None
 
     # For doc building purposes
     if not hasattr(layout, 'parse_file_entities'):
@@ -118,13 +117,13 @@ def init_dwi_preproc_wf(
         if force_syn or (use_syn and not fmaps):
             fmaps.append({'suffix': 'syn'})
 
-        # if fmaps:
-        #     fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
-        #     fmap = fmaps[0]
-        #     if fmap['suffix'] == 'epi':
-        #         sdc_method = 'topup'
-        #     if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
-        #         sdc_method = 'fieldmap'
+        if fmaps:
+            fmaps.sort(key=lambda fmap: FMAP_PRIORITY[fmap['suffix']])
+            fmap = fmaps[0]
+            if fmap['suffix'] == 'epi':
+                sdc_method = 'topup'
+            if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
+                sdc_method = 'fieldmap'
 
     dwi_wf = Workflow(name=wf_name)
     dwi_wf.__desc__ = """
@@ -140,26 +139,27 @@ sessions), the following preprocessing was performed.
                 'subjects_dir', 'subject_id',
                 't1_brain', 'template', 'std2anat_xfm']),
         name='inputnode')
-    inputnode.inputs.dwi_file = dwi_file
-    inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
-    inputnode.inputs.bval_file = layout.get_bval(dwi_file)
 
-    outputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=[
-                'out_dwi',
-                'out_bval',
-                'out_bvec',
-                'index',
-                'acq_params',
-                'out_mask',
-                'out_b0_pre',
-                'out_b0_mask_pre',
-                'out_eddy_quad_json',
-                'out_eddy_quad_pdf',
-                'out_dtifit_FA',
-                'out_dtifit_V1',
-                'out_dtifit_sse',
+    if isinstance(dwi_file, list):
+        dwi_concat_wf = init_dwi_concat_wf(layout)
+        dwi_concat_wf.inputs.inputnode.ref_file = ref_file
+        dwi_concat_wf.inputs.inputnode.dwi_list = dwi_file
+
+        dwi_wf.connect([
+            (dwi_concat_wf, inputnode, [('outputnode.dwi_file' 'dwi_file'),
+                                        ('outputnode.bvec_file', 'bvec_file'),
+                                        ('outputnode.bval_file', 'bval_file')])
+        ])
+    else:
+        inputnode.inputs.dwi_file = dwi_file
+        inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
+        inputnode.inputs.bval_file = layout.get_bval(dwi_file)
+
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['out_dwi', 'out_bval', 'out_bvec', 'index', 'acq_params',
+                'out_mask', 'out_b0_pre', 'out_b0_mask_pre',
+                'out_eddy_quad_json', 'out_eddy_quad_pdf',
+                'out_dtifit_FA', 'out_dtifit_V1', 'out_dtifit_sse',
                 'out_noise']),
         name='outputnode')
 
@@ -252,6 +252,7 @@ sessions), the following preprocessing was performed.
             output_names=['out_file'],
             function=gen_acqparams),
         name='acqp')
+    acqp.inputs.metadata = metadata
 
     dwi_artifacts_wf = init_dwi_artifacts_wf(ignore, output_resolution)
 
@@ -302,9 +303,10 @@ sessions), the following preprocessing was performed.
     )
 
     dwi_sdc_wf = init_sdc_wf(
-        fmaps,
-        layout,
-        metadata
+        fmaps=fmaps,
+        metadata=metadata,
+        layout=layout,
+        ignore=ignore
     )
 
     dwi_eddy_wf = init_dwi_eddy_wf(omp_nthreads, sdc_method)
@@ -344,7 +346,7 @@ sessions), the following preprocessing was performed.
 
     dwi_wf.connect([
         (inputnode, gen_idx, [('dwi_file', 'in_file')]),
-        (inputnode, acqp, [('dwi_file', 'in_file'), ('dwi_meta', 'metadata')]),
+        (inputnode, acqp, [('dwi_file', 'in_file')]),
         (inputnode, dwi_artifacts_wf, [('dwi_file', 'inputnode.dwi_file')]),
         (dwi_artifacts_wf, avg_b0_0, [('outputnode.out_file', 'in_dwi')]),
         (dwi_artifacts_wf, dwi_eddy_wf, [('outputnode.out_file', 'inputnode.dwi_file')]),
@@ -393,7 +395,7 @@ sessions), the following preprocessing was performed.
     # Otherwise (fieldmaps)
         if any(s in fmap['suffix'] for s in ['fieldmap', 'phasediff', 'phase1']):
             dwi_wf.connect([
-                (bet_dwi0, dwi_sdc_wf, [('out_file', 'inputnode.b0_stripped')]),
+                (bet_dwi0, dwi_sdc_wf, [('out_file', 'inputnode.dwi_ref_brain')]),
                 (dwi_sdc_wf, dwi_eddy_wf, [('outputnode.out_fmap', 'inputnode.fieldmap_file')])
             ])
 
