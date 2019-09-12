@@ -6,8 +6,8 @@
 Interfaces from Mrtrix3 (temporary until MRResize is merged)
 """
 
-from ..base import (traits, TraitedSpec, File)
-from .base import MRTrix3BaseInputSpec, MRTrix3Base
+from nipype.interfaces.base import (traits, TraitedSpec, File)
+from nipype.interfaces.mrtrix3.base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
 class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
