@@ -31,7 +31,7 @@ def collect_data(bids_dir, participant_label, acq_id=None, concat_dwis=None,
                                  extension=['nii', 'nii.gz'], **query))
         for dtype, query in queries.items()}
 
-    subj_data['dwi'] = group_dwi(subj_data['dwi'], acq_id, concat_dwis)
+    # subj_data['dwi'] = group_dwi(subj_data['dwi'], acq_id, concat_dwis)
 
     return subj_data, layout
 
@@ -162,11 +162,11 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
             print("bids-validator does not appear to be installed", file=sys.stderr)
 
 
-def group_dwi(dwi_files, acq_id=None, concat_dwis=None):
-
-    all_dwis = []
-
-    return all_dwis
+# def group_dwi(dwi_files, acq_id=None, concat_dwis=None):
+#
+#     all_dwis = []
+#
+#     return all_dwis
 
 
 def _get_shub_version(singularity_url):
