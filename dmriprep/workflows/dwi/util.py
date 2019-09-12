@@ -171,7 +171,7 @@ def init_dwi_concat_wf(layout):
         (gather_bvec_bval, concat_bvecs, [('bvec_list', 'bvec_list')]),
         (inputnode, concat_bvals, [('ref_file', 'ref_file')]),
         (gather_bvec_bval, concat_bvals, [('bval_list', 'bval_list')]),
-        (concat_dwis, outputnode, [('merged_file', 'dwi_file')]),
+        (concat_dwis, outputnode, [('out_file', 'dwi_file')]),
         (concat_bvecs, outputnode, [('out_file', 'bvec_file')]),
         (concat_bvals, outputnode, [('out_file', 'bval_file')])
     ])
