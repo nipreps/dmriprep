@@ -60,10 +60,10 @@ def write_derivative_description(bids_dir, deriv_dir):
     }
 
     # Keys that can only be set by environment
-    if 'FMRIPREP_DOCKER_TAG' in os.environ:
-        desc['DockerHubContainerTag'] = os.environ['FMRIPREP_DOCKER_TAG']
-    if 'FMRIPREP_SINGULARITY_URL' in os.environ:
-        singularity_url = os.environ['FMRIPREP_SINGULARITY_URL']
+    if 'DMRIPREP_DOCKER_TAG' in os.environ:
+        desc['DockerHubContainerTag'] = os.environ['DMRIPREP_DOCKER_TAG']
+    if 'DMRIPREP_SINGULARITY_URL' in os.environ:
+        singularity_url = os.environ['DMRIPREP_SINGULARITY_URL']
         desc['SingularityContainerURL'] = singularity_url
 
         singularity_md5 = _get_shub_version(singularity_url)
@@ -88,7 +88,7 @@ def write_derivative_description(bids_dir, deriv_dir):
 
 
 def validate_input_dir(exec_env, bids_dir, participant_label):
-    # Ignore issues and warnings that should not influence FMRIPREP
+    # Ignore issues and warnings that should not influence dMRIPrep
     import tempfile
     import subprocess
     validator_config_dict = {
