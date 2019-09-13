@@ -6,7 +6,7 @@ newPRWelcomeComment: >
   We have detected this is the first time for you to contribute
   to *dMRIPrep*.
   Please check out our [contributing guidelines](https://github.com/nipreps/dmriprep/blob/master/CONTRIBUTING.md).
-
+  
   We invite you to list yourself as a *dMRIPrep* contributor, so if your name
   is not already mentioned, please modify the
   [``.zenodo.json``](https://github.com/nipreps/dmriprep/blob/master/.zenodo.json)
