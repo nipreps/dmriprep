@@ -163,7 +163,7 @@ RUN pip install --no-cache-dir "$( grep templateflow fmriprep-setup.cfg | xargs 
     find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
     find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
 
-# Installing FMRIPREP
+# Installing DMRIPREP
 COPY . /src/dmriprep
 ARG VERSION
 # Force static versioning within container
