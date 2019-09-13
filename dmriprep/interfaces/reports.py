@@ -5,13 +5,11 @@
 import os
 import time
 
-# from collections import Counter
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec,
     File, Directory, InputMultiObject, Str, isdefined,
     SimpleInterface)
 from nipype.interfaces import freesurfer as fs
-# from niworkflows.utils.bids import BIDS_NAME
 
 
 SUBJECT_TEMPLATE = """\
@@ -104,28 +102,14 @@ class SubjectSummary(SummaryInterface):
         if self.inputs.t2w:
             t2w_seg = '(+ {:d} T2-weighted)'.format(len(self.inputs.t2w))
 
-        # Add list of tasks with number of runs
         dwi_files = self.inputs.dwi if isdefined(self.inputs.dwi) else []
         dwi_files = [s[0] if isinstance(s, list) else s for s in dwi_files]
-
-        # counts = Counter(BIDS_NAME.search(series).groupdict()['task_id'][5:]
-        #                  for series in dwi_files)
-
-        # tasks = ''
-        # if counts:
-        #     header = '\t\t<ul class="elem-desc">'
-        #     footer = '\t\t</ul>'
-        #     lines = ['\t\t\t<li>Task: {task_id} ({n_runs:d} run{s})</li>'.format(
-        #              task_id=task_id, n_runs=n_runs, s='' if n_runs == 1 else 's')
-        #              for task_id, n_runs in sorted(counts.items())]
-        #     tasks = '\n'.join([header] + lines + [footer])
 
         return SUBJECT_TEMPLATE.format(
             subject_id=self.inputs.subject_id,
             n_t1s=len(self.inputs.t1w),
             t2w=t2w_seg,
             n_dwi=len(dwi_files),
-            # tasks=tasks,
             std_spaces=', '.join(self.inputs.std_spaces),
             nstd_spaces=', '.join(self.inputs.nstd_spaces),
             freesurfer_status=freesurfer_status)

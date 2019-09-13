@@ -39,4 +39,4 @@ out/
 .zenodo.json
 .travis.yml
 .readthedocs.yml
-CONTRIBUTING.rst
+CONTRIBUTING.md
