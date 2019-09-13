@@ -31,7 +31,7 @@
   ],
   "contributors": [
     {
-      "affiliation": "Stanford University",
+      "affiliation": "Department of Psychology, Stanford University, CA, USA",
       "name": "Lerma-Usabiaga, Garikoitz",
       "orcid": "0000-0001-9800-4816",
       "type": "Researcher"
@@ -39,7 +39,13 @@
     {
       "name": "nrajamani3",
       "type": "Researcher"
-    }
+    },
+    {
+      "name": "Poldrack, Russell A.",
+      "affiliation": "Department of Psychology, Stanford University",
+      "orcid": "0000-0001-6755-0259",
+      "type": "Researcher"
+    },
   ],
   "keywords": [
     "neuroimaging",
