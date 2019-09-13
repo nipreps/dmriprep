@@ -8,8 +8,7 @@ from pathlib import Path
 from bids import BIDSLayout
 
 
-def collect_data(bids_dir, participant_label, task=None, echo=None,
-                 bids_validate=True):
+def collect_data(bids_dir, participant_label, bids_validate=True):
     """Replacement for niworkflows' version."""
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
@@ -19,19 +18,11 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     queries = {
         'fmap': {'datatype': 'fmap'},
         'dwi': {'datatype': 'dwi', 'suffix': 'dwi'},
-        'bold': {'datatype': 'func', 'suffix': 'bold'},
-        'sbref': {'datatype': 'func', 'suffix': 'sbref'},
         'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
         't2w': {'datatype': 'anat', 'suffix': 'T2w'},
         't1w': {'datatype': 'anat', 'suffix': 'T1w'},
         'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
-
-    if task:
-        queries['bold']['task'] = task
-
-    if echo:
-        queries['bold']['echo'] = echo
 
     subj_data = {
         dtype: sorted(layout.get(return_type='file', subject=participant_label,
@@ -98,25 +89,20 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
             "TSV_EQUAL_ROWS",
             "TSV_EMPTY_CELL",
             "TSV_IMPROPER_NA",
-            "VOLUME_COUNT_MISMATCH",
-            "BVAL_MULTIPLE_ROWS",
-            "BVEC_NUMBER_ROWS",
-            "DWI_MISSING_BVAL",
             "INCONSISTENT_SUBJECTS",
             "INCONSISTENT_PARAMETERS",
-            "BVEC_ROW_LENGTH",
-            "B_FILE",
             "PARTICIPANT_ID_COLUMN",
             "PARTICIPANT_ID_MISMATCH",
             "TASK_NAME_MUST_DEFINE",
             "PHENOTYPE_SUBJECTS_MISSING",
             "STIMULUS_FILE_MISSING",
-            "DWI_MISSING_BVEC",
+            "BOLD_NOT_4D",
             "EVENTS_TSV_MISSING",
             "TSV_IMPROPER_NA",
             "ACQTIME_FMT",
             "Participants age 89 or higher",
             "DATASET_DESCRIPTION_JSON_MISSING",
+            "TASK_NAME_CONTAIN_ILLEGAL_CHARACTER",
             "FILENAME_COLUMN",
             "WRONG_NEW_LINE",
             "MISSING_TSV_COLUMN_CHANNELS",
@@ -131,8 +117,6 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
             "ACQTIME_FMT",
             "SUSPICIOUSLY_LONG_EVENT_DESIGN",
             "SUSPICIOUSLY_SHORT_EVENT_DESIGN",
-            "MALFORMED_BVEC",
-            "MALFORMED_BVAL",
             "MISSING_TSV_COLUMN_EEG_ELECTRODES",
             "MISSING_SESSION"
         ],
