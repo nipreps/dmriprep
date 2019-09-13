@@ -314,7 +314,7 @@ def init_single_subject_wf(
         # for documentation purposes
         subject_data = {
             't1w': ['/completely/made/up/path/sub-01_T1w.nii.gz'],
-            'dwi': ['/completely/made/up/path/sub-01_task-nback_bold.nii.gz']
+            'dwi': ['/completely/made/up/path/sub-01_dwi.nii.gz']
         }
     else:
         subject_data = collect_data(layout, subject_id)[0]
