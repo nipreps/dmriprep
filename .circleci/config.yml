@@ -103,7 +103,6 @@ jobs:
           root: /tmp
           paths:
             - src/dmriprep
-
   get_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
@@ -114,6 +113,28 @@ jobs:
           keys:
             - data-v0-{{ .Revision }}
             - data-v0-
+      - run:
+          name: Get test data from THP002
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/THP002 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O THP002_data.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5d7d89fc9defac0019179fdf"
+              tar xvzf THP002_data.tar.gz -C /tmp/data/
+            else
+              echo "Dataset THP002 was cached"
+            fi 
+      - run:
+          name: Get FreeSurfer derivatives for THP002
+          command: |
+            if [[ ! -d /tmp/THP002/derivatives/freesurfer ]]; then
+              mkdir -p /tmp/THP002/derivatives
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O THP002_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5d7d87ce7483ec0017530cc9"
+              tar xvzf THP002_derivatives_freesurfer.tar.gz -C /tmp/THP002/derivatives
+            else
+              echo "FreeSurfer derivatives of THP002 were cached"
+            fi
       - run:
           name: Store FreeSurfer license file
           command: |
@@ -136,6 +157,7 @@ jobs:
          key: data-v0-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
+            - /tmp/THP002/derivatives/freesurfer
 
   deploy_docker_patches:
     machine:
