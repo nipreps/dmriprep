@@ -13,12 +13,14 @@ newPRWelcomeComment: >
   file and insert yor data last in the ``contributors`` list. Example:
 
   ```JSON
+  
   {
      "name": "Contributor, New dMRIPrep",
      "affiliation": "Department of dMRI prep'ing, Open Science Made-Up University",
      "orcid": "<your id>",
      "type": "Researcher"
   }
+  
   ```
 
 
