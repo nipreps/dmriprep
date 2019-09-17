@@ -10,17 +10,17 @@ newPRWelcomeComment: >
   We invite you to list yourself as a *dMRIPrep* contributor, so if your name
   is not already mentioned, please modify the
   [``.zenodo.json``](https://github.com/nipreps/dmriprep/blob/master/.zenodo.json)
-  file and insert yor data last in the ``contributors`` list. Example:
+  file and insert your data last in the ``contributors`` list. Example:
 
-  ```JSON
-  
+  ```
+
   {
      "name": "Contributor, New dMRIPrep",
      "affiliation": "Department of dMRI prep'ing, Open Science Made-Up University",
      "orcid": "<your id>",
      "type": "Researcher"
   }
-  
+
   ```
 
 
