@@ -1,17 +1,32 @@
-
 {
-  "title": "dMRIPrep: a robust preprocessing pipeline for diffusion MRI",
-  "description": "<p>dMRIPrep is a robust and easy-to-use pipeline for preprocessing of diverse dMRI data. The transparent workflow dispenses of manual intervention, thereby ensuring the reproducibility of the results.</p>",
-  "creators": [
+  "contributors": [
     {
-      "affiliation": "The University of Washington eScience Institute",
-      "name": "Keshavan, Anisha",
-      "orcid": "0000-0003-3554-043X"
+      "affiliation": "Department of Psychology, Stanford University, CA, USA",
+      "name": "Lerma-Usabiaga, Garikoitz",
+      "orcid": "0000-0001-9800-4816",
+      "type": "Researcher"
     },
+    {
+      "name": "nrajamani3",
+      "type": "Researcher"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University",
+      "name": "Poldrack, Russell A.",
+      "orcid": "0000-0001-6755-0259",
+      "type": "Researcher"
+    }
+  ],
+  "creators": [
     {
       "affiliation": "The University of Washington eScience Institute",
       "name": "Richie-Halford, Adam",
       "orcid": "0000-0001-9276-9084"
+    },
+    {
+      "affiliation": "The University of Washington eScience Institute",
+      "name": "Keshavan, Anisha",
+      "orcid": "0000-0003-3554-043X"
     },
     {
       "affiliation": "The Centre for Addiction and Mental Health",
@@ -29,24 +44,7 @@
       "orcid": "0000-0001-8435-6191"
     }
   ],
-  "contributors": [
-    {
-      "affiliation": "Department of Psychology, Stanford University, CA, USA",
-      "name": "Lerma-Usabiaga, Garikoitz",
-      "orcid": "0000-0001-9800-4816",
-      "type": "Researcher"
-    },
-    {
-      "name": "nrajamani3",
-      "type": "Researcher"
-    },
-    {
-      "name": "Poldrack, Russell A.",
-      "affiliation": "Department of Psychology, Stanford University",
-      "orcid": "0000-0001-6755-0259",
-      "type": "Researcher"
-    },
-  ],
+  "description": "<p>dMRIPrep is a robust and easy-to-use pipeline for preprocessing of diverse dMRI data. The transparent workflow dispenses of manual intervention, thereby ensuring the reproducibility of the results.</p>",
   "keywords": [
     "neuroimaging",
     "workflow",
@@ -68,5 +66,6 @@
       "scheme": "doi"
     }
   ],
+  "title": "dMRIPrep: a robust preprocessing pipeline for diffusion MRI",
   "upload_type": "software"
 }
