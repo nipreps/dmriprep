@@ -14,8 +14,9 @@ dmriprep.egg-info
 .eggs
 
 # housekeeping tools
+.maintenance/**/*
+.maintenance
 get_version.py
-update_changes.sh
 tox.ini
 
 # pip installs
