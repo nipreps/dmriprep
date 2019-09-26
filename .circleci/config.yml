@@ -194,6 +194,13 @@ jobs:
       image: circleci/classic:201711-01
     working_directory: /tmp/src/dmriprep
     steps:
+      - run:
+          name: Check whether image should be deployed to Docker Hub
+          command: |
+            if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
+              echo "Nothing to deploy for $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME."
+              circleci step halt
+            fi
       - checkout:
           path: /home/circleci/src/dmriprep
       - run:
