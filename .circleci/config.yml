@@ -234,22 +234,23 @@ jobs:
             fi
 
   test_deploy_pypi:
-    machine:
-      image: circleci/classic:201711-01
+    docker:
+      - image: circleci/python:3.7.4
     working_directory: /tmp/src/dmriprep
     steps:
       - checkout
       - run:
+          name: Start virtual environment
+          command: |
+            sudo python -m pip install "setuptools>=30.3.0" "pip>=10.0.1" twine
+            python -m venv /tmp/venv
+            source /tmp/venv/bin/activate
+      - run:
           name: Build dMRIPrep
           command: |
-            pyenv local 3.5.2
-            pip install twine  # For use in checking distributions
             THISVERSION=$( python get_version.py )
             THISVERSION=${THISVERSION%.dirty*}
             THISVERSION=${CIRCLE_TAG:-$THISVERSION}
-            virtualenv --python=python build
-            source build/bin/activate
-            pip install --upgrade "pip>=19.1" numpy
             echo "${CIRCLE_TAG:-$THISVERSION}" > dmriprep/VERSION
             python setup.py sdist
             pip wheel --no-deps -w dist/ .
@@ -258,14 +259,10 @@ jobs:
       - run:
           name: Check sdist distribution
           command: |
-            pyenv local 3.5.2
             THISVERSION=$( python get_version.py )
             THISVERSION=${THISVERSION%.dirty*}
             THISVERSION=${CIRCLE_TAG:-$THISVERSION}
             twine check dist/dmriprep*.tar.gz
-            virtualenv --python=python sdist
-            source sdist/bin/activate
-            pip install --upgrade "pip>=19.1" numpy
             pip install dist/dmriprep*.tar.gz
             which dmriprep | grep sdist\\/bin
             INSTALLED_VERSION=$(dmriprep --version)
@@ -277,13 +274,10 @@ jobs:
       - run:
           name: Check wheel distribution
           command: |
-            pyenv local 3.5.2
             THISVERSION=$( python get_version.py )
             THISVERSION=${THISVERSION%.dirty*}
             THISVERSION=${CIRCLE_TAG:-$THISVERSION}
             twine check dist/dmriprep*.whl
-            virtualenv --python=python wheel
-            source wheel/bin/activate
             pip install dist/dmriprep*.whl
             which dmriprep | grep wheel\\/bin
             INSTALLED_VERSION=$(dmriprep --version)
@@ -296,27 +290,29 @@ jobs:
           path: /tmp/src/dmriprep/dist
 
   deploy_pypi:
-    machine:
-      image: circleci/classic:201711-01
+    docker:
+      - image: circleci/python:3.7.4
     working_directory: /tmp/src/dmriprep
     steps:
       - checkout
       - run:
+          name: Start virtual environment
+          command: |
+            sudo python -m pip install "setuptools>=30.3.0" "pip>=10.0.1" twine
+            python -m venv /tmp/venv
+            source /tmp/venv/bin/activate
+      - run:
           name: Build dMRIPrep
           command: |
-            sudo setfacl -d -m group:$(id -gn):rwx /tmp/src/dmriprep
-            sudo setfacl -m group:$(id -gn):rwx /tmp/src/dmriprep
-            pyenv local 3.5.2
             THISVERSION=$( python get_version.py )
+            THISVERSION=${THISVERSION%.dirty*}
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
             echo "${CIRCLE_TAG:-$THISVERSION}" > dmriprep/VERSION
-            docker run --rm=false --entrypoint=/bin/bash -v `pwd`:/io -w /io python:3.6.9 -c "pip install numpy && python setup.py sdist"
-            docker run --rm=false -e PLAT='manylinux1_x86_64' -e PKGNAME='dmriprep' -v `pwd`:/io \
-                quay.io/pypa/manylinux1_x86_64 /io/.circleci/pypi_wheel/build-wheels.sh
+            python setup.py sdist
+            pip wheel --no-deps -w dist/ .
       - run:
           name: Upload packages to PyPI
           command: |
-            pyenv local 3.5.2
-            pip install twine
             twine upload dist/dmriprep*
 
   deployable:
