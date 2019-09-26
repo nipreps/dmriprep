@@ -36,10 +36,11 @@ That means *dMRIPrep* shares with *fMRIPrep* (and more generally, other
   1. The tool only and fully supports BIDS and BIDS-Derivatives for the input and output data.
   1. The tool is packaged as a fully-compliant [BIDS-App][link_bidsapps], not just in its user
      interface, but also in the continuous integration, testing and delivery.
-  1. The tool is rigorously restricted to diffusion MRI preprocessing tasks, including:
-     head-motion correction, eddy-currents-derived artifact correction, susceptibility-distortion
-     correction, denoising, B1-bias field correction, session-drift correction, co-registration
-     with anatomical data, spatial normalization to neuroimaging templates, etc.
+  1. The tool is rigorously restricted to diffusion MRI preprocessing tasks, including (but not limited to):
+     input/output metadata assessment, head-motion correction, eddy-currents-derived artifact correction,
+     susceptibility-distortion correction, denoising, B1-bias field correction, session-drift correction,
+     co-registration with anatomical data, spatial normalization to neuroimaging templates, gradient
+     non-linearity correction, Gibbs unringing, etc.
      In other words, the tool does not deal with modeling, tractography or connectivity extraction.
   1. The tool is **agnostic to subsequent analysis**, i.e., any software supporting BIDS-Derivatives
      for its inputs should be amenable perform tractography and to analyze data preprocessed with
