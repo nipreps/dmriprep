@@ -52,7 +52,7 @@ Already know what you're looking for in this guide? Jump to the following sectio
 and we're excited to have you join!
 Most of our discussions will take place on open [issues][link_issues].
 
-We also encourage users to report any difficulties they encounter on [NeuroStars][link_stars],
+We also encourage users to report any difficulties they encounter on [NeuroStars][link_neurostars],
 a community platform for discussing neuroimaging.
 
 We actively monitor both spaces and look forward to hearing from you in either venue!
@@ -278,11 +278,19 @@ All the authors enlisted as *creators* participate in the revision of modificati
 
 ### Creators
 
-TODO
+Creators are contributors who _drive the project_.
+Examples of steering activities that _drive the project_ are: actively participating in the
+follow-up meetings, helping in the design of the tool and definition of the roadmap, providing
+resources (in the broad sense, including funding),
+code-review, etc.
 
 ### Contributors
 
-TODO
+Contributors helped the project in any sense: writing code, writing documentation,
+benchmarking modules of the tool, proposing new features, helping improve the scientific
+rigor of implementations, giving out support on the different communication
+channels ([mattermost][link_mattermost], [NeuroStars][link_neurostars],
+[GitHub issues][link_issues], etc.).
 
 ### Publications
 
@@ -311,7 +319,7 @@ You're awesome. :wave::smiley:
 [link_dMRIPrep]: https://github.com/nipreps/dmriprep
 [link_signupinstructions]: https://help.github.com/articles/signing-up-for-a-new-github-account
 
-[link_stars]: https://neurostars.org/
+[link_neurostars]: https://neurostars.org/tags/dmriprep
 
 [link_git]: https://git-scm.com/
 [link_handbook]: https://guides.github.com/introduction/git-handbook/
@@ -346,6 +354,7 @@ You're awesome. :wave::smiley:
 [link_devel]: https://dmriprep.readthedocs.io/en/latest/contributors.html
 [link_fmriprep]: http://fmriprep.org
 [link_bidsapps]: https://bids-apps.neuroimaging.io
+[link_mattermost]: https://mattermost.brainhack.org/brainhack/channels/dmriprep
 
 [enh_ex]: https://github.com/poldracklab/fmriprep/pull/1508
 [fix_ex]: https://github.com/poldracklab/fmriprep/pull/1378
