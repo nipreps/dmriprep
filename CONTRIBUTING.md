@@ -69,7 +69,6 @@ Already know what you're looking for in this guide? Jump to the following sectio
 * [Licensing](#licensing)
 * [Recognizing contributors](#recognizing-contributions)
 
-
 ## Joining the conversation
 
 *dMRIPrep* is maintained by a growing group of enthusiastic developers&mdash;
@@ -80,7 +79,6 @@ We also encourage users to report any difficulties they encounter on [NeuroStars
 a community platform for discussing neuroimaging.
 
 We actively monitor both spaces and look forward to hearing from you in either venue!
-
 
 ## Contributing through GitHub
 
@@ -100,7 +98,6 @@ or as a [link][rick_roll] (`[link](https://https://youtu.be/dQw4w9WgXcQ)`) to an
 GitHub has a really helpful page for getting started with
 [writing and formatting Markdown on GitHub][writing_formatting_github].
 
-
 ## Understanding issues
 
 Every project on GitHub uses [issues][link_issues] slightly differently.
@@ -113,7 +110,6 @@ is difficult to describe as one unit of work, please consider splitting it into 
 
     Issues are assigned [labels](#issue-labels) which explain how they relate to the overall project's
     goals and immediate next steps.
-
 
 ### Issue Labels
 
@@ -216,23 +212,23 @@ that they can be merged into the main code base.
 
 Pull requests titles should begin with a descriptive prefix:
 
-* ``ENH``: enhancements or new features ([example][enh_ex])
-* ``FIX``: bug fixes ([example][fix_ex])
-* ``TST``: new or updated tests ([example][tst_ex])
-* ``DOC``: new or updated documentation ([example][doc_ex])
-* ``STY``: style changes ([example][sty_ex])
-* ``REF``: refactoring existing code ([example][ref_ex])
-* ``CI``: updates to continous integration infrastructure ([example][ci_ex])
-* ``MAINT``: general maintenance ([example][maint_ex])
+* `ENH`: enhancements or new features ([example][enh_ex])
+* `FIX`: bug fixes ([example][fix_ex])
+* `TST`: new or updated tests ([example][tst_ex])
+* `DOC`: new or updated documentation ([example][doc_ex])
+* `STY`: style changes ([example][sty_ex])
+* `REF`: refactoring existing code ([example][ref_ex])
+* `CI`: updates to continous integration infrastructure ([example][ci_ex])
+* `MAINT`: general maintenance ([example][maint_ex])
 
-For example: `[ENH] Support for SB-reference in multi-band datasets`
+For example: `ENH: Adding Gibbs unringing step`
 
-For works-in-progress, add the ``WIP`` tag in addition to the descriptive prefix.
-Pull-requests tagged with ``[WIP]`` will not be merged until the tag is removed.
+For works-in-progress, add the `WIP` tag in addition to the descriptive prefix.
+Pull-requests tagged with `WIP:` will not be merged until the tag is removed.
 
 ## dMRIPrep coding style guide
 
-Whenever possible, instances of Nodes and Workflows should use the same names
+Whenever possible, instances of Nipype `Node`s and `Workflow`s should use the same names
 as the variables they are assigned to.
 This makes it easier to relate the content of the working directory to the code
 that generated it when debugging.
@@ -274,13 +270,11 @@ myworkflow_lh_wf = init_workflow_wf(name='myworkflow_lh_wf')
 myworkflow_rh_wf = init_workflow_wf(name='myworkflow_rh_wf')
 ```
 
-
 ## Licensing
 
 *dMRIPrep* is licensed under the Apache 2.0 license.
 By contributing to *dMRIPrep*,
 you acknowledge that any contributions will be licensed under the same terms.
-
 
 ## Recognizing contributions
 
@@ -292,8 +286,8 @@ Before every release, the [zenodo file][link_zenodo] will be checked for new con
 who will be invited again to add their names to the file (just in case they missed the automated
 message from our Welcome Bot).
 The [update script][link_update_script] will also sort creators and contributors by
-the relative size of their contributions, as provided by the ``git-line-summary`` utility
-distributed with the ``git-extras`` package.
+the relative size of their contributions, as provided by the `git-line-summary` utility
+distributed with the `git-extras` package.
 Last positions in both the *creators* and *contributors* list will be reserved to
 the project leaders.
 These special positions can be revised to add names by punctual request and revised for
