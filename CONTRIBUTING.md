@@ -175,31 +175,31 @@ but those accepted fastest will follow a workflow similar to the following:
   To keep up with changes in the dMRIPrep repository,
   add the ["upstream" dMRIPrep repository as a remote][link_addremote]
   to your locally cloned repository.  
-  ```Shell
-  git remote add upstream https://github.com/nipreps/dmriprep.git
-  ```
-  Make sure to [keep your fork up to date][link_updateupstreamwiki] with the upstream repository.<br />  
-  For example, to update your master branch on your local cloned repository:  
-  ```Shell
-  git fetch upstream
-  git checkout master
-  git merge upstream/master
-  ```
+    ```Shell
+    git remote add upstream https://github.com/nipreps/dmriprep.git
+    ```
+    Make sure to [keep your fork up to date][link_updateupstreamwiki] with the upstream repository.<br />  
+    For example, to update your master branch on your local cloned repository:  
+      ```Shell
+      git fetch upstream
+      git checkout master
+      git merge upstream/master
+      ```
 
 1. **Create a [new branch][link_branches] to develop and maintain the proposed code changes
   prior a pull-request (see below) is submitted and code changes are reviewed and accepted.**<br />
   For example:
-  ```Shell
-  git fetch upstream  # Always start with an updated upstream
-  git checkout -b fix/bug-1222 upstream/master
-  ```
-  Please consider using appropriate branch names as those listed below, and mind that some of them
-  are special (e.g., `doc/` and `docs/`):
-    * `fix/<some-identifier>`: for bugfixes
-    * `enh/<feature-name>`: for new features
-    * `doc/<some-identifier>`: for documentation improvements.
-      You should name all your documentation branches with the prefix `doc/` or `docs/`
-      as that will preempt triggering the full battery of continuous integration tests.
+    ```Shell
+    git fetch upstream  # Always start with an updated upstream
+    git checkout -b fix/bug-1222 upstream/master
+    ```
+    Please consider using appropriate branch names as those listed below, and mind that some of them
+    are special (e.g., `doc/` and `docs/`):
+      * `fix/<some-identifier>`: for bugfixes
+      * `enh/<feature-name>`: for new features
+      * `doc/<some-identifier>`: for documentation improvements.
+        You should name all your documentation branches with the prefix `doc/` or `docs/`
+        as that will preempt triggering the full battery of continuous integration tests.
 
 1. **Make the changes you've discussed, following the [dMRIPrep coding style guide](#dMRIPrep-coding-style-guide).**<br />
   Try to keep the changes focused: it is generally easy to review changes that address one feature or bug at a time.
