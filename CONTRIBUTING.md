@@ -204,14 +204,14 @@ but those accepted fastest will follow a workflow similar to the following:
 1. **Make the changes you've discussed, following the [dMRIPrep coding style guide](#dMRIPrep-coding-style-guide).**<br />
   Try to keep the changes focused: it is generally easy to review changes that address one feature or bug at a time.
   It can also be helpful to test your changes locally,
-  using an [dMRIPrep development environment][link_devel].
+  using a [dMRIPrep development environment][link_devel].
   Once you are satisfied with your local changes, [add/commit/push them][link_add_commit_push]
   to the branch on your forked repository.
 
 1. **Submit a [pull request][link_pullrequest].**<br />
    A member of the development team will review your changes to confirm
    that they can be merged into the main code base.<br />
-   Pull requests titles should begin with a descriptive prefix
+   Pull request titles should begin with a descriptive prefix
    (for example, `ENH: Adding Gibbs unringing step`):  
      * `ENH`: enhancements or new features ([example][enh_ex])
      * `FIX`: bug fixes ([example][fix_ex])
