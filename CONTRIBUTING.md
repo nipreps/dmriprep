@@ -3,7 +3,7 @@
 Welcome to the dMRIPrep repository!
 We're excited you're here and want to contribute.
 
-**Imposter's syndrome disclaimer**: We want your help. No, really.
+**Imposter's syndrome disclaimer**[^1]: We want your help. No, really.
 
 There may be a little voice inside your head that is telling you that
 you're not ready to be an open-source contributor; that your skills
@@ -93,7 +93,7 @@ On GitHub, You'll use [Markdown][markdown] to chat in issues and pull requests.
 You can think of Markdown as a few little symbols around your text that will allow GitHub
 to render the text with a little bit of formatting.
 For example, you could write words as bold (`**bold**`), or in italics (`*italics*`),
-or as a [link][rick_roll] (`[link](https://https://youtu.be/dQw4w9WgXcQ)`) to another webpage.
+or as a [link][rick_roll] (`[link](https://youtu.be/dQw4w9WgXcQ)`) to another webpage.
 
 GitHub has a really helpful page for getting started with
 [writing and formatting Markdown on GitHub][writing_formatting_github].
@@ -186,8 +186,7 @@ but those accepted fastest will follow a workflow similar to the following:
       git merge upstream/master
       ```
 
-1. **Create a [new branch][link_branches] to develop and maintain the proposed code changes
-  prior a pull-request (see below) is submitted and code changes are reviewed and accepted.**<br />
+1. **Create a [new branch][link_branches] to develop and maintain the proposed code changes.**<br />
   For example:
     ```Shell
     git fetch upstream  # Always start with an updated upstream
@@ -223,6 +222,13 @@ but those accepted fastest will follow a workflow similar to the following:
      * `MAINT`: general maintenance ([example][maint_ex])
      * For works-in-progress, add the `WIP` tag in addition to the descriptive prefix.
        Pull-requests tagged with `WIP:` will not be merged until the tag is removed.
+
+1. **Have your PR reviewed by the developers team, and update your changes accordingly in your branch.**<br />
+   The reviewers will take special care in assisting you address their comments, as well as dealing with conflicts
+   and other tricky situations that could emerge from distributed development.
+   And if you don't make the requested changes, we might ask
+   [@bedevere-bot](https://github.com/search?q=commenter%3Abedevere-bot+soft+cushions) 
+   to [poke you with soft cushions!](https://youtu.be/XnS49c9KZw8?t=1m7s)
 
 ## dMRIPrep coding style guide
 
@@ -330,6 +336,12 @@ You're awesome. :wave::smiley:
 <br>
 
 *&mdash; Based on contributing guidelines from the [STEMMRoleModels][link_stemmrolemodels] project.*
+
+[^1]: The imposter syndrome disclaimer was originally written by
+    [Adrienne Lowe](https://github.com/adriennefriend) for a
+    [PyCon talk](https://www.youtube.com/watch?v=6Uj746j9Heo), and was
+    adapted based on its use in the README file for the
+    [MetPy project](https://github.com/Unidata/MetPy).
 
 [link_github]: https://github.com/
 [link_dMRIPrep]: https://github.com/nipreps/dmriprep
