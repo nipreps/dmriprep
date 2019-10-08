@@ -223,8 +223,8 @@ but those accepted fastest will follow a workflow similar to the following:
      * For works-in-progress, add the `WIP` tag in addition to the descriptive prefix.
        Pull-requests tagged with `WIP:` will not be merged until the tag is removed.
 
-1. **Have your PR reviewed by the developers team, and update your changes accordingly in your branch.**<br />
-   The reviewers will take special care in assisting you address their comments, as well as dealing with conflicts
+1. **Have your PR reviewed by the development team, and update your changes accordingly in your branch.**<br />
+   The reviewers will take special care in assisting you to address their comments, as well as dealing with conflicts
    and other tricky situations that could emerge from distributed development.
    And if you don't make the requested changes, we might ask
    [@bedevere-bot](https://github.com/search?q=commenter%3Abedevere-bot+soft+cushions) 
