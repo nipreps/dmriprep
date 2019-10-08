@@ -3,22 +3,22 @@
 Welcome to the dMRIPrep repository!
 We're excited you're here and want to contribute.
 
-**Imposter syndrome disclaimer**: We want your help. No, really.
+**Imposter's syndrome disclaimer**[^1]: We want your help. No, really.
 
 There may be a little voice inside your head that is telling you that
-you're not ready to be an open source contributor; that your skills
+you're not ready to be an open-source contributor; that your skills
 aren't nearly good enough to contribute. What could you possibly offer a
 project like this one?
 
 We assure you - the little voice in your head is wrong. If you can
-write code at all, you can contribute code to open source. Contributing
-to open source projects is a fantastic way to advance one's coding
+write code at all, you can contribute code to open-source. Contributing
+to open-source projects is a fantastic way to advance one's coding
 skills. Writing perfect code isn't the measure of a good developer (that
 would disqualify all of us!); it's trying to create something, making
 mistakes, and learning from those mistakes. That's how we all improve,
 and we are happy to help others learn.
 
-Being an open source contributor doesn't just mean writing code, either.
+Being an open-source contributor doesn't just mean writing code, either.
 You can help out by writing documentation, tests, or even giving
 feedback about the project (and yes - that includes giving feedback
 about the contribution process). Some of these contributions may be the
@@ -56,7 +56,7 @@ These guidelines are designed to make it as easy as possible to get involved.
 If you have any questions that aren't discussed below,
 please let us know by opening an [issue][link_issues]!
 
-Before you start you'll need to set up a free [GitHub][link_github] account and sign in.
+Before you start, you'll need to set up a free [GitHub][link_github] account and sign in.
 Here are some [instructions][link_signupinstructions].
 
 Already know what you're looking for in this guide? Jump to the following sections:
@@ -92,8 +92,8 @@ the [Software Carpentry introduction to git][link_swc_intro].
 On GitHub, You'll use [Markdown][markdown] to chat in issues and pull requests.
 You can think of Markdown as a few little symbols around your text that will allow GitHub
 to render the text with a little bit of formatting.
-For example you could write words as bold (`**bold**`), or in italics (`*italics*`),
-or as a [link][rick_roll] (`[link](https://https://youtu.be/dQw4w9WgXcQ)`) to another webpage.
+For example, you could write words as bold (`**bold**`), or in italics (`*italics*`),
+or as a [link][rick_roll] (`[link](https://youtu.be/dQw4w9WgXcQ)`) to another webpage.
 
 GitHub has a really helpful page for getting started with
 [writing and formatting Markdown on GitHub][writing_formatting_github].
@@ -104,9 +104,9 @@ Every project on GitHub uses [issues][link_issues] slightly differently.
 
 The following outlines how the *dMRIPrep* developers think about these tools.
 
-* **Issues** are individual pieces of work that need to be completed to move the project forwards.
+* **Issues** are individual pieces of work that need to be completed to move the project forward.
 A general guideline: if you find yourself tempted to write a great big issue that
-is difficult to describe as one unit of work, please consider splitting it into two or more issues.
+is difficult to be described as one unit of work, please consider splitting it into two or more issues.
 
     Issues are assigned [labels](#issue-labels) which explain how they relate to the overall project's
     goals and immediate next steps.
@@ -155,76 +155,80 @@ Finally, ![GitHub labels](https://img.shields.io/github/labels/nipreps/dmriprep/
 We appreciate all contributions to *dMRIPrep*,
 but those accepted fastest will follow a workflow similar to the following:
 
-**1. Comment on an existing issue or open a new issue referencing your addition.**
+1. **Comment on an existing issue or open a new issue referencing your addition.**<br />
+  This allows other members of the *dMRIPrep* development team to confirm that you aren't
+  overlapping with work that's currently underway and that everyone is on the same page
+  with the goal of the work you're going to carry out.<br />
+  [This blog][link_pushpullblog] is a nice explanation of why putting this work in up front
+  is so useful to everyone involved.
+  
+1. **[Fork][link_fork] the [dMRIPrep repository][link_dMRIPrep] to your profile.**<br />
+  This is now your own unique copy of *dMRIPrep*.
+  Changes here won't effect anyone else's work, so it's a safe space to explore edits to the code!
+  
+1. **[Clone][link_clone] your forked dMRIPrep repository to your machine/computer.**<br />
+  While you can edit files [directly on github][link_githubedit], sometimes the changes
+  you want to make will be complex and you will want to use a [text editor][link_texteditor]
+  that you have installed on your local machine/computer.
+  (One great text editor is [vscode][link_vscode]).<br />  
+  In order to work on the code locally, you must clone your forked repository.<br />  
+  To keep up with changes in the dMRIPrep repository,
+  add the ["upstream" dMRIPrep repository as a remote][link_addremote]
+  to your locally cloned repository.  
+    ```Shell
+    git remote add upstream https://github.com/nipreps/dmriprep.git
+    ```
+    Make sure to [keep your fork up to date][link_updateupstreamwiki] with the upstream repository.<br />  
+    For example, to update your master branch on your local cloned repository:  
+      ```Shell
+      git fetch upstream
+      git checkout master
+      git merge upstream/master
+      ```
 
-This allows other members of the *dMRIPrep* development team to confirm that you aren't
-overlapping with work that's currently underway and that everyone is on the same page
-with the goal of the work you're going to carry out.
+1. **Create a [new branch][link_branches] to develop and maintain the proposed code changes.**<br />
+  For example:
+    ```Shell
+    git fetch upstream  # Always start with an updated upstream
+    git checkout -b fix/bug-1222 upstream/master
+    ```
+    Please consider using appropriate branch names as those listed below, and mind that some of them
+    are special (e.g., `doc/` and `docs/`):
+      * `fix/<some-identifier>`: for bugfixes
+      * `enh/<feature-name>`: for new features
+      * `doc/<some-identifier>`: for documentation improvements.
+        You should name all your documentation branches with the prefix `doc/` or `docs/`
+        as that will preempt triggering the full battery of continuous integration tests.
 
-[This blog][link_pushpullblog] is a nice explanation of why putting this work in up front
-is so useful to everyone involved.
+1. **Make the changes you've discussed, following the [dMRIPrep coding style guide](#dMRIPrep-coding-style-guide).**<br />
+  Try to keep the changes focused: it is generally easy to review changes that address one feature or bug at a time.
+  It can also be helpful to test your changes locally,
+  using a [dMRIPrep development environment][link_devel].
+  Once you are satisfied with your local changes, [add/commit/push them][link_add_commit_push]
+  to the branch on your forked repository.
 
-**2. [Fork][link_fork] the [dMRIPrep repository][link_dMRIPrep] to your profile.**
+1. **Submit a [pull request][link_pullrequest].**<br />
+   A member of the development team will review your changes to confirm
+   that they can be merged into the main code base.<br />
+   Pull request titles should begin with a descriptive prefix
+   (for example, `ENH: Adding Gibbs unringing step`):  
+     * `ENH`: enhancements or new features ([example][enh_ex])
+     * `FIX`: bug fixes ([example][fix_ex])
+     * `TST`: new or updated tests ([example][tst_ex])
+     * `DOC`: new or updated documentation ([example][doc_ex])
+     * `STY`: style changes ([example][sty_ex])
+     * `REF`: refactoring existing code ([example][ref_ex])
+     * `CI`: updates to continous integration infrastructure ([example][ci_ex])
+     * `MAINT`: general maintenance ([example][maint_ex])
+     * For works-in-progress, add the `WIP` tag in addition to the descriptive prefix.
+       Pull-requests tagged with `WIP:` will not be merged until the tag is removed.
 
-This is now your own unique copy of *dMRIPrep*.
-Changes here won't effect anyone else's work, so it's a safe space to explore edits to the code!
-
-**3. [Clone][link_clone] your forked dMRIPrep repository to your machine/computer**
-
-While you can edit files [directly on github][link_githubedit], sometimes the changes
-you want to make will be complex and you will want to use a [text editor][link_texteditor]
-that you have installed on your local machine/computer.
-(One great text editor is [vscode][link_vscode]).
-
-In order to work on the code locally, you must clone your forked repository.
-
-To keep up with changes in the dMRIPrep repository,
-add the ["upstream" dMRIPrep repository as a remote][link_addremote]
-to your locally cloned repository.
-
-```Shell
-git remote add upstream https://github.com/nipreps/dmriprep.git
-```
-
-Make sure to [keep your fork up to date][link_updateupstreamwiki] with the upstream repository.
-
-For example, to update your master branch on your local cloned repository:
-
-```Shell
-git fetch upstream
-git checkout master
-git merge upstream/master
-```
-
-**4. Make the changes you've discussed, following the [dMRIPrep coding style guide](#dMRIPrep-coding-style-guide).**
-
-Try to keep the changes focused.
-If you feel tempted to "branch out" then please make a [new branch][link_branches].
-It can also be helpful to test your changes locally,
-using an [dMRIPrep development environment][link_devel].
-Once you are satisfied with your local changes, [add/commit/push them][link_add_commit_push]
-to the branch on your forked repository.
-
-**5. Submit a [pull request][link_pullrequest].**
-
-A member of the development team will review your changes to confirm
-that they can be merged into the main code base.
-
-Pull requests titles should begin with a descriptive prefix:
-
-* `ENH`: enhancements or new features ([example][enh_ex])
-* `FIX`: bug fixes ([example][fix_ex])
-* `TST`: new or updated tests ([example][tst_ex])
-* `DOC`: new or updated documentation ([example][doc_ex])
-* `STY`: style changes ([example][sty_ex])
-* `REF`: refactoring existing code ([example][ref_ex])
-* `CI`: updates to continous integration infrastructure ([example][ci_ex])
-* `MAINT`: general maintenance ([example][maint_ex])
-
-For example: `ENH: Adding Gibbs unringing step`
-
-For works-in-progress, add the `WIP` tag in addition to the descriptive prefix.
-Pull-requests tagged with `WIP:` will not be merged until the tag is removed.
+1. **Have your PR reviewed by the development team, and update your changes accordingly in your branch.**<br />
+   The reviewers will take special care in assisting you to address their comments, as well as dealing with conflicts
+   and other tricky situations that could emerge from distributed development.
+   And if you don't make the requested changes, we might ask
+   [@bedevere-bot](https://github.com/search?q=commenter%3Abedevere-bot+soft+cushions) 
+   to [poke you with soft cushions!](https://youtu.be/XnS49c9KZw8?t=1m7s)
 
 ## dMRIPrep coding style guide
 
@@ -235,7 +239,7 @@ that generated it when debugging.
 
 Workflow variables should end in `_wf` to indicate that they refer to Workflows
 and not Nodes.
-For instance, a workflow whose basename is `myworkflow` might be defined as
+For instance, a workflow whose base-name is `myworkflow` might be defined as
 follows:
 
 ```Python
@@ -332,6 +336,12 @@ You're awesome. :wave::smiley:
 <br>
 
 *&mdash; Based on contributing guidelines from the [STEMMRoleModels][link_stemmrolemodels] project.*
+
+[^1]: The imposter syndrome disclaimer was originally written by
+    [Adrienne Lowe](https://github.com/adriennefriend) for a
+    [PyCon talk](https://www.youtube.com/watch?v=6Uj746j9Heo), and was
+    adapted based on its use in the README file for the
+    [MetPy project](https://github.com/Unidata/MetPy).
 
 [link_github]: https://github.com/
 [link_dMRIPrep]: https://github.com/nipreps/dmriprep
