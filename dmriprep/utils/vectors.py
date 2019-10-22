@@ -125,8 +125,8 @@ def rescale_bval(bval, bvec):
     bvec = bvec.T if bvec.shape[0] == 3 else bvec
 
     bval_rescaled = bval.copy()
-    for dir in range(len(bvec)):
-        bval_rescaled[dir] = bval[dir] * np.linalg.norm(bvec[dir])**2
+    for dvol in range(len(bvec)):
+        bval_rescaled[dvol] = bval[dvol] * np.linalg.norm(bvec[dvol])**2
 
     return np.round(bval_rescaled, 0)
 
