@@ -18,7 +18,7 @@ def make_gradient_table(fbval, fbvec, B0_NORM_EPSILON):
         File path of the b-vectors.
     B0_NORM_EPSILON : float
         Gradient threshold below which volumes and vectors are considered B0's.
-   
+
     Returns
     -------
     gtab : Obj
