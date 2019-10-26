@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""@authors: Derek Pisner, Oscar Estaban, Ariel Rokem"""
-from __future__ import division, print_function
 import os
 import nibabel as nib
 import numpy as np
 
 
-def make_gradient_table(fbval, fbvec, B0_NORM_EPSILON):
+def make_gradient_table(bvals, bvecs, B0_NORM_EPSILON):
     """
     Create gradient table from bval/bvec.
+
     Parameters
     ----------
-    fbval : pathlike or str
-        File path of the b-values.
-    fbvec : pathlike or str
-        File path of the b-vectors.
+    bvals : 1d array
+        Raw b-values float array.
+    bvecs : m x n 2d array
+        Raw b-vectors array.
     B0_NORM_EPSILON : float
         Gradient threshold below which volumes and vectors are considered B0's.
 
@@ -24,21 +23,13 @@ def make_gradient_table(fbval, fbvec, B0_NORM_EPSILON):
     gtab : Obj
         DiPy object storing diffusion gradient information.
     b0_ixs : 1d array
-        Array containing the indices of the b0s
+        Array containing the indices of the b0s.
     """
-    from pathlib import Path
-    from dipy.io import read_bvals_bvecs
     from dipy.core.gradients import gradient_table
+    from dmriprep.utils.vectors import check_corruption
 
-    fbval = Path(fbval)
-    fbvec = Path(fbvec)
-
-    # Read b-values and b-vectors from disk Files can be either ‘.bvals’/’.bvecs’ or ‘.txt’ or ‘.npy’ (containing
-    # arrays stored with the appropriate values).
-    if fbval.exists() and fbvec.exists():
-        bvals, bvecs = read_bvals_bvecs(str(fbval), str(fbvec))
-    else:
-        raise OSError("Either bval or bvec files not found!")
+    # Perform initial corruption check, correcting for obvious format/character encoding anomalies.
+    bvecs, bvals = check_corruption(bvecs, bvals, B0_NORM_EPSILON)
 
     # Creating the gradient table
     gtab = gradient_table(bvals, bvecs, b0_threshold=B0_NORM_EPSILON)
@@ -48,22 +39,46 @@ def make_gradient_table(fbval, fbvec, B0_NORM_EPSILON):
     return gtab, b0_ixs
 
 
-def make_gradients_tsv(gtab, out_file):
+def read_gradients_tsv(rasb_tsv_file):
     """
-    Save gradient table as RAS-B tsv.
+    Read bvals/bvecs from a RAS-B tsv file.
 
     Parameters
     ----------
-    gtab : Obj
-        DiPy object storing diffusion gradient information.
+    rasb_tsv_file : pathlike or str
+        Path to .tsv file containing RAS-B gradient table.
+
+    Returns
+    -------
+    bvals : 1d array
+        Raw b-values float array.
+    bvecs : m x n 2d array
+        Raw b-vectors array.
+    """
+    RASB_table = np.genfromtxt(rasb_tsv_file, delimiter="\t")
+    bvecs = RASB_table[1:, 0:3]
+    bvals = RASB_table[1:, 3]
+    return bvals, bvecs
+
+
+def write_gradients_tsv(bvecs, bvals, out_file):
+    """
+    Save bvals/bveccs as RAS-B tsv.
+
+    Parameters
+    ----------
+    bvals : 1d array
+        Raw b-values float array.
+    bvecs : m x n 2d array
+        Raw b-vectors array.
     out_file : pathlike or str
         Path to .tsv file containing RAS-B gradient table.
     """
-    RASB_table = np.column_stack([gtab.bvecs, gtab.bvals])
+    RASB_table = np.column_stack([bvecs, bvals])
     with open(out_file, 'wb') as f:
         f.write(b'R\tA\tS\tB\n')
-        np.savetxt(out_file, RASB_table.astype('float'), fmt='%.8f', delimiter="\t")
-        f.close()
+        np.savetxt(f, RASB_table.astype('float'), fmt='%.8f', delimiter="\t")
+    f.close()
     return
 
 
@@ -322,73 +337,27 @@ def rescale_vectors(bvals, bvecs, bval_scaling, bmag, B0_NORM_EPSILON):
     return bval_mag_norm, bvec_rescaled
 
 
-def image_gradient_consistency_check(dwi_file, b0_ixs, gtab, n_bvals, bmag):
+class VectorTools(object):
     """
-    Check that b vectors/gradients and dwi image are consistent with one another.
+    Class of vector-handling methods for io and integrity checking.
 
     Parameters
     ----------
+    basedir : str
+        Path the output base directory for derivative dmriprep data.
     dwi_file : str
         Optionally provide a file path to the diffusion-weighted image series to which the
         bvecs/bvals should correspond.
-    b0_ixs : 1d array
-        Array containing the indices of the b0s
-    gtab : Obj
-        DiPy object storing diffusion gradient information.
-    n_bvals : int
-        Number of bvals (should equate to number of total dwi directions + B0s).
-    bmag : int
-        The order of magnitude to round the b-values.
-    """
-
-    from dipy.reconst.dki import check_multi_b
-    check_val = check_multi_b(gtab, n_bvals, non_zero=False, bmag=bmag)
-    if check_val is False:
-        raise ValueError('Insufficient b-values in gradient table based on the number expected')
-
-    # Check that number of image volumes corresponds to the number of gradient encodings.
-    if dwi_file:
-        volume_num = nib.load(dwi_file).shape[-1]
-        if not len(gtab.bvals) == volume_num:
-            raise Exception("Expected %d total image samples but found %d total gradient encoding values", volume_num,
-                            len(gtab.bvals))
-    return
-
-
-def checkvecs(fbval, fbvec, sesdir, dwi_file, B0_NORM_EPSILON=50, bval_scaling=True):
-    """
-    Check b-vectors and b-values alongside diffusion image volume data.
-
-    Parameters
-    ----------
     fbval : str
         File path of the b-values.
     fbvec : str
         File path of the b-vectors.
-    sesdir : str
-        Path the output session directory for derivative dmriprep data.
-    dwi_file : str
-        Optionally provide a file path to the diffusion-weighted image series to which the
-        bvecs/bvals should correspond.
+    rasb_tsv_file : pathlike or str
+        Path to .tsv file containing RAS-B gradient table.
     B0_NORM_EPSILON : float
         Gradient threshold below which volumes and vectors are considered B0's. Default is 50.
     bval_scaling : bool
         If True, then normalizes b-val by the square of the vector amplitude. Default is True.
-
-    Returns
-    -------
-    gtab : Obj
-        DiPy object storing diffusion gradient information.
-    is_hemi : bool
-        If True, one can find a hemisphere that contains all the points.
-        If False, then the points do not lie in any hemisphere.
-    pole : numpy.ndarray
-        If `is_hemi == True`, then pole is the "central" pole of the
-        input vectors. Otherwise, pole is the zero vector.
-    b0_ixs : 1d array
-        Array containing the indices of the b0s
-    slm : str
-        Second-level model to use for eddy correction.
     """
     from pathlib import Path
     from dipy.io import read_bvals_bvecs
