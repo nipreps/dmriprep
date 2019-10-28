@@ -139,7 +139,7 @@ class Reportlet(Element):
 
                 entities['extension'] = 'svg'
                 entities['datatype'] = 'figures'
-                linked_svg = layout.build_path(entities)
+                linked_svg = layout.build_path(entities, validate=False)
                 if linked_svg is None:
                     raise ValueError("Could not generate SVG path to copy {src}"
                                      " to. Entities: {entities}".format(src=src,
@@ -225,7 +225,6 @@ class Report(object):
         self.packagename = packagename
         self.subject_id = subject_id
 
-        print(self.sections, self.errors, self.out_dir, self.out_filename, self.run_uuid, self.template_path, self.packagename, self.subject_id)
         if subject_id is not None and subject_id.startswith('sub-'):
             self.subject_id = self.subject_id[4:]
 
