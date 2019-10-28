@@ -5,3 +5,7 @@ include LICENSE
 # versioneer
 include versioneer.py
 include dmriprep/_version.py
+
+# data
+include dmriprep/reports/dmriprep.yml
+include dmriprep/reports/report.tpl
