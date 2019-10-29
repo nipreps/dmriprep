@@ -337,7 +337,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
             sentry_sdk.capture_message('dMRIPrep finished without errors',
                                        level='info')
     finally:
-        from niworkflows.reports import generate_reports
+        from dmriprep.reports import generate_reports
         from subprocess import check_call, CalledProcessError, TimeoutExpired
         from pkg_resources import resource_filename as pkgrf
         from shutil import copyfile
@@ -410,7 +410,7 @@ def build_workflow(opts, retval):
 
     from nipype import logging as nlogging, config as ncfg
     from niworkflows.utils.bids import collect_participants
-    from niworkflows.reports import generate_reports
+    from dmriprep.reports import generate_reports
     from ..__about__ import __version__
     from ..workflows.base import init_dmriprep_wf
 
