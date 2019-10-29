@@ -2,7 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Reports builder for BIDS-Apps.
+
 Generalizes report generation across BIDS-Apps
+
 """
 from pathlib import Path
 import re
@@ -53,60 +55,80 @@ class Reportlet(Element):
     HTML fragment or a path to an SVG file, and possibly a caption. This is a
     factory class to generate Reportlets reusing the layout from a ``Report``
     object.
+
     .. testsetup::
+
     >>> cwd = os.getcwd()
     >>> os.chdir(tmpdir)
+
     >>> from pkg_resources import resource_filename
     >>> from shutil import copytree
     >>> from bids.layout import BIDSLayout
     >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
     >>> testdir = Path(tmpdir)
     >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
-    >>> out_figs = testdir / 'out' / 'dmriprep'
+    >>> out_figs = testdir / 'out' / 'fmriprep'
     >>> bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),
     ...                 config='figures', validate=False)
+
     .. doctest::
+
     >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
-    [<BIDSFile filename='.../dmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+    [<BIDSFile filename='.../fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+
     >>> len(bl.get(subject='01', space='.*', regex_search=True))
     2
+
     >>> r = Reportlet(bl, out_figs, config={
     ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'reconall'},
     ...     'description': 'Some description'})
     >>> r.name
     'datatype-anat_desc-reconall'
+
     >>> r.components[0][0].startswith('<img')
     True
+
     >>> r = Reportlet(bl, out_figs, config={
     ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'reconall'},
     ...     'description': 'Some description', 'static': False})
     >>> r.name
     'datatype-anat_desc-reconall'
+
     >>> r.components[0][0].startswith('<object')
     True
+
     >>> r = Reportlet(bl, out_figs, config={
     ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'summary'},
     ...     'description': 'Some description'})
+
     >>> r.components[0][0].startswith('<h3')
     True
+
     >>> r.components[0][1] is None
     True
+
     >>> r = Reportlet(bl, out_figs, config={
     ...     'title': 'Some Title',
     ...     'bids': {'datatype': 'anat', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> sorted(r.components)[0][1]
     'Some description MNI152NLin2009cAsym'
+
     >>> sorted(r.components)[1][1]
     'Some description MNI152NLin6Asym'
+
+
     >>> r = Reportlet(bl, out_figs, config={
     ...     'title': 'Some Title',
     ...     'bids': {'datatype': 'fmap', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> r.is_empty()
     True
+
     .. testcleanup::
+
     >>> os.chdir(cwd)
+
     """
 
     def __init__(self, layout, out_dir, config=None):
@@ -187,27 +209,37 @@ class Report(object):
     """
     The full report object. This object maintains a BIDSLayout to index
     all reportlets.
+
+
     .. testsetup::
+
     >>> cwd = os.getcwd()
     >>> os.chdir(tmpdir)
+
     >>> from pkg_resources import resource_filename
     >>> from shutil import copytree
     >>> from bids.layout import BIDSLayout
     >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
     >>> testdir = Path(tmpdir)
     >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
-    >>> out_figs = testdir / 'out' / 'dmriprep'
+    >>> out_figs = testdir / 'out' / 'fmriprep'
+
     .. doctest::
+
     >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
-    ...               'madeoutuuid', subject_id='01', packagename='dmriprep')
+    ...               'madeoutuuid', subject_id='01', packagename='fmriprep')
     >>> robj.layout.get(subject='01', desc='reconall')  # doctest: +ELLIPSIS
     [<BIDSFile filename='.../anat/sub-01_desc-reconall_T1w.svg'>]
+
     >>> robj.generate_report()
     0
-    >>> len((testdir / 'out' / 'dmriprep' / 'sub-01.html').read_text())
+    >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
     19369
+
     .. testcleanup::
+
     >>> os.chdir(cwd)
+
     """
 
     def __init__(self, reportlets_dir, out_dir, run_uuid, config=None,
@@ -224,7 +256,6 @@ class Report(object):
         self.template_path = None
         self.packagename = packagename
         self.subject_id = subject_id
-
         if subject_id is not None and subject_id.startswith('sub-'):
             self.subject_id = self.subject_id[4:]
 
@@ -256,6 +287,7 @@ class Report(object):
     def index(self, config):
         """
         Traverse the reports config definition and instantiate reportlets.
+
         This method also places figures in their final location.
         """
         # Initialize a BIDS layout
@@ -306,7 +338,7 @@ class Report(object):
         # Populate errors section
         error_dir = self.out_dir / 'sub-{}'.format(self.subject_id) / 'log' / self.run_uuid
         if error_dir.is_dir():
-            from niworkflows.utils.misc import read_crashfile
+            from ..utils.misc import read_crashfile
             self.errors = [read_crashfile(str(f)) for f in error_dir.glob('crash*.*')]
 
     def generate_report(self):
@@ -358,21 +390,29 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
                 packagename=None):
     """
     Runs the reports
+
     .. testsetup::
+
     >>> cwd = os.getcwd()
     >>> os.chdir(tmpdir)
+
     >>> from pkg_resources import resource_filename
     >>> from shutil import copytree
     >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
     >>> testdir = Path(tmpdir)
     >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
-    >>> (testdir / 'dmriprep').mkdir(parents=True, exist_ok=True)
+    >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
+
     .. doctest::
+
     >>> run_reports(testdir / 'work' / 'reportlets', testdir / 'out',
-    ...             '01', 'madeoutuuid', packagename='dmriprep')
+    ...             '01', 'madeoutuuid', packagename='fmriprep')
     0
+
     .. testcleanup::
+
     >>> os.chdir(cwd)
+
     """
     report = Report(reportlets_dir, out_dir, run_uuid, config=config,
                     subject_id=subject_label, packagename=packagename)
