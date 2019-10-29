@@ -389,7 +389,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
         # Generate reports phase
         failed_reports = generate_reports(
             subject_list, output_dir, work_dir, run_uuid,
-            config=pkgrf('dmriprep', 'reports/dmriprep.yml'),
+            config=pkgrf('dmriprep', 'config/reports-spec.yml'),
             packagename='dmriprep')
         write_derivative_description(bids_dir, output_dir / 'dmriprep')
 
@@ -537,7 +537,7 @@ def build_workflow(opts, retval):
             retval['run_uuid'] = run_uuid
         retval['return_code'] = generate_reports(
             subject_list, output_dir, work_dir, run_uuid,
-            config=pkgrf('dmriprep', 'reports/dmriprep.yml'),
+            config=pkgrf('dmriprep', 'config/reports-spec.yml'),
             packagename='dmriprep')
         return retval
 

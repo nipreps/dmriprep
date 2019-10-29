@@ -11,19 +11,23 @@
 <style type="text/css">
 .sub-report-title {}
 .run-title {}
+
 h1 { padding-top: 35px; }
 h2 { padding-top: 20px; }
 h3 { padding-top: 15px; }
+
 .elem-desc {}
 .elem-caption {
     margin-top: 15px
     margin-bottom: 0;
 }
 .elem-filename {}
+
 div.elem-image {
   width: 100%;
   page-break-before:always;
 }
+
 .elem-image object.svg-reportlet {
     width: 100%;
     padding-bottom: 5px;
@@ -31,17 +35,20 @@ div.elem-image {
 body {
     padding: 65px 10px 10px;
 }
+
 .boiler-html {
     font-family: "Bitstream Charter", "Georgia", Times;
     margin: 20px 25px;
     padding: 10px;
     background-color: #F8F9FA;
 }
+
 div#boilerplate pre {
     margin: 20px 25px;
     padding: 10px;
     background-color: #F8F9FA;
 }
+
 </style>
 </head>
 <body>
