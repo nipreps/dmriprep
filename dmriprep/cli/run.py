@@ -341,7 +341,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
             sentry_sdk.capture_message('dMRIPrep finished without errors',
                                        level='info')
     finally:
-        from dmriprep.reports import generate_reports
+        from niworkflows.reports import generate_reports
         from subprocess import check_call, CalledProcessError, TimeoutExpired
         from pkg_resources import resource_filename as pkgrf
         from shutil import copyfile
@@ -388,7 +388,9 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
 
         # Generate reports phase
         failed_reports = generate_reports(
-            subject_list, output_dir, work_dir, run_uuid, packagename='dmriprep')
+            subject_list, output_dir, work_dir, run_uuid,
+            config=pkgrf('dmriprep', 'reports/dmriprep.yml'),
+            packagename='dmriprep')
         write_derivative_description(bids_dir, output_dir / 'dmriprep')
 
         if failed_reports and not opts.notrack:
@@ -414,7 +416,7 @@ def build_workflow(opts, retval):
 
     from nipype import logging as nlogging, config as ncfg
     from niworkflows.utils.bids import collect_participants
-    from dmriprep.reports import generate_reports
+    from niworkflows.reports import generate_reports
     from ..__about__ import __version__
     from ..workflows.base import init_dmriprep_wf
 
@@ -528,12 +530,14 @@ def build_workflow(opts, retval):
 
     # Called with reports only
     if opts.reports_only:
+        from pkg_resources import resource_filename as pkgrf
         build_log.log(25, 'Running --reports-only on participants %s', ', '.join(subject_list))
         if opts.run_uuid is not None:
             run_uuid = opts.run_uuid
             retval['run_uuid'] = run_uuid
         retval['return_code'] = generate_reports(
             subject_list, output_dir, work_dir, run_uuid,
+            config=pkgrf('dmriprep', 'reports/dmriprep.yml'),
             packagename='dmriprep')
         return retval
 
