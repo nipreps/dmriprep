@@ -159,6 +159,95 @@ jobs:
             - /tmp/data
             - /tmp/THP002/derivatives/freesurfer
 
+  THP002:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/THP002
+    environment:
+      - FS_LICENSE: /tmp/fslicense/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/dmriprep
+      - run:
+          name: Check whether build should be skipped
+          command: |
+            cd /home/circleci/src/dmriprep
+            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
+              echo "Only docs build"
+              circleci step halt
+            fi
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?THP002\]' )" != "" ]]; then
+              echo "Skipping THP002 build"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - docker-v0-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - THP002-anat-v00-{{ .Branch }}-{{ .Revision }}
+            - THP002-anat-v00-{{ .Branch }}
+            - THP002-anat-v00-master
+            - THP002-anat-v00-
+      - run:
+          name: Setting up test
+          command: |
+            mkdir -p /tmp/THP002/derivatives && sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/derivatives && sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
+            pip install --upgrade pip setuptools
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              sudo apt update && sudo apt -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Run anatomical workflow on THP002
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/THP002/work /tmp/THP002/derivatives
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/derivatives && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/work && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/work
+            docker run -e FS_LICENSE=$FS_LICENSE --rm=false \
+                -v /tmp/data/THP002:/data \
+                -v /tmp/THP002/derivatives:/out \
+                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/THP002/work:/work \
+                --user $(id -u):$(id -g) \
+                nipreps/dmriprep:latest /data /out participant --anat-only --notrack --skip-bids-validation -w /work
+      - run:
+          name: Clean-up after anatomical run
+          command: |
+            rm -rf /tmp/THP002/work/dmriprep_wf/fsdir*
+            rm -rf /tmp/THP002/work/reportlets
+            rm -rf /tmp/THP002/derivatives/dmriprep
+          when: on_success
+      - save_cache:
+         key: THP002-anat-v00-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         paths:
+            - /tmp/THP002/work
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/THP002
+            sudo rm -rf /tmp/THP002/work
+            sudo rm -rf /tmp/THP002/work_partial
+      - store_artifacts:
+          path: /tmp/THP002
+
+
   deploy_docker_patches:
     machine:
       image: circleci/classic:201711-01
@@ -360,6 +449,18 @@ workflows:
             tags:
               only: /.*/
 
+      - THP002:
+          requires:
+            - build
+            - get_data 
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
       - test_deploy_pypi:
           filters:
             branches:
