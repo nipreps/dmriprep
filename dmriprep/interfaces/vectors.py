@@ -1,91 +1,101 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from nipype.interfaces.base import SimpleInterface, BaseInterfaceInputSpec, TraitedSpec, File, traits, Directory, isdefined
+"""Handling the gradient table."""
+from pathlib import Path
+import numpy as np
+from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.base import (
+    SimpleInterface, BaseInterfaceInputSpec, TraitedSpec,
+    File, traits, isdefined
+)
+from ..utils.vectors import DiffusionGradientTable, B0_THRESHOLD, BVEC_NORM_EPSILON
 
 
-class CleanVecsInputSpec(BaseInterfaceInputSpec):
-    """Input interface wrapper for CleanVecs"""
-    basedir = Directory(exists=True, mandatory=False)
+class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
     dwi_file = File(exists=True, mandatory=True)
-    fbval = File(exists=False, mandatory=False)
-    fbvec = File(exists=False, mandatory=False)
-    rasb_tsv_file = File(exists=False, mandatory=False)
-    rescale = traits.Bool(True, usedefault=True)
-    save_fsl_style = traits.Bool(True, usedefault=True)
-    B0_NORM_EPSILON = traits.Float(50)
-    bval_scaling = traits.Bool(True, usedefault=True)
+    in_bvec = File(exists=True, xor=['in_rasb'])
+    in_bval = File(exists=True, xor=['in_rasb'])
+    in_rasb = File(exists=True, xor=['in_bval', 'in_bvec'])
+    b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
+    bvec_norm_epsilon = traits.Float(BVEC_NORM_EPSILON, usedefault=True)
+    b_scale = traits.Bool(True, usedefault=True)
 
 
-class CleanVecsOutputSpec(TraitedSpec):
-    """Output interface wrapper for CleanVecs"""
-    from dipy.core.gradients import GradientTable
-    gtab = traits.Instance(GradientTable)
-    is_hemi = traits.Bool()
-    pole = traits.Array()
-    b0_ixs = traits.Array()
-    slm = traits.Str()
-    fbval_out_file = traits.Any()
-    fbvec_out_file = traits.Any()
-    rasb_tsv_out_file = File(exists=True, mandatory=True)
+class _CheckGradientTableOutputSpec(TraitedSpec):
+    out_rasb = File(exists=True)
+    out_bval = File(exists=True)
+    out_bvec = File(exists=True)
+    full_sphere = traits.Bool()
+    pole = traits.Tuple(traits.Float, traits.Float, traits.Float)
+    b0_ixs = traits.List(traits.Int)
 
 
-class CleanVecs(SimpleInterface):
-    """Interface wrapper for CleanVecs"""
-    input_spec = CleanVecsInputSpec
-    output_spec = CleanVecsOutputSpec
+class CheckGradientTable(SimpleInterface):
+    """
+    Ensure the correctness of the gradient table.
+
+    Example
+    -------
+
+    >>> os.chdir(tmpdir)
+    >>> check = CheckGradientTable(
+    ...     dwi_file=str(data_dir / 'dwi.nii.gz'),
+    ...     in_rasb=str(data_dir / 'dwi.tsv')).run()
+    >>> check.outputs.pole
+    (0.0, 0.0, 0.0)
+    >>> check.outputs.full_sphere
+    True
+
+    >>> check = CheckGradientTable(
+    ...     dwi_file=str(data_dir / 'dwi.nii.gz'),
+    ...     in_bvec=str(data_dir / 'bvec'),
+    ...     in_bval=str(data_dir / 'bval')).run()
+    >>> check.outputs.pole
+    (0.0, 0.0, 0.0)
+    >>> check.outputs.full_sphere
+    True
+    >>> newrasb = np.loadtxt(check.outputs.out_rasb, skiprows=1)
+    >>> oldrasb = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
+    >>> np.allclose(newrasb, oldrasb, rtol=1.e-3)
+    True
+
+    """
+
+    input_spec = _CheckGradientTableInputSpec
+    output_spec = _CheckGradientTableOutputSpec
 
     def _run_interface(self, runtime):
-        from dmriprep.utils.vectors import VectorTools
-        if isdefined(self.inputs.fbval) and isdefined(self.inputs.fbvec):
-            fbval = self.inputs.fbval
-            fbvec = self.inputs.fbvec
-        else:
-            fbval = None
-            fbvec = None
+        rasb_file = _undefined(self.inputs, 'in_rasb')
 
-        if isdefined(self.inputs.rasb_tsv_file):
-            rasb_tsv_file = self.inputs.rasb_tsv_file
-        else:
-            rasb_tsv_file = None
+        table = DiffusionGradientTable(
+            self.inputs.dwi_file,
+            bvecs=_undefined(self.inputs, 'in_bvec'),
+            bvals=_undefined(self.inputs, 'in_bval'),
+            rasb_file=rasb_file,
+            b_scale=self.inputs.b_scale,
+            bvec_norm_epsilon=self.inputs.bvec_norm_epsilon,
+            b0_threshold=self.inputs.b0_threshold,
+        )
+        pole = table.pole
+        self._results['pole'] = tuple(pole)
+        self._results['full_sphere'] = np.all(pole == 0.0)
+        self._results['b0_ixs'] = np.where(table.b0mask)[0].tolist()
 
-        if isdefined(self.inputs.basedir):
-            basedir = self.inputs.basedir
-        else:
-            basedir = runtime.cwd
+        if rasb_file is None:
+            rasb_file = fname_presuffix(
+                self.inputs.dwi_file, use_ext=False, suffix='.tsv',
+                newpath=runtime.cwd)
+            table.to_filename(rasb_file)
+        self._results['out_rasb'] = rasb_file
 
-        vt = VectorTools(basedir, self.inputs.dwi_file, fbval, fbvec, rasb_tsv_file, self.inputs.B0_NORM_EPSILON,
-                         self.inputs.bval_scaling)
+        cwd = Path(runtime.cwd).absolute()
 
-        # Read in vectors
-        if rasb_tsv_file is not None:
-            vt.read_rasb_tsv()
-        elif fbval is not None and fbvec is not None:
-            vt.read_bvals_bvecs()
-        else:
-            raise OSError('VectorTools methods require either fbval/fbvec input files or an input rasb .tsv file.')
-
-        # Rescale vectors
-        if self.inputs.rescale is True:
-            vt.rescale_vecs()
-
-        # Build gradient table
-        gtab, b0_ixs = vt.build_gradient_table()
-
-        # Check vector integrity
-        is_hemi, pole, slm = vt.checkvecs()
-
-        if self.inputs.save_fsl_style is True:
-            fbval_out_file, fbvec_out_file = vt.save_vecs_fsl()
-        else:
-            fbval_out_file = None
-            fbvec_out_file = None
-
-        self._results['gtab'] = gtab
-        self._results['is_hemi'] = is_hemi
-        self._results['pole'] = pole
-        self._results['slm'] = slm
-        self._results['b0_ixs'] = b0_ixs
-        self._results['fbval_out_file'] = fbval_out_file
-        self._results['fbvec_out_file'] = fbvec_out_file
-        self._results['rasb_tsv_out_file'] = vt.write_rasb_tsv()
+        table.to_filename(bvecs=cwd / 'bvec', bvals=cwd / 'bval')
+        self._results['out_bval'] = str(cwd / 'bval')
+        self._results['out_bvec'] = str(cwd / 'bvec')
         return runtime
+
+
+def _undefined(objekt, name, default=None):
+    value = getattr(objekt, name)
+    if not isdefined(value):
+        return default
+    return value
