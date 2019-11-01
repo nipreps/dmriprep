@@ -1,0 +1,13 @@
+[run]
+branch = True
+omit =
+    */tests/*
+    */_afq/*
+    dmriprep/_version.py
+    dmriprep/conftest.py
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    raise NotImplementedError
+    warnings\.warn
