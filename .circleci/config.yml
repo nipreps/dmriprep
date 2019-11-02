@@ -123,7 +123,7 @@ jobs:
               tar xvzf THP002_data.tar.gz -C /tmp/data/
             else
               echo "Dataset THP002 was cached"
-            fi 
+            fi
       - run:
           name: Get FreeSurfer derivatives for THP002
           command: |
@@ -219,13 +219,15 @@ jobs:
                 sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
             sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/work && \
                 sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/work
-            docker run -e FS_LICENSE=$FS_LICENSE --rm=false \
+            docker run -e FS_LICENSE=$FS_LICENSE --rm \
                 -v /tmp/data/THP002:/data \
                 -v /tmp/THP002/derivatives:/out \
                 -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
                 -v /tmp/THP002/work:/work \
                 --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant --anat-only --notrack --skip-bids-validation -w /work
+                nipreps/dmriprep:latest /data /out participant -vv --sloppy --anat-only \
+                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - run:
           name: Clean-up after anatomical run
           command: |
@@ -452,7 +454,7 @@ workflows:
       - THP002:
           requires:
             - build
-            - get_data 
+            - get_data
           filters:
             branches:
               ignore:
