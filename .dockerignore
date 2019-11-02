@@ -27,6 +27,7 @@ src/
 .gitignore
 .git/**/*
 .git
+.mailmap
 
 # other
 work/**/*
@@ -37,7 +38,11 @@ out/
 # CI, etc.
 .circleci
 .circleci/**/*
-.zenodo.json
-.travis.yml
+.codecov.yml
+.coveragerc
+.pep8speaks.yml
 .readthedocs.yml
-CONTRIBUTING.md
+.travis.yml
+.zenodo.json
+
+.afq
