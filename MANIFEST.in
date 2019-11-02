@@ -8,4 +8,3 @@ include dmriprep/_version.py
 
 # data
 include dmriprep/config/reports-spec.yml
-include dmriprep/config/report.tpl
