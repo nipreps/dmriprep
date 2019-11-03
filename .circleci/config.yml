@@ -233,21 +233,29 @@ jobs:
           command: |
             rm -rf /tmp/THP002/work/dmriprep_wf/fsdir*
             rm -rf /tmp/THP002/work/reportlets
-            rm -rf /tmp/THP002/derivatives/dmriprep
           when: on_success
       - save_cache:
          key: THP002-anat-v00-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/THP002/work
+      - store_artifacts:
+          path: /tmp/THP002/derivatives/dmriprep
       - run:
           name: Clean working directory
           when: on_success
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/THP002
             sudo rm -rf /tmp/THP002/work
-            sudo rm -rf /tmp/THP002/work_partial
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/THP002
+            find /tmp/THP002/work \( -name "*.nii.gz" -or -name "*.nii" -or "*.gii" -or "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+            find /tmp/THP002/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or "*.gii" -or "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
       - store_artifacts:
-          path: /tmp/THP002
+          path: /tmp/THP002/work
 
 
   deploy_docker_patches:
