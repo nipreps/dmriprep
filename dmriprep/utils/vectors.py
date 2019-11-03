@@ -34,7 +34,6 @@ class DiffusionGradientTable:
             then bvecs and bvals will be dismissed.
         b_scale : bool
             Whether b-values should be normalized.
-
         """
         self._b_scale = b_scale
         self._b0_thres = b0_threshold
@@ -169,7 +168,7 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
 
     Parameters
     ----------
-    bvec : m x n 2d array
+    bvecs : m x n 2d array
         Raw b-vectors array.
     bvals : 1d array
         Raw b-values float array.
@@ -339,8 +338,9 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
 
     bvecs = np.array(bvecs, dtype='float32')  # Normalize inputs
     rotated_bvecs = affine[np.newaxis, ...].dot(bvecs.T)[0].T
-    norms_bvecs = np.linalg.norm(rotated_bvecs, axis=1)
-    b0s = norms_bvecs < bvec_norm_epsilon
-    rotated_bvecs[~b0s] /= norms_bvecs[~b0s, np.newaxis]
-    rotated_bvecs[b0s] = np.zeros(3)
+    if norm is True:
+        norms_bvecs = np.linalg.norm(rotated_bvecs, axis=1)
+        b0s = norms_bvecs < bvec_norm_epsilon
+        rotated_bvecs[~b0s] /= norms_bvecs[~b0s, np.newaxis]
+        rotated_bvecs[b0s] = np.zeros(3)
     return rotated_bvecs
