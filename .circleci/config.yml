@@ -123,7 +123,7 @@ jobs:
               tar xvzf THP002_data.tar.gz -C /tmp/data/
             else
               echo "Dataset THP002 was cached"
-            fi 
+            fi
       - run:
           name: Get FreeSurfer derivatives for THP002
           command: |
@@ -219,33 +219,43 @@ jobs:
                 sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
             sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/work && \
                 sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/work
-            docker run -e FS_LICENSE=$FS_LICENSE --rm=false \
+            docker run -e FS_LICENSE=$FS_LICENSE --rm \
                 -v /tmp/data/THP002:/data \
                 -v /tmp/THP002/derivatives:/out \
                 -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
                 -v /tmp/THP002/work:/work \
                 --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant --anat-only --notrack --skip-bids-validation -w /work
+                nipreps/dmriprep:latest /data /out participant -vv --sloppy --anat-only \
+                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - run:
           name: Clean-up after anatomical run
           command: |
             rm -rf /tmp/THP002/work/dmriprep_wf/fsdir*
             rm -rf /tmp/THP002/work/reportlets
-            rm -rf /tmp/THP002/derivatives/dmriprep
           when: on_success
       - save_cache:
          key: THP002-anat-v00-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/THP002/work
+      - store_artifacts:
+          path: /tmp/THP002/derivatives/dmriprep
       - run:
           name: Clean working directory
           when: on_success
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/THP002
             sudo rm -rf /tmp/THP002/work
-            sudo rm -rf /tmp/THP002/work_partial
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/THP002
+            find /tmp/THP002/work \( -name "*.nii.gz" -or -name "*.nii" -or "*.gii" -or "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+            find /tmp/THP002/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or "*.gii" -or "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
       - store_artifacts:
-          path: /tmp/THP002
+          path: /tmp/THP002/work
 
 
   deploy_docker_patches:
@@ -452,7 +462,7 @@ workflows:
       - THP002:
           requires:
             - build
-            - get_data 
+            - get_data
           filters:
             branches:
               ignore:

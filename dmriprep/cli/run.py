@@ -235,10 +235,6 @@ def main():
         from ..utils.sentry import sentry_setup
         sentry_setup(opts, exec_env)
 
-    if opts.debug:
-        print('WARNING: Option --debug is deprecated and has no effect',
-              file=sys.stderr)
-
     # Validate inputs
     if not opts.skip_bids_validation:
         print("Making sure the input data is BIDS compliant (warnings can be ignored in most "
