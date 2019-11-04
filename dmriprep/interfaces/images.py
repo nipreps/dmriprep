@@ -38,7 +38,7 @@ class ExtractB0(SimpleInterface):
         return runtime
 
 
-def extract_b0(in_file, in_rasb, b0_thres=50, newpath=None):
+def extract_b0(in_file, b0_mask, newpath=None):
     """Extract the *b0* volumes from a DWI dataset."""
     import numpy as np
     import nibabel as nib
