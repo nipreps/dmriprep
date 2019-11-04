@@ -34,6 +34,7 @@ class DiffusionGradientTable:
             then bvecs and bvals will be dismissed.
         b_scale : bool
             Whether b-values should be normalized.
+
         """
         self._b_scale = b_scale
         self._b0_thres = b0_threshold
@@ -57,6 +58,7 @@ class DiffusionGradientTable:
 
     @property
     def affine(self):
+        """Get the affine for RAS+/image-coordinates conversions."""
         return self._affine
 
     @property
@@ -66,14 +68,17 @@ class DiffusionGradientTable:
 
     @property
     def bvecs(self):
+        """Get the N x 3 list of bvecs."""
         return self._bvecs
 
     @property
     def bvals(self):
+        """Get the N b-values."""
         return self._bvals
 
     @property
     def normalized(self):
+        """Return whether b-vecs have been normalized."""
         return self._normalized
 
     @affine.setter
@@ -118,6 +123,7 @@ class DiffusionGradientTable:
         return np.squeeze(self.gradients[..., -1] > self._b0_thres)
 
     def normalize(self):
+        """Normalize (l2-norm) b-vectors."""
         if self._normalized:
             return
 
@@ -136,7 +142,8 @@ class DiffusionGradientTable:
             self.gradients = np.hstack((_ras, self.bvals[..., np.newaxis]))
 
     def generate_vecval(self):
-        if not self.bvecs:
+        """Compose a bvec/bval pair in image coordinates."""
+        if self.bvecs is not None:
             self._bvecs = bvecs2ras(np.linalg.inv(self.affine), self.gradients[..., :-1])
             self._bvals = self.gradients[..., -1].flatten()
 
@@ -152,6 +159,7 @@ class DiffusionGradientTable:
         return calculate_pole(self.gradients[..., :-1], bvec_norm_epsilon=self._bvec_norm_epsilon)
 
     def to_filename(self, path=None, bvecs=None, bvals=None):
+        """Write files (RASB, bvecs/bvals) to a given path."""
         if path:
             np.savetxt(str(path), self.gradients,
                        delimiter='\t', header='\t'.join('RASB'),
