@@ -118,6 +118,7 @@ class DiffusionGradientTable:
             raise ValueError('The number of b-vectors and b-values do not match')
         self._bvals = np.array(value)
 
+    @property
     def b0mask(self):
         """Get a mask of low-b frames."""
         return np.squeeze(self.gradients[..., -1] < self._b0_thres)
