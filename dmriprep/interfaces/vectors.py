@@ -79,18 +79,16 @@ class CheckGradientTable(SimpleInterface):
         self._results['full_sphere'] = np.all(pole == 0.0)
         self._results['b0_ixs'] = np.where(table.b0mask)[0].tolist()
 
+        cwd = Path(runtime.cwd).absolute()
         if rasb_file is None:
             rasb_file = fname_presuffix(
                 self.inputs.dwi_file, use_ext=False, suffix='.tsv',
-                newpath=runtime.cwd)
+                newpath=str(cwd))
             table.to_filename(rasb_file)
         self._results['out_rasb'] = rasb_file
-
-        cwd = Path(runtime.cwd).absolute()
-
-        table.to_filename(bvecs=cwd / 'bvec', bvals=cwd / 'bval')
-        self._results['out_bval'] = str(cwd / 'bval')
-        self._results['out_bvec'] = str(cwd / 'bvec')
+        table.to_filename('%s/dwi' % cwd, filetype='fsl')
+        self._results['out_bval'] = str(cwd / 'dwi.bval')
+        self._results['out_bvec'] = str(cwd / 'dwi.bvec')
         return runtime
 
 

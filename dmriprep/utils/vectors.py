@@ -143,7 +143,7 @@ class DiffusionGradientTable:
 
     def generate_vecval(self):
         """Compose a bvec/bval pair in image coordinates."""
-        if self.bvecs is not None:
+        if self.bvecs is None or self.bvals is None:
             self._bvecs = bvecs2ras(np.linalg.inv(self.affine), self.gradients[..., :-1])
             self._bvals = self.gradients[..., -1].flatten()
 
@@ -158,16 +158,17 @@ class DiffusionGradientTable:
         self.generate_rasb()
         return calculate_pole(self.gradients[..., :-1], bvec_norm_epsilon=self._bvec_norm_epsilon)
 
-    def to_filename(self, path=None, bvecs=None, bvals=None):
+    def to_filename(self, filename, filetype='rasb'):
         """Write files (RASB, bvecs/bvals) to a given path."""
-        if path:
-            np.savetxt(str(path), self.gradients,
+        if filetype == 'rasb':
+            np.savetxt(str(filename), self.gradients,
                        delimiter='\t', header='\t'.join('RASB'),
                        fmt=['%.8f'] * 3 + ['%g'])
-        if bvecs:
-            np.savetxt(str(bvecs), self.bvecs.T, fmt='%.6f')
-        if bvals:
-            np.savetxt(str(bvals), self.bvals, fmt='%.6f')
+        elif filetype == 'fsl':
+            np.savetxt('%s.bvec' % filename, self.bvecs.T, fmt='%.6f')
+            np.savetxt('%s.bval' % filename, self.bvals, fmt='%.6f')
+        else:
+            raise ValueError('Unknown filetype "%s"' % filetype)
 
 
 def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
