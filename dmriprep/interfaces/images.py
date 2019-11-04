@@ -52,7 +52,7 @@ def extract_b0(in_file, b0_mask, newpath=None):
 
     bvals = np.loadtxt(in_rasb, usecols=-1, skiprows=1)
 
-    b0 = data[..., bvals < b0_thres]
+    b0 = data[..., np.array(b0_mask, dtype=bool)]
 
     hdr = img.header.copy()
     hdr.set_data_shape(b0.shape)
