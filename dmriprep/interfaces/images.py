@@ -1,16 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Image tools interfaces
-~~~~~~~~~~~~~~~~~~~~~~
-
-"""
+"""Image tools interfaces."""
 
 from nipype import logging
 from nipype.interfaces.base import (
-    TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File
+    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File
 )
 
 LOGGER = logging.getLogger('nipype.interface')
@@ -18,27 +10,38 @@ LOGGER = logging.getLogger('nipype.interface')
 
 class ExtractB0InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='dwi file')
-    in_rasb = File(exists=True, mandatory=True,
-                   desc='File containing the gradient directions in RAS+ scanner coordinates')
+    b0_ixs = traits.List(traits.Int, mandatory=True,
+                         desc='Index of b0s')
 
 
 class ExtractB0OutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='mean b0 file')
+    out_file = File(exists=True, desc='b0 file')
 
 
 class ExtractB0(SimpleInterface):
+    """
+
+    Example
+    -------
+
+    >>> os.chdir(tmpdir)
+    >>> check = ExtractB0(
+    ...    in_file=str(data_dir / 'dwi.nii.gz'),
+    ...    b0_ixs=[0, 9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 100]).run()
+
+    """
     input_spec = ExtractB0InputSpec
     output_spec = ExtractB0OutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = extract_b0(
             self.inputs.in_file,
-            self.inputs.in_rasb,
+            self.inputs.b0_ixs,
             newpath=runtime.cwd)
         return runtime
 
 
-def extract_b0(in_file, b0_mask, newpath=None):
+def extract_b0(in_file, b0_ixs, newpath=None):
     """Extract the *b0* volumes from a DWI dataset."""
     import numpy as np
     import nibabel as nib
@@ -50,9 +53,7 @@ def extract_b0(in_file, b0_mask, newpath=None):
     img = nib.load(in_file)
     data = img.get_fdata()
 
-    bvals = np.loadtxt(in_rasb, usecols=-1, skiprows=1)
-
-    b0 = data[..., np.array(b0_mask, dtype=bool)]
+    b0 = data[..., b0_ixs]
 
     hdr = img.header.copy()
     hdr.set_data_shape(b0.shape)
