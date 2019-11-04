@@ -51,7 +51,7 @@ class DiffusionGradientTable:
             self.gradients = rasb_file
             if self.affine is not None:
                 self.generate_vecval()
-        elif dwi_file and bvecs is not None and bvals is not None:
+        elif dwi_file is not None and bvecs is not None and bvals is not None:
             self.bvecs = bvecs
             self.bvals = bvals
             self.generate_rasb()

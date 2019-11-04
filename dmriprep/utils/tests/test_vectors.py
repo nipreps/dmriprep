@@ -12,8 +12,10 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     bvals = dipy_test_data['bvals']
     bvecs = dipy_test_data['bvecs']
 
-    # Test vector hemisphere coverage
     dgt = v.DiffusionGradientTable(**dipy_test_data)
+    affine = dgt.affine.copy()
+
+    # Test vector hemisphere coverage
     assert np.all(dgt.pole == [0., 0., 0.])
 
     dgt.to_filename('dwi.tsv')
@@ -22,8 +24,11 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     with pytest.raises(TypeError):
         dgt.to_filename('dwi', filetype='fsl')   # You can do this iff the affine is set.
 
-    aff = namedtuple('Affine', ['affine'])(dgt.affine)  # check accessing obj.affine
-    dgt = v.DiffusionGradientTable(dwi_file=aff)
+    # check accessing obj.affine
+    dgt = v.DiffusionGradientTable(dwi_file=namedtuple('Affine', ['affine'])(affine))
+    assert np.all(dgt.affine == affine)
+    dgt = v.DiffusionGradientTable(dwi_file=affine)
+    assert np.all(dgt.affine == affine)
 
     # Perform various corruption checks using synthetic corrupted bval-bvec.
     dgt = v.DiffusionGradientTable()
