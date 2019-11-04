@@ -6,9 +6,8 @@ from dmriprep.utils import vectors as v
 
 def test_corruption(dipy_test_data):
     """Check whether b-value rescaling is operational."""
-
-    bvecs = np.loadtxt(dipy_test_data['bvecs']).T
-    bvals = np.loadtxt(dipy_test_data['bvals'])
+    bvals = dipy_test_data['bvals']
+    bvecs = dipy_test_data['bvecs']
 
     # Perform various corruption checks using synthetic corrupted bval-bvec.
     dgt = v.DiffusionGradientTable()
@@ -57,6 +56,5 @@ def test_corruption(dipy_test_data):
 
 def test_hemisphericity(dipy_test_data):
     """Test vector hemisphere coverage."""
-
     dgt = v.DiffusionGradientTable(**dipy_test_data)
     assert np.all(dgt.pole == [0., 0., 0.])
