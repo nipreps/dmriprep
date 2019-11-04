@@ -145,6 +145,10 @@ class DiffusionGradientTable:
     def generate_vecval(self):
         """Compose a bvec/bval pair in image coordinates."""
         if self.bvecs is None or self.bvals is None:
+            if self.affine is None:
+                raise TypeError(
+                    "Cannot generate b-vectors & b-values in image coordinates. "
+                    "Please set the corresponding DWI image's affine matrix.")
             self._bvecs = bvecs2ras(np.linalg.inv(self.affine), self.gradients[..., :-1])
             self._bvals = self.gradients[..., -1].flatten()
 
@@ -161,11 +165,13 @@ class DiffusionGradientTable:
 
     def to_filename(self, filename, filetype='rasb'):
         """Write files (RASB, bvecs/bvals) to a given path."""
-        if filetype == 'rasb':
+        if filetype.lower() == 'rasb':
+            self.generate_rasb()
             np.savetxt(str(filename), self.gradients,
                        delimiter='\t', header='\t'.join('RASB'),
                        fmt=['%.8f'] * 3 + ['%g'])
-        elif filetype == 'fsl':
+        elif filetype.lower() == 'fsl':
+            self.generate_vecval()
             np.savetxt('%s.bvec' % filename, self.bvecs.T, fmt='%.6f')
             np.savetxt('%s.bval' % filename, self.bvals, fmt='%.6f')
         else:
@@ -221,6 +227,12 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
     600
     >>> norm_vals[-1]
     3000
+
+    >>> norm_vecs, norm_vals = normalize_gradients(bvecs, bvals, b_scale=False)
+    >>> norm_vals[0]
+    0
+    >>> np.all(norm_vals[1:] == 1000)
+    True
 
     """
     bvals = np.array(bvals, dtype='float32')
@@ -346,6 +358,10 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
 
     >>> bvecs2ras(affine, [(0.0, 0.0, 0.0)]).tolist()
     [[0.0, 0.0, 0.0]]
+
+    >>> bvecs2ras(2.0 * np.eye(3), [(1.0, 0.0, 0.0), (-1.0, 0.0, 0.0)],
+    ...           norm=False).tolist()
+    [[2.0, 0.0, 0.0], [-2.0, 0.0, 0.0]]
 
     """
     if affine.shape == (4, 4):

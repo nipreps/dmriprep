@@ -2,12 +2,28 @@
 import pytest
 import numpy as np
 from dmriprep.utils import vectors as v
+from collections import namedtuple
 
 
-def test_corruption(dipy_test_data):
+def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     """Check whether b-value rescaling is operational."""
+    tmpdir.chdir()
+
     bvals = dipy_test_data['bvals']
     bvecs = dipy_test_data['bvecs']
+
+    # Test vector hemisphere coverage
+    dgt = v.DiffusionGradientTable(**dipy_test_data)
+    assert np.all(dgt.pole == [0., 0., 0.])
+
+    dgt.to_filename('dwi.tsv')
+    dgt = v.DiffusionGradientTable(rasb_file='dwi.tsv')
+    assert dgt.normalized is False
+    with pytest.raises(TypeError):
+        dgt.to_filename('dwi', filetype='fsl')   # You can do this iff the affine is set.
+
+    aff = namedtuple('Affine', ['affine'])(dgt.affine)  # check accessing obj.affine
+    dgt = v.DiffusionGradientTable(dwi_file=aff)
 
     # Perform various corruption checks using synthetic corrupted bval-bvec.
     dgt = v.DiffusionGradientTable()
@@ -52,9 +68,19 @@ def test_corruption(dipy_test_data):
     dgt = v.DiffusionGradientTable(dwi_file=dipy_test_data['dwi_file'],
                                    bvals=bvals, bvecs=bvecs_factor)
     assert -1.0 <= np.max(np.abs(dgt.gradients[..., :-1])) <= 1.0
+    assert dgt.normalized is True
 
+    def mock_func(*args, **kwargs):
+        return 'called!'
 
-def test_hemisphericity(dipy_test_data):
-    """Test vector hemisphere coverage."""
-    dgt = v.DiffusionGradientTable(**dipy_test_data)
-    assert np.all(dgt.pole == [0., 0., 0.])
+    with monkeypatch.context() as m:
+        m.setattr(v, 'normalize_gradients', mock_func)
+        assert dgt.normalize() is None  # Test nothing is executed.
+
+    with monkeypatch.context() as m:
+        m.setattr(v, 'bvecs2ras', mock_func)
+        assert dgt.generate_vecval() is None  # Test nothing is executed.
+
+    # Miscellaneous tests
+    with pytest.raises(ValueError):
+        dgt.to_filename('path', filetype='mrtrix')
