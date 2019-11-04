@@ -120,7 +120,7 @@ class DiffusionGradientTable:
 
     def b0mask(self):
         """Get a mask of low-b frames."""
-        return np.squeeze(self.gradients[..., -1] > self._b0_thres)
+        return np.squeeze(self.gradients[..., -1] < self._b0_thres)
 
     def normalize(self):
         """Normalize (l2-norm) b-vectors."""
