@@ -232,7 +232,13 @@ def topup_inputs_from_dwi_files(dwi_file, sesdir, spec_acqp, b0_vols, b0s, vol_l
     datain_lines = []
     spec_counts = defaultdict(int)
 
-    unique_encodings = [j for j in list(set([float(i) for i in spec_acqp.split(' ')])) if (j == 1.0) or (j == -1.0)]
+    if isinstance(spec_acqp, list):
+        unique_encodings = []
+        for k in range(len(spec_acqp)):
+            unique_encodings.extend([j for j in list(set([float(i) for i in spec_acqp[k].split(' ')])) if (j == 1.0) or (j == -1.0)])
+    else:
+        unique_encodings = [j for j in list(set([float(i) for i in spec_acqp.split(' ')])) if (j == 1.0) or (j == -1.0)]
+
     if len(unique_encodings) > 1:
         # Reverse phase encodings are present to susceptibility can be estimated via topup
         susceptibility_args = '--estimate_move_by_susceptibility'

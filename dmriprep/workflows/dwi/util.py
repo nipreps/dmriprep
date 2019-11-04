@@ -109,16 +109,19 @@ def init_dwi_concat_wf(dwi_files, fbvals, fbvecs, metadata_files, sub, ses, out_
         imports=import_list,
         name='concat_dwis')
 
-    def concat_bvecs(sesdir, bvec_list):
+    def concat_bvecs(sesdir, bvec_list, bvec_norm_epsilon=0.1):
         import numpy as np
         import os
         out_file = sesdir + '/' + os.path.basename(bvec_list[0]).split('_acq')[0] + '_concat.bvec'
 
         bvec_vals = []
         for bvec in bvec_list:
-            bvec_vals.append(np.genfromtxt(bvec))
+            bvecs = np.genfromtxt(bvec)
+            b0s = np.linalg.norm(bvecs, axis=1) < bvec_norm_epsilon
+            bvecs[~b0s] /= np.linalg.norm(bvecs[~b0s], axis=1)[..., np.newaxis]
+            bvec_vals.append(bvecs)
         np.savetxt(out_file,
-                   np.concatenate((bvec_vals), axis=1),
+                   np.concatenate(bvec_vals, axis=1),
                    fmt='%.4f',
                    delimiter=' ')
         return out_file

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a5bb7211-a5b4-4090-96a6-1237b311e47e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/config/b02b0.cnf" beforeDir="false" afterPath="$PROJECT_DIR$/config/b02b0.cnf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/b02b0_1.cnf" beforeDir="false" afterPath="$PROJECT_DIR$/config/b02b0_1.cnf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workflows/dwi/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/workflows/dwi/util.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,21 +12,56 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/config/b02b0_1.cnf">
+        <entry file="file://$PROJECT_DIR$/utils/bids.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="25" column="9" lean-forward="true" selection-end-line="25" selection-end-column="9" />
+            <state relative-caret-position="-355">
+              <caret line="2" column="38" selection-start-line="2" selection-start-column="38" selection-end-line="2" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/workflows/dwi/base.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="720">
+              <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/workflows/dwi/util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1845">
+              <caret line="123" column="53" lean-forward="true" selection-start-line="123" selection-start-column="53" selection-end-line="123" selection-end-column="53" />
+              <folding>
+                <element signature="e#108#117#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/utils/qc.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1078">
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/config/b02b0.cnf">
+        <entry file="file://$PROJECT_DIR$/utils/core.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="13" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
+            <state relative-caret-position="797">
+              <caret line="258" column="39" selection-start-line="258" selection-start-column="39" selection-end-line="258" selection-end-column="39" />
+              <folding>
+                <element signature="e#0#47#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -43,6 +78,8 @@
       <find>reverse</find>
       <find>'none'</find>
       <find>work_dir</find>
+      <find>rescale</find>
+      <find>split</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -51,40 +88,27 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/utils/core.py" />
         <option value="$PROJECT_DIR$/config/b02b0_1.cnf" />
         <option value="$PROJECT_DIR$/config/b02b0.cnf" />
+        <option value="$PROJECT_DIR$/workflows/dwi/util.py" />
+        <option value="$PROJECT_DIR$/utils/core.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="607" />
+    <option name="x" value="615" />
     <option name="y" value="23" />
-    <option name="width" value="1001" />
-    <option name="height" value="985" />
+    <option name="width" value="1209" />
+    <option name="height" value="984" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="ProjectPane" />
       <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="dmriprep" type="b2602c69:ProjectViewProjectNode" />
-              <item name="dmriprep" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="dmriprep" type="b2602c69:ProjectViewProjectNode" />
-              <item name="dmriprep" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -118,22 +142,16 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3369000" />
+    <option name="totallyTimeSpent" value="5503000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="607" y="23" width="1001" height="985" extended-state="0" />
+    <frame x="615" y="23" width="1209" height="984" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="aws.explorer" side_tool="true" />
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24921794" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14395887" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" />
-      <window_info anchor="bottom" id="Database Changes" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="aws.explorer" order="2" side_tool="true" />
+      <window_info id="Favorites" order="3" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -141,14 +159,46 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="Database" />
-      <window_info anchor="right" id="R Packages" />
-      <window_info anchor="right" id="SciView" />
-      <window_info anchor="right" id="R Graphics" />
+      <window_info anchor="bottom" id="Docker" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Terminal" order="10" />
+      <window_info anchor="bottom" id="Python Console" order="11" />
+      <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="R Graphics" order="4" />
+      <window_info anchor="right" id="R Packages" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49663678" visible="true" weight="0.13835958" />
+      <window_info active="true" id="Structure" order="1" sideWeight="0.50336325" side_tool="true" visible="true" weight="0.13835958" />
+      <window_info id="aws.explorer" order="2" side_tool="true" />
+      <window_info id="Favorites" order="3" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3295964" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="R Graphics" order="4" />
+      <window_info anchor="right" id="R Packages" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -164,16 +214,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/core.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2940">
-          <caret line="196" column="9" lean-forward="true" selection-start-line="196" selection-start-column="9" selection-end-line="196" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#47#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/config/b02b0_1.cnf">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
@@ -185,6 +225,49 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
           <caret line="3" column="13" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/bids.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-355">
+          <caret line="2" column="38" selection-start-line="2" selection-start-column="38" selection-end-line="2" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/dwi/util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1845">
+          <caret line="123" column="53" lean-forward="true" selection-start-line="123" selection-start-column="53" selection-end-line="123" selection-end-column="53" />
+          <folding>
+            <element signature="e#108#117#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/qc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1078">
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workflows/dwi/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="797">
+          <caret line="258" column="39" selection-start-line="258" selection-start-column="39" selection-end-line="258" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#47#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
