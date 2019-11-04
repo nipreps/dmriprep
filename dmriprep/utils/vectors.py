@@ -48,8 +48,9 @@ class DiffusionGradientTable:
             self.affine = dwi_file
         if rasb_file is not None:
             self.gradients = rasb_file
-            self.generate_vecval()
-        elif dwi_file and bvecs and bvals:
+            if self.affine is not None:
+                self.generate_vecval()
+        elif dwi_file and bvecs is not None and bvals is not None:
             self.bvecs = bvecs
             self.bvals = bvals
             self.generate_rasb()
@@ -100,12 +101,16 @@ class DiffusionGradientTable:
 
         # Correct any b0's in bvecs misstated as 10's.
         value[np.any(abs(value) >= 10, axis=1)] = np.zeros(3)
+        if self.bvals is not None and value.shape[0] != self.bvals.shape[0]:
+            raise ValueError('The number of b-vectors and b-values do not match')
         self._bvecs = value
 
     @bvals.setter
     def bvals(self, value):
         if isinstance(value, (str, Path)):
             value = np.loadtxt(str(value)).flatten()
+        if self.bvecs is not None and value.shape[0] != self.bvecs.shape[0]:
+            raise ValueError('The number of b-vectors and b-values do not match')
         self._bvals = np.array(value)
 
     def b0mask(self):
