@@ -21,7 +21,7 @@ def make_gtab(fbval, fbvec, sesdir, final, b0_thr=100):
     gtab_file = "%s%s" % (namer_dir, "/gtab.pkl")
 
     # Creating the gradient table
-    gtab = gradient_table(bvals, bvecs)
+    gtab = gradient_table(bvals, bvecs, atol=1)
 
     # Correct b0 threshold
     gtab.b0_threshold = b0_thr
