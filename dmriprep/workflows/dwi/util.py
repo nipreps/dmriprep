@@ -1,6 +1,3 @@
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Utility workflows
 ^^^^^^^^^^^^^^^^^
@@ -19,7 +16,8 @@ from niworkflows.interfaces.fixes import FixN4BiasFieldCorrection as N4BiasField
 from niworkflows.interfaces.masks import SimpleShowMaskRPT
 from niworkflows.interfaces.utils import CopyXForm
 
-from ...interfaces.images import MeanB0
+from ...interfaces.images import ExtractB0
+from ...interfaces.registration import EstimateReferenceImage
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
@@ -57,7 +55,7 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
         dwi_file
             Validated dwi NIfTI file
         raw_ref_image
-            Reference image to which dwi series is motion corrected
+            Reference image
         ref_image
             Contrast-enhanced reference image
         ref_image_brain
@@ -92,19 +90,21 @@ using a custom methodology taken from *fMRIPrep*.
 
     validate = pe.Node(ValidateImage(), name='validate', mem_gb=DEFAULT_MEMORY_MIN_GB)
 
-    gen_ref = pe.Node(MeanB0(), name="gen_ref")
+    extract_b0 = pe.Node(ExtractB0(), name="extract_b0")
 
     pre_mask = pe.Node(afni.Automask(outputtype="NIFTI_GZ"), name="pre_mask")
+
+    gen_ref = pe.Node(EstimateReferenceImage(), name='gen_ref')
 
     enhance_and_skullstrip_dwi_wf = init_enhance_and_skullstrip_dwi_wf(
         omp_nthreads=omp_nthreads)
 
     workflow.connect([
         (inputnode, validate, [('dwi_file', 'in_file')]),
-        (validate, gen_ref, [('out_file', 'in_file')]),
-        (inputnode, gen_ref, [('bvec_file', 'in_bvec'),
-                              ('bval_file', 'in_bval')]),
-        (gen_ref, pre_mask, [('out_file', 'in_file')]),
+        (validate, extract_b0, [('out_file', 'in_file')]),
+        (extract_b0, pre_mask, [('out_file', 'in_file')]),
+        (extract_b0, gen_ref, [('out_file', 'in_file')]),
+        (pre_mask, gen_ref, [('out_file', 'pre_mask')]),
         (gen_ref, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.in_file')]),
         (pre_mask, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.pre_mask')]),
         (validate, outputnode, [('out_file', 'dwi_file'),
@@ -132,7 +132,7 @@ def init_enhance_and_skullstrip_dwi_wf(
         name='enhance_and_skullstrip_dwi_wf',
         omp_nthreads=1):
     """
-    This workflow takes in a dwi reference iamge and sharpens the histogram
+    This workflow takes in a dwi reference image and sharpens the histogram
     with the application of the N4 algorithm for removing the
     :abbr:`INU (intensity non-uniformity)` bias field and calculates a signal
     mask.
