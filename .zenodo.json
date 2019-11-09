@@ -19,6 +19,12 @@
   ],
   "creators": [
     {
+      "affiliation": "Department of Psychology, University of Texas at Austin, TX, USA",
+      "name": "Pisner, Derek",
+      "orcid": "0000-0002-1228-0201",
+      "type": "Researcher"
+    },
+    {
       "affiliation": "The University of Washington eScience Institute",
       "name": "Richie-Halford, Adam",
       "orcid": "0000-0001-9276-9084"
@@ -43,12 +49,6 @@
       "name": "Esteban, Oscar",
       "orcid": "0000-0001-8435-6191"
     }
-    {
-      "affiliation": "Department of Psychology, University of Texas at Austin, TX, USA",
-      "name": "Pisner, Derek",
-      "orcid": "0000-0002-1228-0201",
-      "type": "Researcher"
-    },
   ],
   "description": "<p>dMRIPrep is a robust and easy-to-use pipeline for preprocessing of diverse dMRI data. The transparent workflow dispenses of manual intervention, thereby ensuring the reproducibility of the results.</p>",
   "keywords": [
