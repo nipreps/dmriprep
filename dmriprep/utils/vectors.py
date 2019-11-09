@@ -171,7 +171,7 @@ class DiffusionGradientTable:
         """
         Check that b gradients and signal variation in dwi image are consistent with one another.
         """
-        if Path(self._dwi_file).exists() is True:
+        if (Path(self._dwi_file).exists() is True) and (self._image_consistency is True):
             return image_gradient_consistency_check(str(self._dwi_file), self.bvecs, self.bvals,
                                                     b0_threshold=self._b0_thres)
         else:
