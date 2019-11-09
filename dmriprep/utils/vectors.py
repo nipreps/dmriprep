@@ -103,6 +103,7 @@ class DiffusionGradientTable:
 
         if dwi_file is not None:
             self.affine = dwi_file
+            self._dwi_file = dwi_file
         if rasb_file is not None:
             self.gradients = rasb_file
             if self.affine is not None:
@@ -277,6 +278,18 @@ class DiffusionGradientTable:
             np.savetxt("%s.bval" % filename, self.bvals, fmt="%.6f")
         else:
             raise ValueError('Unknown filetype "%s"' % filetype)
+
+    # @property
+    # def gradient_consistency(self):
+    #     """
+    #     Check that b gradients and signal variation in dwi image are consistent with one another.
+    #     """
+    #     if (Path(self._dwi_file).exists() is True) and (self._image_consistency is True):
+    #         return image_gradient_consistency_check(str(self._dwi_file), self.bvecs, self.bvals,
+    #                                                 b0_threshold=self._b0_thres)
+    #     else:
+    #         raise FileNotFoundError(
+    #             "DWI file not found, and is required for checking image-gradient consistency.")
 
 
 def normalize_gradients(
@@ -483,3 +496,75 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
         rotated_bvecs[~b0s] /= norms_bvecs[~b0s, np.newaxis]
         rotated_bvecs[b0s] = np.zeros(3)
     return rotated_bvecs
+
+
+def image_gradient_consistency_check(dwi_file, bvecs, bvals, b0_threshold=B0_THRESHOLD):
+    """
+    Check that gradient encoding patterns found in the b-values correspond to those
+    found in the signal intensity variance across volumes of the dwi image.
+
+    Parameters
+    ----------
+    dwi_file : str
+        Optionally provide a file path to the diffusion-weighted image series to which the
+        bvecs/bvals should correspond.
+    bvecs : m x n 2d array
+        B-vectors array.
+    bvals : 1d array
+        B-values float array.
+    b0_threshold : float
+        Gradient threshold below which volumes and vectors are considered B0's.
+    """
+    import nibabel as nib
+    from dipy.core.gradients import gradient_table_from_bvals_bvecs
+    from sklearn.cluster import MeanShift, estimate_bandwidth
+
+    # Build gradient table object
+    gtab = gradient_table_from_bvals_bvecs(bvals, bvecs, b0_threshold=b0_threshold)
+
+    # Check that number of image volumes corresponds to the number of gradient encodings.
+    volume_num = nib.load(dwi_file).shape[-1]
+    if not len(bvals) == volume_num:
+        raise Exception("Expected %d total image samples but found %d total gradient encoding values", volume_num,
+                        len(bvals))
+    # Evaluate B0 locations relative to mean signal variation.
+    data = np.array(nib.load(dwi_file).dataobj)
+    signal_means = []
+    for vol in range(data.shape[-1]):
+        signal_means.append(np.mean(data[:, :, :, vol]))
+    signal_b0_indices = np.where(signal_means > np.mean(signal_means)+3*np.std(signal_means))[0]
+
+    # Check B0 locations first
+    if not np.allclose(np.where(gtab.b0s_mask == True)[0], signal_b0_indices):
+        raise UserWarning('B0 indices in vectors do not correspond to relative high-signal contrast volumes '
+                          'detected in dwi image.')
+
+    # Next check number of unique b encodings (i.e. shells) and their indices
+    X = np.array(signal_means).reshape(-1, 1)
+    ms = MeanShift(bandwidth=estimate_bandwidth(X, quantile=0.1), bin_seeding=True)
+    ms.fit(X)
+    labs, idx = np.unique(ms.labels_, return_index=True)
+    ix_img = []
+    i = -1
+    for val in range(len(ms.labels_)):
+        if val in np.sort(idx[::-1]):
+            i = i + 1
+        ix_img.append(labs[i])
+    ix_img = np.array(ix_img)
+
+    ix_vec = []
+    i = -1
+    for val in range(len(bvals)):
+        if bvals[val] != bvals[val-1]:
+            i = i + 1
+        ix_vec.append(i)
+    ix_vec = np.array(ix_vec)
+
+    if len(ms.cluster_centers_) != len(np.unique(bvals)):
+        raise UserWarning('Number of unique b-values does not correspond to number of unique signal gradient '
+                          'encoding intensities in the dwi image.')
+
+    if np.all(np.isclose(ix_img, ix_vec)) is True:
+        raise UserWarning('Positions of b-value B0\'s and shell(s) do not correspond to signal intensity '
+                          'fluctuation patterns in the dwi image.')
+    return

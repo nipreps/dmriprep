@@ -86,6 +86,11 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     assert -1.0 <= np.max(np.abs(dgt.gradients[..., :-1])) <= 1.0
     assert dgt.normalized is True
 
+    # Test image gradient consistency
+    dgt = v.DiffusionGradientTable(dwi_file=dipy_test_data['dwi_file'],
+                                   bvals=bvals, bvecs=bvecs)
+    assert dgt.gradient_consistency is None
+
     def mock_func(*args, **kwargs):
         return "called!"
 
