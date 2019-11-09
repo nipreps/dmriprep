@@ -17,6 +17,7 @@ class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
     b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
     bvec_norm_epsilon = traits.Float(BVEC_NORM_EPSILON, usedefault=True)
     b_scale = traits.Bool(True, usedefault=True)
+    image_consistency = traits.Bool(False, usedefault=True)
 
 
 class _CheckGradientTableOutputSpec(TraitedSpec):
@@ -71,8 +72,9 @@ class CheckGradientTable(SimpleInterface):
             bvals=_undefined(self.inputs, 'in_bval'),
             rasb_file=rasb_file,
             b_scale=self.inputs.b_scale,
+            image_consistency=self.inputs.image_consistency,
             bvec_norm_epsilon=self.inputs.bvec_norm_epsilon,
-            b0_threshold=self.inputs.b0_threshold,
+            b0_threshold=self.inputs.b0_threshold
         )
         pole = table.pole
         self._results['pole'] = tuple(pole)
