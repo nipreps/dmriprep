@@ -16,8 +16,7 @@ from niworkflows.interfaces.fixes import FixN4BiasFieldCorrection as N4BiasField
 from niworkflows.interfaces.masks import SimpleShowMaskRPT
 from niworkflows.interfaces.utils import CopyXForm
 
-from ...interfaces.images import ExtractB0
-from ...interfaces.registration import EstimateReferenceImage
+from ...interfaces.images import ExtractB0, RescaleB0
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
@@ -49,6 +48,8 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
 
         dwi_file
             dwi NIfTI file
+        b0_ixs : list
+            index of b0s in dwi NIfTI file
 
     **Outputs**
 
@@ -76,11 +77,11 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
 First, a reference volume and its skull-stripped version were generated
 using a custom methodology taken from *fMRIPrep*.
 """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file', 'bvec_file', 'bval_file']),
+    inputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file', 'b0_ixs']),
                         name='inputnode')
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=['dwi_file', 'raw_ref_image',
-                                      'ref_image', 'ref_image_brain',
+        niu.IdentityInterface(fields=['dwi_file', 'raw_ref_image', 'ref_image',
+                                      'ref_image_brain',
                                       'dwi_mask', 'validation_report']),
         name='outputnode')
 
@@ -90,11 +91,14 @@ using a custom methodology taken from *fMRIPrep*.
 
     validate = pe.Node(ValidateImage(), name='validate', mem_gb=DEFAULT_MEMORY_MIN_GB)
 
-    extract_b0 = pe.Node(ExtractB0(), name="extract_b0")
+    extract_b0 = pe.Node(ExtractB0(), name='extract_b0')
 
-    pre_mask = pe.Node(afni.Automask(outputtype="NIFTI_GZ"), name="pre_mask")
+    # b0_template_wf = init_b0_template_wf()
 
-    gen_ref = pe.Node(EstimateReferenceImage(), name='gen_ref')
+    pre_mask = pe.Node(afni.Automask(dilate=1, outputtype='NIFTI_GZ'),
+                       name='pre_mask')
+
+    rescale_b0 = pe.Node(RescaleB0(), name='rescale_b0')
 
     enhance_and_skullstrip_dwi_wf = init_enhance_and_skullstrip_dwi_wf(
         omp_nthreads=omp_nthreads)
@@ -102,14 +106,15 @@ using a custom methodology taken from *fMRIPrep*.
     workflow.connect([
         (inputnode, validate, [('dwi_file', 'in_file')]),
         (validate, extract_b0, [('out_file', 'in_file')]),
+        (inputnode, extract_b0, [('b0_ixs', 'b0_ixs')]),
         (extract_b0, pre_mask, [('out_file', 'in_file')]),
-        (extract_b0, gen_ref, [('out_file', 'in_file')]),
-        (pre_mask, gen_ref, [('out_file', 'pre_mask')]),
-        (gen_ref, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.in_file')]),
+        (extract_b0, rescale_b0, [('out_file', 'in_file')]),
+        (pre_mask, rescale_b0, [('out_file', 'pre_mask')]),
+        (rescale_b0, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.in_file')]),
         (pre_mask, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.pre_mask')]),
         (validate, outputnode, [('out_file', 'dwi_file'),
                                 ('out_report', 'validation_report')]),
-        (gen_ref, outputnode, [('out_file', 'raw_ref_image')]),
+        (rescale_b0, outputnode, [('ref_image', 'raw_ref_image')]),
         (enhance_and_skullstrip_dwi_wf, outputnode, [
             ('outputnode.bias_corrected_file', 'ref_image'),
             ('outputnode.mask_file', 'dwi_mask'),
@@ -126,6 +131,16 @@ using a custom methodology taken from *fMRIPrep*.
         ])
 
     return workflow
+
+
+def init_b0_template_wf(
+    name='b0_template_wf'
+):
+   """[summary]
+
+   Keyword Arguments:
+       name {str} -- [description] (default: {'b0_template_wf'})
+   """
 
 
 def init_enhance_and_skullstrip_dwi_wf(
@@ -204,16 +219,14 @@ def init_enhance_and_skullstrip_dwi_wf(
         internal_datatype='char'), name='skullstrip_first_dilate')
     bet_mask = pe.Node(fsl.ApplyMask(), name='skullstrip_first_mask')
 
-    # Use AFNI's unifize for T2 constrast & fix header
+    # Use AFNI's unifize for T2 contrast & fix header
     unifize = pe.Node(afni.Unifize(
         t2=True, outputtype='NIFTI_GZ',
-        # Default -clfrac is 0.1, 0.4 was too conservative
-        # -rbt because I'm a Jedi AFNI Master (see 3dUnifize's documentation)
         args='-clfrac 0.2 -rbt 18.3 65.0 90.0',
-        out_file="uni.nii.gz"), name='unifize')
+        out_file='uni.nii.gz'), name='unifize')
     fixhdr_unifize = pe.Node(CopyXForm(), name='fixhdr_unifize', mem_gb=0.1)
 
-    # Run ANFI's 3dAutomask to extract a refined brain mask
+    # Run AFNI's 3dAutomask to extract a refined brain mask
     skullstrip_second_pass = pe.Node(afni.Automask(dilate=1,
                                                    outputtype='NIFTI_GZ'),
                                      name='skullstrip_second_pass')
