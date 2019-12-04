@@ -31,7 +31,7 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
     intensity values, and calculates a median image.
 
     Then, the reference b0 and its skull-stripped version are generated using
-    a custom methodology taken from *niworkflows*.
+    a custom methodology adapted from *niworkflows*.
 
     .. workflow::
         :graph2use: orig
