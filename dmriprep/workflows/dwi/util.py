@@ -26,6 +26,13 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
     """
     Build a workflow that generates a reference b0 image from a dwi series.
 
+    To generate the reference b0, this workflow takes in a dwi series,
+    extracts the b0s, registers them to eachother, rescales the signal
+    intensity values, and calculates a median image.
+
+    Then, the reference b0 and its skull-stripped version are generated using
+    a custom methodology taken from *niworkflows*.
+
     .. workflow::
         :graph2use: orig
         :simple_form: yes
@@ -73,10 +80,7 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
 
     """
     workflow = Workflow(name=name)
-    workflow.__desc__ = """\
-First, a reference volume and its skull-stripped version were generated
-using a custom methodology taken from *fMRIPrep*.
-"""
+
     inputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file', 'b0_ixs']),
                         name='inputnode')
     outputnode = pe.Node(
@@ -131,16 +135,6 @@ using a custom methodology taken from *fMRIPrep*.
         ])
 
     return workflow
-
-
-def init_b0_template_wf(
-    name='b0_template_wf'
-):
-   """[summary]
-
-   Keyword Arguments:
-       name {str} -- [description] (default: {'b0_template_wf'})
-   """
 
 
 def init_enhance_and_skullstrip_dwi_wf(
