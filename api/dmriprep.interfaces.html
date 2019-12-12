@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dmriprep.interfaces package &mdash; dmriprep 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmriprep.interfaces.reports module" href="dmriprep.interfaces.reports.html" />
+    <link rel="prev" title="dmriprep.config package" href="dmriprep.config.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> dmriprep
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.config.html">dmriprep.config package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dmriprep.interfaces package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.reports.html">dmriprep.interfaces.reports module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.vectors.html">dmriprep.interfaces.vectors module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.utils.html">dmriprep.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.workflows.html">dmriprep.workflows package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">dmriprep</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+        
+      <li>dmriprep.interfaces package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/dmriprep.interfaces.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+
+
+
+<div class="section" id="module-dmriprep.interfaces">
+<span id="dmriprep-interfaces-package"></span><h1>dmriprep.interfaces package<a class="headerlink" href="#module-dmriprep.interfaces" title="Permalink to this headline">¶</a></h1>
+<p>Custom Nipype interfaces for dMRIPrep.</p>
+<dl class="class">
+<dt id="dmriprep.interfaces.BIDSDataGrabber">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.</code><code class="sig-name descname">BIDSDataGrabber</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.BIDSDataGrabber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<dl class="attribute">
+<dt id="dmriprep.interfaces.BIDSDataGrabber.input_spec">
+<code class="sig-name descname">input_spec</code><a class="headerlink" href="#dmriprep.interfaces.BIDSDataGrabber.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.bids._BIDSDataGrabberInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.interfaces.BIDSDataGrabber.output_spec">
+<code class="sig-name descname">output_spec</code><a class="headerlink" href="#dmriprep.interfaces.BIDSDataGrabber.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#dmriprep.interfaces.BIDSDataGrabberOutputSpec" title="dmriprep.interfaces.BIDSDataGrabberOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSDataGrabberOutputSpec</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dmriprep.interfaces.BIDSDataGrabberOutputSpec">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.</code><code class="sig-name descname">BIDSDataGrabberOutputSpec</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.BIDSDataGrabberOutputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.bids._BIDSDataGrabberOutputSpec</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dmriprep.interfaces.DerivativesDataSink">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.</code><code class="sig-name descname">DerivativesDataSink</code><span class="sig-paren">(</span><em class="sig-param">allowed_entities=None</em>, <em class="sig-param">out_path_base=None</em>, <em class="sig-param">**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.DerivativesDataSink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.bids.DerivativesDataSink</span></code></p>
+<p>A patched DataSink.</p>
+<dl class="attribute">
+<dt id="dmriprep.interfaces.DerivativesDataSink.out_path_base">
+<code class="sig-name descname">out_path_base</code><em class="property"> = 'dmriprep'</em><a class="headerlink" href="#dmriprep.interfaces.DerivativesDataSink.out_path_base" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dmriprep.interfaces.reports.html">dmriprep.interfaces.reports module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dmriprep.interfaces.vectors.html">dmriprep.interfaces.vectors module</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dmriprep.interfaces.reports.html" class="btn btn-neutral float-right" title="dmriprep.interfaces.reports module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dmriprep.config.html" class="btn btn-neutral float-left" title="dmriprep.config package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019, The dMRIPrep developers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: master
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../master/api/dmriprep.interfaces.html">master</a></dd>
+            <dd><a href="../test_docs/api/dmriprep.interfaces.html">test_docs</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

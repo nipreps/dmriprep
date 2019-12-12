@@ -1,1 +1,322 @@
-<!DOCTYPE html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>dmriprep-viewer</title><link href=/dmriprep/static/css/app.36960609ce653565a3a6a77262ae7521.css rel=stylesheet></head><body><div id=app></div><script type=text/javascript src=/dmriprep/static/js/manifest.21a7c3a8e78b8286d9ff.js></script><script type=text/javascript src=/dmriprep/static/js/vendor.c01d5eeb79153b26a8fb.js></script><script type=text/javascript src=/dmriprep/static/js/app.877928b8cea99ef4bdab.js></script></body></html>
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dMRIPrep &mdash; dmriprep 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/banner.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> dmriprep
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">dmriprep</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>dMRIPrep</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+
+
+
+<div class="section" id="dmriprep">
+<h1>dMRIPrep<a class="headerlink" href="#dmriprep" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://mattermost.brainhack.org/brainhack/channels/dmriprep"><img alt="https://badgen.net/badge/chat/on%20mattermost/blue" src="https://badgen.net/badge/chat/on%20mattermost/blue" /></a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/dmriprep"><img alt="https://img.shields.io/pypi/v/dmriprep.svg" src="https://img.shields.io/pypi/v/dmriprep.svg" /></a>
+<a class="reference external image-reference" href="https://circleci.com/gh/nipreps/dmriprep"><img alt="https://circleci.com/gh/nipreps/dmriprep.svg?style=svg" src="https://circleci.com/gh/nipreps/dmriprep.svg?style=svg" /></a>
+<a class="reference external image-reference" href="https://travis-ci.org/nipreps/dmriprep"><img alt="https://travis-ci.org/nipreps/dmriprep.svg?branch=master" src="https://travis-ci.org/nipreps/dmriprep.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.3392201"><img alt="https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg" src="https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg" /></a>
+<p>[<a class="reference external" href="https://nipreps.github.io/dmriprep/">Documentation</a>]
+[<a class="reference external" href="https://neurostars.org/tags/dmriprep">Support at neurostars.org</a>]</p>
+<p>The preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
+the data before fitting a particular model.
+Generally, researchers create ad-hoc preprocessing workflows for each dataset,
+building upon a large inventory of available tools.
+The complexity of these workflows has snowballed with rapid advances in
+acquisition and processing.
+dMRIPrep is an analysis-agnostic tool that addresses the challenge of robust and
+reproducible preprocessing for whole-brain dMRI data.
+dMRIPrep automatically adapts a best-in-breed workflow to the idiosyncrasies of
+virtually any dataset, ensuring high-quality preprocessing without manual intervention.
+dMRIPrep equips neuroscientists with an easy-to-use and transparent preprocessing
+workflow, which can help ensure the validity of inference and the interpretability
+of results.</p>
+<p>The workflow is based on <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a> and encompases a large
+set of tools from well-known neuroimaging packages, including
+<a class="reference external" href="https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/">FSL</a>,
+<a class="reference external" href="https://stnava.github.io/ANTs/">ANTs</a>,
+<a class="reference external" href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer</a>,
+<a class="reference external" href="https://afni.nimh.nih.gov/">AFNI</a>,
+and <a class="reference external" href="https://nilearn.github.io/">Nilearn</a>.
+This pipeline was designed to provide the best software implementation for each state of
+preprocessing, and will be updated as newer and better neuroimaging software becomes
+available.</p>
+<p>dMRIPrep performs basic preprocessing steps (coregistration, normalization, unwarping,
+segmentation, skullstripping etc.) providing outputs that can be
+easily submitted to a variety of tractography algorithms.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#container-technologies-docker-and-singularity">Container technologies: Docker and Singularity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#docker-recommended-for-pc-laptop-and-commercial-cloud">Docker (recommended for PC/laptop and commercial Cloud)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#singularity-recommended-for-hpc">Singularity (recommended for HPC)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#manually-prepared-environment-python-3-5">Manually Prepared Environment (Python 3.5+)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#external-dependencies">External Dependencies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#execution-and-the-bids-format">Execution and the BIDS format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#command-line-arguments">Command-Line Arguments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Positional Arguments">Positional Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Named Arguments">Named Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Options for filtering BIDS queries">Options for filtering BIDS queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Options to handle performance">Options to handle performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Workflow configuration">Workflow configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Specific options for ANTs registrations">Specific options for ANTs registrations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Specific options for handling fieldmaps">Specific options for handling fieldmaps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Specific options for SyN distortion correction">Specific options for SyN distortion correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Specific options for FreeSurfer preprocessing">Specific options for FreeSurfer preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Surface preprocessing options">Surface preprocessing options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#Other options">Other options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#the-freesurfer-license">The FreeSurfer license</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/dmriprep.config.html">dmriprep.config package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/dmriprep.interfaces.html">dmriprep.interfaces package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dmriprep.interfaces.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dmriprep.utils.html">dmriprep.utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dmriprep.utils.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/dmriprep.workflows.html">dmriprep.workflows package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/dmriprep.workflows.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/dmriprep.workflows.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#september-06-2019">0.2.0 (September 06, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#a0-september-05-2019">0.1.1a0 (September 05, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#september-05-2019">0.1.1 (September 05, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changes.html#november-21-2018">0.1.0 (November 21, 2018)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019, The dMRIPrep developers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: master
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="master/index.html">master</a></dd>
+            <dd><a href="test_docs/index.html">test_docs</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

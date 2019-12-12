@@ -1,0 +1,15 @@
+dmriprep.utils package
+======================
+
+.. automodule:: dmriprep.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   dmriprep.utils.bids
+   dmriprep.utils.vectors

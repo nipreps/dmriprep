@@ -1,0 +1,7 @@
+dmriprep.workflows.dwi package
+==============================
+
+.. automodule:: dmriprep.workflows.dwi
+   :members:
+   :undoc-members:
+   :show-inheritance:

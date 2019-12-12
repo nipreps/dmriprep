@@ -1,0 +1,7 @@
+dmriprep.interfaces.vectors module
+==================================
+
+.. automodule:: dmriprep.interfaces.vectors
+   :members:
+   :undoc-members:
+   :show-inheritance:
