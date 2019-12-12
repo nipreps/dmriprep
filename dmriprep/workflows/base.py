@@ -59,87 +59,87 @@ def init_dmriprep_wf(
     each subject. If FreeSurfer's recon-all is to be run, a FreeSurfer derivatives folder is
     created and populated with any needed template subjects.
 
-    .. workflow::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-        import os
-        from collections import namedtuple, OrderedDict
-        BIDSLayout = namedtuple('BIDSLayout', ['root'])
-        from dmriprep.workflows.base import init_dmriprep_wf
-        os.environ['FREESURFER_HOME'] = os.getcwd()
-        wf = init_dmriprep_wf(
-            anat_only=False,
-            debug=False,
-            force_syn=True,
-            freesurfer=True,
-            hires=True,
-            ignore=[],
-            layout=BIDSLayout('.'),
-            longitudinal=False,
-            low_mem=False,
-            omp_nthreads=1,
-            output_dir='.',
-            output_spaces=OrderedDict([
-                ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
-                ('T1w', {}), ('fsnative', {})]),
-            run_uuid='X',
-            skull_strip_fixed_seed=False,
-            skull_strip_template=('OASIS30ANTs', {}),
-            subject_list=['dmripreptest'],
-            use_syn=True,
-            work_dir='.',
-        )
-
+            import os
+            from collections import namedtuple, OrderedDict
+            BIDSLayout = namedtuple('BIDSLayout', ['root'])
+            from dmriprep.workflows.base import init_dmriprep_wf
+            os.environ['FREESURFER_HOME'] = os.getcwd()
+            wf = init_dmriprep_wf(
+                anat_only=False,
+                debug=False,
+                force_syn=True,
+                freesurfer=True,
+                hires=True,
+                ignore=[],
+                layout=BIDSLayout('.'),
+                longitudinal=False,
+                low_mem=False,
+                omp_nthreads=1,
+                output_dir='.',
+                output_spaces=OrderedDict([
+                    ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
+                    ('T1w', {}), ('fsnative', {})]),
+                run_uuid='X',
+                skull_strip_fixed_seed=False,
+                skull_strip_template=('OASIS30ANTs', {}),
+                subject_list=['dmripreptest'],
+                use_syn=True,
+                work_dir='.',
+            )
 
     Parameters
     ----------
-        anat_only : bool
-            Disable diffusion MRI workflows
-        debug : bool
-            Enable debugging outputs
-        force_syn : bool
-            **Temporary**: Always run SyN-based SDC
-        freesurfer : bool
-            Enable FreeSurfer surface reconstruction (may increase runtime)
-        hires : bool
-            Enable sub-millimeter preprocessing in FreeSurfer
-        ignore : list
-            Preprocessing steps to skip (may include "slicetiming", "fieldmaps")
-        layout : BIDSLayout object
-            BIDS dataset layout
-        longitudinal : bool
-            Treat multiple sessions as longitudinal (may increase runtime)
-            See sub-workflows for specific differences
-        low_mem : bool
-            Write uncompressed .nii files in some cases to reduce memory usage
-        omp_nthreads : int
-            Maximum number of threads an individual process may use
-        output_dir : str
-            Directory in which to save derivatives
-        output_spaces : OrderedDict
-            Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
-            ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
-            nonstandard references (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.),
-            or paths pointing to custom templates organized in a TemplateFlow-like structure.
-            Values of the dictionary aggregate modifiers (e.g., the value for the key ``MNI152Lin``
-            could be ``{'resolution': 2}`` if one wants the resampling to be done on the 2mm
-            resolution version of the selected template).
-        run_uuid : str
-            Unique identifier for execution instance
-        skull_strip_template : tuple
-            Name of target template for brain extraction with ANTs' ``antsBrainExtraction``,
-            and corresponding dictionary of output-space modifiers.
-        skull_strip_fixed_seed : bool
-            Do not use a random seed for skull-stripping - will ensure
-            run-to-run replicability when used with --omp-nthreads 1
-        subject_list : list
-            List of subject labels
-        use_syn : bool
-            **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
-            If fieldmaps are present and enabled, this is not run, by default.
-        work_dir : str
-            Directory in which to store workflow execution state and temporary files
+    anat_only : bool
+        Disable diffusion MRI workflows
+    debug : bool
+        Enable debugging outputs
+    force_syn : bool
+        **Temporary**: Always run SyN-based SDC
+    freesurfer : bool
+        Enable FreeSurfer surface reconstruction (may increase runtime)
+    hires : bool
+        Enable sub-millimeter preprocessing in FreeSurfer
+    ignore : list
+        Preprocessing steps to skip (may include "slicetiming", "fieldmaps")
+    layout : BIDSLayout object
+        BIDS dataset layout
+    longitudinal : bool
+        Treat multiple sessions as longitudinal (may increase runtime)
+        See sub-workflows for specific differences
+    low_mem : bool
+        Write uncompressed .nii files in some cases to reduce memory usage
+    omp_nthreads : int
+        Maximum number of threads an individual process may use
+    output_dir : str
+        Directory in which to save derivatives
+    output_spaces : OrderedDict
+        Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
+        ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
+        nonstandard references (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.),
+        or paths pointing to custom templates organized in a TemplateFlow-like structure.
+        Values of the dictionary aggregate modifiers (e.g., the value for the key ``MNI152Lin``
+        could be ``{'resolution': 2}`` if one wants the resampling to be done on the 2mm
+        resolution version of the selected template).
+    run_uuid : str
+        Unique identifier for execution instance
+    skull_strip_template : tuple
+        Name of target template for brain extraction with ANTs' ``antsBrainExtraction``,
+        and corresponding dictionary of output-space modifiers.
+    skull_strip_fixed_seed : bool
+        Do not use a random seed for skull-stripping - will ensure
+        run-to-run replicability when used with --omp-nthreads 1
+    subject_list : list
+        List of subject labels
+    use_syn : bool
+        **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
+        If fieldmaps are present and enabled, this is not run, by default.
+    work_dir : str
+        Directory in which to store workflow execution state and temporary files
 
     """
     dmriprep_wf = Workflow(name='dmriprep_wf')
@@ -222,91 +222,90 @@ def init_single_subject_wf(
     Functional preprocessing is performed using a separate workflow for each
     individual BOLD series.
 
-    .. workflow::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-        from dmriprep.workflows.base import init_single_subject_wf
-        from collections import namedtuple, OrderedDict
-        BIDSLayout = namedtuple('BIDSLayout', ['root'])
-        wf = init_single_subject_wf(
-            anat_only=False,
-            debug=False,
-            force_syn=True,
-            freesurfer=True,
-            hires=True,
-            ignore=[],
-            layout=BIDSLayout('.'),
-            longitudinal=False,
-            low_mem=False,
-            name='single_subject_wf',
-            omp_nthreads=1,
-            output_dir='.',
-            output_spaces=OrderedDict([
-                ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
-                ('T1w', {}), ('fsnative', {})]),
-            reportlets_dir='.',
-            skull_strip_fixed_seed=False,
-            skull_strip_template=('OASIS30ANTs', {}),
-            subject_id='test',
-            use_syn=True,
-        )
-
+            from dmriprep.workflows.base import init_single_subject_wf
+            from collections import namedtuple, OrderedDict
+            BIDSLayout = namedtuple('BIDSLayout', ['root'])
+            wf = init_single_subject_wf(
+                anat_only=False,
+                debug=False,
+                force_syn=True,
+                freesurfer=True,
+                hires=True,
+                ignore=[],
+                layout=BIDSLayout('.'),
+                longitudinal=False,
+                low_mem=False,
+                name='single_subject_wf',
+                omp_nthreads=1,
+                output_dir='.',
+                output_spaces=OrderedDict([
+                    ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
+                    ('T1w', {}), ('fsnative', {})]),
+                reportlets_dir='.',
+                skull_strip_fixed_seed=False,
+                skull_strip_template=('OASIS30ANTs', {}),
+                subject_id='test',
+                use_syn=True,
+            )
 
     Parameters
     ----------
-        anat_only : bool
-            Disable diffusion MRI workflows
-        debug : bool
-            Enable debugging outputs
-        force_syn : bool
-            **Temporary**: Always run SyN-based SDC
-        freesurfer : bool
-            Enable FreeSurfer surface reconstruction (may increase runtime)
-        hires : bool
-            Enable sub-millimeter preprocessing in FreeSurfer
-        ignore : list
-            Preprocessing steps to skip (may include "slicetiming", "fieldmaps")
-        layout : BIDSLayout object
-            BIDS dataset layout
-        longitudinal : bool
-            Treat multiple sessions as longitudinal (may increase runtime)
-            See sub-workflows for specific differences
-        low_mem : bool
-            Write uncompressed .nii files in some cases to reduce memory usage
-        name : str
-            Name of workflow
-        omp_nthreads : int
-            Maximum number of threads an individual process may use
-        output_dir : str
-            Directory in which to save derivatives
-        output_spaces : OrderedDict
-            Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
-            ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
-            nonstandard references (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.),
-            or paths pointing to custom templates organized in a TemplateFlow-like structure.
-            Values of the dictionary aggregate modifiers (e.g., the value for the key ``MNI152Lin``
-            could be ``{'resolution': 2}`` if one wants the resampling to be done on the 2mm
-            resolution version of the selected template).
-        reportlets_dir : str
-            Directory in which to save reportlets
-        skull_strip_fixed_seed : bool
-            Do not use a random seed for skull-stripping - will ensure
-            run-to-run replicability when used with --omp-nthreads 1
-        skull_strip_template : tuple
-            Name of target template for brain extraction with ANTs' ``antsBrainExtraction``,
-            and corresponding dictionary of output-space modifiers.
-        subject_id : str
-            List of subject labels
-        use_syn : bool
-            **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
-            If fieldmaps are present and enabled, this is not run, by default.
-
+    anat_only : bool
+        Disable diffusion MRI workflows
+    debug : bool
+        Enable debugging outputs
+    force_syn : bool
+        **Temporary**: Always run SyN-based SDC
+    freesurfer : bool
+        Enable FreeSurfer surface reconstruction (may increase runtime)
+    hires : bool
+        Enable sub-millimeter preprocessing in FreeSurfer
+    ignore : list
+        Preprocessing steps to skip (may include "slicetiming", "fieldmaps")
+    layout : BIDSLayout object
+        BIDS dataset layout
+    longitudinal : bool
+        Treat multiple sessions as longitudinal (may increase runtime)
+        See sub-workflows for specific differences
+    low_mem : bool
+        Write uncompressed .nii files in some cases to reduce memory usage
+    name : str
+        Name of workflow
+    omp_nthreads : int
+        Maximum number of threads an individual process may use
+    output_dir : str
+        Directory in which to save derivatives
+    output_spaces : OrderedDict
+        Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
+        ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
+        nonstandard references (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.),
+        or paths pointing to custom templates organized in a TemplateFlow-like structure.
+        Values of the dictionary aggregate modifiers (e.g., the value for the key ``MNI152Lin``
+        could be ``{'resolution': 2}`` if one wants the resampling to be done on the 2mm
+        resolution version of the selected template).
+    reportlets_dir : str
+        Directory in which to save reportlets
+    skull_strip_fixed_seed : bool
+        Do not use a random seed for skull-stripping - will ensure
+        run-to-run replicability when used with --omp-nthreads 1
+    skull_strip_template : tuple
+        Name of target template for brain extraction with ANTs' ``antsBrainExtraction``,
+        and corresponding dictionary of output-space modifiers.
+    subject_id : str
+        List of subject labels
+    use_syn : bool
+        **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
+        If fieldmaps are present and enabled, this is not run, by default.
 
     Inputs
-
-        subjects_dir
-            FreeSurfer SUBJECTS_DIR
+    ------
+    subjects_dir : os.pathlike
+        FreeSurfer's ``$SUBJECTS_DIR``
 
     """
     from ..config import NONSTANDARD_REFERENCES
