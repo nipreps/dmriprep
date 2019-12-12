@@ -12,11 +12,13 @@
 #
 import os
 import sys
+import re
 from packaging.version import Version
 
 from dmriprep import __version__, __copyright__, __packagename__
 
-sys.path.append(os.path.abspath('sphinxext'))
+sys.path.append(os.path.abspath(os.path.join(
+    os.path.dirname(__file__), 'sphinxext')))
 from github_link import make_linkcode_resolve
 
 # -- Project information -----------------------------------------------------
@@ -227,3 +229,11 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 # -- Options for versioning extension ----------------------------------------
 scv_show_banner = True
+scv_whitelist_branches = ('master', re.compile(r'^docs\/.*$'), 'test_docs')
+scv_whitelist_tags = (
+    re.compile(r'^\d{2,}\..*$'),
+    re.compile(r'^[1-9]\..*$'),
+    re.compile(r'^0\.\d{2,}\..*$'),
+    re.compile(r'^0\.[2-9]\..*$'),
+)
+
