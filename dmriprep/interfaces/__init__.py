@@ -4,8 +4,8 @@
 from nipype.interfaces.base import OutputMultiObject, SimpleInterface
 from niworkflows.interfaces.bids import (
     DerivativesDataSink as _DDS,
-    BIDSDataGrabberOutputSpec as _BIDSDataGrabberOutputSpec,
-    BIDSDataGrabberInputSpec,
+    _BIDSDataGrabberOutputSpec,
+    _BIDSDataGrabberInputSpec,
     LOGGER as _LOGGER,
 )
 
@@ -21,7 +21,7 @@ class BIDSDataGrabberOutputSpec(_BIDSDataGrabberOutputSpec):
 
 
 class BIDSDataGrabber(SimpleInterface):
-    input_spec = BIDSDataGrabberInputSpec
+    input_spec = _BIDSDataGrabberInputSpec
     output_spec = BIDSDataGrabberOutputSpec
     _require_dwis = True
 

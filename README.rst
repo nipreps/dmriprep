@@ -1,5 +1,5 @@
 ========
-dmriprep
+dMRIPrep
 ========
 
 .. image:: https://badgen.net/badge/chat/on%20mattermost/blue
@@ -17,10 +17,8 @@ dmriprep
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg
     :target: https://doi.org/10.5281/zenodo.3392201
 
-.. image:: https://readthedocs.org/projects/dmriprep/badge/?version=latest
-    :target: https://dmriprep.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
-
+[`Documentation <https://nipreps.github.io/dmriprep/>`__]
+[`Support at neurostars.org <https://neurostars.org/tags/dmriprep>`__]
 
 The preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
 the data before fitting a particular model.
@@ -36,13 +34,13 @@ dMRIPrep equips neuroscientists with an easy-to-use and transparent preprocessin
 workflow, which can help ensure the validity of inference and the interpretability
 of results.
 
-The workflow is based on `Nipype <https://nipype.readthedocs.io>`_ and encompases a large
+The workflow is based on `Nipype <https://nipype.readthedocs.io>`__ and encompases a large
 set of tools from well-known neuroimaging packages, including
-`FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/>`_,
-`ANTs <https://stnava.github.io/ANTs/>`_,
-`FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`_,
-`AFNI <https://afni.nimh.nih.gov/>`_,
-and `Nilearn <https://nilearn.github.io/>`_.
+`FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/>`__,
+`ANTs <https://stnava.github.io/ANTs/>`__,
+`FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`__,
+`AFNI <https://afni.nimh.nih.gov/>`__,
+and `Nilearn <https://nilearn.github.io/>`__.
 This pipeline was designed to provide the best software implementation for each state of
 preprocessing, and will be updated as newer and better neuroimaging software becomes
 available.
@@ -50,6 +48,3 @@ available.
 dMRIPrep performs basic preprocessing steps (coregistration, normalization, unwarping,
 segmentation, skullstripping etc.) providing outputs that can be
 easily submitted to a variety of tractography algorithms.
-
-[Documentation `dmriprep.org <https://dmriprep.readthedocs.io>`_]
-[Support `neurostars.org <https://neurostars.org/tags/dmriprep>`_]
