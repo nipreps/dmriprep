@@ -1,12 +1,6 @@
 {
   "contributors": [
     {
-      "affiliation": "Department of Psychology, Stanford University, CA, USA",
-      "name": "Lerma-Usabiaga, Garikoitz",
-      "orcid": "0000-0001-9800-4816",
-      "type": "Researcher"
-    },
-    {
       "name": "nrajamani3",
       "type": "Researcher"
     },
@@ -19,18 +13,12 @@
   ],
   "creators": [
     {
-      "affiliation": "Department of Psychology, University of Texas at Austin, TX, USA",
-      "name": "Pisner, Derek",
-      "orcid": "0000-0002-1228-0201",
-      "type": "Researcher"
-    },
-    {
-      "affiliation": "The University of Washington eScience Institute",
+      "affiliation": "The University of Washington, eScience Institute",
       "name": "Richie-Halford, Adam",
       "orcid": "0000-0001-9276-9084"
     },
     {
-      "affiliation": "The University of Washington eScience Institute",
+      "affiliation": "The University of Washington, eScience Institute",
       "name": "Keshavan, Anisha",
       "orcid": "0000-0003-3554-043X"
     },
@@ -38,6 +26,16 @@
       "affiliation": "The Centre for Addiction and Mental Health",
       "name": "Joseph, Michael",
       "orcid": "0000-0002-0068-230X"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University, CA, USA",
+      "name": "Lerma-Usabiaga, Garikoitz",
+      "orcid": "0000-0001-9800-4816"
+    },
+    {
+      "affiliation": "Department of Psychology, University of Texas at Austin, TX, USA",
+      "name": "Pisner, Derek",
+      "orcid": "0000-0002-1228-0201"
     },
     {
       "affiliation": "The University of Washington eScience Institute",
