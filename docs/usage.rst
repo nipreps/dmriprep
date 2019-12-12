@@ -47,7 +47,7 @@ in the default path to the license key file (``$FREESURFER_HOME/license.txt``).
 If using the ``--cleanenv`` flag and ``$FS_LICENSE`` is set, use ``--fs-license-file $FS_LICENSE`` 
 to pass the license file location to *dMRIPrep*.
 
-It is possible to run the docker container pointing the image to a local path
+It is possible to run the Docker container pointing the image to a local path
 where a valid license file is stored.
 For example, if the license is stored in the ``$HOME/.licenses/freesurfer/license.txt``
 file on the host system: ::
