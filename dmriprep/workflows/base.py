@@ -219,8 +219,10 @@ def init_single_subject_wf(
 
     Anatomical preprocessing is performed in a single workflow, regardless of
     the number of sessions.
-    Functional preprocessing is performed using a separate workflow for each
-    individual BOLD series.
+    Diffusion MRI preprocessing is performed using a separate workflow for
+    a full :abbr:`DWI (diffusion weighted imaging)` *entity*.
+    A DWI *entity* may comprehend one or several runs (for instance, two
+    opposed :abbr:`PE (phase-encoding)` directions.
 
     Workflow Graph
         .. workflow::

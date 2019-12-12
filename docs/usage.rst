@@ -12,7 +12,7 @@ The *dMRIPrep* workflow takes as principal input the path of the dataset
 that is to be processed.
 The input dataset is required to be in valid :abbr:`BIDS (Brain Imaging Data
 Structure)` format, and it must include at least one T1w structural image and
-(unless disabled with a flag) a BOLD series.
+(unless disabled with a flag) one :abbr:`DWI (diffusion weighted imaging)` series.
 We highly recommend that you validate your dataset with the free, online
 `BIDS Validator <http://bids-standard.github.io/bids-validator/>`_.
 
