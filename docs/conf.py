@@ -161,7 +161,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'dmriprep.tex', 'dMRIPrep Documentation',
-     'The sMRIPrep Developers', 'manual'),
+     'The dMRIPrep Developers', 'manual'),
 ]
 
 
@@ -181,7 +181,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'dmriprep', 'sMRIPrep Documentation',
+    (master_doc, 'dmriprep', 'dMRIPrep Documentation',
      author, 'dMRIPrep', 'One line description of project.',
      'Miscellaneous'),
 ]

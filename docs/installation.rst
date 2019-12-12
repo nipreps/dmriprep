@@ -33,7 +33,7 @@ The command-line structure above is then modified as follows:
        <input_bids_path> <derivatives_path> <analysis_level> <dmriprep_named_options>
 
 Therefore, once specified, the container options and the image to be run
-the command line is the same as for the *bare-metal* installation but dropping
+from the command line is the same as for the *bare-metal* installation but dropping
 the ``dmriprep`` executable name.
 
 Container technologies: Docker and Singularity
@@ -132,4 +132,4 @@ the ``dmriprep`` package:
 - AFNI_ (version Debian-16.2.07)
 - `C3D <https://sourceforge.net/projects/c3d/>`_ (version 1.0.0)
 - FreeSurfer_ (version 6.0.1)
-- `bids-validator <https://github.com/bids-standard/bids-validator>`_ (version 1.1.0)
+- `bids-validator <https://github.com/bids-standard/bids-validator>`_ (version 1.2.3)
