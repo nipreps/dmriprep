@@ -1,0 +1,7 @@
+dmriprep.utils.vectors module
+=============================
+
+.. automodule:: dmriprep.utils.vectors
+   :members:
+   :undoc-members:
+   :show-inheritance:
