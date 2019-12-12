@@ -47,6 +47,7 @@ extensions = [
 ]
 
 autodoc_mock_imports = [
+    'dipy',
     'matplotlib',
     'nilearn',
     'nipy',
