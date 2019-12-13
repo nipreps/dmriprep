@@ -10,13 +10,13 @@ dMRIPrep base processing workflows.
 
 import sys
 import os
+from packaging.version import Version
 from collections import OrderedDict
 from copy import deepcopy
 
 from nipype import __version__ as nipype_ver
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
-from nilearn import __version__ as nilearn_ver
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from niworkflows.interfaces.bids import (
@@ -340,12 +340,9 @@ which is based on *Nipype* {nipype_ver}
 """.format(dmriprep_ver=__version__, nipype_ver=nipype_ver)
     workflow.__postdesc__ = """
 
-Many internal operations of *dMRIPrep* use
-*Nilearn* {nilearn_ver} [@nilearn, RRID:SCR_001362],
-mostly within the diffusion MRI processing workflow.
 For more details of the pipeline, see [the section corresponding
 to workflows in *dMRIPrep*'s documentation]\
-(https://dmriprep.readthedocs.io/en/latest/workflows.html \
+(https://nipreps.github.io/dmriprep/{dmriprep_ver}/workflows.html \
 "dMRIPrep's documentation").
 
 
@@ -359,7 +356,7 @@ It is released under the [CC0]\
 
 ### References
 
-""".format(nilearn_ver=nilearn_ver)
+""".format(dmriprep_ver=Version(__version__).public)
 
     # Filter out standard spaces to a separate dict
     std_spaces = OrderedDict([
