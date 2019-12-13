@@ -42,7 +42,7 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
@@ -202,7 +202,9 @@ jobs:
             - data-v0-{{ .Revision }}
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
           paths:
             - /tmp/docker
       - run:
@@ -293,7 +295,9 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
           paths:
             - /tmp/docker
       - run:
@@ -340,7 +344,9 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
           paths:
             - /tmp/docker
       - run:
