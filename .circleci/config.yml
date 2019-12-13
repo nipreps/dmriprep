@@ -25,12 +25,12 @@ version: 2
 jobs:
 
   build:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/src/dmriprep
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
       SCRATCH: "/scratch"
-    docker:
-      - image: docker:18.01.0-ce-git
-    working_directory: /tmp/src/dmriprep
     steps:
       - checkout
       - run:
@@ -40,34 +40,46 @@ jobs:
               echo "Only docs build"
               circleci step halt
             fi
-
-      - run:
-          name: Install parallel gzip and python3
-          command: |
-            apk add --no-cache pigz python3
       - restore_cache:
           keys:
-            - docker-v0-{{ .Branch }}-{{ .Revision }}
-            - docker-v0-{{ .Branch }}-
-            - docker-v0-master-
-            - docker-v0-
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-master-
+            - build-v1-
           paths:
-            - /tmp/cache/docker.tar.gz
-      - setup_remote_docker
+            - /tmp/docker
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: Set-up a Docker registry
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images
+          command: |
+            set +e
+            docker pull localhost:5000/ubuntu
+            success=$?
+            set -e
+            if [[ "$success" = "0" ]]; then
+                echo "Pulling from local registry"
+                docker tag localhost:5000/ubuntu ubuntu:xenial-20191010
+                docker pull localhost:5000/dmriprep
+                docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
+                docker tag localhost:5000/dmriprep nipreps/dmriprep
+            else
+                echo "Pulling from Docker Hub"
+                docker pull ubuntu:xenial-20191010
+                docker tag ubuntu:xenial-20191010 localhost:5000/ubuntu
+                docker push localhost:5000/ubuntu
+                docker pull nipreps/dmriprep:latest
             fi
       - run:
           name: Build Docker image
           no_output_timeout: 60m
           command: |
+            export PY3=$(pyenv versions | grep '3\.' |
+                         sed -e 's/.* 3\./3./' -e 's/ .*//')
+            pyenv local $PY3
             # Get version, update files.
             THISVERSION=$( python3 get_version.py )
             if [[ ${THISVERSION:0:2} == "0+" ]] ; then
@@ -78,54 +90,34 @@ jobs:
             fi
             # Build docker image
             e=1 && for i in {1..5}; do
-              docker build \
+              docker build --rm \
                 --cache-from=nipreps/dmriprep \
-                --rm=false \
                 -t nipreps/dmriprep:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
-            # test if development image should be built
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[build[ _]?devel\]' )" != "" ]]; then
-              echo "building development container"
-              docker tag nipreps/dmriprep nipreps/dmriprep:unstable
-              docker build \
-                --rm=false \
-                -t nipreps/dmriprep_devel \
-                -f Dockerfile_devel .
-            fi
-
       - run:
-          name: Docker save
+          name: Docker push to local registry
           no_output_timeout: 40m
           command: |
-            mkdir -p /tmp/cache
-            docker save ubuntu:xenial-20161213 nipreps/dmriprep:latest \
-            | pigz -3 > /tmp/cache/docker.tar.gz
-      - save_cache:
-         key: docker-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
-         paths:
-            - /tmp/cache/docker.tar.gz
-
+            docker tag nipreps/dmriprep:latest localhost:5000/dmriprep
+            docker push localhost:5000/dmriprep
       - run:
-          name: Smoke test Docker image
+          name: Docker registry garbage collection
           command: |
-            THISVERSION=$( python3 get_version.py )
-            THISVERSION=${THISVERSION%.dirty*}
-            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
-            DOCKERVERSION=$(docker run --rm -it nipreps/dmriprep:latest --version)
-            DOCKERVERSION=${DOCKERVERSION%$'\r'}
-            DOCKERVERSION=${DOCKERVERSION#*"dmriprep v"}
-            echo "VERSION: \"$THISVERSION\""
-            echo "DOCKERVERSION: \"${DOCKERVERSION}\""
-            test "$DOCKERVERSION" = "$THISVERSION"
-
+            docker exec -it registry /bin/registry garbage-collect --delete-untagged \
+                /etc/docker/registry/config.yml
+      - save_cache:
+         key: build-v1-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/docker
       - persist_to_workspace:
           root: /tmp
           paths:
             - src/dmriprep
+
   get_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
@@ -207,32 +199,30 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - docker-v0-{{ .Branch }}-{{ .Revision }}
+            - data-v0-{{ .Revision }}
       - restore_cache:
           keys:
-            - data-v0-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
+          paths:
+            - /tmp/docker
+      - run:
+          name: Set-up a Docker registry
+          command: |
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/dmriprep
+            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - restore_cache:
           keys:
             - THP002-anat-v00-{{ .Branch }}-{{ .Revision }}
             - THP002-anat-v00-{{ .Branch }}
             - THP002-anat-v00-master
             - THP002-anat-v00-
-      - run:
-          name: Setting up test
-          command: |
-            mkdir -p /tmp/THP002/derivatives && sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/derivatives && sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
-            pip install --upgrade pip setuptools
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              sudo apt update && sudo apt -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
       - run:
           name: Run anatomical workflow on THP002
           no_output_timeout: 2h
@@ -286,21 +276,40 @@ jobs:
       image: circleci/classic:201711-01
     working_directory: /tmp/src/dmriprep
     steps:
-
+      - run:
+          name: Check whether image should be deployed to Docker Hub
+          command: |
+            if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
+              echo "Nothing to deploy for $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME."
+              circleci step halt
+            fi
+      - checkout:
+          path: /home/circleci/src/dmriprep
+      - run:
+          name: Check whether build should be skipped
+          command: |
+            cd /home/circleci/src/dmriprep
+            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
+              echo "Only docs build"
+              circleci step halt
+            fi
       - restore_cache:
           keys:
-            - docker-v0-{{ .Branch }}-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
+          paths:
+            - /tmp/docker
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: Set-up a Docker registry
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              sudo apt update && sudo apt -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/dmriprep
+            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - run:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
@@ -335,18 +344,21 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - docker-v0-{{ .Branch }}-{{ .Revision }}
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
+          paths:
+            - /tmp/docker
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: Set-up a Docker registry
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              sudo apt update && sudo apt -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/dmriprep
+            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - run:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
