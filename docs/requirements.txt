@@ -6,7 +6,7 @@ niworkflows ~= 1.1.0
 packaging
 pydot>=1.2.3
 pydotplus
-smriprep ~= 0.4.0
+smriprep ~= 0.4.1
 sphinx-argparse
 sphinx>=2.1.2
 sphinx_rtd_theme
