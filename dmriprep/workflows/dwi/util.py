@@ -1,11 +1,4 @@
-"""
-Utility workflows
-^^^^^^^^^^^^^^^^^
-
-.. autofunction:: init_dwi_reference_wf
-.. autofunction:: init_enhance_and_skullstrip_dwi_wf
-
-"""
+"""Utility workflows for :abbr:`DWI (diffusion weighted imaging)` data."""
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
@@ -24,59 +17,59 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
                           name='dwi_reference_wf', gen_report=False):
     """
-    Build a workflow that generates a reference b0 image from a dwi series.
+    Build a workflow that generates a reference b0 image from a DWI dataset.
 
-    To generate the reference b0, this workflow takes in a dwi series,
-    extracts the b0s, registers them to eachother, rescales the signal
+    To generate the reference *b0*, this workflow takes in a DWI dataset,
+    extracts the b0s, registers them to each other, rescales the signal
     intensity values, and calculates a median image.
 
-    Then, the reference b0 and its skull-stripped version are generated using
+    Then, the reference *b0* and its skull-stripped version are generated using
     a custom methodology adapted from *niworkflows*.
 
-    .. workflow::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow Graph:
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-        from dmriprep.workflows.dwi.util import init_dwi_reference_wf
-        wf = init_dwi_reference_wf(omp_nthreads=1)
+            from dmriprep.workflows.dwi.util import init_dwi_reference_wf
+            wf = init_dwi_reference_wf(omp_nthreads=1)
 
-    **Parameters**
+    Parameters
+    ----------
+    dwi_file : str
+        dwi NIfTI file
+    omp_nthreads : int
+        Maximum number of threads an individual process may use
+    name : str
+        Name of workflow (default: ``dwi_reference_wf``)
+    gen_report : bool
+        Whether a mask report node should be appended in the end
 
-        dwi_file : str
-            dwi NIfTI file
-        omp_nthreads : int
-            Maximum number of threads an individual process may use
-        name : str
-            Name of workflow (default: ``dwi_reference_wf``)
-        gen_report : bool
-            Whether a mask report node should be appended in the end
+    Inputs
+    ------
+    dwi_file
+        dwi NIfTI file
+    b0_ixs : list
+        index of b0s in dwi NIfTI file
 
-    **Inputs**
+    Outputs
+    -------
+    dwi_file
+        Validated dwi NIfTI file
+    raw_ref_image
+        Reference image
+    ref_image
+        Contrast-enhanced reference image
+    ref_image_brain
+        Skull-stripped reference image
+    dwi_mask
+        Skull-stripping mask of reference image
+    validation_report
+        HTML reportlet indicating whether ``dwi_file`` had a valid affine
 
-        dwi_file
-            dwi NIfTI file
-        b0_ixs : list
-            index of b0s in dwi NIfTI file
-
-    **Outputs**
-
-        dwi_file
-            Validated dwi NIfTI file
-        raw_ref_image
-            Reference image
-        ref_image
-            Contrast-enhanced reference image
-        ref_image_brain
-            Skull-stripped reference image
-        dwi_mask
-            Skull-stripping mask of reference image
-        validation_report
-            HTML reportlet indicating whether ``dwi_file`` had a valid affine
-
-
-    **Subworkflows**
-
-        * :py:func:`~dmriprep.workflows.dwi.util.init_enhance_and_skullstrip_wf`
+    See also
+    --------
+    * :py:func:`~dmriprep.workflows.dwi.util.init_enhance_and_skullstrip_wf`
 
     """
     workflow = Workflow(name=name)
@@ -141,7 +134,9 @@ def init_enhance_and_skullstrip_dwi_wf(
         name='enhance_and_skullstrip_dwi_wf',
         omp_nthreads=1):
     """
-    This workflow takes in a dwi reference image and sharpens the histogram
+    Enhance a *b0* reference and perform brain extraction.
+
+    This workflow takes in a *b0* reference image and sharpens the histogram
     with the application of the N4 algorithm for removing the
     :abbr:`INU (intensity non-uniformity)` bias field and calculates a signal
     mask.
@@ -160,38 +155,41 @@ def init_enhance_and_skullstrip_dwi_wf(
       5. Calculate a final mask as the intersection of 2) and 4).
       6. Apply final mask on the enhanced reference.
 
-    .. workflow ::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow Graph:
+        .. workflow ::
+            :graph2use: orig
+            :simple_form: yes
 
-        from dmriprep.workflows.dwi.util import init_enhance_and_skullstrip_dwi_wf
-        wf = init_enhance_and_skullstrip_dwi_wf(omp_nthreads=1)
-
-    **Parameters**
-        name : str
-            Name of workflow (default: ``enhance_and_skullstrip_dwi_wf``)
-        omp_nthreads : int
-            number of threads available to parallel nodes
-
-    **Inputs**
-
-        in_file
-            b0 image (single volume)
-        pre_mask
-            initial mask
-
-    **Outputs**
-
-        bias_corrected_file
-            the ``in_file`` after `N4BiasFieldCorrection`_
-        skull_stripped_file
-            the ``bias_corrected_file`` after skull-stripping
-        mask_file
-            mask of the skull-stripped input file
-        out_report
-            reportlet for the skull-stripping
+            from dmriprep.workflows.dwi.util import init_enhance_and_skullstrip_dwi_wf
+            wf = init_enhance_and_skullstrip_dwi_wf(omp_nthreads=1)
 
     .. _N4BiasFieldCorrection: https://hdl.handle.net/10380/3053
+
+    Parameters
+    ----------
+    name : str
+        Name of workflow (default: ``enhance_and_skullstrip_dwi_wf``)
+    omp_nthreads : int
+        number of threads available to parallel nodes
+
+    Inputs
+    ------
+    in_file
+        The *b0* reference (single volume)
+    pre_mask
+        initial mask
+
+    Outputs
+    -------
+    bias_corrected_file
+        the ``in_file`` after `N4BiasFieldCorrection`_
+    skull_stripped_file
+        the ``bias_corrected_file`` after skull-stripping
+    mask_file
+        mask of the skull-stripped input file
+    out_report
+        reportlet for the skull-stripping
+
     """
     workflow = Workflow(name=name)
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'pre_mask']),
