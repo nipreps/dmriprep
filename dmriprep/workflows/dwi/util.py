@@ -90,7 +90,7 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
 
     extract_b0 = pe.Node(ExtractB0(), name='extract_b0')
 
-    # b0_template_wf = init_b0_template_wf()
+    reg_b0 = fsl.MCFLIRT(ref_vol=0, interpolation='sinc')
 
     pre_mask = pe.Node(afni.Automask(dilate=1, outputtype='NIFTI_GZ'),
                        name='pre_mask')
@@ -104,14 +104,15 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
         (inputnode, validate, [('dwi_file', 'in_file')]),
         (validate, extract_b0, [('out_file', 'in_file')]),
         (inputnode, extract_b0, [('b0_ixs', 'b0_ixs')]),
-        (extract_b0, pre_mask, [('out_file', 'in_file')]),
-        (extract_b0, rescale_b0, [('out_file', 'in_file')]),
+        (extract_b0, reg_b0, [('out_file', 'in_file')]),
+        (reg_b0, pre_mask, [('out_file', 'in_file')]),
+        (reg_b0, rescale_b0, [('out_file', 'in_file')]),
         (pre_mask, rescale_b0, [('out_file', 'pre_mask')]),
         (rescale_b0, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.in_file')]),
-        (pre_mask, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.pre_mask')]),
+        (pre_mask, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.mask_file')]),
         (validate, outputnode, [('out_file', 'dwi_file'),
                                 ('out_report', 'validation_report')]),
-        (rescale_b0, outputnode, [('ref_image', 'raw_ref_image')]),
+        (rescale_b0, outputnode, [('out_file', 'raw_ref_image')]),
         (enhance_and_skullstrip_dwi_wf, outputnode, [
             ('outputnode.bias_corrected_file', 'ref_image'),
             ('outputnode.mask_file', 'dwi_mask'),
