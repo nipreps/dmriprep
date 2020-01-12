@@ -29,7 +29,7 @@ from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
 from ..__about__ import __version__
-# from .dwi import init_dwi_preproc_wf
+from .dwi import init_dwi_preproc_wf
 
 
 def init_dmriprep_wf(
@@ -435,35 +435,20 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    # for dwi_file in subject_data['dwi']:
-    #     dwi_preproc_wf = init_dwi_preproc_wf(
-    #         aroma_melodic_dim=aroma_melodic_dim,
-    #         bold2t1w_dof=bold2t1w_dof,
-    #         bold_file=bold_file,
-    #         cifti_output=cifti_output,
-    #         debug=debug,
-    #         dummy_scans=dummy_scans,
-    #         err_on_aroma_warn=err_on_aroma_warn,
-    #         fmap_bspline=fmap_bspline,
-    #         fmap_demean=fmap_demean,
-    #         force_syn=force_syn,
-    #         freesurfer=freesurfer,
-    #         ignore=ignore,
-    #         layout=layout,
-    #         low_mem=low_mem,
-    #         medial_surface_nan=medial_surface_nan,
-    #         num_bold=len(subject_data['bold']),
-    #         omp_nthreads=omp_nthreads,
-    #         output_dir=output_dir,
-    #         output_spaces=output_spaces,
-    #         reportlets_dir=reportlets_dir,
-    #         regressors_all_comps=regressors_all_comps,
-    #         regressors_fd_th=regressors_fd_th,
-    #         regressors_dvars_th=regressors_dvars_th,
-    #         t2s_coreg=t2s_coreg,
-    #         use_aroma=use_aroma,
-    #         use_syn=use_syn,
-    #     )
+    for dwi_file in subject_data['dwi']:
+        dwi_preproc_wf = init_dwi_preproc_wf(
+            dwi_file=dwi_file,
+            debug=debug,
+            force_syn=force_syn,
+            ignore=ignore,
+            layout=layout,
+            low_mem=low_mem,
+            num_dwi=len(subject_data['dwi']),
+            omp_nthreads=omp_nthreads,
+            output_dir=output_dir,
+            reportlets_dir=reportlets_dir,
+            use_syn=use_syn,
+        )
 
     #     workflow.connect([
     #         (anat_preproc_wf, dwi_preproc_wf,

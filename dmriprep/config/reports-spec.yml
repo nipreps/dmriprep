@@ -26,6 +26,14 @@ sections:
     caption: Surfaces (white and pial) reconstructed with FreeSurfer (<code>recon-all</code>)
       overlaid on the participant's T1w template.
     subtitle: Surface reconstruction
+- name: Diffusion
+  ordering: session, acq, run
+  reportlets:
+  - bids: {datatype: dwi, desc: summary, suffix: dwi}
+  - bids: {datatype: dwi, desc: validation, suffix: dwi}
+  - bids: {datatype: dwi, suffix: 'dwi'}
+    caption: Brain mask calculated on the dwi signal (red contour).
+    subtitle: Brain mask
 - name: About
   reportlets:
   - bids: {datatype: anat, desc: about, suffix: T1w}
