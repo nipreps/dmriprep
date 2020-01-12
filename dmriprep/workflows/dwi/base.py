@@ -127,7 +127,14 @@ Diffusion data preprocessing
     workflow.__postdesc__ = """\
     """
 
-    metadata = layout.get_metadata(dwi_file)
+    # For doc building purposes
+    if not hasattr(layout, 'parse_file_entities'):
+        LOGGER.log(25, 'No valid layout: building empty workflow.')
+        metadata = {
+            'PhaseEncodingDirection': 'j',
+        }
+    else:
+        metadata = layout.get_metadata(dwi_file)
 
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file']),
