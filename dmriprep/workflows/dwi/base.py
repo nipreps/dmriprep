@@ -23,7 +23,7 @@ from ...interfaces.vectors import CheckGradientTable
 from .util import init_dwi_reference_wf
 
 
-LOGGING = logging.getLogger('nipype.workflow')
+LOGGER = logging.getLogger('nipype.workflow')
 
 
 def init_dwi_preproc_wf(
