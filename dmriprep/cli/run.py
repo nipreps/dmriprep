@@ -37,7 +37,6 @@ def get_parser():
     from templateflow.api import templates
     from packaging.version import Version
     from ..__about__ import __version__
-    from ..__about__ import __ga_id__
     from ..config import NONSTANDARD_REFERENCES
     from .version import check_latest, is_flagged
 
@@ -215,6 +214,7 @@ def main():
     from nipype import logging as nlogging
     from multiprocessing import set_start_method, Process, Manager
     from ..utils.bids import write_derivative_description, validate_input_dir
+    from ..__about__ import __ga_id__
     set_start_method('forkserver')
     warnings.showwarning = _warn_redirect
     opts = get_parser().parse_args()
