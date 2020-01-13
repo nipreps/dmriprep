@@ -138,11 +138,12 @@ Diffusion data preprocessing
         metadata = layout.get_metadata(dwi_file)
 
     inputnode = pe.Node(niu.IdentityInterface(
-        fields=['dwi_file', 'bvec_file', 'bval_file']),
+        fields=['dwi_file', 'b0_ixs',
+                'bvec_file', 'bval_file']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
-    inputnode.inputs.bvec_file = bvec_file
-    inputnode.inputs.bval_file = bval_file
+    inputnode.inputs.bvec_file = layout.get_bvec(bvec_file)
+    inputnode.inputs.bval_file = layout.get_bval(bval_file)
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'bvec_file', 'bval_file', 'rasb_file',
