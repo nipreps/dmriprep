@@ -304,7 +304,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     try:
         dmriprep_wf.run(**plugin_settings)
     except Exception as e:
-        popylar.track_event('run', 'cli_error')
+        popylar.track_event(__ga_id__, 'run', 'cli_error')
         raise
     else:
         if opts.run_reconall:
@@ -318,7 +318,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
         errno = 0
         logger.log(25, 'dMRIPrep finished without errors')
         if not opts.notrack:
-            popylar.track_event('run', 'cli_finished')
+            popylar.track_event(__ga_id__, 'run', 'cli_finished')
 
     finally:
         from niworkflows.reports import generate_reports

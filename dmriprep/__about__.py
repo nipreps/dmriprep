@@ -15,4 +15,4 @@ DOWNLOAD_URL = (
     'https://github.com/nipreps/{name}/archive/{ver}.tar.gz'.format(
         name=__packagename__, ver=__version__))
 
-__ga_id__ =  "UA-156165436-1"
+__ga_id__ = "UA-156165436-1"
