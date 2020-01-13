@@ -375,3 +375,32 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
         rotated_bvecs[~b0s] /= norms_bvecs[~b0s, np.newaxis]
         rotated_bvecs[b0s] = np.zeros(3)
     return rotated_bvecs
+
+
+def reorient_bvecs_from_ras_b(ras_b, affines):
+    """
+    Reorient the vectors from a rasb .tsv file.
+    When correcting for motion, rotation of the diffusion-weighted volumes
+    might cause systematic bias in rotationally invariant measures, such as FA
+    and MD, and also cause characteristic biases in tractography, unless the
+    gradient directions are appropriately reoriented to compensate for this
+    effect [Leemans2009]_.
+
+    Parameters
+    ----------
+    rasb_file : str or os.pathlike
+        File path to a RAS-B gradient table. If rasb_file is provided,
+        then bvecs and bvals will be dismissed.
+
+    affines : list or ndarray of shape (n, 4, 4) or (n, 3, 3)
+        Each entry in this list or array contain either an affine
+        transformation (4,4) or a rotation matrix (3, 3).
+        In both cases, the transformations encode the rotation that was applied
+        to the image corresponding to one of the non-zero gradient directions.
+    """
+    from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
+
+    ras_b_mat = np.genfromtxt(ras_b, delimiter='\t')
+    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=50)
+
+    return reorient_bvecs(gt, affines)
