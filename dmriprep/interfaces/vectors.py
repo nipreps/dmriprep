@@ -6,7 +6,8 @@ from nipype.interfaces.base import (
     SimpleInterface, BaseInterfaceInputSpec, TraitedSpec,
     File, traits, isdefined
 )
-from ..utils.vectors import DiffusionGradientTable, reorient_vecs_from_ras_b, B0_THRESHOLD, BVEC_NORM_EPSILON
+from ..utils.vectors import DiffusionGradientTable, reorient_vecs_from_ras_b, \
+    B0_THRESHOLD, BVEC_NORM_EPSILON
 
 
 class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
@@ -120,7 +121,7 @@ class ReorientVectors(SimpleInterface):
     >>> oldrasb = str(data_dir / 'dwi.tsv')
     >>> oldrasb_mat = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
     >>> # The simple case: all affines are identity
-    >>> affine_list = np.zeros((len(oldrasb_mat[:,3][oldrasb_mat[:,3]!=0]), 4, 4))
+    >>> affine_list = np.zeros((len(oldrasb_mat[:, 3][oldrasb_mat[:, 3] != 0]), 4, 4))
     >>> for i in range(4):
     >>>     affine_list[:, i, i] = 1
     >>>     reor_vecs = ReorientVectors()

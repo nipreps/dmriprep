@@ -400,15 +400,25 @@ def reorient_vecs_from_ras_b(rasb_file, affines, b0_threshold=B0_THRESHOLD):
     Returns
     -------
     Gradients : ndarray of shape (4, n)
-        A reoriented ndarray where the first three columns correspond to each of x, y, z directions of the bvecs,
-        in R-A-S image orientation.
+        A reoriented ndarray where the first three columns correspond to each of
+        x, y, z directions of the bvecs, in R-A-S image orientation.
 
     """
     from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
 
     ras_b_mat = np.genfromtxt(rasb_file, delimiter='\t')
-    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=b0_threshold)
 
+    # Verify that number of non-B0 volumes corresponds to the number of affines.
+    # If not, raise an error.
+    if len(ras_b_mat[:, 3][ras_b_mat[:, 3] != 0]) != len(affines):
+        raise ValueError('Number of affine transformations must match number of '
+                         'non-zero gradients')
+
+    # Build gradient table object
+    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:, 3], ras_b_mat[:, 0:3],
+                                         b0_threshold=b0_threshold)
+
+    # Reorient table
     new_gt = reorient_bvecs(gt, affines)
 
     return np.hstack((new_gt.bvecs, new_gt.bvals[..., np.newaxis]))
