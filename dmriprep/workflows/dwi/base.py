@@ -130,6 +130,7 @@ Diffusion data preprocessing
     # For doc building purposes
     if not hasattr(layout, 'parse_file_entities'):
         LOGGER.log(25, 'No valid layout: building empty workflow.')
+        b0_ixs = [0]
         metadata = {
             'PhaseEncodingDirection': 'j',
         }
@@ -137,11 +138,11 @@ Diffusion data preprocessing
         metadata = layout.get_metadata(dwi_file)
 
     inputnode = pe.Node(niu.IdentityInterface(
-        fields=['dwi_file']),
+        fields=['dwi_file', 'bvec_file', 'bval_file']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
-    inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
-    inputnode.inputs.bval_file = layout.get_bval(dwi_file)
+    inputnode.inputs.bvec_file = bvec_file
+    inputnode.inputs.bval_file = bval_file
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'bvec_file', 'bval_file', 'rasb_file',
@@ -167,6 +168,12 @@ Diffusion data preprocessing
             ('bval_file', 'in_bval')]),
         (inputnode, dwi_reference_wf, [('dwi_file', 'inputnode.dwi_file')]),
         (gradient_table, dwi_reference_wf, [('b0_ixs', 'inputnode.b0_ixs')]),
+        (dwi_reference_wf, outputnode, [
+            ('outputnode.dwi_file', 'dwi_file'),
+            ('outputnode.dwi_mask', 'dwi_mask')]),
+        (gradient_table, outputnode, [
+            ('bvec_file', 'bvec_file'),
+            ('bval_file', 'bval_file')])
     ])
 
     # REPORTING
@@ -175,6 +182,18 @@ Diffusion data preprocessing
         name='ds_report_summary', run_without_submitting=True,
         mem_gb=DEFAULT_MEMORY_MIN_GB
     )
+
+    ds_report_validation = pe.Node(
+        DerivativesDataSink(base_directory=reportlets_dir,
+                            desc='validation', keep_dtype=True),
+        name='ds_report_validation', run_without_submitting=True,
+        mem_gb=DEFAULT_MEMORY_MIN_GB)
+
+    workflow.connect([
+        (summary, ds_report_summary, [('out_report', 'in_file')]),
+        (dwi_reference_wf, ds_report_validation, [
+            ('outputnode.validation_report', 'in_file')]),
+    ])
 
     return workflow
 
