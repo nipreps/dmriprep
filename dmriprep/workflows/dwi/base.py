@@ -142,12 +142,12 @@ Diffusion data preprocessing
                 'bvec_file', 'bval_file']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
-    inputnode.inputs.bvec_file = layout.get_bvec(bvec_file)
-    inputnode.inputs.bval_file = layout.get_bval(bval_file)
+    inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
+    inputnode.inputs.bval_file = layout.get_bval(dwi_file)
 
     outputnode = pe.Node(niu.IdentityInterface(
-        fields=['dwi_file', 'bvec_file', 'bval_file', 'rasb_file',
-                'dwi_mask']),
+        fields=['out_dwi', 'out_bvec', 'out_bval', 'out_rasb',
+                'out_dwi_mask']),
         name='outputnode')
 
     summary = pe.Node(
@@ -159,8 +159,6 @@ Diffusion data preprocessing
 
     dwi_reference_wf = init_dwi_reference_wf(omp_nthreads=1, gen_report=True)
 
-    # dwi_derivatives_wf = init_dwi_derivatives_wf()
-
     # MAIN WORKFLOW STRUCTURE
     workflow.connect([
         (inputnode, gradient_table, [
@@ -170,11 +168,12 @@ Diffusion data preprocessing
         (inputnode, dwi_reference_wf, [('dwi_file', 'inputnode.dwi_file')]),
         (gradient_table, dwi_reference_wf, [('b0_ixs', 'inputnode.b0_ixs')]),
         (dwi_reference_wf, outputnode, [
-            ('outputnode.dwi_file', 'dwi_file'),
-            ('outputnode.dwi_mask', 'dwi_mask')]),
+            ('outputnode.dwi_file', 'out_dwi'),
+            ('outputnode.dwi_mask', 'out_dwi_mask')]),
         (gradient_table, outputnode, [
-            ('bvec_file', 'bvec_file'),
-            ('bval_file', 'bval_file')])
+            ('out_bvec', 'out_bvec'),
+            ('out_bval', 'out_bval'),
+            ('out_rasb', 'out_rasb')])
     ])
 
     # REPORTING
