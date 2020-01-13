@@ -37,6 +37,7 @@ def get_parser():
     from templateflow.api import templates
     from packaging.version import Version
     from ..__about__ import __version__
+    from ..__about__ import __ga_id__
     from ..config import NONSTANDARD_REFERENCES
     from .version import check_latest, is_flagged
 
@@ -229,11 +230,9 @@ def main():
             if os.getenv('DOCKER_VERSION_8395080871'):
                 exec_env = 'dmriprep-docker'
 
-    sentry_sdk = None
     if not opts.notrack:
-        import sentry_sdk
-        from ..utils.sentry import sentry_setup
-        sentry_setup(opts, exec_env)
+        import popylar
+        popylar.track_event(__ga_id__, 'run', 'cli_run')
 
     # Validate inputs
     if not opts.skip_bids_validation:
@@ -301,26 +300,11 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     # Clean up master process before running workflow, which may create forks
     gc.collect()
 
-    # Sentry tracking
-    if not opts.notrack:
-        from ..utils.sentry import start_ping
-        start_ping(run_uuid, len(subject_list))
-
     errno = 1  # Default is error exit unless otherwise set
     try:
         dmriprep_wf.run(**plugin_settings)
     except Exception as e:
-        if not opts.notrack:
-            from ..utils.sentry import process_crashfile
-            crashfolders = [output_dir / 'dmriprep' / 'sub-{}'.format(s) / 'log' / run_uuid
-                            for s in subject_list]
-            for crashfolder in crashfolders:
-                for crashfile in crashfolder.glob('crash*.*'):
-                    process_crashfile(crashfile)
-
-            if "Workflow did not execute cleanly" not in str(e):
-                sentry_sdk.capture_exception(e)
-        logger.critical('dMRIPrep failed: %s', e)
+        popylar.track_event('run', 'cli_error')
         raise
     else:
         if opts.run_reconall:
@@ -334,8 +318,8 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
         errno = 0
         logger.log(25, 'dMRIPrep finished without errors')
         if not opts.notrack:
-            sentry_sdk.capture_message('dMRIPrep finished without errors',
-                                       level='info')
+            popylar.track_event('run', 'cli_finished')
+
     finally:
         from niworkflows.reports import generate_reports
         from subprocess import check_call, CalledProcessError, TimeoutExpired
@@ -389,10 +373,6 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
             packagename='dmriprep')
         write_derivative_description(bids_dir, output_dir / 'dmriprep')
 
-        if failed_reports and not opts.notrack:
-            sentry_sdk.capture_message(
-                'Report generation failed for %d subjects' % failed_reports,
-                level='error')
         sys.exit(int((errno + failed_reports) > 0))
 
 
