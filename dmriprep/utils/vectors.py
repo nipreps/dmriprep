@@ -377,7 +377,7 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     return rotated_bvecs
 
 
-def reorient_bvecs_from_ras_b(ras_b, affines):
+def reorient_bvecs_from_ras_b(ras_b, affines, b0_threshold=B0_THRESHOLD):
     """
     Reorient the vectors from a rasb .tsv file.
     When correcting for motion, rotation of the diffusion-weighted volumes
@@ -389,8 +389,7 @@ def reorient_bvecs_from_ras_b(ras_b, affines):
     Parameters
     ----------
     rasb_file : str or os.pathlike
-        File path to a RAS-B gradient table. If rasb_file is provided,
-        then bvecs and bvals will be dismissed.
+        File path to a RAS-B gradient table.
 
     affines : list or ndarray of shape (n, 4, 4) or (n, 3, 3)
         Each entry in this list or array contain either an affine
@@ -401,6 +400,6 @@ def reorient_bvecs_from_ras_b(ras_b, affines):
     from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
 
     ras_b_mat = np.genfromtxt(ras_b, delimiter='\t')
-    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=50)
+    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=b0_threshold)
 
     return reorient_bvecs(gt, affines)
