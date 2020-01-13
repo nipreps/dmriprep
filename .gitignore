@@ -104,7 +104,6 @@ ENV/
 
 # Mac OS nonsense:
 .DS_Store
-.idea
 
 #kubernetes stuff
 kubernetes/jobs/

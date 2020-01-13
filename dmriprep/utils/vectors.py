@@ -377,7 +377,7 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     return rotated_bvecs
 
 
-def reorient_bvecs_from_ras_b(ras_b, affines, b0_threshold=B0_THRESHOLD):
+def reorient_vecs_from_ras_b(rasb_file, affines, b0_threshold=B0_THRESHOLD):
     """
     Reorient the vectors from a rasb .tsv file.
     When correcting for motion, rotation of the diffusion-weighted volumes
@@ -396,10 +396,19 @@ def reorient_bvecs_from_ras_b(ras_b, affines, b0_threshold=B0_THRESHOLD):
         transformation (4,4) or a rotation matrix (3, 3).
         In both cases, the transformations encode the rotation that was applied
         to the image corresponding to one of the non-zero gradient directions.
+
+    Returns
+    -------
+    Gradients : ndarray of shape (4, n)
+        A reoriented ndarray where the first three columns correspond to each of x, y, z directions of the bvecs,
+        in R-A-S image orientation.
+
     """
     from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
 
-    ras_b_mat = np.genfromtxt(ras_b, delimiter='\t')
+    ras_b_mat = np.genfromtxt(rasb_file, delimiter='\t')
     gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=b0_threshold)
 
-    return reorient_bvecs(gt, affines)
+    new_gt = reorient_bvecs(gt, affines)
+
+    return np.hstack((new_gt.bvecs, new_gt.bvals[..., np.newaxis]))
