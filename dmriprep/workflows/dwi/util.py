@@ -33,7 +33,7 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
 
             from dmriprep.workflows.dwi.util import init_dwi_reference_wf
             wf = init_dwi_reference_wf(omp_nthreads=1)
-            wf.inputnode.inputs.b0_ixs=[0]
+            wf.inputs.inputnode.b0_ixs=[0]
 
     Parameters
     ----------
