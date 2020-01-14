@@ -130,18 +130,22 @@ Diffusion data preprocessing
     # For doc building purposes
     if not hasattr(layout, 'parse_file_entities'):
         LOGGER.log(25, 'No valid layout: building empty workflow.')
+        bvec_file = '/completely/made/up/path/sub-01_dwi.bvec'
+        bval_file = '/completely/made/up/path/sub-01_dwi.bval'
         metadata = {
             'PhaseEncodingDirection': 'j',
         }
     else:
+        bvec_file = layout.get_bvec(dwi_file)
+        bval_file = layout.get_bval(dwi_file)
         metadata = layout.get_metadata(dwi_file)
 
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'bvec_file', 'bval_file']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
-    inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
-    inputnode.inputs.bval_file = layout.get_bval(dwi_file)
+    inputnode.inputs.bvec_file = bvec_file
+    inputnode.inputs.bval_file = bval_file
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_dwi', 'out_bvec', 'out_bval', 'out_rasb',
