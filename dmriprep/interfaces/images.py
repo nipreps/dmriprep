@@ -46,13 +46,13 @@ class ExtractB0(SimpleInterface):
 def extract_b0(in_file, b0_ixs, newpath=None):
     """Extract the *b0* volumes from a DWI dataset."""
     import numpy as np
-    import nibabel as nib
+    import nibabel as nb
     from nipype.utils.filemanip import fname_presuffix
 
     out_file = fname_presuffix(
         in_file, suffix='_b0', newpath=newpath)
 
-    img = nib.load(in_file)
+    img = nb.load(in_file)
     data = img.get_fdata(dtype='float32')
 
     b0 = data[..., b0_ixs]
@@ -61,7 +61,7 @@ def extract_b0(in_file, b0_ixs, newpath=None):
     hdr.set_data_shape(b0.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nib.Nifti1Image(b0, img.affine, hdr).to_filename(out_file)
+    nb.Nifti1Image(b0, img.affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -106,13 +106,13 @@ def rescale_b0(in_file, mask_file, newpath=None):
     and output a median image.
     """
     import numpy as np
-    import nibabel as nib
+    import nibabel as nb
     from nipype.utils.filemanip import fname_presuffix
 
     out_file = fname_presuffix(
         in_file, suffix='_median_b0', newpath=newpath)
 
-    img = nib.load(in_file)
+    img = nb.load(in_file)
     if img.dataobj.ndim == 3:
         return in_file
     if img.shape[-1] == 1:
@@ -120,7 +120,7 @@ def rescale_b0(in_file, mask_file, newpath=None):
         return out_file
 
     data = img.get_fdata(dtype='float32')
-    mask_img = nib.load(mask_file)
+    mask_img = nb.load(mask_file)
     mask_data = mask_img.get_fdata(dtype='float32')
 
     median_signal = data[mask_data > 0, ...].median(axis=0)
@@ -133,5 +133,5 @@ def rescale_b0(in_file, mask_file, newpath=None):
     hdr.set_data_shape(median_data.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nib.Nifti1Image(median_data, img.affine, hdr).to_filename(out_file)
+    nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_file)
     return out_file
