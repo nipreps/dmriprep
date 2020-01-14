@@ -6,7 +6,7 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v1
-    - name: Checkout repo
+    - name: Build and push
       uses: mr-smithers-excellent/docker-build-push@v1.0
       with:
         image: nipreps/dmriprep
