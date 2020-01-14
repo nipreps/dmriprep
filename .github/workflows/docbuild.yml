@@ -4,13 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.6, 3.7]
-
     steps:
     - name: Checkout repo
       uses: actions/checkout@v1
@@ -29,7 +23,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: docs
-        path: docs/build/html
+        path: docs/_build/html
     - name: Publish docs to Github Pages
       if: startsWith(github.event.ref, 'refs/tags')
       uses: JamesIves/github-pages-deploy-action@releases/v3
