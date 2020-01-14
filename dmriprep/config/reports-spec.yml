@@ -27,7 +27,7 @@ sections:
       overlaid on the participant's T1w template.
     subtitle: Surface reconstruction
 - name: Diffusion
-  ordering: session, acquisition, run
+  ordering: session,acquisition,run
   reportlets:
   - bids: {datatype: dwi, desc: summary, suffix: dwi}
   - bids: {datatype: dwi, desc: validation, suffix: dwi}
