@@ -13,11 +13,11 @@ jobs:
     - name: Install pyenv
       run: |
         curl https://pyenv.run | bash
-        export PATH="/home/runner/.pyenv/bin:$PATH"
-        eval "$(pyenv init -)"
-        eval "$(pyenv virtualenv-init -)"
     - name: Build and push
       run: |
+            export PATH="/home/runner/.pyenv/bin:$PATH"
+            eval "$(pyenv init -)"
+            eval "$(pyenv virtualenv-init -)"
             export PY3=$(pyenv versions | grep '3\.' |
                          sed -e 's/.* 3\./3./' -e 's/ .*//')
             pyenv local $PY3
