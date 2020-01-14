@@ -8,13 +8,13 @@ from nipype.interfaces.base import (
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class ExtractB0InputSpec(BaseInterfaceInputSpec):
+class _ExtractB0InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='dwi file')
     b0_ixs = traits.List(traits.Int, mandatory=True,
                          desc='Index of b0s')
 
 
-class ExtractB0OutputSpec(TraitedSpec):
+class _ExtractB0OutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='b0 file')
 
 
@@ -32,7 +32,8 @@ class ExtractB0(SimpleInterface):
     >>> res = extract_b0.run()  # doctest: +SKIP
 
     """
-    input_spec = ExtractB0InputSpec
+
+    input_spec = _ExtractB0InputSpec
     output_spec = ExtractB0OutputSpec
 
     def _run_interface(self, runtime):
@@ -53,7 +54,7 @@ def extract_b0(in_file, b0_ixs, newpath=None):
         in_file, suffix='_b0', newpath=newpath)
 
     img = nib.load(in_file)
-    data = img.get_fdata()
+    data = img.get_fdata(dtype='float32')
 
     b0 = data[..., b0_ixs]
 
@@ -65,7 +66,7 @@ def extract_b0(in_file, b0_ixs, newpath=None):
     return out_file
 
 
-class RescaleB0InputSpec(BaseInterfaceInputSpec):
+class _RescaleB0InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='b0s file')
     mask_file = File(exists=True, mandatory=True, desc='mask file')
 
@@ -112,10 +113,10 @@ def rescale_b0(in_file, mask_file, newpath=None):
         in_file, suffix='_median_b0', newpath=newpath)
 
     img = nib.load(in_file)
-    data = img.get_fdata()
+    data = img.get_fdata(dtype='float32')
 
     mask_img = nib.load(mask_file)
-    mask_data = mask_img.get_fdata()
+    mask_data = mask_img.get_fdata(dtype='float32')
 
     mean_b0_signals = data[mask_data > 0, ...].mean(axis=0)
 
