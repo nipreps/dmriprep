@@ -42,7 +42,7 @@ def init_dwi_preproc_wf(
     """
     This workflow controls the diffusion preprocessing stages of *dMRIPrep*.
 
-    Workflow Graph:
+    Workflow Graph
         .. workflow::
             :graph2use: orig
             :simple_form: yes
