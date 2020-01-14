@@ -24,7 +24,6 @@ class ExtractB0(SimpleInterface):
 
     Example
     -------
-
     >>> os.chdir(tmpdir)
     >>> extract_b0 = ExtractB0()
     >>> extract_b0.inputs.in_file = str(data_dir / 'dwi.nii.gz')
@@ -34,7 +33,7 @@ class ExtractB0(SimpleInterface):
     """
 
     input_spec = _ExtractB0InputSpec
-    output_spec = ExtractB0OutputSpec
+    output_spec = _ExtractB0OutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = extract_b0(
@@ -71,7 +70,7 @@ class _RescaleB0InputSpec(BaseInterfaceInputSpec):
     mask_file = File(exists=True, mandatory=True, desc='mask file')
 
 
-class RescaleB0OutputSpec(TraitedSpec):
+class _RescaleB0OutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='b0 file')
 
 
@@ -82,7 +81,6 @@ class RescaleB0(SimpleInterface):
 
     Example
     -------
-
     >>> os.chdir(tmpdir)
     >>> rescale_b0 = RescaleB0()
     >>> rescale_b0.inputs.in_file = str(data_dir / 'dwi.nii.gz')
@@ -91,8 +89,8 @@ class RescaleB0(SimpleInterface):
 
     """
 
-    input_spec = RescaleB0InputSpec
-    output_spec = RescaleB0OutputSpec
+    input_spec = _RescaleB0InputSpec
+    output_spec = _RescaleB0OutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = rescale_b0(
@@ -104,7 +102,9 @@ class RescaleB0(SimpleInterface):
 
 def rescale_b0(in_file, mask_file, newpath=None):
     """
-    Rescale the *b0* volumes from a DWI dataset."""
+    Rescale the input volumes using the median signal intensity
+    and output a median image.
+    """
     import numpy as np
     import nibabel as nib
     from nipype.utils.filemanip import fname_presuffix
@@ -113,20 +113,25 @@ def rescale_b0(in_file, mask_file, newpath=None):
         in_file, suffix='_median_b0', newpath=newpath)
 
     img = nib.load(in_file)
-    data = img.get_fdata(dtype='float32')
+    if img.dataobj.ndim == 3:
+        return in_file
+    if img.shape[-1] == 1:
+        nb.squeeze_image(img).to_filename(out_file)
+        return out_file
 
+    data = img.get_fdata(dtype='float32')
     mask_img = nib.load(mask_file)
     mask_data = mask_img.get_fdata(dtype='float32')
 
-    mean_b0_signals = data[mask_data > 0, ...].mean(axis=0)
+    median_signal = data[mask_data > 0, ...].median(axis=0)
 
-    rescale_b0 = 1000 * data / mean_b0_signals
+    rescaled_data = 1000 * data / median_signal
 
-    median_b0 = np.median(rescale_b0, axis=-1)
+    median_data = np.median(rescaled_data, axis=-1)
 
     hdr = img.header.copy()
-    hdr.set_data_shape(median_b0.shape)
+    hdr.set_data_shape(median_data.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nib.Nifti1Image(median_b0, img.affine, hdr).to_filename(out_file)
+    nib.Nifti1Image(median_data, img.affine, hdr).to_filename(out_file)
     return out_file
