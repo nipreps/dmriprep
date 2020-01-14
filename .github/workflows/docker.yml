@@ -10,6 +10,9 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: '3.7'
+    - name: Install pyenv
+      run: |
+        curl https://pyenv.run | bash
     - name: Build and push
       run: |
             export PY3=$(pyenv versions | grep '3\.' |
