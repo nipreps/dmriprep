@@ -59,6 +59,7 @@ def init_dwi_preproc_wf(
                 omp_nthreads=1,
                 output_dir='.',
                 reportlets_dir='.',
+                use_syn,
                 layout=BIDSLayout('.'),
                 num_dwi=1,
             )
