@@ -26,7 +26,7 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
     Then, the reference *b0* and its skull-stripped version are generated using
     a custom methodology adapted from *niworkflows*.
 
-    Workflow Graph:
+    Workflow Graph
         .. workflow::
             :graph2use: orig
             :simple_form: yes

@@ -108,7 +108,7 @@ def init_dwi_preproc_wf(
 
     See also
     --------
-    * :py_func:`~dmriprep.workflows.dwi.util.init_dwi_reference_wf
+    * :py:func:`~dmriprep.workflows.dwi.util.init_dwi_reference_wf`
 
     """
 
