@@ -10,7 +10,7 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: '3.7'
-    - name: Build and push
+    - name: Build docker image
       run: |
             # Get version, update files.
             THISVERSION=$( python get_version.py )
@@ -30,3 +30,9 @@ jobs:
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
+    - name: Push docker image
+      if: startsWith(github.event.ref, 'refs/tags') || startsWith(github.event.ref, 'docker/') || github.event.pull_request.merged == true
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker tag nipreps/dmriprep nipreps/dmriprep:${{ github.sha }}
+        docker push nipreps/dmriprep:$${{ github.sha }}
