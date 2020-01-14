@@ -5,7 +5,6 @@ from .__about__ import (
     __copyright__,
     __credits__,
     __packagename__,
-    __ga_id__
 )
 
 

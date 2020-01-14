@@ -87,7 +87,7 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
-docker: docker
+docker:
 	docker build --rm -t nipreps/dmriprep:latest \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 		--build-arg VCS_REF=`git rev-parse --short HEAD` \
