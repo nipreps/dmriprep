@@ -1,0 +1,14 @@
+name: Docker
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1.0
+      - uses: mr-smithers-excellent/docker-build-push@v1.0
+        with:
+          image: nipreps/dmriprep
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
