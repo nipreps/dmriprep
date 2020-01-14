@@ -4,14 +4,15 @@ on: [push, pull_request]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repo
       uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.7'
     - name: Install software
       run: |
         pip install .[all]
