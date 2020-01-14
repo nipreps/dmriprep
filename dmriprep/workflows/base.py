@@ -3,9 +3,6 @@
 """
 dMRIPrep base processing workflows.
 
-.. autofunction:: init_dmriprep_wf
-.. autofunction:: init_single_subject_wf
-
 """
 
 import sys

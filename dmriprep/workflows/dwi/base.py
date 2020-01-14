@@ -1,8 +1,6 @@
 """
 Orchestrating the dMRI-preprocessing workflow.
 
-.. autofunction:: init_dwi_preproc_wf
-
 """
 
 from nipype import logging

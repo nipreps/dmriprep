@@ -1,9 +1,6 @@
 """
 Pre-processing dMRI workflows
 
-.. automodule:: dmriprep.workflows.dwi.base
-.. automodule:: dmriprep.workflows.dwi.util
-
 """
 
 from .base import init_dwi_preproc_wf
