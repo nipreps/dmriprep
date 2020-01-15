@@ -191,7 +191,7 @@ Diffusion data preprocessing
         mem_gb=DEFAULT_MEMORY_MIN_GB)
 
     workflow.connect([
-        (inputnode, ds_report_summary, [('dwi_file', 'in_file')]),
+        (inputnode, ds_report_summary, [('dwi_file', 'source_file')]),
         (summary, ds_report_summary, [('out_report', 'in_file')]),
         (dwi_reference_wf, ds_report_validation, [
             ('outputnode.validation_report', 'in_file')]),
