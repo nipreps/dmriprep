@@ -9,7 +9,7 @@ communicate to users and other stake-holders aboout the expectations they should
 have about the current functionality of the software and future developments.
 
 Version 0.3 (Targetted for March 1st, 2020)
-------------
+-------------------------------------------
 This version should be considered an early alpha of the software, but will
 contain a full pipeline of processing from a raw BIDS dataset to analyzable data.
 
@@ -19,7 +19,7 @@ At this point, the processing pipeline will include the following major steps:
     Using SDC flows
 
 Version 0.4 (April 1st, 2020)
------------
+-----------------------------
 #. Head motion correction.
 
 #. Eddy current correction.
@@ -32,7 +32,7 @@ Version 0.4 (April 1st, 2020)
 #. Identification of outliers.
 
 Version 0.5 (May 1st, 2020)
------------
+----------------------------
 
 #. Registration between dMRI and T1w image.
 
@@ -43,7 +43,7 @@ earlier releases.
 
 
 Version 1.0 (Targetted for September 2020)
------------
+------------------------------------------
 
 After integrating the above steps, we will spend the time leading to a 1.0
 testing the software on various datasets, evaluating and validating the
