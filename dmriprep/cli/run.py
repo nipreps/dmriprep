@@ -304,8 +304,10 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     try:
         dmriprep_wf.run(**plugin_settings)
     except Exception as e:
-        popylar.track_event(__ga_id__, 'run', 'cli_error')
-        raise
+        if not opts.notrack:
+            popylar.track_event(__ga_id__, 'run', 'cli_error')
+        logger.critical('dMRIPrep failed: %s', e)
+        raise e
     else:
         if opts.run_reconall:
             from templateflow import api
