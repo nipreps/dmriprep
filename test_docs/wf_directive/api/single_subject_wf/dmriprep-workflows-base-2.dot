@@ -2,6 +2,7 @@ strict digraph  {
 "inputnode (utility)";
 anat_preproc_wf;
 "summary (reports)";
+dwi_preproc_wf;
 bidssrc;
 "bids_info (bids)";
 ds_report_summary;
@@ -9,6 +10,7 @@ ds_report_about;
 "about (reports)";
 "inputnode (utility)" -> anat_preproc_wf;
 "inputnode (utility)" -> "summary (reports)";
+anat_preproc_wf -> dwi_preproc_wf;
 "summary (reports)" -> ds_report_summary;
 bidssrc -> "bids_info (bids)";
 bidssrc -> "summary (reports)";

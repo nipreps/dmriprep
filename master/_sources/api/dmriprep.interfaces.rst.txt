@@ -11,5 +11,6 @@ Submodules
 
 .. toctree::
 
+   dmriprep.interfaces.images
    dmriprep.interfaces.reports
    dmriprep.interfaces.vectors

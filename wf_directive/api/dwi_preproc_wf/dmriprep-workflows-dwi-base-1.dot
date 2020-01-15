@@ -1,0 +1,14 @@
+strict digraph  {
+"inputnode (utility)";
+"gradient_table (vectors)";
+dwi_reference_wf;
+reportlets_wf;
+"outputnode (utility)";
+"inputnode (utility)" -> "gradient_table (vectors)";
+"inputnode (utility)" -> dwi_reference_wf;
+"inputnode (utility)" -> reportlets_wf;
+"gradient_table (vectors)" -> dwi_reference_wf;
+"gradient_table (vectors)" -> "outputnode (utility)";
+dwi_reference_wf -> "outputnode (utility)";
+dwi_reference_wf -> reportlets_wf;
+}

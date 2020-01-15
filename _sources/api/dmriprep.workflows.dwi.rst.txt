@@ -5,3 +5,12 @@ dmriprep.workflows.dwi package
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   dmriprep.workflows.dwi.base
+   dmriprep.workflows.dwi.outputs
+   dmriprep.workflows.dwi.util
