@@ -124,6 +124,7 @@ ENV PATH="/usr/local/miniconda/bin:$PATH" \
     LC_ALL="C.UTF-8" \
     PYTHONNOUSERSITE=1
 
+ENV FOO=1
 # Installing precomputed python packages
 RUN conda install -y python=3.7.1 \
                      pip=19.1 \
@@ -154,8 +155,8 @@ RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
 # Precaching atlases
-COPY setup.cfg fmriprep-setup.cfg
-RUN pip install --no-cache-dir "$( grep templateflow fmriprep-setup.cfg | xargs )" && \
+COPY setup.cfg dmriprep-setup.cfg
+RUN pip install --no-cache-dir "$( grep templateflow dmriprep-setup.cfg | xargs )" && \
     python -c "from templateflow import api as tfapi; \
                tfapi.get('MNI152NLin6Asym', atlas=None, resolution=[1, 2], extension=['.nii', '.nii.gz']); \
                tfapi.get('MNI152NLin2009cAsym', atlas=None, extension=['.nii', '.nii.gz']); \
@@ -169,12 +170,11 @@ ARG VERSION
 # Force static versioning within container
 RUN echo "${VERSION}" > /src/dmriprep/dmriprep/VERSION && \
     echo "include dmriprep/VERSION" >> /src/dmriprep/MANIFEST.in && \
-    pip install --no-cache-dir "/src/dmriprep[all]"
+    cd /src/dmriprep && \
+    pip install --no-cache-dir .[all]
 
 RUN find $HOME -type d -exec chmod go=u {} + && \
     find $HOME -type f -exec chmod go=u {} +
-
-ENV IS_DOCKER_8395080871=1
 
 RUN ldconfig
 WORKDIR /tmp/
