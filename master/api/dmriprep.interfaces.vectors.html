@@ -186,7 +186,7 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
 <p>Ensure the correctness of the gradient table.</p>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">check</span> <span class="o">=</span> <span class="n">CheckGradientTable</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">dwi_file</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi.nii.gz&#39;</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="n">in_rasb</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi.tsv&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -196,7 +196,7 @@
 <span class="go">True</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check</span> <span class="o">=</span> <span class="n">CheckGradientTable</span><span class="p">(</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check</span> <span class="o">=</span> <span class="n">CheckGradientTable</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">dwi_file</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi.nii.gz&#39;</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="n">in_bvec</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;bvec&#39;</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="n">in_bval</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;bval&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
