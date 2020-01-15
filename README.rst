@@ -36,15 +36,13 @@ of results.
 
 The workflow is based on `Nipype <https://nipype.readthedocs.io>`__ and encompases a large
 set of tools from well-known neuroimaging packages, including
-`FSL <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/>`__,
 `ANTs <https://stnava.github.io/ANTs/>`__,
 `FreeSurfer <https://surfer.nmr.mgh.harvard.edu/>`__,
-`AFNI <https://afni.nimh.nih.gov/>`__,
-and `Nilearn <https://nilearn.github.io/>`__.
+and `DIPY <https://dipy.org/>`__.
 This pipeline was designed to provide the best software implementation for each state of
 preprocessing, and will be updated as newer and better neuroimaging software becomes
 available.
 
-dMRIPrep performs basic preprocessing steps (coregistration, normalization, unwarping,
-segmentation, skullstripping etc.) providing outputs that can be
-easily submitted to a variety of tractography algorithms.
+dMRIPrep performs basic preprocessing steps (head motion correction,
+susceptibility distortion correction, eddy current correction,  etc.) providing
+outputs that can be easily submitted to a variety of tractography algorithms.
