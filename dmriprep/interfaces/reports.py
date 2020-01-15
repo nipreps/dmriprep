@@ -23,13 +23,6 @@ SUBJECT_TEMPLATE = """\
 \t</ul>
 """
 
-DWI_TEMPLATE = """\t\t<h3 class="elem-title">Summary</h3>
-\t\t<ul class="elem-desc">
-\t\t\t<li>Susceptibility distortion correction: {sdc}</li>
-\t\t\t<li>Registration: {registration}</li>
-\t\t</ul>
-"""
-
 ABOUT_TEMPLATE = """\t<ul>
 \t\t<li>dMRIPrep version: {version}</li>
 \t\t<li>dMRIPrep command: <code>{command}</code></li>
@@ -128,39 +121,3 @@ class AboutSummary(SummaryInterface):
         return ABOUT_TEMPLATE.format(version=self.inputs.version,
                                      command=self.inputs.command,
                                      date=time.strftime("%Y-%m-%d %H:%M:%S %z"))
-
-
-class DiffusionSummaryInputSpec(BaseInterfaceInputSpec):
-    distortion_correction = traits.Str(desc='Susceptibility distortion correction method',
-                                       mandatory=True)
-    pe_direction = traits.Enum(None, 'i', 'i-', 'j', 'j-', mandatory=True,
-                               desc='Phase-encoding direction detected')
-    registration = traits.Enum('FSL', 'FreeSurfer', mandatory=True,
-                               desc='Diffusion/anatomical registration method')
-    fallback = traits.Bool(desc='Boundary-based registration rejected')
-    registration_dof = traits.Enum(6, 9, 12, desc='Registration degrees of freedom',
-                                   mandatory=True)
-
-
-class DiffusionSummary(SummaryInterface):
-    input_spec = DiffusionSummaryInputSpec
-
-    def _generate_segment(self):
-        dof = self.inputs.registration_dof
-        reg = {
-            'FSL': [
-                'FSL <code>flirt</code> with boundary-based registration'
-                ' (BBR) metric - %d dof' % dof,
-                'FSL <code>flirt</code> rigid registration - 6 dof'],
-            'FreeSurfer': [
-                'FreeSurfer <code>bbregister</code> '
-                '(boundary-based registration, BBR) - %d dof' % dof,
-                'FreeSurfer <code>mri_coreg</code> - %d dof' % dof],
-        }[self.inputs.registration][self.inputs.fallback]
-        if self.inputs.pe_direction is None:
-            pedir = 'MISSING - Assuming Anterior-Posterior'
-        else:
-            pedir = {'i': 'Left-Right', 'j': 'Anterior-Posterior'}[self.inputs.pe_direction[0]]
-
-        return DWI_TEMPLATE.format(
-            pedir=pedir, sdc=self.inputs.distortion_correction, registration=reg)

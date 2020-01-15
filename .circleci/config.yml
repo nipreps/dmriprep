@@ -251,6 +251,24 @@ jobs:
          key: THP002-anat-v00-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/THP002/work
+      - run:
+          name: Run full diffusion workflow on THP002
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/THP002/work /tmp/THP002/derivatives
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/derivatives && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/work && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/work
+            docker run -e FS_LICENSE=$FS_LICENSE --rm \
+                -v /tmp/data/THP002:/data \
+                -v /tmp/THP002/derivatives:/out \
+                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
+                -v /tmp/THP002/work:/work \
+                --user $(id -u):$(id -g) \
+                nipreps/dmriprep:latest /data /out participant -vv --sloppy \
+                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - store_artifacts:
           path: /tmp/THP002/derivatives/dmriprep
       - run:

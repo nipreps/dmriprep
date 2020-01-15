@@ -1,13 +1,4 @@
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-dMRIPrep base processing workflows.
-
-.. autofunction:: init_dmriprep_wf
-.. autofunction:: init_single_subject_wf
-
-"""
-
+"""dMRIPrep base processing workflows."""
 import sys
 import os
 from packaging.version import Version
@@ -29,7 +20,7 @@ from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
 from ..__about__ import __version__
-# from .dwi import init_dwi_preproc_wf
+from .dwi import init_dwi_preproc_wf
 
 
 def init_dmriprep_wf(
@@ -435,59 +426,42 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    # for dwi_file in subject_data['dwi']:
-    #     dwi_preproc_wf = init_dwi_preproc_wf(
-    #         aroma_melodic_dim=aroma_melodic_dim,
-    #         bold2t1w_dof=bold2t1w_dof,
-    #         bold_file=bold_file,
-    #         cifti_output=cifti_output,
-    #         debug=debug,
-    #         dummy_scans=dummy_scans,
-    #         err_on_aroma_warn=err_on_aroma_warn,
-    #         fmap_bspline=fmap_bspline,
-    #         fmap_demean=fmap_demean,
-    #         force_syn=force_syn,
-    #         freesurfer=freesurfer,
-    #         ignore=ignore,
-    #         layout=layout,
-    #         low_mem=low_mem,
-    #         medial_surface_nan=medial_surface_nan,
-    #         num_bold=len(subject_data['bold']),
-    #         omp_nthreads=omp_nthreads,
-    #         output_dir=output_dir,
-    #         output_spaces=output_spaces,
-    #         reportlets_dir=reportlets_dir,
-    #         regressors_all_comps=regressors_all_comps,
-    #         regressors_fd_th=regressors_fd_th,
-    #         regressors_dvars_th=regressors_dvars_th,
-    #         t2s_coreg=t2s_coreg,
-    #         use_aroma=use_aroma,
-    #         use_syn=use_syn,
-    #     )
+    for dwi_file in subject_data['dwi']:
+        dwi_preproc_wf = init_dwi_preproc_wf(
+            dwi_file=dwi_file,
+            debug=debug,
+            force_syn=force_syn,
+            ignore=ignore,
+            layout=layout,
+            low_mem=low_mem,
+            num_dwi=len(subject_data['dwi']),
+            omp_nthreads=omp_nthreads,
+            output_dir=output_dir,
+            reportlets_dir=reportlets_dir,
+            use_syn=use_syn,
+        )
 
-    #     workflow.connect([
-    #         (anat_preproc_wf, dwi_preproc_wf,
-    #          [(('outputnode.t1_preproc', _pop), 'inputnode.t1_preproc'),
-    #           ('outputnode.t1_brain', 'inputnode.t1_brain'),
-    #           ('outputnode.t1_mask', 'inputnode.t1_mask'),
-    #           ('outputnode.t1_seg', 'inputnode.t1_seg'),
-    #           ('outputnode.t1_aseg', 'inputnode.t1_aseg'),
-    #           ('outputnode.t1_aparc', 'inputnode.t1_aparc'),
-    #           ('outputnode.t1_tpms', 'inputnode.t1_tpms'),
-    #           ('outputnode.template', 'inputnode.template'),
-    #           ('outputnode.forward_transform', 'inputnode.anat2std_xfm'),
-    #           ('outputnode.reverse_transform', 'inputnode.std2anat_xfm'),
-    #           ('outputnode.joint_template', 'inputnode.joint_template'),
-    #           ('outputnode.joint_forward_transform', 'inputnode.joint_anat2std_xfm'),
-    #           ('outputnode.joint_reverse_transform', 'inputnode.joint_std2anat_xfm'),
-    #           # Undefined if --no-freesurfer, but this is safe
-    #           ('outputnode.subjects_dir', 'inputnode.subjects_dir'),
-    #           ('outputnode.subject_id', 'inputnode.subject_id'),
-    #           ('outputnode.t1_2_fsnative_forward_transform',
-    #            'inputnode.t1_2_fsnative_forward_transform'),
-    #           ('outputnode.t1_2_fsnative_reverse_transform',
-    #            'inputnode.t1_2_fsnative_reverse_transform')]),
-    #     ])
+        workflow.connect([
+            (anat_preproc_wf, dwi_preproc_wf,
+             [(('outputnode.t1w_preproc', _pop), 'inputnode.t1w_preproc'),
+              ('outputnode.t1w_brain', 'inputnode.t1w_brain'),
+              ('outputnode.t1w_mask', 'inputnode.t1w_mask'),
+              ('outputnode.t1w_dseg', 'inputnode.t1w_dseg'),
+              ('outputnode.t1w_aseg', 'inputnode.t1w_aseg'),
+              ('outputnode.t1w_aparc', 'inputnode.t1w_aparc'),
+              ('outputnode.t1w_tpms', 'inputnode.t1w_tpms'),
+              ('outputnode.template', 'inputnode.template'),
+              ('outputnode.anat2std_xfm', 'inputnode.anat2std_xfm'),
+              ('outputnode.std2anat_xfm', 'inputnode.std2anat_xfm'),
+              ('outputnode.joint_template', 'inputnode.joint_template'),
+              ('outputnode.joint_anat2std_xfm', 'inputnode.joint_anat2std_xfm'),
+              ('outputnode.joint_std2anat_xfm', 'inputnode.joint_std2anat_xfm'),
+              # Undefined if --fs-no-reconall, but this is safe
+              ('outputnode.subjects_dir', 'inputnode.subjects_dir'),
+              ('outputnode.subject_id', 'inputnode.subject_id'),
+              ('outputnode.t1w2fsnative_xfm', 'inputnode.t1w2fsnative_xfm'),
+              ('outputnode.fsnative2t1w_xfm', 'inputnode.fsnative2t1w_xfm')]),
+        ])
 
     return workflow
 
