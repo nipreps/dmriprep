@@ -17,17 +17,20 @@ jobs:
         pip install .[all]
     - name: Build docs
       run: |
-        cd docs
-        make html
+        make -C doc
     - name: Upload docs
       uses: actions/upload-artifact@v1
       with:
         name: docs
         path: docs/_build/html
+    - name: Create versioned docs on tag
+      if: startsWith(github.event.ref, 'refs/tags')
+      run: |
+        make -f ./docs/Makefile versioned CURBRANCH=${GITHUB_REF##*/}
     - name: Publish docs to Github Pages
       if: startsWith(github.event.ref, 'refs/tags')
       uses: JamesIves/github-pages-deploy-action@releases/v3
       with:
         ACCESS_TOKEN: ${{ secrets.DOCDEPLOY_ACCESS_TOKEN }}
         BRANCH: gh-pages # The branch the action should deploy to.
-        FOLDER: docs/build/html # The folder the action should deploy.
+        FOLDER: docs/_build/html # The folder the action should deploy.
