@@ -124,7 +124,6 @@ ENV PATH="/usr/local/miniconda/bin:$PATH" \
     LC_ALL="C.UTF-8" \
     PYTHONNOUSERSITE=1
 
-ENV FOO=1
 # Installing precomputed python packages
 RUN conda install -y python=3.7.1 \
                      pip=19.1 \
