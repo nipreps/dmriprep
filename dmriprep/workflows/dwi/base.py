@@ -1,16 +1,12 @@
 """Orchestrating the dMRI-preprocessing workflow."""
-
 from nipype import logging
-
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-
-from ...config import DEFAULT_MEMORY_MIN_GB
-
-from ...interfaces import DerivativesDataSink
 from ...interfaces.vectors import CheckGradientTable
+from .util import init_dwi_reference_wf
+from .outputs import init_reportlets_wf
 
 
 LOGGER = logging.getLogger('nipype.workflow')
@@ -100,10 +96,9 @@ def init_dwi_preproc_wf(
     See also
     --------
     * :py:func:`~dmriprep.workflows.dwi.util.init_dwi_reference_wf`
+    * :py:func:`~dmriprep.workflows.dwi.outputs.init_reportlets_wf`
 
     """
-    from .util import init_dwi_reference_wf
-
     wf_name = _get_wf_name(dwi_file)
 
     # Build workflow
@@ -147,7 +142,7 @@ Diffusion data preprocessing
 
     gradient_table = pe.Node(CheckGradientTable(), name='gradient_table')
 
-    dwi_reference_wf = init_dwi_reference_wf(omp_nthreads=1, gen_report=True)
+    dwi_reference_wf = init_dwi_reference_wf(omp_nthreads=1)
 
     # MAIN WORKFLOW STRUCTURE
     workflow.connect([
@@ -158,7 +153,7 @@ Diffusion data preprocessing
         (inputnode, dwi_reference_wf, [('dwi_file', 'inputnode.dwi_file')]),
         (gradient_table, dwi_reference_wf, [('b0_ixs', 'inputnode.b0_ixs')]),
         (dwi_reference_wf, outputnode, [
-            ('outputnode.dwi_file', 'out_dwi'),
+            ('outputnode.ref_image', 'out_dwi'),
             ('outputnode.dwi_mask', 'out_dwi_mask')]),
         (gradient_table, outputnode, [
             ('out_bvec', 'out_bvec'),
@@ -167,18 +162,14 @@ Diffusion data preprocessing
     ])
 
     # REPORTING
-    ds_report_validation = pe.Node(
-        DerivativesDataSink(base_directory=reportlets_dir,
-                            desc='validation', keep_dtype=True),
-        name='ds_report_validation', run_without_submitting=True,
-        mem_gb=DEFAULT_MEMORY_MIN_GB)
-
+    reportlets_wf = init_reportlets_wf(reportlets_dir)
     workflow.connect([
-        (inputnode, ds_report_validation, [('dwi', 'source_file')]),
-        (dwi_reference_wf, ds_report_validation, [
-            ('outputnode.validation_report', 'in_file')]),
+        (inputnode, reportlets_wf, [('dwi_file', 'inputnode.source_file')]),
+        (dwi_reference_wf, reportlets_wf, [
+            ('outputnode.ref_image', 'inputnode.dwi_ref'),
+            ('outputnode.dwi_mask', 'inputnode.dwi_mask'),
+            ('outputnode.validation_report', 'inputnode.validation_report')]),
     ])
-
     return workflow
 
 

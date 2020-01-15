@@ -6,7 +6,6 @@ from nipype.interfaces import utility as niu, fsl, afni
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from niworkflows.interfaces.images import ValidateImage
 from niworkflows.interfaces.fixes import FixN4BiasFieldCorrection as N4BiasFieldCorrection
-from niworkflows.interfaces.masks import SimpleShowMaskRPT
 from niworkflows.interfaces.utils import CopyXForm
 
 from ...interfaces.images import ExtractB0, RescaleB0
@@ -14,7 +13,7 @@ from ...interfaces.images import ExtractB0, RescaleB0
 DEFAULT_MEMORY_MIN_GB = 0.01
 
 
-def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf', gen_report=False):
+def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf'):
     """
     Build a workflow that generates a reference b0 image from a DWI dataset.
 
@@ -40,8 +39,6 @@ def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf', gen_report=Fals
         Maximum number of threads an individual process may use
     name : str
         Name of workflow (default: ``dwi_reference_wf``)
-    gen_report : bool
-        Whether a mask report node should be appended in the end
 
     Inputs
     ------
@@ -112,16 +109,6 @@ def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf', gen_report=Fals
             ('outputnode.mask_file', 'dwi_mask'),
             ('outputnode.skull_stripped_file', 'ref_image_brain')]),
     ])
-
-    if gen_report:
-        mask_reportlet = pe.Node(SimpleShowMaskRPT(), name='mask_reportlet')
-        workflow.connect([
-            (enhance_and_skullstrip_dwi_wf, mask_reportlet, [
-                ('outputnode.bias_corrected_file', 'background_file'),
-                ('outputnode.mask_file', 'mask_file'),
-            ]),
-        ])
-
     return workflow
 
 
