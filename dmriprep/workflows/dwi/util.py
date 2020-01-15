@@ -14,8 +14,7 @@ from ...interfaces.images import ExtractB0, RescaleB0
 DEFAULT_MEMORY_MIN_GB = 0.01
 
 
-def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
-                          name='dwi_reference_wf', gen_report=False):
+def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf', gen_report=False):
     """
     Build a workflow that generates a reference b0 image from a DWI dataset.
 
@@ -37,8 +36,6 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
 
     Parameters
     ----------
-    dwi_file : str
-        dwi NIfTI file
     omp_nthreads : int
         Maximum number of threads an individual process may use
     name : str
@@ -82,10 +79,6 @@ def init_dwi_reference_wf(omp_nthreads, dwi_file=None,
                                       'ref_image_brain',
                                       'dwi_mask', 'validation_report']),
         name='outputnode')
-
-    # Simplify manually setting input image
-    if dwi_file is not None:
-        inputnode.inputs.dwi_file = dwi_file
 
     validate = pe.Node(ValidateImage(), name='validate', mem_gb=DEFAULT_MEMORY_MIN_GB)
 

@@ -1,7 +1,4 @@
-"""
-Orchestrating the dMRI-preprocessing workflow.
-
-"""
+"""Orchestrating the dMRI-preprocessing workflow."""
 
 from nipype import logging
 
@@ -15,9 +12,6 @@ from ...config import DEFAULT_MEMORY_MIN_GB
 from ...interfaces import DerivativesDataSink
 from ...interfaces.reports import DiffusionSummary
 from ...interfaces.vectors import CheckGradientTable
-
-# dwi workflows
-from .util import init_dwi_reference_wf
 
 
 LOGGER = logging.getLogger('nipype.workflow')
@@ -109,6 +103,7 @@ def init_dwi_preproc_wf(
     * :py:func:`~dmriprep.workflows.dwi.util.init_dwi_reference_wf`
 
     """
+    from .util import init_dwi_reference_wf
 
     wf_name = _get_wf_name(dwi_file)
 
@@ -139,7 +134,12 @@ Diffusion data preprocessing
         metadata = layout.get_metadata(dwi_file)
 
     inputnode = pe.Node(niu.IdentityInterface(
-        fields=['dwi_file', 'bvec_file', 'bval_file']),
+        fields=['dwi_file', 'bvec_file', 'bval_file',
+                'subjects_dir', 'subject_id',
+                't1w_preproc', 't1w_brain', 't1w_mask', 't1w_dseg', 't1w_tpms',
+                't1w_aseg', 't1w_aparc', 'anat2std_xfm', 'std2anat_xfm', 'template',
+                'joint_anat2std_xfm', 'joint_std2anat_xfm', 'joint_template',
+                't1w2fsnative_xfm', 'fsnative2t1w_xfm']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
     inputnode.inputs.bvec_file = bvec_file
@@ -201,10 +201,12 @@ Diffusion data preprocessing
 def _get_wf_name(dwi_fname):
     """
     Derive the workflow name for supplied dwi file.
+
     >>> _get_wf_name('/completely/made/up/path/sub-01_dwi.nii.gz')
     'dwi_preproc_wf'
     >>> _get_wf_name('/completely/made/up/path/sub-01_run-1_dwi.nii.gz')
     'dwi_preproc_run_1_wf'
+
     """
     from nipype.utils.filemanip import split_filename
     fname = split_filename(dwi_fname)[1]
