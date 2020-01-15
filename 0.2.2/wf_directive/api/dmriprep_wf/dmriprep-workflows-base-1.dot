@@ -1,0 +1,5 @@
+strict digraph  {
+"fsdir_run_X (bids)";
+single_subject_dmripreptest_wf;
+"fsdir_run_X (bids)" -> single_subject_dmripreptest_wf;
+}

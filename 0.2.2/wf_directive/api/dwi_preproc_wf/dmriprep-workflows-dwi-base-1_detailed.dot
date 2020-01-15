@@ -1,0 +1,22 @@
+digraph structs {
+node [shape=record];
+dwi_preproc_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outbvalfile> bval_file|<outbvecfile> bvec_file|<outdwifile> dwi_file}"];
+dwi_preproc_wfgradient_table [label="{IN|<indwifile> dwi_file|<ininbval> in_bval|<ininbvec> in_bvec}|{ gradient_table | vectors |  }|{OUT|<outb0ixs> b0_ixs|<outoutbval> out_bval|<outoutbvec> out_bvec|<outoutrasb> out_rasb}"];
+dwi_preproc_wfdwi_reference_wf [label="{IN|<ininputnodeb0ixs> inputnode.b0_ixs|<ininputnodedwifile> inputnode.dwi_file}|{ dwi_reference_wf |  |  }|{OUT|<outoutputnodedwimask> outputnode.dwi_mask|<outoutputnoderefimage> outputnode.ref_image|<outoutputnodevalidationreport> outputnode.validation_report}"];
+dwi_preproc_wfreportlets_wf [label="{IN|<ininputnodedwimask> inputnode.dwi_mask|<ininputnodedwiref> inputnode.dwi_ref|<ininputnodesourcefile> inputnode.source_file|<ininputnodevalidationreport> inputnode.validation_report}|{ reportlets_wf |  |  }|{OUT}"];
+dwi_preproc_wfoutputnode [label="{IN|<inoutbval> out_bval|<inoutbvec> out_bvec|<inoutdwi> out_dwi|<inoutdwimask> out_dwi_mask|<inoutrasb> out_rasb}|{ outputnode | utility |  }|{OUT}"];
+dwi_preproc_wfdwi_reference_wf:outoutputnodedwimask:e -> dwi_preproc_wfoutputnode:inoutdwimask:w;
+dwi_preproc_wfdwi_reference_wf:outoutputnodedwimask:e -> dwi_preproc_wfreportlets_wf:ininputnodedwimask:w;
+dwi_preproc_wfdwi_reference_wf:outoutputnoderefimage:e -> dwi_preproc_wfoutputnode:inoutdwi:w;
+dwi_preproc_wfdwi_reference_wf:outoutputnoderefimage:e -> dwi_preproc_wfreportlets_wf:ininputnodedwiref:w;
+dwi_preproc_wfdwi_reference_wf:outoutputnodevalidationreport:e -> dwi_preproc_wfreportlets_wf:ininputnodevalidationreport:w;
+dwi_preproc_wfgradient_table:outb0ixs:e -> dwi_preproc_wfdwi_reference_wf:ininputnodeb0ixs:w;
+dwi_preproc_wfgradient_table:outoutbval:e -> dwi_preproc_wfoutputnode:inoutbval:w;
+dwi_preproc_wfgradient_table:outoutbvec:e -> dwi_preproc_wfoutputnode:inoutbvec:w;
+dwi_preproc_wfgradient_table:outoutrasb:e -> dwi_preproc_wfoutputnode:inoutrasb:w;
+dwi_preproc_wfinputnode:outbvalfile:e -> dwi_preproc_wfgradient_table:ininbval:w;
+dwi_preproc_wfinputnode:outbvecfile:e -> dwi_preproc_wfgradient_table:ininbvec:w;
+dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfdwi_reference_wf:ininputnodedwifile:w;
+dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfgradient_table:indwifile:w;
+dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfreportlets_wf:ininputnodesourcefile:w;
+}

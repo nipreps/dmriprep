@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dmriprep.workflows.dwi.util module &mdash; dmriprep 0.2.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmriprep.workflows.base module" href="dmriprep.workflows.base.html" />
+    <link rel="prev" title="dmriprep.workflows.dwi.outputs module" href="dmriprep.workflows.dwi.outputs.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> dmriprep
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.config.html">dmriprep.config package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.interfaces.html">dmriprep.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.utils.html">dmriprep.utils package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dmriprep.workflows.html">dmriprep.workflows package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="dmriprep.workflows.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="dmriprep.workflows.dwi.html">dmriprep.workflows.dwi package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dmriprep.workflows.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">dmriprep</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+        
+          <li><a href="dmriprep.workflows.html">dmriprep.workflows package</a> &raquo;</li>
+        
+          <li><a href="dmriprep.workflows.dwi.html">dmriprep.workflows.dwi package</a> &raquo;</li>
+        
+      <li>dmriprep.workflows.dwi.util module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/dmriprep.workflows.dwi.util.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/dmriprep.workflows.dwi.util.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
+<div class="section" id="module-dmriprep.workflows.dwi.util">
+<span id="dmriprep-workflows-dwi-util-module"></span><h1>dmriprep.workflows.dwi.util module<a class="headerlink" href="#module-dmriprep.workflows.dwi.util" title="Permalink to this headline">¶</a></h1>
+<p>Utility workflows for <abbr title="diffusion weighted imaging">DWI</abbr> data.</p>
+<dl class="function">
+<dt id="dmriprep.workflows.dwi.util.init_dwi_reference_wf">
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.util.</code><code class="sig-name descname">init_dwi_reference_wf</code><span class="sig-paren">(</span><em class="sig-param">omp_nthreads</em>, <em class="sig-param">name='dwi_reference_wf'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.util.init_dwi_reference_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a workflow that generates a reference b0 image from a DWI dataset.</p>
+<p>To generate the reference <em>b0</em>, this workflow takes in a DWI dataset,
+extracts the b0s, registers them to each other, rescales the signal
+intensity values, and calculates a median image.</p>
+<p>Then, the reference <em>b0</em> and its skull-stripped version are generated using
+a custom methodology adapted from <em>niworkflows</em>.</p>
+<dl>
+<dt>Workflow Graph</dt><dd><div class="figure align-default">
+<img alt="../_images/dmriprep-workflows-dwi-util-1.png" src="../_images/dmriprep-workflows-dwi-util-1.png" />
+</div>
+<p>(<a class="reference external" href="../api/dmriprep-workflows-dwi-util-1.py">Source code</a>, <a class="reference external" href="../api/dmriprep-workflows-dwi-util-1.png">png</a>, <a class="reference external" href="../api/dmriprep-workflows-dwi-util-1.svg">svg</a>, <a class="reference external" href="../api/dmriprep-workflows-dwi-util-1.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omp_nthreads</strong> (<em>int</em>) – Maximum number of threads an individual process may use</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of workflow (default: <code class="docutils literal notranslate"><span class="pre">dwi_reference_wf</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>dwi_file</strong> – dwi NIfTI file</p></li>
+<li><p><strong>b0_ixs</strong> (<em>list</em>) – index of b0s in dwi NIfTI file</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwi_file</strong> – Validated dwi NIfTI file</p></li>
+<li><p><strong>raw_ref_image</strong> – Reference image</p></li>
+<li><p><strong>ref_image</strong> – Contrast-enhanced reference image</p></li>
+<li><p><strong>ref_image_brain</strong> – Skull-stripped reference image</p></li>
+<li><p><strong>dwi_mask</strong> – Skull-stripping mask of reference image</p></li>
+<li><p><strong>validation_report</strong> – HTML reportlet indicating whether <code class="docutils literal notranslate"><span class="pre">dwi_file</span></code> had a valid affine</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">init_enhance_and_skullstrip_wf()</span></code></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.workflows.dwi.util.init_enhance_and_skullstrip_dwi_wf">
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.util.</code><code class="sig-name descname">init_enhance_and_skullstrip_dwi_wf</code><span class="sig-paren">(</span><em class="sig-param">name='enhance_and_skullstrip_dwi_wf'</em>, <em class="sig-param">omp_nthreads=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.util.init_enhance_and_skullstrip_dwi_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhance a <em>b0</em> reference and perform brain extraction.</p>
+<p>This workflow takes in a <em>b0</em> reference image and sharpens the histogram
+with the application of the N4 algorithm for removing the
+<abbr title="intensity non-uniformity">INU</abbr> bias field and calculates a signal
+mask.</p>
+<p>Steps of this workflow are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Run ANTs’ <code class="docutils literal notranslate"><span class="pre">N4BiasFieldCorrection</span></code> on the input
+dwi reference image and mask.</p></li>
+<li><p>Calculate a loose mask using FSL’s <code class="docutils literal notranslate"><span class="pre">bet</span></code>, with one mathematical morphology
+dilation of one iteration and a sphere of 6mm as structuring element.</p></li>
+<li><p>Mask the <abbr title="intensity non-uniformity">INU</abbr>-corrected image
+with the latest mask calculated in 3), then use AFNI’s <code class="docutils literal notranslate"><span class="pre">3dUnifize</span></code>
+to <em>standardize</em> the T2* contrast distribution.</p></li>
+<li><p>Calculate a mask using AFNI’s <code class="docutils literal notranslate"><span class="pre">3dAutomask</span></code> after the contrast
+enhancement of 4).</p></li>
+<li><p>Calculate a final mask as the intersection of 2) and 4).</p></li>
+<li><p>Apply final mask on the enhanced reference.</p></li>
+</ol>
+</div></blockquote>
+<dl>
+<dt>Workflow Graph:</dt><dd><div class="figure align-default">
+<img alt="../_images/dmriprep-workflows-dwi-util-2.png" src="../_images/dmriprep-workflows-dwi-util-2.png" />
+</div>
+<p>(<a class="reference external" href="../api/dmriprep-workflows-dwi-util-2.py">Source code</a>, <a class="reference external" href="../api/dmriprep-workflows-dwi-util-2.png">png</a>, <a class="reference external" href="../api/dmriprep-workflows-dwi-util-2.svg">svg</a>, <a class="reference external" href="../api/dmriprep-workflows-dwi-util-2.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of workflow (default: <code class="docutils literal notranslate"><span class="pre">enhance_and_skullstrip_dwi_wf</span></code>)</p></li>
+<li><p><strong>omp_nthreads</strong> (<em>int</em>) – number of threads available to parallel nodes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>in_file</strong> – The <em>b0</em> reference (single volume)</p></li>
+<li><p><strong>pre_mask</strong> – initial mask</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias_corrected_file</strong> – the <code class="docutils literal notranslate"><span class="pre">in_file</span></code> after <a class="reference external" href="https://hdl.handle.net/10380/3053">N4BiasFieldCorrection</a></p></li>
+<li><p><strong>skull_stripped_file</strong> – the <code class="docutils literal notranslate"><span class="pre">bias_corrected_file</span></code> after skull-stripping</p></li>
+<li><p><strong>mask_file</strong> – mask of the skull-stripped input file</p></li>
+<li><p><strong>out_report</strong> – reportlet for the skull-stripping</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dmriprep.workflows.base.html" class="btn btn-neutral float-right" title="dmriprep.workflows.base module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dmriprep.workflows.dwi.outputs.html" class="btn btn-neutral float-left" title="dmriprep.workflows.dwi.outputs module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright Copyright 2019, The dMRIPrep developers
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 0.2.2
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../0.2.1/index.html">0.2.1</a></dd>
+            <dd><a href="dmriprep.workflows.dwi.util.html">0.2.2</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../master/api/dmriprep.workflows.dwi.util.html">master</a></dd>
+            <dd><a href="../../test_docs/index.html">test_docs</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
