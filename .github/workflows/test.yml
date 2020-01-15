@@ -23,4 +23,4 @@ jobs:
         pip install .[all]
     - name: Test
       run: |
-        pytest -n 2 -vv --doctest-modules --cov dmriprep --cov-config .coveragerc --cov-report xml:cov.xml dmriprep
+        pytest dmriprep
