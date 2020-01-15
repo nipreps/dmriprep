@@ -106,7 +106,7 @@ def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf', gen_report=Fals
         (pre_mask, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.pre_mask')]),
         (validate, outputnode, [('out_file', 'dwi_file'),
                                 ('out_report', 'validation_report')]),
-        (rescale_b0, outputnode, [('out_file', 'raw_ref_image')]),
+        (rescale_b0, outputnode, [('out_ref', 'raw_ref_image')]),
         (enhance_and_skullstrip_dwi_wf, outputnode, [
             ('outputnode.bias_corrected_file', 'ref_image'),
             ('outputnode.mask_file', 'dwi_mask'),
