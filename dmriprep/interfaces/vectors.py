@@ -124,7 +124,7 @@ class ReorientVectors(SimpleInterface):
     >>> affine_list = np.zeros((len(oldrasb_mat[:, 3][oldrasb_mat[:, 3] != 0]), 4, 4))
     >>> for i in range(4):
     ...     affine_list[:, i, i] = 1
-    >>>     reor_vecs = ReorientVectors()
+    ...     reor_vecs = ReorientVectors()
     >>> reor_vecs = ReorientVectors()
     >>> reor_vecs.inputs.affines = affine_list
     >>> reor_vecs.inputs.in_rasb = oldrasb
