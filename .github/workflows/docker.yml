@@ -1,37 +1,20 @@
-name: Docker
-on: [push, pull_request]
+name: Docker Build & Push
+
+on: [push]
+
 jobs:
-  build:
+
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v1
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
+    - uses: actions/checkout@v1
+      name: Check out code
+
+    - uses: mr-smithers-excellent/docker-build-push@feature/add-build-args
+      name: Build & push Docker image
       with:
-        python-version: '3.7'
-    - name: Build docker image
-      run: |
-            # Get version, update files.
-            THISVERSION=$( python get_version.py )
-            if [[ ${THISVERSION:0:2} == "0+" ]] ; then
-              echo "WARNING: latest git tag could not be found"
-              echo "Please, make sure you fetch all tags from upstream with"
-              echo "the command ``git fetch --tags --verbose`` and push"
-              echo "them to your fork with ``git push origin --tags``"
-            fi
-            # Build docker image
-            e=1 && for i in {1..5}; do
-              docker build --rm \
-                -t nipreps/dmriprep:latest \
-                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-    - name: Push docker image
-      if: startsWith(github.event.ref, 'refs/tags') || startsWith(github.event.ref, 'docker/') || github.event.pull_request.merged == true
-      run: |
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker tag nipreps/dmriprep nipreps/dmriprep:${{ github.sha }}
-        docker push nipreps/dmriprep:$${{ github.sha }}
+        image: 'nipreps/dmriprep'
+        registry: 'docker.io'
+        buildArgs: 'VERSION=1.0,BUILD_DATE=2020-01-08'
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
