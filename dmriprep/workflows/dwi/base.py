@@ -10,7 +10,6 @@ from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...config import DEFAULT_MEMORY_MIN_GB
 
 from ...interfaces import DerivativesDataSink
-from ...interfaces.reports import DiffusionSummary
 from ...interfaces.vectors import CheckGradientTable
 
 
@@ -125,13 +124,9 @@ Diffusion data preprocessing
         LOGGER.log(25, 'No valid layout: building empty workflow.')
         bvec_file = '/completely/made/up/path/sub-01_dwi.bvec'
         bval_file = '/completely/made/up/path/sub-01_dwi.bval'
-        metadata = {
-            'PhaseEncodingDirection': 'j',
-        }
     else:
         bvec_file = layout.get_bvec(dwi_file)
         bval_file = layout.get_bval(dwi_file)
-        metadata = layout.get_metadata(dwi_file)
 
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'bvec_file', 'bval_file',
@@ -149,12 +144,6 @@ Diffusion data preprocessing
         fields=['out_dwi', 'out_bvec', 'out_bval', 'out_rasb',
                 'out_dwi_mask']),
         name='outputnode')
-
-    summary = pe.Node(
-        DiffusionSummary(
-            distortion_correction='Not implemented',
-            pe_direction=metadata.get("PhaseEncodingDirection")),
-        name='summary', mem_gb=DEFAULT_MEMORY_MIN_GB, run_without_submitting=True)
 
     gradient_table = pe.Node(CheckGradientTable(), name='gradient_table')
 
@@ -178,12 +167,6 @@ Diffusion data preprocessing
     ])
 
     # REPORTING
-    ds_report_summary = pe.Node(
-        DerivativesDataSink(desc='summary', keep_dtype=True),
-        name='ds_report_summary', run_without_submitting=True,
-        mem_gb=DEFAULT_MEMORY_MIN_GB
-    )
-
     ds_report_validation = pe.Node(
         DerivativesDataSink(base_directory=reportlets_dir,
                             desc='validation', keep_dtype=True),
@@ -191,8 +174,7 @@ Diffusion data preprocessing
         mem_gb=DEFAULT_MEMORY_MIN_GB)
 
     workflow.connect([
-        (inputnode, ds_report_summary, [('dwi_file', 'source_file')]),
-        (summary, ds_report_summary, [('out_report', 'in_file')]),
+        (inputnode, ds_report_validation, [('dwi', 'source_file')]),
         (dwi_reference_wf, ds_report_validation, [
             ('outputnode.validation_report', 'in_file')]),
     ])

@@ -29,7 +29,6 @@ sections:
 - name: Diffusion
   ordering: session,acquisition,run
   reportlets:
-  - bids: {datatype: dwi, desc: summary, suffix: dwi}
   - bids: {datatype: dwi, desc: validation, suffix: dwi}
 - name: About
   reportlets:
