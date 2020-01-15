@@ -31,11 +31,11 @@ sections:
   reportlets:
   - bids: {datatype: dwi, desc: validation, suffix: dwi}
   - bids: {datatype: dwi, desc: brain, suffix: mask}
-      caption: Average b=0 that serves for reference in early preprocessing steps.
-      descriptions: The reference b=0 is obtained as the voxel-wise median across
-        all b=0 found in the dataset, after accounting for signal drift.
-        The red contour shows the brain mask calculated using this reference b=0.
-      subtitle: Reference b=0 and brain mask
+    caption: Average b=0 that serves for reference in early preprocessing steps.
+    descriptions: The reference b=0 is obtained as the voxel-wise median across
+      all b=0 found in the dataset, after accounting for signal drift.
+      The red contour shows the brain mask calculated using this reference b=0.
+    subtitle: Reference b=0 and brain mask
 - name: About
   reportlets:
   - bids: {datatype: anat, desc: about, suffix: T1w}
