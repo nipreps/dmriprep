@@ -152,6 +152,7 @@ Diffusion data preprocessing
 
     summary = pe.Node(
         DiffusionSummary(
+            distortion_correction='Not implemented',
             pe_direction=metadata.get("PhaseEncodingDirection")),
         name='summary', mem_gb=DEFAULT_MEMORY_MIN_GB, run_without_submitting=True)
 
@@ -190,6 +191,7 @@ Diffusion data preprocessing
         mem_gb=DEFAULT_MEMORY_MIN_GB)
 
     workflow.connect([
+        (inputnode, ds_report_summary, [('dwi_file', 'in_file')]),
         (summary, ds_report_summary, [('out_report', 'in_file')]),
         (dwi_reference_wf, ds_report_validation, [
             ('outputnode.validation_report', 'in_file')]),
