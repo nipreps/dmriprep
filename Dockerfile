@@ -176,8 +176,6 @@ RUN echo "${VERSION}" > /src/dmriprep/dmriprep/VERSION && \
 RUN find $HOME -type d -exec chmod go=u {} + && \
     find $HOME -type f -exec chmod go=u {} +
 
-ENV IS_DOCKER_8395080871=1
-
 RUN ldconfig
 WORKDIR /tmp/
 ENTRYPOINT ["/usr/local/miniconda/bin/dmriprep"]
