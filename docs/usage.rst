@@ -41,10 +41,10 @@ The FreeSurfer license
 To obtain a FreeSurfer license, simply register for free at
 https://surfer.nmr.mgh.harvard.edu/registration.html.
 
-When using manually-prepared environments or Singularity, FreeSurfer will search 
-for a license key file first using the ``$FS_LICENSE`` environment variable and then 
-in the default path to the license key file (``$FREESURFER_HOME/license.txt``). 
-If using the ``--cleanenv`` flag and ``$FS_LICENSE`` is set, use ``--fs-license-file $FS_LICENSE`` 
+When using manually-prepared environments or Singularity, FreeSurfer will search
+for a license key file first using the ``$FS_LICENSE`` environment variable and then
+in the default path to the license key file (``$FREESURFER_HOME/license.txt``).
+If using the ``--cleanenv`` flag and ``$FS_LICENSE`` is set, use ``--fs-license-file $FS_LICENSE``
 to pass the license file location to *dMRIPrep*.
 
 It is possible to run the Docker container pointing the image to a local path
@@ -60,3 +60,23 @@ file on the host system: ::
         /data /out/out \
         participant \
         --ignore fieldmaps
+
+
+Usage tracking with Google Analytics
+------------------------------------
+
+To be able to assess usage of the software, we are recording each use of the
+CLI as an event in Google Analytics, using `popylar <https://popylar.github.io>`_
+
+For now, the only information that we are recording is the fact that the CLI was
+called and whether the call completed successfully. In addition, through Google
+Analytics, we will have access to very general information, such as the country
+and city in which the computer using the CLI was located and the time that it
+was used. At this time, we do not record any additional information, although in
+the future we may want to record statistics on the computational environment in
+which the CLI was called, such as the operating system.
+
+Opting out of this usage tracking can be done by calling the CLI with the
+`--notrack` flag::
+
+    dmriprep data/bids_root/ out/ participant -w work/ --notrack
