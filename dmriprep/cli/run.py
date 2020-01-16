@@ -225,7 +225,7 @@ def main():
         logger.info(
             "Your usage of dmriprep is being recorded using popylar (https://popylar.github.io/). ",  # noqa
             "For details, see https://nipreps.github.io/dmriprep/usage.html. ",
-            "To opt out, call dmriprep with a `--notrack` flag" )
+            "To opt out, call dmriprep with a `--notrack` flag")
         import popylar
         popylar.track_event(__ga_id__, 'run', 'cli_run')
 
