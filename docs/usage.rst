@@ -65,7 +65,9 @@ file on the host system: ::
 Usage tracking with Google Analytics
 ------------------------------------
 To be able to assess usage of the software, we are recording each use of the
-CLI as an event in Google Analytics, using `popylar <https://popylar.github.io>`_
+:abbr:`CLI (command-line interface)` as an event in Google Analytics,
+using `popylar <https://popylar.github.io>`__.
+``
 
 For now, the only information that we are recording is the fact that the CLI was
 called and whether the call completed successfully. In addition, through Google
