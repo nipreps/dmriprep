@@ -160,3 +160,50 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
 
 def _get_shub_version(singularity_url):
     return NotImplemented
+
+
+def splitext(fname):
+    """Splits filename and extension (.gz safe)
+    >>> splitext('some/file.nii.gz')
+    ('file', '.nii.gz')
+    >>> splitext('some/other/file.nii')
+    ('file', '.nii')
+    >>> splitext('otherext.tar.gz')
+    ('otherext', '.tar.gz')
+    >>> splitext('text.txt')
+    ('text', '.txt')
+    """
+    from pathlib import Path
+    basename = str(Path(fname).name)
+    stem = Path(basename.rstrip('.gz')).stem
+    return stem, basename[len(stem):]
+
+
+def _copy_any(src, dst):
+    import os
+    import gzip
+    from shutil import copyfileobj
+    from nipype.utils.filemanip import copyfile
+
+    src_isgz = src.endswith('.gz')
+    dst_isgz = dst.endswith('.gz')
+    if not src_isgz and not dst_isgz:
+        copyfile(src, dst, copy=True, use_hardlink=True)
+        return False  # Make sure we do not reuse the hardlink later
+
+    # Unlink target (should not exist)
+    if os.path.exists(dst):
+        os.unlink(dst)
+
+    src_open = gzip.open if src_isgz else open
+    with src_open(src, 'rb') as f_in:
+        with open(dst, 'wb') as f_out:
+            if dst_isgz:
+                # Remove FNAME header from gzip (poldracklab/fmriprep#1480)
+                gz_out = gzip.GzipFile('', 'wb', 9, f_out, 0.)
+                copyfileobj(f_in, gz_out)
+                gz_out.close()
+            else:
+                copyfileobj(f_in, f_out)
+
+    return True

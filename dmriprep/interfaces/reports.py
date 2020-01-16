@@ -4,13 +4,13 @@
 
 import os
 import time
-
+import pandas as pd
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec,
     File, Directory, InputMultiObject, Str, isdefined,
     SimpleInterface)
 from nipype.interfaces import freesurfer as fs
-
+from ..utils.viz import _iteration_summary_plot, before_after_images
 
 SUBJECT_TEMPLATE = """\
 \t<ul class="elem-desc">
@@ -121,3 +121,73 @@ class AboutSummary(SummaryInterface):
         return ABOUT_TEMPLATE.format(version=self.inputs.version,
                                      command=self.inputs.command,
                                      date=time.strftime("%Y-%m-%d %H:%M:%S %z"))
+
+
+class IterationSummaryInputSpec(BaseInterfaceInputSpec):
+    collected_motion_files = InputMultiObject(File(exists=True))
+
+
+class IterationSummaryOutputSpec(TraitedSpec):
+    iteration_summary_file = File(exists=True)
+    plot_file = File(exists=True)
+
+
+class IterationSummary(SummaryInterface):
+    input_spec = IterationSummaryInputSpec
+    output_spec = IterationSummaryOutputSpec
+
+    def _run_interface(self, runtime):
+        motion_files = self.inputs.collected_motion_files
+        output_fname = os.path.join(runtime.cwd, "iteration_summary.csv")
+        fig_output_fname = os.path.join(runtime.cwd, "iterdiffs.svg")
+        if not isdefined(motion_files):
+            return runtime
+
+        all_iters = []
+        for fnum, fname in enumerate(motion_files):
+            df = pd.read_csv(fname)
+            df['iter_num'] = fnum
+            path_parts = fname.split(os.sep)
+            itername = '' if 'iter' not in path_parts[-3] else path_parts[-3]
+            df['iter_name'] = itername
+            all_iters.append(df)
+        combined = pd.concat(all_iters, axis=0, ignore_index=True)
+
+        combined.to_csv(output_fname, index=False)
+        self._results['iteration_summary_file'] = output_fname
+
+        # Create a figure for the report
+        _iteration_summary_plot(combined, fig_output_fname)
+        self._results['plot_file'] = fig_output_fname
+
+        return runtime
+
+
+class HMCReportInputSpec(BaseInterfaceInputSpec):
+    iteration_summary = File(exists=True)
+    registered_images = InputMultiObject(File(exists=True))
+    original_images = InputMultiObject(File(exists=True))
+    model_predicted_images = InputMultiObject(File(exists=True))
+
+
+class HMCReportOutputSpec(SummaryOutputSpec):
+    plot_file = File(exists=True)
+
+
+class HMCReport(SummaryInterface):
+    input_spec = HMCReportInputSpec
+    output_spec = HMCReportOutputSpec
+
+    def _run_interface(self, runtime):
+        import imageio
+        images = []
+        for imagenum, (orig_file, aligned_file, model_file) in enumerate(zip(
+                self.inputs.original_images, self.inputs.registered_images,
+                self.inputs.model_predicted_images)):
+
+            images.extend(before_after_images(orig_file, aligned_file, model_file, imagenum))
+
+        out_file = os.path.join(runtime.cwd, "emc_reg.gif")
+        imageio.mimsave(out_file, images, fps=1)
+        self._results['plot_file'] = out_file
+        return runtime

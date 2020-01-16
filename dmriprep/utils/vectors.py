@@ -377,7 +377,7 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     return rotated_bvecs
 
 
-def reorient_bvecs_from_ras_b(ras_b, affines):
+def reorient_vecs_from_ras_b(rasb_file, affines, b0_threshold=B0_THRESHOLD):
     """
     Reorient the vectors from a rasb .tsv file.
     When correcting for motion, rotation of the diffusion-weighted volumes
@@ -385,22 +385,99 @@ def reorient_bvecs_from_ras_b(ras_b, affines):
     and MD, and also cause characteristic biases in tractography, unless the
     gradient directions are appropriately reoriented to compensate for this
     effect [Leemans2009]_.
-
     Parameters
     ----------
     rasb_file : str or os.pathlike
-        File path to a RAS-B gradient table. If rasb_file is provided,
-        then bvecs and bvals will be dismissed.
-
+        File path to a RAS-B gradient table.
     affines : list or ndarray of shape (n, 4, 4) or (n, 3, 3)
         Each entry in this list or array contain either an affine
         transformation (4,4) or a rotation matrix (3, 3).
         In both cases, the transformations encode the rotation that was applied
         to the image corresponding to one of the non-zero gradient directions.
+    Returns
+    -------
+    Gradients : ndarray of shape (4, n)
+        A reoriented ndarray where the first three columns correspond to each of
+        x, y, z directions of the bvecs, in R-A-S image orientation.
     """
     from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
+    from scipy.io import loadmat
 
-    ras_b_mat = np.genfromtxt(ras_b, delimiter='\t')
-    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=50)
+    ras_b_mat = np.genfromtxt(rasb_file, delimiter='\t')
 
-    return reorient_bvecs(gt, affines)
+    # Verify that number of non-B0 volumes corresponds to the number of affines.
+    # If not, raise an error.
+    if len(ras_b_mat[:, 3][ras_b_mat[:, 3] <= b0_threshold]) != len(affines):
+        b0_indices = np.where(ras_b_mat[:, 3] <= b0_threshold)[0].tolist()
+        for i in sorted(b0_indices, reverse=True):
+            del affines[i]
+        if len(ras_b_mat[:, 3][ras_b_mat[:, 3] > b0_threshold]) != len(affines):
+            raise ValueError('Affine transformations do not correspond to gradients')
+
+    # Build gradient table object
+    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:, 3], ras_b_mat[:, 0:3],
+                                         b0_threshold=b0_threshold)
+
+    # Reorient table
+    ras_trans = np.ones(shape=(4, 4))
+    ras_trans[0, 1] = -ras_trans[0, 1]
+    ras_trans[1, 0] = -ras_trans[1, 0]
+    ras_trans[2, 3] = -ras_trans[2, 3]
+    affines_ras = []
+    for aff in affines:
+        aff_mat = loadmat(aff)
+        M = np.zeros(shape=(4, 4))
+        M[0, 0] = aff_mat['AffineTransform_float_3_3'][0]
+        M[0, 1] = aff_mat['AffineTransform_float_3_3'][1]
+        M[0, 2] = aff_mat['AffineTransform_float_3_3'][2]
+        M[1, 0] = aff_mat['AffineTransform_float_3_3'][3]
+        M[1, 1] = aff_mat['AffineTransform_float_3_3'][4]
+        M[1, 2] = aff_mat['AffineTransform_float_3_3'][5]
+        M[2, 0] = aff_mat['AffineTransform_float_3_3'][6]
+        M[2, 1] = aff_mat['AffineTransform_float_3_3'][7]
+        M[2, 2] = aff_mat['AffineTransform_float_3_3'][8]
+        M[3, 3] = 1
+        M[0:3, 3] = aff_mat['fixed'].T
+        affines_ras.append(np.multiply(M, ras_trans))
+        del M
+
+    new_gt = reorient_bvecs(gt, affines_ras)
+
+    return np.hstack((new_gt.bvecs, new_gt.bvals[..., np.newaxis]))
+
+
+def _nonoverlapping_qspace_samples(prediction_bval, prediction_bvec,
+                                   all_bvals, all_bvecs, cutoff):
+    """Ensure that none of the training samples are too close to the sample to predict.
+    Parameters
+    """
+    min_bval = min(min(all_bvals), prediction_bval)
+    all_qvals = np.sqrt(all_bvals - min_bval)
+    prediction_qval = np.sqrt(prediction_bval - min_bval)
+
+    # Convert q values to percent of maximum qval
+    max_qval = max(max(all_qvals), prediction_qval)
+    all_qvals_scaled = all_qvals / max_qval * 100
+    prediction_qval_scaled = prediction_qval / max_qval * 100
+    scaled_qvecs = all_bvecs * all_qvals_scaled[:, np.newaxis]
+    scaled_prediction_qvec = prediction_bvec * prediction_qval_scaled
+
+    # Calculate the distance between the sampled qvecs and the prediction qvec
+    distances = np.linalg.norm(scaled_qvecs - scaled_prediction_qvec, axis=1)
+    distances_flip = np.linalg.norm(scaled_qvecs + scaled_prediction_qvec, axis=1)
+    ok_samples = (distances > cutoff) * (distances_flip > cutoff)
+
+    return ok_samples
+
+
+def _rasb_to_bvec_list(in_rasb):
+    import numpy as np
+    ras_b_mat = np.genfromtxt(in_rasb, delimiter='\t')
+    bvec = [vec for vec in ras_b_mat[:, 0:3] if not np.isclose(all(vec), 0)]
+    return list(bvec)
+
+
+def _rasb_to_bval_floats(in_rasb):
+    import numpy as np
+    ras_b_mat = np.genfromtxt(in_rasb, delimiter='\t')
+    return [float(bval) for bval in ras_b_mat[:, 3] if bval > 0]

@@ -1,12 +1,21 @@
 """Handling the gradient table."""
+import os
 from pathlib import Path
 import numpy as np
+import pandas as pd
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     SimpleInterface, BaseInterfaceInputSpec, TraitedSpec,
-    File, traits, isdefined
+    File, traits, isdefined, InputMultiObject
 )
-from ..utils.vectors import DiffusionGradientTable, B0_THRESHOLD, BVEC_NORM_EPSILON
+from ..utils.vectors import DiffusionGradientTable, reorient_vecs_from_ras_b, B0_THRESHOLD, BVEC_NORM_EPSILON
+from subprocess import Popen, PIPE
+
+def _undefined(objekt, name, default=None):
+    value = getattr(objekt, name)
+    if not isdefined(value):
+        return default
+    return value
 
 
 class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
@@ -92,8 +101,128 @@ class CheckGradientTable(SimpleInterface):
         return runtime
 
 
-def _undefined(objekt, name, default=None):
-    value = getattr(objekt, name)
-    if not isdefined(value):
-        return default
-    return value
+class _ReorientVectorsInputSpec(BaseInterfaceInputSpec):
+    rasb_file = File(exists=True)
+    affines = traits.List()
+    b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
+
+
+class _ReorientVectorsOutputSpec(TraitedSpec):
+    out_rasb = File(exists=True)
+
+
+class ReorientVectors(SimpleInterface):
+    """
+    Reorient Vectors
+    Example
+    -------
+    >>> os.chdir(tmpdir)
+    >>> oldrasb = str(data_dir / 'dwi.tsv')
+    >>> oldrasb_mat = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
+    >>> # The simple case: all affines are identity
+    >>> affine_list = np.zeros((len(oldrasb_mat[:, 3][oldrasb_mat[:, 3] != 0]), 4, 4))
+    >>> for i in range(4):
+    >>>     affine_list[:, i, i] = 1
+    >>>     reor_vecs = ReorientVectors()
+    >>> reor_vecs = ReorientVectors()
+    >>> reor_vecs.inputs.affines = affine_list
+    >>> reor_vecs.inputs.in_rasb = oldrasb
+    >>> res = reor_vecs.run()
+    >>> out_rasb = res.outputs.out_rasb
+    >>> out_rasb_mat = np.loadtxt(out_rasb, skiprows=1)
+    >>> npt.assert_equal(oldrasb_mat, out_rasb_mat)
+    True
+    """
+
+    input_spec = _ReorientVectorsInputSpec
+    output_spec = _ReorientVectorsOutputSpec
+
+    def _run_interface(self, runtime):
+        from nipype.utils.filemanip import fname_presuffix
+        reor_table = reorient_vecs_from_ras_b(
+            rasb_file=self.inputs.rasb_file,
+            affines=self.inputs.affines,
+            b0_threshold=self.inputs.b0_threshold,
+        )
+
+        cwd = Path(runtime.cwd).absolute()
+        reor_rasb_file = fname_presuffix(
+            self.inputs.rasb_file, use_ext=False, suffix='_reoriented.tsv',
+            newpath=str(cwd))
+        np.savetxt(str(reor_rasb_file), reor_table,
+                   delimiter='\t', header='\t'.join('RASB'),
+                   fmt=['%.8f'] * 3 + ['%g'])
+
+        self._results['out_rasb'] = reor_rasb_file
+        return runtime
+
+
+def get_fsl_motion_params(itk_file, src_file, ref_file, working_dir):
+    tmp_fsl_file = fname_presuffix(itk_file, newpath=working_dir,
+                                   suffix='_FSL.xfm', use_ext=False)
+    fsl_convert_cmd = "c3d_affine_tool " \
+        "-ref {ref_file} " \
+        "-src {src_file} " \
+        "-itk {itk_file} " \
+        "-ras2fsl -o {fsl_file}".format(
+            src_file=src_file, ref_file=ref_file, itk_file=itk_file,
+            fsl_file=tmp_fsl_file)
+    os.system(fsl_convert_cmd)
+    proc = Popen(['avscale', '--allparams', tmp_fsl_file, src_file], stdout=PIPE,
+                 stderr=PIPE)
+    stdout, _ = proc.communicate()
+
+    def get_measures(line):
+        line = line.strip().split()
+        return np.array([float(num) for num in line[-3:]])
+
+    lines = stdout.decode("utf-8").split("\n")
+    flip = np.array([1, -1, -1])
+    rotation = get_measures(lines[6]) * flip
+    translation = get_measures(lines[8]) * flip
+    scale = get_measures(lines[10])
+    shear = get_measures(lines[12])
+
+    return np.concatenate([scale, shear, rotation, translation])
+
+
+class CombineMotionsInputSpec(BaseInterfaceInputSpec):
+    transform_files = InputMultiObject(File(exists=True), mandatory=True,
+                                       desc='transform files from hmc')
+    source_files = InputMultiObject(File(exists=True), mandatory=True,
+                                    desc='Moving images')
+    ref_file = File(exists=True, mandatory=True, desc='Fixed Image')
+
+
+class CombineMotionsOututSpec(TraitedSpec):
+    motion_file = File(exists=True)
+    spm_motion_file = File(exists=True)
+
+
+class CombineMotions(SimpleInterface):
+    input_spec = CombineMotionsInputSpec
+    output_spec = CombineMotionsOututSpec
+
+    def _run_interface(self, runtime):
+        collected_motion = []
+        output_fname = os.path.join(runtime.cwd, "motion_params.csv")
+        output_spm_fname = os.path.join(runtime.cwd, "spm_movpar.txt")
+        ref_file = self.inputs.ref_file
+        for motion_file, src_file in zip(self.inputs.transform_files,
+                                         self.inputs.source_files):
+            collected_motion.append(
+                get_fsl_motion_params(motion_file, src_file, ref_file, runtime.cwd))
+
+        final_motion = np.row_stack(collected_motion)
+        cols = ["scaleX", "scaleY", "scaleZ", "shearXY", "shearXZ",
+                "shearYZ", "rotateX", "rotateY", "rotateZ", "shiftX", "shiftY",
+                "shiftZ"]
+        motion_df = pd.DataFrame(data=final_motion, columns=cols)
+        motion_df.to_csv(output_fname, index=False)
+        self._results['motion_file'] = output_fname
+
+        spmcols = motion_df[['shiftX', 'shiftY', 'shiftZ', 'rotateX', 'rotateY', 'rotateZ']]
+        self._results['spm_motion_file'] = output_spm_fname
+        np.savetxt(output_spm_fname, spmcols.values)
+
+        return runtime

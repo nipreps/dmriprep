@@ -190,3 +190,7 @@ def _get_wf_name(dwi_fname):
         ".", "_").replace(" ", "").replace("-", "_").replace("dwi", "wf")
 
     return name
+
+
+def _list_squeeze(in_list):
+    return [item[0] for item in in_list]
