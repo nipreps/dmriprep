@@ -221,16 +221,11 @@ def main():
 
     exec_env = os.name
 
-    # special variable set in the container
-    if os.getenv('IS_DOCKER_8395080871'):
-        exec_env = 'singularity'
-        cgroup = Path('/proc/1/cgroup')
-        if cgroup.exists() and 'docker' in cgroup.read_text():
-            exec_env = 'docker'
-            if os.getenv('DOCKER_VERSION_8395080871'):
-                exec_env = 'dmriprep-docker'
-
     if not opts.notrack:
+        logger.info(
+            "Your usage of dmriprep is being recorded using popylar (https://popylar.github.io/). ",  # noqa
+            "For details, see https://nipreps.github.io/dmriprep/usage.html. ",
+            "To opt out, call dmriprep with a `--notrack` flag")
         import popylar
         popylar.track_event(__ga_id__, 'run', 'cli_run')
 
