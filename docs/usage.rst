@@ -78,6 +78,6 @@ the future we may want to record statistics on the computational environment in
 which the CLI was called, such as the operating system.
 
 Opting out of this usage tracking can be done by calling the CLI with the
-`--notrack` flag::
+``--notrack`` flag::
 
     dmriprep data/bids_root/ out/ participant -w work/ --notrack
