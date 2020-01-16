@@ -1,3 +1,15 @@
+0.2.2 (January 15, 2020)
+========================
+A release to show the deployment process on the Sprint.
+
+  * ENH: b0 reference and skullstrip workflow (#50)
+  * FIX: Version on docker target of ``Makefile`` (#54)
+  * FIX/ENH: Remove sentry tracking and add popylar tracking. (#51)
+  * MAINT: Some small changes to the Dockerfile. (#53)
+  * ENH: Set up customized report specification (#34)
+  * MAINT: Use a local docker registry instead of load/save (#46)
+
+
 0.2.1 (December 12, 2019)
 =========================
 A bugfix release to test that versioned documentation is working.
