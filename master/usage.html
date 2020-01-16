@@ -104,6 +104,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#the-freesurfer-license">The FreeSurfer license</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-tracking-with-google-analytics">Usage tracking with Google Analytics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
@@ -398,6 +399,25 @@ file on the host system:</p>
     /data /out/out \
     participant \
     --ignore fieldmaps
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage-tracking-with-google-analytics">
+<h2>Usage tracking with Google Analytics<a class="headerlink" href="#usage-tracking-with-google-analytics" title="Permalink to this headline">¶</a></h2>
+<p>To be able to assess usage of the software, we are recording each use of the
+<abbr title="command-line interface">CLI</abbr> as an event in Google Analytics,
+using <a class="reference external" href="https://popylar.github.io">popylar</a>.
+``</p>
+<p>For now, the only information that we are recording is the fact that the CLI was
+called and whether the call completed successfully. In addition, through Google
+Analytics, we will have access to very general information, such as the country
+and city in which the computer using the CLI was located and the time that it
+was used. At this time, we do not record any additional information, although in
+the future we may want to record statistics on the computational environment in
+which the CLI was called, such as the operating system.</p>
+<p>Opting out of this usage tracking can be done by calling the CLI with the
+<code class="docutils literal notranslate"><span class="pre">--notrack</span></code> flag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dmriprep</span> <span class="n">data</span><span class="o">/</span><span class="n">bids_root</span><span class="o">/</span> <span class="n">out</span><span class="o">/</span> <span class="n">participant</span> <span class="o">-</span><span class="n">w</span> <span class="n">work</span><span class="o">/</span> <span class="o">--</span><span class="n">notrack</span>
 </pre></div>
 </div>
 </div>
