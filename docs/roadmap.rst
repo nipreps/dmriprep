@@ -66,5 +66,5 @@ In the long run we would like to explore the following processing steps:
 - Denoising (e.g., MP-PCA)
 - Rician bias correction
 - Gradient non-linearity correction
-- Bias field correction
+- B1 inhomogeneity field estimation and :abbr:`INU (intensity non-uniformity) correction`
 - Signal drift correction
