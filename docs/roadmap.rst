@@ -25,7 +25,7 @@ Version 0.4 (April 1st, 2020)
 
 #. Eddy current correction.
 
-    For this release, these two will be done doing something related to the
+    We will explore the possible adaptations of the HMC based on SHOREline above.
     SHOREline approach In cases where the data are "shelled", 3dSHORE will be
     used as the diffusion model. If the data are single-shell, we will use SFM
     as the diffusion model.
@@ -67,5 +67,4 @@ In the long run we would like to explore the following processing steps:
 - Bias field correction
 
 - Signal drift correction
-
 
