@@ -31,6 +31,9 @@ Version 0.4 (April 1st, 2020)
 #. Eddy current correction.
 
     We will explore the possible adaptations of the HMC based on SHOREline above.
+    In cases where the data are "shelled", 3dSHORE will be
+    used as the diffusion model. If the data are single-shell, we will use SFM
+    as the diffusion model.
 
 #. Identification of outliers.
 
@@ -63,14 +66,8 @@ Long-term plans
 In the long run we would like to explore the following processing steps:
 
 - Gibbs ringing (using DIPY's image-based implementation).
-
 - Denoising (e.g., MP-PCA)
-
 - Rician bias correction
-
 - Gradient non-linearity correction
-
 - Bias field correction
-
 - Signal drift correction
-
