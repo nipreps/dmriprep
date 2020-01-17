@@ -35,7 +35,7 @@ Version 0.4 (April 1st, 2020)
     used as the diffusion model. If the data are single-shell, we will use SFM
     as the diffusion model.
 
-#. Identification of outliers.
+#. Framewise-displacement calculation
 
     We will identify volumes that are outliers in terms of head motion, or other
     severe artifacts that make them likely candidates for exclusion from further
