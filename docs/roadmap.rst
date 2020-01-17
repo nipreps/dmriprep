@@ -21,6 +21,8 @@ Version 0.4 (April 1st, 2020)
 -----------------------------
 #. Head motion correction.
 
+    A SHOREline-based approach, ported from QSIPREP.
+
 #. Eddy current correction.
 
     For this release, these two will be done doing something related to the
@@ -65,6 +67,5 @@ In the long run we would like to explore the following processing steps:
 - Bias field correction
 
 - Signal drift correction
-
 
 
