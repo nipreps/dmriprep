@@ -40,7 +40,6 @@ was designed to provide the best software implementation for each state of
 preprocessing, and will be updated as newer and better neuroimaging software
 becomes available.
 
-dMRIPrep performs basic preprocessing steps (:abbr:`HMC (Head-Motion Correction)`,
-:abbr:`SDC (Susceptibility-derived Distortion Correction)`,
-:abbr:`ECC (Eddy-Currents Correction)`,  etc.) providing
-outputs that can be easily submitted to a variety of diffusion models.
+dMRIPrep performs basic preprocessing steps such as head-motion correction,
+susceptibility-derived distortion correction, eddy current correction, etc.
+providing outputs that can be easily submitted to a variety of diffusion models.
