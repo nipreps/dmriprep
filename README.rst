@@ -40,6 +40,6 @@ was designed to provide the best software implementation for each state of
 preprocessing, and will be updated as newer and better neuroimaging software
 becomes available.
 
-dMRIPrep performs basic preprocessing steps (head motion correction,
+dMRIPrep performs basic preprocessing steps (:abbr:`HMC (Head-Motion Correction)`,
 susceptibility distortion correction, eddy current correction,  etc.) providing
 outputs that can be easily submitted to a variety of tractography algorithms.
