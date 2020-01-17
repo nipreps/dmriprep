@@ -43,7 +43,6 @@ Version 0.4 (April 1st, 2020)
 
 Version 0.5 (May 1st, 2020)
 ----------------------------
-
 #. Registration between dMRI and T1w image.
 
 #. Identification of outlier measurements (+ imputation?)
@@ -54,7 +53,6 @@ earlier releases.
 
 Version 1.0 (Targetted for September 2020)
 ------------------------------------------
-
 After integrating the above steps, we will spend the time leading to a 1.0
 testing the software on various datasets, evaluating and validating the
 resulting derivatives.
@@ -62,7 +60,6 @@ resulting derivatives.
 
 Long-term plans
 ---------------
-
 In the long run we would like to explore the following processing steps:
 
 - Gibbs ringing (using DIPY's image-based implementation).
