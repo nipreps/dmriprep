@@ -41,5 +41,6 @@ preprocessing, and will be updated as newer and better neuroimaging software
 becomes available.
 
 dMRIPrep performs basic preprocessing steps (:abbr:`HMC (Head-Motion Correction)`,
-susceptibility distortion correction, eddy current correction,  etc.) providing
+:abbr:`SDC (Susceptibility-derived Distortion Correction)`,
+:abbr:`ECC (Eddy-Currents Correction)`,  etc.) providing
 outputs that can be easily submitted to a variety of tractography algorithms.
