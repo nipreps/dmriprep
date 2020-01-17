@@ -17,20 +17,26 @@ At this point, the processing pipeline will include the following major steps:
 #. Susceptibility distortion correction.
     Using `SDCFlows <https://github.com/poldracklab/sdcflows>`__
 
+#. Signal drift estimation
+    Leveraging the :math:`b=0` extraction, rescaling and averaging that was merged in `#50 <https://github.com/nipreps/dmriprep/pull/50>`__
+
 Version 0.4 (April 1st, 2020)
 -----------------------------
 #. Head motion correction.
 
-    A SHOREline-based approach, ported from QSIPREP.
+    A SHOREline-based approach, ported from QSIPREP. In cases where the data are
+    "shelled", 3dSHORE will be used as the diffusion model. If the data are
+    single-shell, we will use SFM as the diffusion model.
 
 #. Eddy current correction.
 
     We will explore the possible adaptations of the HMC based on SHOREline above.
-    SHOREline approach In cases where the data are "shelled", 3dSHORE will be
-    used as the diffusion model. If the data are single-shell, we will use SFM
-    as the diffusion model.
 
 #. Identification of outliers.
+
+    We will identify volumes that are outliers in terms of head motion, or other
+    severe artifacts that make them likely candidates for exclusion from further
+    analysis.
 
 Version 0.5 (May 1st, 2020)
 ----------------------------
