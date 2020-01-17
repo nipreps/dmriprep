@@ -43,4 +43,4 @@ becomes available.
 dMRIPrep performs basic preprocessing steps (:abbr:`HMC (Head-Motion Correction)`,
 :abbr:`SDC (Susceptibility-derived Distortion Correction)`,
 :abbr:`ECC (Eddy-Currents Correction)`,  etc.) providing
-outputs that can be easily submitted to a variety of tractography algorithms.
+outputs that can be easily submitted to a variety of diffusion models.
