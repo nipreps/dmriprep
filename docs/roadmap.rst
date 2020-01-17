@@ -15,7 +15,7 @@ contain a full pipeline of processing from a raw BIDS dataset to analyzable data
 At this point, the processing pipeline will include the following major steps:
 
 #. Susceptibility distortion correction.
-    Using SDC flows
+    Using `SDCFlows <https://github.com/poldracklab/sdcflows>`__
 
 Version 0.4 (April 1st, 2020)
 -----------------------------
@@ -65,7 +65,6 @@ In the long run we would like to explore the following processing steps:
 - Bias field correction
 
 - Signal drift correction
-
 
 
 
