@@ -25,6 +25,7 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -89,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development road map</a></li>
 </ul>
 
             
@@ -181,19 +183,14 @@ virtually any dataset, ensuring high-quality preprocessing without manual interv
 dMRIPrep equips neuroscientists with an easy-to-use and transparent preprocessing
 workflow, which can help ensure the validity of inference and the interpretability
 of results.</p>
-<p>The workflow is based on <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a> and encompases a large
-set of tools from well-known neuroimaging packages, including
-<a class="reference external" href="https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/">FSL</a>,
-<a class="reference external" href="https://stnava.github.io/ANTs/">ANTs</a>,
-<a class="reference external" href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer</a>,
-<a class="reference external" href="https://afni.nimh.nih.gov/">AFNI</a>,
-and <a class="reference external" href="https://nilearn.github.io/">Nilearn</a>.
-This pipeline was designed to provide the best software implementation for each state of
-preprocessing, and will be updated as newer and better neuroimaging software becomes
-available.</p>
-<p>dMRIPrep performs basic preprocessing steps (coregistration, normalization, unwarping,
-segmentation, skullstripping etc.) providing outputs that can be
-easily submitted to a variety of tractography algorithms.</p>
+<p>The workflow is based on <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a> and
+encompases a large set of tools from other neuroimaging package. This pipeline
+was designed to provide the best software implementation for each state of
+preprocessing, and will be updated as newer and better neuroimaging software
+becomes available.</p>
+<p>dMRIPrep performs basic preprocessing steps such as head-motion correction,
+susceptibility-derived distortion correction, eddy current correction, etc.
+providing outputs that can be easily submitted to a variety of diffusion models.</p>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -254,6 +251,14 @@ easily submitted to a variety of tractography algorithms.</p>
 <li class="toctree-l2"><a class="reference internal" href="changes.html#a0-september-05-2019">0.1.1a0 (September 05, 2019)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changes.html#september-05-2019">0.1.1 (September 05, 2019)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changes.html#november-21-2018">0.1.0 (November 21, 2018)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development road map</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#version-0-3-targetted-for-march-1st-2020">Version 0.3 (Targetted for March 1st, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#version-0-4-april-1st-2020">Version 0.4 (April 1st, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#version-0-5-may-1st-2020">Version 0.5 (May 1st, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#version-1-0-targetted-for-september-2020">Version 1.0 (Targetted for September 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#long-term-plans">Long-term plans</a></li>
 </ul>
 </li>
 </ul>
