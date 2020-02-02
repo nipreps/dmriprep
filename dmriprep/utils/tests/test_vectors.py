@@ -89,3 +89,12 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     # Miscellaneous tests
     with pytest.raises(ValueError):
         dgt.to_filename('path', filetype='mrtrix')
+
+def test_bval_scheme(dipy_test_data):
+    '''basic smoke test'''
+    bvals = dipy_test_data['bvals']
+    
+    bval_scheme = v.BVALScheme(bvals = bvals)
+    
+    print(bval_scheme)
+    assert True ## just see if if can get here..

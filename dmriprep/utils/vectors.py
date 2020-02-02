@@ -4,6 +4,7 @@ from itertools import permutations
 import nibabel as nb
 import numpy as np
 from dipy.core.gradients import round_bvals
+from sklearn.cluster import KMeans
 
 B0_THRESHOLD = 50
 BVEC_NORM_EPSILON = 0.1
