@@ -182,29 +182,17 @@ class DiffusionGradientTable:
 class BVALScheme:
     """Data structure for bval scheme."""
     
-    def __init__(self, bvals = None, rasb_file = None, shell_diff_thres = SHELL_DIFF_THRES):
+    def __init__(self, bvals = None, shell_diff_thres = SHELL_DIFF_THRES):
         """
         Parse the available bvals into shells
         
         Parameters
         ----------
-        bvals : str or os.pathlike or numpy.ndarray
-            File path of the b-values.
-        rasb_file : str or os.pathlike
-            File path to a RAS-B gradient table. If rasb_file is provided,
-                then bvecs and bvals will be dismissed.
+        bvals : numpy.ndarray of b-values
         """
-        self._bvals = None
-        self._shell_diff_thres = shell_diff_thres
         
-        if rasb_file is not None:
-            if isinstance(rasb_file, (str, Path)):
-                gradients = np.loadtxt(gradients, skiprows=1)
-                self._bvals = np.squeeze(gradients[..., -1])
-        elif bvals is not None:
-            if isinstance(bvals, (str, Path)):
-                bvals = np.loadtxt(str(bvals)).flatten()
-            self._bvals = np.array(bvals)
+        self._shell_diff_thres = shell_diff_thres
+        self._bvals = np.array(bvals)
             
         self._kclust = self._k_cluster_result()
         

@@ -97,4 +97,23 @@ def test_bval_scheme(dipy_test_data):
     bval_scheme = v.BVALScheme(bvals = bvals)
     
     print(bval_scheme)
-    assert True ## just see if if can get here..
+    assert bval_scheme.n_shells == 3 ## just see if if can get here..
+    
+def test_bval_when_only_b0_present():
+    ''' all the weird schemes '''
+    res_a = v.BVALScheme(bvals = np.array([0,0]))
+    print(res_a)
+    assert res_a.n_b0 == 2
+    assert res_a.n_shells == 0
+
+def test_more_complez_bval():
+    bvals_b = [5, 300, 300, 300, 300, 300, 305, 1005, 995, 1000, 1000, 1005, 1000,
+               1000, 1005, 995, 1000, 1005, 5, 995, 1000, 1000, 995, 1005, 995, 1000,
+               995, 995, 2005, 2000, 2005, 2005, 1995, 2000, 2005, 2000, 1995, 2005, 5,
+               1995, 2005, 1995, 1995, 2005, 2005, 1995, 2000, 2000, 2000, 1995, 2000, 2000,
+               2005, 2005, 1995, 2005, 2005, 1990, 1995, 1995, 1995, 2005, 2000, 1990, 2010, 5]
+    res_b = v.BVALScheme(bvals = np.array(bvals_b))
+    print(res_b)
+    assert res_b.n_b0 == 4
+    assert res_b.n_shells == 3
+    
