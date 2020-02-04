@@ -2,14 +2,17 @@
 import os
 from pathlib import Path
 import numpy as np
-import pandas as pd
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    SimpleInterface, BaseInterfaceInputSpec, TraitedSpec,
-    File, traits, isdefined, InputMultiObject
+    SimpleInterface,
+    BaseInterfaceInputSpec,
+    TraitedSpec,
+    File,
+    traits,
+    isdefined,
 )
-from ..utils.vectors import DiffusionGradientTable, reorient_vecs_from_ras_b, B0_THRESHOLD, BVEC_NORM_EPSILON
-from subprocess import Popen, PIPE
+from ..utils.vectors import DiffusionGradientTable, B0_THRESHOLD, BVEC_NORM_EPSILON
+
 
 def _undefined(objekt, name, default=None):
     value = getattr(objekt, name)
@@ -20,9 +23,9 @@ def _undefined(objekt, name, default=None):
 
 class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
     dwi_file = File(exists=True, mandatory=True)
-    in_bvec = File(exists=True, xor=['in_rasb'])
-    in_bval = File(exists=True, xor=['in_rasb'])
-    in_rasb = File(exists=True, xor=['in_bval', 'in_bvec'])
+    in_bvec = File(exists=True, xor=["in_rasb"])
+    in_bval = File(exists=True, xor=["in_rasb"])
+    in_rasb = File(exists=True, xor=["in_bval", "in_bvec"])
     b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
     bvec_norm_epsilon = traits.Float(BVEC_NORM_EPSILON, usedefault=True)
     b_scale = traits.Bool(True, usedefault=True)
@@ -72,36 +75,37 @@ class CheckGradientTable(SimpleInterface):
     output_spec = _CheckGradientTableOutputSpec
 
     def _run_interface(self, runtime):
-        rasb_file = _undefined(self.inputs, 'in_rasb')
+        rasb_file = _undefined(self.inputs, "in_rasb")
 
         table = DiffusionGradientTable(
             self.inputs.dwi_file,
-            bvecs=_undefined(self.inputs, 'in_bvec'),
-            bvals=_undefined(self.inputs, 'in_bval'),
+            bvecs=_undefined(self.inputs, "in_bvec"),
+            bvals=_undefined(self.inputs, "in_bval"),
             rasb_file=rasb_file,
             b_scale=self.inputs.b_scale,
             bvec_norm_epsilon=self.inputs.bvec_norm_epsilon,
             b0_threshold=self.inputs.b0_threshold,
         )
         pole = table.pole
-        self._results['pole'] = tuple(pole)
-        self._results['full_sphere'] = np.all(pole == 0.0)
-        self._results['b0_ixs'] = np.where(table.b0mask)[0].tolist()
+        self._results["pole"] = tuple(pole)
+        self._results["full_sphere"] = np.all(pole == 0.0)
+        self._results["b0_ixs"] = np.where(table.b0mask)[0].tolist()
 
         cwd = Path(runtime.cwd).absolute()
         if rasb_file is None:
             rasb_file = fname_presuffix(
-                self.inputs.dwi_file, use_ext=False, suffix='.tsv',
-                newpath=str(cwd))
+                self.inputs.dwi_file, use_ext=False, suffix=".tsv", newpath=str(cwd)
+            )
             table.to_filename(rasb_file)
-        self._results['out_rasb'] = rasb_file
-        table.to_filename('%s/dwi' % cwd, filetype='fsl')
-        self._results['out_bval'] = str(cwd / 'dwi.bval')
-        self._results['out_bvec'] = str(cwd / 'dwi.bvec')
+        self._results["out_rasb"] = rasb_file
+        table.to_filename("%s/dwi" % cwd, filetype="fsl")
+        self._results["out_bval"] = str(cwd / "dwi.bval")
+        self._results["out_bvec"] = str(cwd / "dwi.bvec")
         return runtime
 
 
 class _ReorientVectorsInputSpec(BaseInterfaceInputSpec):
+    dwi_file = File(exists=True)
     rasb_file = File(exists=True)
     affines = traits.List()
     b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
@@ -130,7 +134,7 @@ class ReorientVectors(SimpleInterface):
     >>> res = reor_vecs.run()
     >>> out_rasb = res.outputs.out_rasb
     >>> out_rasb_mat = np.loadtxt(out_rasb, skiprows=1)
-    >>> npt.assert_equal(oldrasb_mat, out_rasb_mat)
+    >>> assert oldrasb_mat == out_rasb_mat
     True
     """
 
@@ -139,90 +143,29 @@ class ReorientVectors(SimpleInterface):
 
     def _run_interface(self, runtime):
         from nipype.utils.filemanip import fname_presuffix
-        reor_table = reorient_vecs_from_ras_b(
+
+        table = DiffusionGradientTable(
+            dwi_file=self.inputs.dwi_file,
             rasb_file=self.inputs.rasb_file,
-            affines=self.inputs.affines,
-            b0_threshold=self.inputs.b0_threshold,
+            transforms=self.inputs.affines,
         )
+        table.generate_vecval()
+        reor_table = table.reorient_rasb()
 
         cwd = Path(runtime.cwd).absolute()
         reor_rasb_file = fname_presuffix(
-            self.inputs.rasb_file, use_ext=False, suffix='_reoriented.tsv',
-            newpath=str(cwd))
-        np.savetxt(str(reor_rasb_file), reor_table,
-                   delimiter='\t', header='\t'.join('RASB'),
-                   fmt=['%.8f'] * 3 + ['%g'])
+            self.inputs.rasb_file,
+            use_ext=False,
+            suffix="_reoriented.tsv",
+            newpath=str(cwd),
+        )
+        np.savetxt(
+            str(reor_rasb_file),
+            reor_table,
+            delimiter="\t",
+            header="\t".join("RASB"),
+            fmt=["%.8f"] * 3 + ["%g"],
+        )
 
-        self._results['out_rasb'] = reor_rasb_file
-        return runtime
-
-
-def get_fsl_motion_params(itk_file, src_file, ref_file, working_dir):
-    tmp_fsl_file = fname_presuffix(itk_file, newpath=working_dir,
-                                   suffix='_FSL.xfm', use_ext=False)
-    fsl_convert_cmd = "c3d_affine_tool " \
-        "-ref {ref_file} " \
-        "-src {src_file} " \
-        "-itk {itk_file} " \
-        "-ras2fsl -o {fsl_file}".format(
-            src_file=src_file, ref_file=ref_file, itk_file=itk_file,
-            fsl_file=tmp_fsl_file)
-    os.system(fsl_convert_cmd)
-    proc = Popen(['avscale', '--allparams', tmp_fsl_file, src_file], stdout=PIPE,
-                 stderr=PIPE)
-    stdout, _ = proc.communicate()
-
-    def get_measures(line):
-        line = line.strip().split()
-        return np.array([float(num) for num in line[-3:]])
-
-    lines = stdout.decode("utf-8").split("\n")
-    flip = np.array([1, -1, -1])
-    rotation = get_measures(lines[6]) * flip
-    translation = get_measures(lines[8]) * flip
-    scale = get_measures(lines[10])
-    shear = get_measures(lines[12])
-
-    return np.concatenate([scale, shear, rotation, translation])
-
-
-class CombineMotionsInputSpec(BaseInterfaceInputSpec):
-    transform_files = InputMultiObject(File(exists=True), mandatory=True,
-                                       desc='transform files from hmc')
-    source_files = InputMultiObject(File(exists=True), mandatory=True,
-                                    desc='Moving images')
-    ref_file = File(exists=True, mandatory=True, desc='Fixed Image')
-
-
-class CombineMotionsOututSpec(TraitedSpec):
-    motion_file = File(exists=True)
-    spm_motion_file = File(exists=True)
-
-
-class CombineMotions(SimpleInterface):
-    input_spec = CombineMotionsInputSpec
-    output_spec = CombineMotionsOututSpec
-
-    def _run_interface(self, runtime):
-        collected_motion = []
-        output_fname = os.path.join(runtime.cwd, "motion_params.csv")
-        output_spm_fname = os.path.join(runtime.cwd, "spm_movpar.txt")
-        ref_file = self.inputs.ref_file
-        for motion_file, src_file in zip(self.inputs.transform_files,
-                                         self.inputs.source_files):
-            collected_motion.append(
-                get_fsl_motion_params(motion_file, src_file, ref_file, runtime.cwd))
-
-        final_motion = np.row_stack(collected_motion)
-        cols = ["scaleX", "scaleY", "scaleZ", "shearXY", "shearXZ",
-                "shearYZ", "rotateX", "rotateY", "rotateZ", "shiftX", "shiftY",
-                "shiftZ"]
-        motion_df = pd.DataFrame(data=final_motion, columns=cols)
-        motion_df.to_csv(output_fname, index=False)
-        self._results['motion_file'] = output_fname
-
-        spmcols = motion_df[['shiftX', 'shiftY', 'shiftZ', 'rotateX', 'rotateY', 'rotateZ']]
-        self._results['spm_motion_file'] = output_spm_fname
-        np.savetxt(output_spm_fname, spmcols.values)
-
+        self._results["out_rasb"] = reor_rasb_file
         return runtime
