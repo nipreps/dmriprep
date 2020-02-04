@@ -6,24 +6,37 @@ from nipype import logging
 from nipype.interfaces import ants
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File, isdefined,
-    InputMultiObject, OutputMultiObject, CommandLine
+    traits,
+    TraitedSpec,
+    BaseInterfaceInputSpec,
+    SimpleInterface,
+    File,
+    isdefined,
+    InputMultiObject,
+    OutputMultiObject,
+    CommandLine,
 )
-from ..utils.images import extract_b0, rescale_b0, median, quick_load_images, match_transforms, prune_b0s_from_dwis
+from ..utils.images import (
+    extract_b0,
+    rescale_b0,
+    median,
+    quick_load_images,
+    match_transforms,
+    prune_b0s_from_dwis,
+)
 from ..utils.vectors import _nonoverlapping_qspace_samples
 
 
-LOGGER = logging.getLogger('nipype.interface')
+LOGGER = logging.getLogger("nipype.interface")
 
 
 class _ExtractB0InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc='dwi file')
-    b0_ixs = traits.List(traits.Int, mandatory=True,
-                         desc='Index of b0s')
+    in_file = File(exists=True, mandatory=True, desc="dwi file")
+    b0_ixs = traits.List(traits.Int, mandatory=True, desc="Index of b0s")
 
 
 class _ExtractB0OutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='b0 file')
+    out_file = File(exists=True, desc="b0 file")
 
 
 class ExtractB0(SimpleInterface):
@@ -44,21 +57,20 @@ class ExtractB0(SimpleInterface):
     output_spec = _ExtractB0OutputSpec
 
     def _run_interface(self, runtime):
-        self._results['out_file'] = extract_b0(
-            self.inputs.in_file,
-            self.inputs.b0_ixs,
-            newpath=runtime.cwd)
+        self._results["out_file"] = extract_b0(
+            self.inputs.in_file, self.inputs.b0_ixs, newpath=runtime.cwd
+        )
         return runtime
 
 
 class _RescaleB0InputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc='b0s file')
-    mask_file = File(exists=True, mandatory=True, desc='mask file')
+    in_file = File(exists=True, mandatory=True, desc="b0s file")
+    mask_file = File(exists=True, mandatory=True, desc="mask file")
 
 
 class _RescaleB0OutputSpec(TraitedSpec):
-    out_ref = File(exists=True, desc='One median b0 file')
-    out_b0s = File(exists=True, desc='series of rescaled b0 volumes')
+    out_ref = File(exists=True, desc="One average b0 file")
+    out_b0s = File(exists=True, desc="series of rescaled b0 volumes")
 
 
 class RescaleB0(SimpleInterface):
@@ -79,15 +91,10 @@ class RescaleB0(SimpleInterface):
     output_spec = _RescaleB0OutputSpec
 
     def _run_interface(self, runtime):
-        self._results['out_b0s'] = rescale_b0(
-            self.inputs.in_file,
-            self.inputs.mask_file,
-            newpath=runtime.cwd
+        self._results["out_b0s"] = rescale_b0(
+            self.inputs.in_file, self.inputs.mask_file, newpath=runtime.cwd
         )
-        self._results['out_ref'] = median(
-            self._results['out_b0s'],
-            newpath=runtime.cwd
-        )
+        self._results["out_ref"] = median(self._results["out_b0s"], newpath=runtime.cwd)
         return runtime
 
 
@@ -106,9 +113,9 @@ class MatchTransforms(SimpleInterface):
     output_spec = MatchTransformsOutputSpec
 
     def _run_interface(self, runtime):
-        self._results['transforms'] = match_transforms(self.inputs.dwi_files,
-                                                       self.inputs.transforms,
-                                                       self.inputs.b0_indices)
+        self._results["transforms"] = match_transforms(
+            self.inputs.dwi_files, self.inputs.transforms, self.inputs.b0_indices
+        )
         return runtime
 
 
@@ -117,7 +124,7 @@ class N3BiasFieldCorrection(ants.N4BiasFieldCorrection):
 
 
 class ImageMathInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, position=3, argstr='%s')
+    in_file = File(exists=True, mandatory=True, position=3, argstr="%s")
     dimension = traits.Enum(3, 2, 4, usedefault=True, argstr="%d", position=0)
     out_file = File(argstr="%s", genfile=True, position=1)
     operation = traits.Str(argstr="%s", position=2)
@@ -132,10 +139,10 @@ class ImageMathOutputSpec(TraitedSpec):
 class ImageMath(CommandLine):
     input_spec = ImageMathInputSpec
     output_spec = ImageMathOutputSpec
-    _cmd = 'ImageMath'
+    _cmd = "ImageMath"
 
     def _gen_filename(self, name):
-        if name == 'out_file':
+        if name == "out_file":
             output = self.inputs.out_file
             if not isdefined(output):
                 _, fname, ext = split_filename(self.inputs.in_file)
@@ -145,7 +152,7 @@ class ImageMath(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_filename('out_file'))
+        outputs["out_file"] = os.path.abspath(self._gen_filename("out_file"))
         return outputs
 
 
@@ -158,6 +165,8 @@ class SignalPredictionInputSpec(BaseInterfaceInputSpec):
     bval_to_predict = traits.Float()
     minimal_q_distance = traits.Float(2.0, usedefault=True)
     b0_indices = traits.List()
+    prune_b0s = traits.Bool(False, usedefault=True)
+    model_name = traits.Str(default_value="sfm", userdefault=True)
 
 
 class SignalPredictionOutputSpec(TraitedSpec):
@@ -167,13 +176,16 @@ class SignalPredictionOutputSpec(TraitedSpec):
 class SignalPrediction(SimpleInterface):
     """
     """
+
     input_spec = SignalPredictionInputSpec
     output_spec = SignalPredictionOutputSpec
 
-    def _run_interface(self, runtime, model_name='tensor'):
+    def _run_interface(self, runtime):
         import warnings
+
         warnings.filterwarnings("ignore")
         from dipy.core.gradients import gradient_table_from_bvals_bvecs
+
         pred_vec = self.inputs.bvec_to_predict
         pred_val = self.inputs.bval_to_predict
 
@@ -181,19 +193,30 @@ class SignalPrediction(SimpleInterface):
         mask_img = nb.load(self.inputs.b0_mask)
         mask_array = mask_img.get_data() > 1e-6
 
-        all_images = prune_b0s_from_dwis(self.inputs.aligned_dwi_files, self.inputs.b0_indices)
+        if self.inputs.prune_b0s is True:
+            all_images = prune_b0s_from_dwis(
+                self.inputs.aligned_dwi_files, self.inputs.b0_indices
+            )
+        else:
+            all_images = self.inputs.aligned_dwi_files
 
-        # Load the vectors
-        ras_b_mat = np.genfromtxt(self.inputs.aligned_vectors, delimiter='\t')
-        all_bvecs = np.row_stack([np.zeros(3), np.delete(ras_b_mat[:, 0:3], self.inputs.b0_indices, axis=0)])
-        all_bvals = np.concatenate([np.zeros(1), np.delete(ras_b_mat[:, 3], self.inputs.b0_indices)])
+            # Load the vectors
+        ras_b_mat = np.genfromtxt(self.inputs.aligned_vectors, delimiter="\t")
+        all_bvecs = np.row_stack(
+            [np.zeros(3), np.delete(ras_b_mat[:, 0:3], self.inputs.b0_indices, axis=0)]
+        )
+        all_bvals = np.concatenate(
+            [np.zeros(1), np.delete(ras_b_mat[:, 3], self.inputs.b0_indices)]
+        )
 
         # Which sample points are too close to the one we want to predict?
         training_mask = _nonoverlapping_qspace_samples(
-            pred_val, pred_vec, all_bvals, all_bvecs, self.inputs.minimal_q_distance)
+            pred_val, pred_vec, all_bvals, all_bvecs, self.inputs.minimal_q_distance
+        )
         training_indices = np.flatnonzero(training_mask[1:])
         training_image_paths = [self.inputs.b0_median] + [
-            all_images[idx] for idx in training_indices]
+            all_images[idx] for idx in training_indices
+        ]
         training_bvecs = all_bvecs[training_mask]
         training_bvals = all_bvals[training_mask]
         # print("Training with volumes: {}".format(str(training_indices)))
@@ -202,7 +225,9 @@ class SignalPrediction(SimpleInterface):
         training_data = quick_load_images(training_image_paths)
 
         # Build gradient table object
-        training_gtab = gradient_table_from_bvals_bvecs(training_bvals, training_bvecs, b0_threshold=0)
+        training_gtab = gradient_table_from_bvals_bvecs(
+            training_bvals, training_bvecs, b0_threshold=0
+        )
 
         # Checked shelledness
         if len(np.unique(training_gtab.bvals)) > 2:
@@ -211,53 +236,131 @@ class SignalPrediction(SimpleInterface):
             is_shelled = False
 
         # Get the vector for the desired coordinate
-        prediction_gtab = gradient_table_from_bvals_bvecs(np.array(pred_val)[None], np.array(pred_vec)[None, :],
-                                                          b0_threshold=0)
+        prediction_gtab = gradient_table_from_bvals_bvecs(
+            np.array(pred_val)[None], np.array(pred_vec)[None, :], b0_threshold=0
+        )
 
-        if is_shelled and model_name == '3dshore':
+        if is_shelled and self.inputs.model_name == "3dshore":
             from dipy.reconst.shore import ShoreModel
+
             radial_order = 6
             zeta = 700
             lambdaN = 1e-8
             lambdaL = 1e-8
-            estimator_shore = ShoreModel(training_gtab, radial_order=radial_order,
-                             zeta=zeta, lambdaN=lambdaN, lambdaL=lambdaL)
+            estimator_shore = ShoreModel(
+                training_gtab,
+                radial_order=radial_order,
+                zeta=zeta,
+                lambdaN=lambdaN,
+                lambdaL=lambdaL,
+            )
             estimator_shore_fit = estimator_shore.fit(training_data, mask=mask_array)
             pred_shore_fit = estimator_shore_fit.predict(prediction_gtab)
-            pred_shore_fit_file = os.path.join(runtime.cwd,
-                                               "predicted_shore_b%d_%.2f_%.2f_%.2f.nii.gz" %
-                                               ((pred_val,) + tuple(np.round(pred_vec, decimals=2))))
+            pred_shore_fit_file = os.path.join(
+                runtime.cwd,
+                "predicted_shore_b%d_%.2f_%.2f_%.2f.nii.gz"
+                % ((pred_val,) + tuple(np.round(pred_vec, decimals=2))),
+            )
             output_data = pred_shore_fit[..., 0]
-            nb.Nifti1Image(output_data, mask_img.affine, mask_img.header).to_filename(pred_shore_fit_file)
-        elif model_name == 'sfm' and not is_shelled:
+            nb.Nifti1Image(output_data, mask_img.affine, mask_img.header).to_filename(
+                pred_shore_fit_file
+            )
+        elif self.inputs.model_name == "sfm":
+            from sklearn.linear_model import Ridge
             import dipy.reconst.sfm as sfm
             from dipy.data import default_sphere
 
-            estimator_sfm = sfm.SparseFascicleModel(training_gtab, sphere=default_sphere,
-                                                    l1_ratio=0.5, alpha=0.001)
+            estimator_sfm = sfm.SparseFascicleModel(
+                training_gtab,
+                sphere=default_sphere,
+                solver=Ridge(alpha=0.001, solver="lsqr"),
+            )
             estimator_sfm_fit = estimator_sfm.fit(training_data, mask=mask_array)
-            pred_sfm_fit = estimator_sfm_fit.predict(prediction_gtab)[..., 0]
+            pred_sfm_fit = estimator_sfm_fit.predict(prediction_gtab)
             pred_sfm_fit[~mask_array] = 0
-            pred_fit_file = os.path.join(runtime.cwd, "predicted_sfm_b%d_%.2f_%.2f_%.2f.npy" %
-            ((pred_val,) + tuple(np.round(pred_vec, decimals=2))))
+            pred_fit_file = os.path.join(
+                runtime.cwd,
+                "predicted_sfm_b%d_%.2f_%.2f_%.2f.npy"
+                % ((pred_val,) + tuple(np.round(pred_vec, decimals=2))),
+            )
             np.save(pred_fit_file, pred_sfm_fit)
-            pred_fit_file = os.path.join(runtime.cwd, "predicted_sfm_b%d_%.2f_%.2f_%.2f.nii.gz" %
-            ((pred_val,) + tuple(np.round(pred_vec, decimals=2))))
-            nb.Nifti1Image(pred_sfm_fit, mask_img.affine, mask_img.header).to_filename(pred_fit_file)
-        else:
+            pred_fit_file = os.path.join(
+                runtime.cwd,
+                "predicted_sfm_b%d_%.2f_%.2f_%.2f.nii.gz"
+                % ((pred_val,) + tuple(np.round(pred_vec, decimals=2))),
+            )
+            nb.Nifti1Image(pred_sfm_fit, mask_img.affine, mask_img.header).to_filename(
+                pred_fit_file
+            )
+        elif self.inputs.model_name == "tensor":
             from dipy.reconst.dti import TensorModel
+
             estimator_ten = TensorModel(training_gtab)
             estimator_ten_fit = estimator_ten.fit(training_data, mask=mask_array)
             pred_ten_fit = estimator_ten_fit.predict(prediction_gtab)[..., 0]
             pred_ten_fit[~mask_array] = 0
-            pred_fit_file = os.path.join(runtime.cwd, "predicted_ten_b%d_%.2f_%.2f_%.2f.npy" %
-            ((pred_val,) + tuple(np.round(pred_vec, decimals=2))))
+            pred_fit_file = os.path.join(
+                runtime.cwd,
+                "predicted_ten_b%d_%.2f_%.2f_%.2f.npy"
+                % ((pred_val,) + tuple(np.round(pred_vec, decimals=2))),
+            )
             np.save(pred_fit_file, pred_ten_fit)
-            pred_fit_file = os.path.join(runtime.cwd, "predicted_ten_b%d_%.2f_%.2f_%.2f.nii.gz" %
-                                         ((pred_val,) + tuple(np.round(pred_vec, decimals=2))))
-            nb.Nifti1Image(pred_ten_fit, mask_img.affine, mask_img.header).to_filename(pred_fit_file)
+            pred_fit_file = os.path.join(
+                runtime.cwd,
+                "predicted_ten_b%d_%.2f_%.2f_%.2f.nii.gz"
+                % ((pred_val,) + tuple(np.round(pred_vec, decimals=2))),
+            )
+            nb.Nifti1Image(pred_ten_fit, mask_img.affine, mask_img.header).to_filename(
+                pred_fit_file
+            )
+        else:
+            raise ValueError("Model not supported.")
 
-        self._results['predicted_image'] = pred_fit_file
+        self._results["predicted_image"] = pred_fit_file
+
+        return runtime
+
+
+class CombineMotionsInputSpec(BaseInterfaceInputSpec):
+    transform_files = InputMultiObject(
+        File(exists=True), mandatory=True, desc="transform files from emc"
+    )
+    source_files = InputMultiObject(
+        File(exists=True), mandatory=True, desc="Moving images"
+    )
+    ref_file = File(exists=True, mandatory=True, desc="Fixed Image")
+
+
+class CombineMotionsOututSpec(TraitedSpec):
+    motion_file = File(exists=True)
+
+
+class CombineMotions(SimpleInterface):
+    input_spec = CombineMotionsInputSpec
+    output_spec = CombineMotionsOututSpec
+
+    def _run_interface(self, runtime):
+        import pandas as pd
+        from dmriprep.utils.images import get_params
+
+        output_fname = os.path.join(runtime.cwd, "motion_params.csv")
+        motion_parms_path = os.path.join(runtime.cwd, "movpar.txt")
+        motion_params = open(os.path.abspath(motion_parms_path), "w")
+
+        collected_motion = []
+        for aff in self.inputs.transform_files:
+            rotations, translations = get_params(np.load(aff))
+            collected_motion.append(rotations + translations)
+            for i in rotations + translations:
+                motion_params.write("%f " % i)
+            motion_params.write("\n")
+        motion_params.close()
+
+        final_motion = np.row_stack(collected_motion)
+        cols = ["rotateX", "rotateY", "rotateZ", "shiftX", "shiftY", "shiftZ"]
+        motion_df = pd.DataFrame(data=final_motion, columns=cols)
+        motion_df.to_csv(output_fname, index=False)
+        self._results['motion_file'] = output_fname
 
         return runtime
 
@@ -291,9 +394,10 @@ class CalculateCNR(SimpleInterface):
         snr = np.nan_to_num(signal_var / noise_var)
         out_mat = np.zeros(mask_image.shape)
         out_mat[mask] = snr
-        nb.Nifti1Image(out_mat, mask_image.affine,
-                       header=mask_image.header).to_filename(cnr_file)
-        self._results['cnr_image'] = cnr_file
+        nb.Nifti1Image(
+            out_mat, mask_image.affine, header=mask_image.header
+        ).to_filename(cnr_file)
+        self._results["cnr_image"] = cnr_file
         return runtime
 
 
@@ -325,8 +429,9 @@ class ReorderOutputs(SimpleInterface):
         warped_dwi_images = self.inputs.warped_dwi_images[::-1]
         model_transforms = self.inputs.model_based_transforms[::-1]
         model_images = self.inputs.model_predicted_images[::-1]
-        b0_transforms = [self.inputs.initial_transforms[idx] for idx in
-                         self.inputs.b0_indices][::-1]
+        b0_transforms = [
+            self.inputs.initial_transforms[idx] for idx in self.inputs.b0_indices
+        ][::-1]
         num_dwis = len(self.inputs.initial_transforms)
 
         for imagenum in range(num_dwis):
@@ -342,8 +447,8 @@ class ReorderOutputs(SimpleInterface):
         if not len(model_transforms) == len(b0_transforms) == len(model_images) == 0:
             raise Exception("Unable to recombine images and transforms")
 
-        self._results['emc_warped_images'] = full_warped_images
-        self._results['full_transforms'] = full_transforms
-        self._results['full_predicted_dwi_series'] = full_predicted_dwi_series
+        self._results["emc_warped_images"] = full_warped_images
+        self._results["full_transforms"] = full_transforms
+        self._results["full_predicted_dwi_series"] = full_predicted_dwi_series
 
         return runtime

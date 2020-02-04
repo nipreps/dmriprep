@@ -163,20 +163,20 @@ class IterationSummary(SummaryInterface):
         return runtime
 
 
-class HMCReportInputSpec(BaseInterfaceInputSpec):
+class EMCReportInputSpec(BaseInterfaceInputSpec):
     iteration_summary = File(exists=True)
     registered_images = InputMultiObject(File(exists=True))
     original_images = InputMultiObject(File(exists=True))
     model_predicted_images = InputMultiObject(File(exists=True))
 
 
-class HMCReportOutputSpec(SummaryOutputSpec):
+class EMCReportOutputSpec(SummaryOutputSpec):
     plot_file = File(exists=True)
 
 
-class HMCReport(SummaryInterface):
-    input_spec = HMCReportInputSpec
-    output_spec = HMCReportOutputSpec
+class EMCReport(SummaryInterface):
+    input_spec = EMCReportInputSpec
+    output_spec = EMCReportOutputSpec
 
     def _run_interface(self, runtime):
         import imageio

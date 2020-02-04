@@ -12,11 +12,29 @@ BVEC_NORM_EPSILON = 0.1
 class DiffusionGradientTable:
     """Data structure for DWI gradients."""
 
-    __slots__ = ['_affine', '_gradients', '_b_scale', '_bvecs', '_bvals', '_normalized',
-                 '_b0_thres', '_bvec_norm_epsilon']
+    __slots__ = [
+        "_affine",
+        "_gradients",
+        "_b_scale",
+        "_bvecs",
+        "_bvals",
+        "_normalized",
+        "_transforms",
+        "_b0_thres",
+        "_bvec_norm_epsilon",
+    ]
 
-    def __init__(self, dwi_file=None, bvecs=None, bvals=None, rasb_file=None,
-                 b_scale=True, b0_threshold=B0_THRESHOLD, bvec_norm_epsilon=BVEC_NORM_EPSILON):
+    def __init__(
+        self,
+        dwi_file=None,
+        bvecs=None,
+        bvals=None,
+        rasb_file=None,
+        b_scale=True,
+        transforms=None,
+        b0_threshold=B0_THRESHOLD,
+        bvec_norm_epsilon=BVEC_NORM_EPSILON,
+    ):
         """
         Create a new table of diffusion gradients.
 
@@ -34,8 +52,8 @@ class DiffusionGradientTable:
             then bvecs and bvals will be dismissed.
         b_scale : bool
             Whether b-values should be normalized.
-
         """
+        self._transforms = transforms
         self._b_scale = b_scale
         self._b0_thres = b0_threshold
         self._bvec_norm_epsilon = bvec_norm_epsilon
@@ -87,7 +105,7 @@ class DiffusionGradientTable:
             dwi_file = nb.load(str(value))
             self._affine = dwi_file.affine.copy()
             return
-        if hasattr(value, 'affine'):
+        if hasattr(value, "affine"):
             self._affine = value.affine
         self._affine = np.array(value)
 
@@ -102,12 +120,12 @@ class DiffusionGradientTable:
         if isinstance(value, (str, Path)):
             value = np.loadtxt(str(value)).T
         else:
-            value = np.array(value, dtype='float32')
+            value = np.array(value, dtype="float32")
 
         # Correct any b0's in bvecs misstated as 10's.
         value[np.any(abs(value) >= 10, axis=1)] = np.zeros(3)
         if self.bvals is not None and value.shape[0] != self.bvals.shape[0]:
-            raise ValueError('The number of b-vectors and b-values do not match')
+            raise ValueError("The number of b-vectors and b-values do not match")
         self._bvecs = value
 
     @bvals.setter
@@ -115,7 +133,7 @@ class DiffusionGradientTable:
         if isinstance(value, (str, Path)):
             value = np.loadtxt(str(value)).flatten()
         if self.bvecs is not None and value.shape[0] != self.bvecs.shape[0]:
-            raise ValueError('The number of b-vectors and b-values do not match')
+            raise ValueError("The number of b-vectors and b-values do not match")
         self._bvals = np.array(value)
 
     @property
@@ -129,10 +147,12 @@ class DiffusionGradientTable:
             return
 
         self._bvecs, self._bvals = normalize_gradients(
-            self.bvecs, self.bvals,
+            self.bvecs,
+            self.bvals,
             b0_threshold=self._b0_thres,
             bvec_norm_epsilon=self._bvec_norm_epsilon,
-            b_scale=self._b_scale)
+            b_scale=self._b_scale,
+        )
         self._normalized = True
 
     def generate_rasb(self):
@@ -142,14 +162,50 @@ class DiffusionGradientTable:
             _ras = bvecs2ras(self.affine, self.bvecs)
             self.gradients = np.hstack((_ras, self.bvals[..., np.newaxis]))
 
+    def reorient_rasb(self):
+        """Reorient the vectors based o a list of affine transforms."""
+        from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
+
+        affines = self._transforms.copy()
+        bvals = self._bvals
+        bvecs = self._bvecs
+
+        # Verify that number of non-B0 volumes corresponds to the number of affines.
+        # If not, raise an error.
+        if len(self._bvals[self._bvals >= self._b0_thres]) != len(affines):
+            b0_indices = np.where(self._bvals <= self._b0_thres)[0].tolist()
+            if len(self._bvals[self._bvals >= self._b0_thres]) < len(affines):
+                for i in sorted(b0_indices, reverse=True):
+                    del affines[i]
+            if len(self._bvals[self._bvals >= self._b0_thres]) > len(affines):
+                ras_b_mat = self._gradients.copy()
+                ras_b_mat = np.delete(ras_b_mat, tuple(b0_indices), axis=0)
+                bvals = ras_b_mat[:, 3]
+                bvecs = ras_b_mat[:, 0:3]
+            if len(self._bvals[self._bvals > self._b0_thres]) != len(affines):
+                raise ValueError(
+                    "Affine transformations do not correspond to gradients"
+                )
+
+        # Build gradient table object
+        gt = gradient_table_from_bvals_bvecs(bvals, bvecs, b0_threshold=self._b0_thres)
+
+        # Reorient table
+        new_gt = reorient_bvecs(gt, [np.load(aff) for aff in affines])
+
+        return np.hstack((new_gt.bvecs, new_gt.bvals[..., np.newaxis]))
+
     def generate_vecval(self):
         """Compose a bvec/bval pair in image coordinates."""
         if self.bvecs is None or self.bvals is None:
             if self.affine is None:
                 raise TypeError(
                     "Cannot generate b-vectors & b-values in image coordinates. "
-                    "Please set the corresponding DWI image's affine matrix.")
-            self._bvecs = bvecs2ras(np.linalg.inv(self.affine), self.gradients[..., :-1])
+                    "Please set the corresponding DWI image's affine matrix."
+                )
+            self._bvecs = bvecs2ras(
+                np.linalg.inv(self.affine), self.gradients[..., :-1]
+            )
             self._bvals = self.gradients[..., -1].flatten()
 
     @property
@@ -161,25 +217,36 @@ class DiffusionGradientTable:
 
         """
         self.generate_rasb()
-        return calculate_pole(self.gradients[..., :-1], bvec_norm_epsilon=self._bvec_norm_epsilon)
+        return calculate_pole(
+            self.gradients[..., :-1], bvec_norm_epsilon=self._bvec_norm_epsilon
+        )
 
-    def to_filename(self, filename, filetype='rasb'):
+    def to_filename(self, filename, filetype="rasb"):
         """Write files (RASB, bvecs/bvals) to a given path."""
-        if filetype.lower() == 'rasb':
+        if filetype.lower() == "rasb":
             self.generate_rasb()
-            np.savetxt(str(filename), self.gradients,
-                       delimiter='\t', header='\t'.join('RASB'),
-                       fmt=['%.8f'] * 3 + ['%g'])
-        elif filetype.lower() == 'fsl':
+            np.savetxt(
+                str(filename),
+                self.gradients,
+                delimiter="\t",
+                header="\t".join("RASB"),
+                fmt=["%.8f"] * 3 + ["%g"],
+            )
+        elif filetype.lower() == "fsl":
             self.generate_vecval()
-            np.savetxt('%s.bvec' % filename, self.bvecs.T, fmt='%.6f')
-            np.savetxt('%s.bval' % filename, self.bvals, fmt='%.6f')
+            np.savetxt("%s.bvec" % filename, self.bvecs.T, fmt="%.6f")
+            np.savetxt("%s.bval" % filename, self.bvals, fmt="%.6f")
         else:
             raise ValueError('Unknown filetype "%s"' % filetype)
 
 
-def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
-                        bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True):
+def normalize_gradients(
+    bvecs,
+    bvals,
+    b0_threshold=B0_THRESHOLD,
+    bvec_norm_epsilon=BVEC_NORM_EPSILON,
+    b_scale=True,
+):
     """
     Normalize b-vectors and b-values.
 
@@ -235,8 +302,8 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
     True
 
     """
-    bvals = np.array(bvals, dtype='float32')
-    bvecs = np.array(bvecs, dtype='float32')
+    bvals = np.array(bvals, dtype="float32")
+    bvecs = np.array(bvecs, dtype="float32")
 
     b0s = bvals < b0_threshold
     b0_vecs = np.linalg.norm(bvecs, axis=1) < bvec_norm_epsilon
@@ -244,8 +311,9 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
     # Check for bval-bvec discrepancy.
     if not np.all(b0s == b0_vecs):
         raise ValueError(
-            'Inconsistent bvals and bvecs (%d, %d low-b, respectively).' %
-            (b0s.sum(), b0_vecs.sum()))
+            "Inconsistent bvals and bvecs (%d, %d low-b, respectively)."
+            % (b0s.sum(), b0_vecs.sum())
+        )
 
     # Rescale b-vals if requested
     if b_scale:
@@ -259,7 +327,7 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
 
     # Rescale b-vecs, skipping b0's, on the appropriate axis to unit-norm length.
     bvecs[~b0s] /= np.linalg.norm(bvecs[~b0s], axis=1)[..., np.newaxis]
-    return bvecs, bvals.astype('uint16')
+    return bvecs, bvals.astype("uint16")
 
 
 def calculate_pole(bvecs, bvec_norm_epsilon=BVEC_NORM_EPSILON):
@@ -295,7 +363,7 @@ def calculate_pole(bvecs, bvec_norm_epsilon=BVEC_NORM_EPSILON):
     https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html
 
     """
-    bvecs = np.array(bvecs, dtype='float32')  # Normalize inputs
+    bvecs = np.array(bvecs, dtype="float32")  # Normalize inputs
     b0s = np.linalg.norm(bvecs, axis=1) < bvec_norm_epsilon
 
     bvecs = bvecs[~b0s]
@@ -367,7 +435,7 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     if affine.shape == (4, 4):
         affine = affine[:3, :3]
 
-    bvecs = np.array(bvecs, dtype='float32')  # Normalize inputs
+    bvecs = np.array(bvecs, dtype="float32")  # Normalize inputs
     rotated_bvecs = affine[np.newaxis, ...].dot(bvecs.T)[0].T
     if norm is True:
         norms_bvecs = np.linalg.norm(rotated_bvecs, axis=1)
@@ -377,77 +445,9 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     return rotated_bvecs
 
 
-def reorient_vecs_from_ras_b(rasb_file, affines, b0_threshold=B0_THRESHOLD):
-    """
-    Reorient the vectors from a rasb .tsv file.
-    When correcting for motion, rotation of the diffusion-weighted volumes
-    might cause systematic bias in rotationally invariant measures, such as FA
-    and MD, and also cause characteristic biases in tractography, unless the
-    gradient directions are appropriately reoriented to compensate for this
-    effect [Leemans2009]_.
-    Parameters
-    ----------
-    rasb_file : str or os.pathlike
-        File path to a RAS-B gradient table.
-    affines : list or ndarray of shape (n, 4, 4) or (n, 3, 3)
-        Each entry in this list or array contain either an affine
-        transformation (4,4) or a rotation matrix (3, 3).
-        In both cases, the transformations encode the rotation that was applied
-        to the image corresponding to one of the non-zero gradient directions.
-    Returns
-    -------
-    Gradients : ndarray of shape (4, n)
-        A reoriented ndarray where the first three columns correspond to each of
-        x, y, z directions of the bvecs, in R-A-S image orientation.
-    """
-    from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
-    from scipy.io import loadmat
-
-    ras_b_mat = np.genfromtxt(rasb_file, delimiter='\t')
-
-    # Verify that number of non-B0 volumes corresponds to the number of affines.
-    # If not, raise an error.
-    if len(ras_b_mat[:, 3][ras_b_mat[:, 3] <= b0_threshold]) != len(affines):
-        b0_indices = np.where(ras_b_mat[:, 3] <= b0_threshold)[0].tolist()
-        for i in sorted(b0_indices, reverse=True):
-            del affines[i]
-        if len(ras_b_mat[:, 3][ras_b_mat[:, 3] > b0_threshold]) != len(affines):
-            raise ValueError('Affine transformations do not correspond to gradients')
-
-    # Build gradient table object
-    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:, 3], ras_b_mat[:, 0:3],
-                                         b0_threshold=b0_threshold)
-
-    # Reorient table
-    ras_trans = np.ones(shape=(4, 4))
-    ras_trans[0, 1] = -ras_trans[0, 1]
-    ras_trans[1, 0] = -ras_trans[1, 0]
-    ras_trans[2, 3] = -ras_trans[2, 3]
-    affines_ras = []
-    for aff in affines:
-        aff_mat = loadmat(aff)
-        M = np.zeros(shape=(4, 4))
-        M[0, 0] = aff_mat['AffineTransform_float_3_3'][0]
-        M[0, 1] = aff_mat['AffineTransform_float_3_3'][1]
-        M[0, 2] = aff_mat['AffineTransform_float_3_3'][2]
-        M[1, 0] = aff_mat['AffineTransform_float_3_3'][3]
-        M[1, 1] = aff_mat['AffineTransform_float_3_3'][4]
-        M[1, 2] = aff_mat['AffineTransform_float_3_3'][5]
-        M[2, 0] = aff_mat['AffineTransform_float_3_3'][6]
-        M[2, 1] = aff_mat['AffineTransform_float_3_3'][7]
-        M[2, 2] = aff_mat['AffineTransform_float_3_3'][8]
-        M[3, 3] = 1
-        M[0:3, 3] = aff_mat['fixed'].T
-        affines_ras.append(np.multiply(M, ras_trans))
-        del M
-
-    new_gt = reorient_bvecs(gt, affines_ras)
-
-    return np.hstack((new_gt.bvecs, new_gt.bvals[..., np.newaxis]))
-
-
-def _nonoverlapping_qspace_samples(prediction_bval, prediction_bvec,
-                                   all_bvals, all_bvecs, cutoff):
+def _nonoverlapping_qspace_samples(
+    prediction_bval, prediction_bvec, all_bvals, all_bvecs, cutoff
+):
     """Ensure that none of the training samples are too close to the sample to predict.
     Parameters
     """
@@ -458,26 +458,43 @@ def _nonoverlapping_qspace_samples(prediction_bval, prediction_bvec,
     # Convert q values to percent of maximum qval
     max_qval = max(max(all_qvals), prediction_qval)
     all_qvals_scaled = all_qvals / max_qval * 100
-    prediction_qval_scaled = prediction_qval / max_qval * 100
     scaled_qvecs = all_bvecs * all_qvals_scaled[:, np.newaxis]
-    scaled_prediction_qvec = prediction_bvec * prediction_qval_scaled
+    scaled_prediction_qvec = prediction_bvec * (prediction_qval / max_qval * 100)
 
     # Calculate the distance between the sampled qvecs and the prediction qvec
-    distances = np.linalg.norm(scaled_qvecs - scaled_prediction_qvec, axis=1)
-    distances_flip = np.linalg.norm(scaled_qvecs + scaled_prediction_qvec, axis=1)
-    ok_samples = (distances > cutoff) * (distances_flip > cutoff)
+    ok_samples = (
+        np.linalg.norm(scaled_qvecs - scaled_prediction_qvec, axis=1) > cutoff
+    ) * (np.linalg.norm(scaled_qvecs + scaled_prediction_qvec, axis=1) > cutoff)
 
     return ok_samples
 
 
 def _rasb_to_bvec_list(in_rasb):
+    """
+    Create a list of b-vectors from a rasb gradient table.
+
+    Parameters
+    ----------
+    in_rasb : str or os.pathlike
+        File path to a RAS-B gradient table.
+    """
     import numpy as np
-    ras_b_mat = np.genfromtxt(in_rasb, delimiter='\t')
+
+    ras_b_mat = np.genfromtxt(in_rasb, delimiter="\t")
     bvec = [vec for vec in ras_b_mat[:, 0:3] if not np.isclose(all(vec), 0)]
     return list(bvec)
 
 
 def _rasb_to_bval_floats(in_rasb):
+    """
+    Create a list of b-values from a rasb gradient table.
+
+    Parameters
+    ----------
+    in_rasb : str or os.pathlike
+        File path to a RAS-B gradient table.
+    """
     import numpy as np
-    ras_b_mat = np.genfromtxt(in_rasb, delimiter='\t')
+
+    ras_b_mat = np.genfromtxt(in_rasb, delimiter="\t")
     return [float(bval) for bval in ras_b_mat[:, 3] if bval > 0]
