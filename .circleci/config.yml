@@ -168,7 +168,7 @@ jobs:
               mkdir -p /tmp/DS001771/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
                 -O ds001771_sub-36_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5e21e74fedceab00ad82e047"
-              tar xvzf THP002_derivatives_freesurfer.tar.gz -C /tmp/DS001771/derivatives
+              tar xvzf ds001771_sub-36_derivatives_freesurfer.tar.gz -C /tmp/DS001771/derivatives
             else
               echo "FreeSurfer derivatives of DS001771 were cached"
             fi
