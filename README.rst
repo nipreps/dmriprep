@@ -17,7 +17,7 @@ dMRIPrep
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg
     :target: https://doi.org/10.5281/zenodo.3392201
 
-[`Documentation <https://nipreps.github.io/dmriprep/>`__]
+[`Documentation <https://www.nipreps.org/dmriprep/>`__]
 [`Support at neurostars.org <https://neurostars.org/tags/dmriprep>`__]
 
 The preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
