@@ -1,10 +1,9 @@
 """Image tools interfaces."""
-import numpy as np
-import nibabel as nb
-from nipype.utils.filemanip import fname_presuffix
+from dmriprep.utils.images import rescale_b0, median, match_transforms, extract_b0
 from nipype import logging
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File
+    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File,
+    InputMultiObject, OutputMultiObject
 )
 
 LOGGER = logging.getLogger('nipype.interface')
@@ -43,24 +42,6 @@ class ExtractB0(SimpleInterface):
             self.inputs.b0_ixs,
             newpath=runtime.cwd)
         return runtime
-
-
-def extract_b0(in_file, b0_ixs, newpath=None):
-    """Extract the *b0* volumes from a DWI dataset."""
-    out_file = fname_presuffix(
-        in_file, suffix='_b0', newpath=newpath)
-
-    img = nb.load(in_file)
-    data = img.get_fdata(dtype='float32')
-
-    b0 = data[..., b0_ixs]
-
-    hdr = img.header.copy()
-    hdr.set_data_shape(b0.shape)
-    hdr.set_xyzt_units('mm')
-    hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(b0, img.affine, hdr).to_filename(out_file)
-    return out_file
 
 
 class _RescaleB0InputSpec(BaseInterfaceInputSpec):
@@ -103,43 +84,25 @@ class RescaleB0(SimpleInterface):
         return runtime
 
 
-def rescale_b0(in_file, mask_file, newpath=None):
-    """Rescale the input volumes using the median signal intensity."""
-    out_file = fname_presuffix(
-        in_file, suffix='_rescaled_b0', newpath=newpath)
-
-    img = nb.load(in_file)
-    if img.dataobj.ndim == 3:
-        return in_file
-
-    data = img.get_fdata(dtype='float32')
-    mask_img = nb.load(mask_file)
-    mask_data = mask_img.get_fdata(dtype='float32')
-
-    median_signal = np.median(data[mask_data > 0, ...], axis=0)
-    rescaled_data = 1000 * data / median_signal
-    hdr = img.header.copy()
-    nb.Nifti1Image(rescaled_data, img.affine, hdr).to_filename(out_file)
-    return out_file
+class MatchTransformsInputSpec(BaseInterfaceInputSpec):
+    b0_indices = traits.List(mandatory=True)
+    dwi_files = InputMultiObject(File(exists=True), mandatory=True)
+    transforms = InputMultiObject(File(exists=True), mandatory=True)
 
 
-def median(in_file, newpath=None):
-    """Average a 4D dataset across the last dimension using median."""
-    out_file = fname_presuffix(
-        in_file, suffix='_b0ref', newpath=newpath)
+class MatchTransformsOutputSpec(TraitedSpec):
+    transforms = OutputMultiObject(File(exists=True), mandatory=True)
 
-    img = nb.load(in_file)
-    if img.dataobj.ndim == 3:
-        return in_file
-    if img.shape[-1] == 1:
-        nb.squeeze_image(img).to_filename(out_file)
-        return out_file
 
-    median_data = np.median(img.get_fdata(dtype='float32'),
-                            axis=-1)
+class MatchTransforms(SimpleInterface):
+    """
+    Interface for mapping the `match_transforms` function across lists of inputs.
+    """
+    input_spec = MatchTransformsInputSpec
+    output_spec = MatchTransformsOutputSpec
 
-    hdr = img.header.copy()
-    hdr.set_xyzt_units('mm')
-    hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_file)
-    return out_file
+    def _run_interface(self, runtime):
+        self._results["transforms"] = match_transforms(
+            self.inputs.dwi_files, self.inputs.transforms, self.inputs.b0_indices
+        )
+        return runtime
