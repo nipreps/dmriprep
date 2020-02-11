@@ -377,30 +377,56 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     return rotated_bvecs
 
 
-def reorient_bvecs_from_ras_b(ras_b, affines):
+def _nonoverlapping_qspace_samples(
+    prediction_bval, prediction_bvec, all_bvals, all_bvecs, cutoff
+):
+    """Ensure that none of the training samples are too close to the sample to predict.
+    Parameters
     """
-    Reorient the vectors from a rasb .tsv file.
-    When correcting for motion, rotation of the diffusion-weighted volumes
-    might cause systematic bias in rotationally invariant measures, such as FA
-    and MD, and also cause characteristic biases in tractography, unless the
-    gradient directions are appropriately reoriented to compensate for this
-    effect [Leemans2009]_.
+    min_bval = min(min(all_bvals), prediction_bval)
+    all_qvals = np.sqrt(all_bvals - min_bval)
+    prediction_qval = np.sqrt(prediction_bval - min_bval)
+
+    # Convert q values to percent of maximum qval
+    max_qval = max(max(all_qvals), prediction_qval)
+    all_qvals_scaled = all_qvals / max_qval * 100
+    scaled_qvecs = all_bvecs * all_qvals_scaled[:, np.newaxis]
+    scaled_prediction_qvec = prediction_bvec * (prediction_qval / max_qval * 100)
+
+    # Calculate the distance between the sampled qvecs and the prediction qvec
+    ok_samples = (
+        np.linalg.norm(scaled_qvecs - scaled_prediction_qvec, axis=1) > cutoff
+    ) * (np.linalg.norm(scaled_qvecs + scaled_prediction_qvec, axis=1) > cutoff)
+
+    return ok_samples
+
+
+def _rasb_to_bvec_list(in_rasb):
+    """
+    Create a list of b-vectors from a rasb gradient table.
 
     Parameters
     ----------
-    rasb_file : str or os.pathlike
-        File path to a RAS-B gradient table. If rasb_file is provided,
-        then bvecs and bvals will be dismissed.
-
-    affines : list or ndarray of shape (n, 4, 4) or (n, 3, 3)
-        Each entry in this list or array contain either an affine
-        transformation (4,4) or a rotation matrix (3, 3).
-        In both cases, the transformations encode the rotation that was applied
-        to the image corresponding to one of the non-zero gradient directions.
+    in_rasb : str or os.pathlike
+        File path to a RAS-B gradient table.
     """
-    from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
+    import numpy as np
 
-    ras_b_mat = np.genfromtxt(ras_b, delimiter='\t')
-    gt = gradient_table_from_bvals_bvecs(ras_b_mat[:,3], ras_b_mat[:,0:3], b0_threshold=50)
+    ras_b_mat = np.genfromtxt(in_rasb, delimiter="\t")
+    bvec = [vec for vec in ras_b_mat[:, 0:3] if not np.isclose(all(vec), 0)]
+    return list(bvec)
 
-    return reorient_bvecs(gt, affines)
+
+def _rasb_to_bval_floats(in_rasb):
+    """
+    Create a list of b-values from a rasb gradient table.
+
+    Parameters
+    ----------
+    in_rasb : str or os.pathlike
+        File path to a RAS-B gradient table.
+    """
+    import numpy as np
+
+    ras_b_mat = np.genfromtxt(in_rasb, delimiter="\t")
+    return [float(bval) for bval in ras_b_mat[:, 3] if bval > 0]
