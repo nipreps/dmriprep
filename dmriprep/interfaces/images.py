@@ -175,6 +175,7 @@ class SignalPredictionOutputSpec(TraitedSpec):
 
 class SignalPrediction(SimpleInterface):
     """
+    Predicts signal for each dwi volume from a list of 3D coordinate vectors along the sphere.
     """
 
     input_spec = SignalPredictionInputSpec
