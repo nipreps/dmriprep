@@ -50,7 +50,7 @@ def median(in_file, newpath=None):
         nb.squeeze_image(img).to_filename(out_file)
         return out_file
 
-    median_data = np.median(img.get_fdata(dtype="float32"), axis=-1)
+    median_data = np.median(img.get_fdata(), axis=-1)
 
     hdr = img.header.copy()
     hdr.set_xyzt_units("mm")
