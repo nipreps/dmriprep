@@ -17,8 +17,7 @@ def extract_b0(in_file, b0_ixs, out_path=None):
     hdr = img.header.copy()
     hdr.set_data_shape(b0.shape)
     hdr.set_xyzt_units('mm')
-    hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(b0, img.affine, hdr).to_filename(out_path)
+    nb.Nifti1Image(b0.astype(hdr.get_data_dtype()), img.affine, hdr).to_filename(out_path)
     return out_path
 
 
@@ -32,14 +31,14 @@ def rescale_b0(in_file, mask_file, out_path=None):
     if img.dataobj.ndim == 3:
         return in_file
 
-    data = img.get_fdata(dtype='float32')
+    data = img.get_fdata()
     mask_img = nb.load(mask_file)
-    mask_data = mask_img.get_fdata(dtype='float32')
+    mask_data = mask_img.get_fdata()
 
     median_signal = np.median(data[mask_data > 0, ...], axis=0)
     rescaled_data = 1000 * data / median_signal
     hdr = img.header.copy()
-    nb.Nifti1Image(rescaled_data, img.affine, hdr).to_filename(out_path)
+    nb.Nifti1Image(rescaled_data.astype(hdr.get_data_dtype()), img.affine, hdr).to_filename(out_path)
     return out_path
 
 
@@ -63,5 +62,7 @@ def median(in_file, dtype=None, out_path=None):
     hdr.set_xyzt_units('mm')
     if dtype is not None:
         hdr.set_data_dtype(dtype)
-    nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_path)
+    else:
+        dtype = hdr.get_data_dtype()
+    nb.Nifti1Image(median_data.astype(dtype), img.affine, hdr).to_filename(out_path)
     return out_path
