@@ -152,7 +152,7 @@ def save_3d_to_4d(in_files):
     return out_file
 
 
-def get_params(A):
+def decompose_affine(affine):
     """Takes an transformation affine matrix A and determines
     rotations and translations."""
 
