@@ -90,7 +90,7 @@ class _MatchTransformsInputSpec(BaseInterfaceInputSpec):
     transforms = InputMultiObject(File(exists=True), mandatory=True)
 
 
-class MatchTransformsOutputSpec(TraitedSpec):
+class _MatchTransformsOutputSpec(TraitedSpec):
     transforms = OutputMultiObject(File(exists=True), mandatory=True)
 
 
