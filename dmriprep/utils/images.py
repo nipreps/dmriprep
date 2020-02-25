@@ -54,7 +54,6 @@ def median(in_file, newpath=None):
 
     hdr = img.header.copy()
     hdr.set_xyzt_units("mm")
-    hdr.set_data_dtype(np.float32)
     nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_file)
     return out_file
 
