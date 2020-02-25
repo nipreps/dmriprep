@@ -43,7 +43,7 @@ def rescale_b0(in_file, mask_file, out_path=None):
     return out_path
 
 
-def median(in_file, out_path=None):
+def median(in_file, dtype=None, out_path=None):
     """Average a 4D dataset across the last dimension using median."""
     if out_path is None:
         out_path = fname_presuffix(
