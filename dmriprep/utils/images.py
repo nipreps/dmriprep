@@ -10,7 +10,7 @@ def extract_b0(in_file, b0_ixs, out_path=None):
             in_file, suffix='_b0', use_ext=True)
 
     img = nb.load(in_file)
-    data = img.get_fdata(dtype='float32')
+    data = img.get_fdata()
 
     b0 = data[..., b0_ixs]
 
