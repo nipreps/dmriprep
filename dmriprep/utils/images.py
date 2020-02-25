@@ -147,7 +147,6 @@ def save_3d_to_4d(in_files):
     img_4d = nb.funcs.concat_images([nb.load(img_3d) for img_3d in in_files])
     out_file = fname_presuffix(in_files[0], suffix="_merged")
     img_4d.to_filename(out_file)
-    del img_4d
     return out_file
 
 
