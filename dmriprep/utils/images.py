@@ -38,7 +38,9 @@ def rescale_b0(in_file, mask_file, out_path=None):
     median_signal = np.median(data[mask_data > 0, ...], axis=0)
     rescaled_data = 1000 * data / median_signal
     hdr = img.header.copy()
-    nb.Nifti1Image(rescaled_data.astype(hdr.get_data_dtype()), img.affine, hdr).to_filename(out_path)
+    nb.Nifti1Image(
+        rescaled_data.astype(hdr.get_data_dtype()), img.affine, hdr
+    ).to_filename(out_path)
     return out_path
 
 
