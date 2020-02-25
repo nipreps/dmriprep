@@ -56,7 +56,7 @@ def median(in_file, dtype=None, out_path=None):
         nb.squeeze_image(img).to_filename(out_path)
         return out_path
 
-    median_data = np.median(img.get_fdata(dtype='float32'),
+    median_data = np.median(img.get_fdata(dtype=dtype),
                             axis=-1)
 
     hdr = img.header.copy()
