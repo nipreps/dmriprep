@@ -32,12 +32,10 @@ def check_deps(workflow):
 
 
 def get_parser():
-    """Build parser object"""
-    from smriprep.cli.utils import ParseTemplates, output_space as _output_space
-    from templateflow.api import templates
+    """Build parser object."""
+    from niworkflows.utils.spaces import Reference, SpatialReferences, OutputReferencesAction
     from packaging.version import Version
     from ..__about__ import __version__
-    from ..config import NONSTANDARD_REFERENCES
     from .version import check_latest, is_flagged
 
     verstr = 'dmriprep v{}'.format(__version__)
@@ -104,26 +102,24 @@ def get_parser():
         '--longitudinal', action='store_true',
         help='treat dataset as longitudinal - may increase runtime')
     g_conf.add_argument(
-        '--output-spaces', nargs='+', action=ParseTemplates,
+        '--output-spaces', nargs='*', action=OutputReferencesAction, default=SpatialReferences(),
         help="""\
 Standard and non-standard spaces to resample anatomical and functional images to. \
 Standard spaces may be specified by the form \
-``<TEMPLATE>[:res-<resolution>][:cohort-<label>][...]``, where ``<TEMPLATE>`` is \
-a keyword (valid keywords: %s) or path pointing to a user-supplied template, and \
-may be followed by optional, colon-separated parameters. \
-Non-standard spaces (valid keywords: %s) imply specific orientations and sampling \
-grids. \
+``<SPACE>[:cohort-<label>][:res-<resolution>][...]``, where ``<SPACE>`` is \
+a keyword designating a spatial reference, and may be followed by optional, \
+colon-separated parameters. \
+Non-standard spaces imply specific orientations and sampling grids. \
 Important to note, the ``res-*`` modifier does not define the resolution used for \
-the spatial normalization.
-For further details, please check out \
-https://dmriprep.readthedocs.io/en/%s/spaces.html""" % (
-            ', '.join('"%s"' % s for s in templates()), ', '.join(NONSTANDARD_REFERENCES),
-            currentv.base_version if is_release else 'latest'))
+the spatial normalization. To generate no DWI outputs, use this option without specifying \
+any spatial references. For further details, please check out \
+https://www.nipreps.org/dmriprep/en/%s/spaces.html""" % (currentv.base_version
+                                                         if is_release else 'latest'))
 
     #  ANTs options
     g_ants = parser.add_argument_group('Specific options for ANTs registrations')
     g_ants.add_argument(
-        '--skull-strip-template', action='store', default='OASIS30ANTs', type=_output_space,
+        '--skull-strip-template', default='OASIS30ANTs', type=Reference.from_string,
         help='select a template for skull-stripping with antsBrainExtraction')
     g_ants.add_argument('--skull-strip-fixed-seed', action='store_true',
                         help='do not use a random seed for skull-stripping - will ensure '
