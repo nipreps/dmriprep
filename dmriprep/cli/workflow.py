@@ -63,7 +63,7 @@ def build_workflow(config_file, retval):
 
     # Build main workflow
     INIT_MSG = """
-    Running dMRIPREP version {version}:
+    Running dMRIPrep version {version}:
       * BIDS dataset path: {bids_dir}.
       * Participant list: {subject_list}.
       * Run identifier: {uuid}.

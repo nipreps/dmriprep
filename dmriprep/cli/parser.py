@@ -245,7 +245,7 @@ def parse_args(args=None, namespace=None):
 
     # Initialize --output-spaces if not defined
     if config.execution.output_spaces is None:
-        config.execution.output_spaces = SpatialReferences([Reference(("run", {}))])
+        config.execution.output_spaces = SpatialReferences([Reference("run")])
 
     # Retrieve logging level
     build_log = config.loggers.cli

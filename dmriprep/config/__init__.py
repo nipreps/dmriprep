@@ -11,7 +11,7 @@ Settings are stored using :abbr:`ToML (Tom's Markup Language)`.
 The module has a :py:func:`~dmriprep.config.to_filename` function to allow writing out
 the settings to hard disk in *ToML* format, which looks like:
 
-.. literalinclude:: ../dmriprep/data/tests/config.toml
+.. literalinclude:: ../../dmriprep/data/tests/config.toml
    :language: toml
    :name: dmriprep.toml
    :caption: **Example file representation of dMRIPrep settings**.
@@ -531,12 +531,6 @@ def init_spaces(checkpoint=True):
 
     if checkpoint and not spaces.is_cached():
         spaces.checkpoint()
-
-    # Add the default standard space if not already present (required by several sub-workflows)
-    if "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,)):
-        spaces.add(
-            Reference("MNI152NLin2009cAsym", {})
-        )
 
     # Make the SpatialReferences object available
     workflow.spaces = spaces
