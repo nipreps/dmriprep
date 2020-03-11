@@ -33,7 +33,7 @@ def check_deps(workflow):
 
 def get_parser():
     """Build parser object."""
-    from niworkflows.utils.spaces import Reference, SpatialReferences, OutputReferencesAction
+    from niworkflows.utils.spaces import Reference, OutputReferencesAction
     from packaging.version import Version
     from ..__about__ import __version__
     from .version import check_latest, is_flagged
@@ -102,7 +102,7 @@ def get_parser():
         '--longitudinal', action='store_true',
         help='treat dataset as longitudinal - may increase runtime')
     g_conf.add_argument(
-        '--output-spaces', nargs='*', action=OutputReferencesAction, default=SpatialReferences(),
+        '--output-spaces', nargs='*', action=OutputReferencesAction,
         help="""\
 Standard and non-standard spaces to resample anatomical and functional images to. \
 Standard spaces may be specified by the form \
@@ -110,9 +110,11 @@ Standard spaces may be specified by the form \
 a keyword designating a spatial reference, and may be followed by optional, \
 colon-separated parameters. \
 Non-standard spaces imply specific orientations and sampling grids. \
+The default value of this flag (meaning, if the argument is not include in the command line) \
+is ``--output-spaces run`` - the original space and sampling grid of the original DWI run. \
 Important to note, the ``res-*`` modifier does not define the resolution used for \
-the spatial normalization. To generate no DWI outputs, use this option without specifying \
-any spatial references. For further details, please check out \
+the spatial normalization. To generate no DWI outputs (if that is intended for some reason), \
+use this option without specifying any spatial references. For further details, please check out \
 https://www.nipreps.org/dmriprep/en/%s/spaces.html""" % (currentv.base_version
                                                          if is_release else 'latest'))
 
@@ -146,6 +148,10 @@ https://www.nipreps.org/dmriprep/en/%s/spaces.html""" % (currentv.base_version
         '--fs-license-file', metavar='PATH', type=Path,
         help='Path to FreeSurfer license key file. Get it (for free) by registering'
              ' at https://surfer.nmr.mgh.harvard.edu/registration.html')
+    g_fs.add_argument(
+        '--fs-subjects-dir', metavar='PATH', type=Path,
+        help='Path to existing FreeSurfer subjects directory to reuse. '
+             '(default: OUTPUT_DIR/freesurfer)')
 
     # Surface generation xor
     g_surfs = parser.add_argument_group('Surface preprocessing options')
@@ -416,7 +422,11 @@ def build_workflow(opts, retval):
         retval['return_code'] = 1
         return retval
 
-    output_spaces = parse_spaces(opts)
+    # Initialize --output-spaces if not defined
+    output_spaces = opts.output_spaces
+    if opts.output_spaces is None:
+        from niworkflows.utils.spaces import Reference, SpatialReferences
+        output_spaces = SpatialReferences([Reference("run", {})])
 
     # Set up some instrumental utilities
     run_uuid = '%s_%s' % (strftime('%Y%m%d-%H%M%S'), uuid.uuid4())
@@ -523,6 +533,7 @@ def build_workflow(opts, retval):
         debug=opts.debug,
         force_syn=opts.force_syn,
         freesurfer=opts.run_reconall,
+        fs_subjects_dir=opts.fs_subjects_dir,
         hires=opts.hires,
         ignore=opts.ignore,
         layout=layout,
@@ -530,10 +541,10 @@ def build_workflow(opts, retval):
         low_mem=opts.low_mem,
         omp_nthreads=omp_nthreads,
         output_dir=str(output_dir),
-        output_spaces=output_spaces,
         run_uuid=run_uuid,
         skull_strip_fixed_seed=opts.skull_strip_fixed_seed,
-        skull_strip_template=opts.skull_strip_template,
+        skull_strip_template=opts.skull_strip_template[0],
+        spaces=output_spaces,
         subject_list=subject_list,
         use_syn=opts.use_syn_sdc,
         work_dir=str(work_dir),
@@ -561,23 +572,6 @@ def build_workflow(opts, retval):
         build_log.log(25, 'Works derived from this dMRIPrep execution should '
                       'include the following boilerplate:\n\n%s', boilerplate)
     return retval
-
-
-def parse_spaces(opts):
-    """Ensure the spaces are correctly parsed."""
-    from sys import stderr
-    from collections import OrderedDict
-    # Set the default template to 'MNI152NLin2009cAsym'
-    output_spaces = opts.output_spaces or OrderedDict([('MNI152NLin2009cAsym', {})])
-
-    FS_SPACES = set(['fsnative', 'fsaverage', 'fsaverage6', 'fsaverage5'])
-    if opts.run_reconall and not list(FS_SPACES.intersection(output_spaces.keys())):
-        print("""\
-Although ``--fs-no-reconall`` was not set (i.e., FreeSurfer is to be run), no FreeSurfer \
-output space (valid values are: %s) was selected. Adding default "fsaverage5" to the \
-list of output spaces.""" % ', '.join(FS_SPACES), file=stderr)
-        output_spaces['fsaverage5'] = {}
-    return output_spaces
 
 
 if __name__ == '__main__':

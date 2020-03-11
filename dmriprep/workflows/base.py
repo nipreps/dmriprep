@@ -2,7 +2,6 @@
 import sys
 import os
 from packaging.version import Version
-from collections import OrderedDict
 from copy import deepcopy
 
 from nipype import __version__ as nipype_ver
@@ -28,6 +27,7 @@ def init_dmriprep_wf(
     debug,
     force_syn,
     freesurfer,
+    fs_subjects_dir,
     hires,
     ignore,
     layout,
@@ -35,10 +35,10 @@ def init_dmriprep_wf(
     low_mem,
     omp_nthreads,
     output_dir,
-    output_spaces,
     run_uuid,
     skull_strip_fixed_seed,
     skull_strip_template,
+    spaces,
     subject_list,
     use_syn,
     work_dir,
@@ -59,12 +59,14 @@ def init_dmriprep_wf(
             from collections import namedtuple, OrderedDict
             BIDSLayout = namedtuple('BIDSLayout', ['root'])
             from dmriprep.workflows.base import init_dmriprep_wf
+            from niworkflows.utils.spaces import Reference, SpatialReferences
             os.environ['FREESURFER_HOME'] = os.getcwd()
             wf = init_dmriprep_wf(
                 anat_only=False,
                 debug=False,
                 force_syn=True,
                 freesurfer=True,
+                fs_subjects_dir=None,
                 hires=True,
                 ignore=[],
                 layout=BIDSLayout('.'),
@@ -72,12 +74,15 @@ def init_dmriprep_wf(
                 low_mem=False,
                 omp_nthreads=1,
                 output_dir='.',
-                output_spaces=OrderedDict([
-                    ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
-                    ('T1w', {}), ('fsnative', {})]),
                 run_uuid='X',
                 skull_strip_fixed_seed=False,
-                skull_strip_template=('OASIS30ANTs', {}),
+                skull_strip_template=Reference('OASIS30ANTs'),
+                spaces=SpatialReferences(
+                    spaces=['MNI152Lin',
+                            ('fsaverage', {'density': '10k'}),
+                            'T1w',
+                            'fsnative'],
+                    checkpoint=True),
                 subject_list=['dmripreptest'],
                 use_syn=True,
                 work_dir='.',
@@ -93,6 +98,9 @@ def init_dmriprep_wf(
         **Temporary**: Always run SyN-based SDC
     freesurfer : bool
         Enable FreeSurfer surface reconstruction (may increase runtime)
+    fs_subjects_dir : :obj:`~pathlib.Path` or :obj:`str`
+        Designates a custom FreeSurfer subjects directory, other than
+        ``<derivatives>/freesurfer/``.
     hires : bool
         Enable sub-millimeter preprocessing in FreeSurfer
     ignore : list
@@ -108,22 +116,22 @@ def init_dmriprep_wf(
         Maximum number of threads an individual process may use
     output_dir : str
         Directory in which to save derivatives
-    output_spaces : OrderedDict
-        Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
-        ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
-        nonstandard references (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.),
-        or paths pointing to custom templates organized in a TemplateFlow-like structure.
-        Values of the dictionary aggregate modifiers (e.g., the value for the key ``MNI152Lin``
-        could be ``{'resolution': 2}`` if one wants the resampling to be done on the 2mm
-        resolution version of the selected template).
     run_uuid : str
         Unique identifier for execution instance
-    skull_strip_template : tuple
-        Name of target template for brain extraction with ANTs' ``antsBrainExtraction``,
-        and corresponding dictionary of output-space modifiers.
+    skull_strip_template : :py:class:`~niworkflows.utils.space.Reference`
+        Target template for brain extraction with ANTs' ``antsBrainExtraction``.
     skull_strip_fixed_seed : bool
         Do not use a random seed for skull-stripping - will ensure
         run-to-run replicability when used with --omp-nthreads 1
+    spaces : :py:class:`~niworkflows.utils.spaces.SpatialReferences`
+        A container for storing, organizing, and parsing spatial normalizations. Composed of
+        :py:class:`~niworkflows.utils.spaces.Reference` objects representing spatial references.
+        Each ``Reference`` contains a space, which is a string of either TemplateFlow template IDs
+        (e.g., ``MNI152Lin``, ``MNI152NLin6Asym``, ``MNIPediatricAsym``), nonstandard references
+        (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.), or a custom template located in
+        the TemplateFlow root directory. Each ``Reference`` may also contain a spec, which is a
+        dictionary with template specifications (e.g., a specification of ``{'resolution': 2}``
+        would lead to resampling on a 2mm resolution of the space).
     subject_list : list
         List of subject labels
     use_syn : bool
@@ -141,9 +149,10 @@ def init_dmriprep_wf(
             BIDSFreeSurferDir(
                 derivatives=output_dir,
                 freesurfer_home=os.getenv('FREESURFER_HOME'),
-                spaces=[s for s in output_spaces.keys() if s.startswith('fsaverage')] + [
-                    'fsnative'] * ('fsnative' in output_spaces)),
+                spaces=spaces.get_fs_spaces()),
             name='fsdir_run_' + run_uuid.replace('-', '_'), run_without_submitting=True)
+        if fs_subjects_dir is not None:
+            fsdir.inputs.subjects_dir = str(fs_subjects_dir.absolute())
 
     reportlets_dir = os.path.join(work_dir, 'reportlets')
     for subject_id in subject_list:
@@ -160,10 +169,10 @@ def init_dmriprep_wf(
             name="single_subject_" + subject_id + "_wf",
             omp_nthreads=omp_nthreads,
             output_dir=output_dir,
-            output_spaces=output_spaces,
             reportlets_dir=reportlets_dir,
             skull_strip_fixed_seed=skull_strip_fixed_seed,
             skull_strip_template=skull_strip_template,
+            spaces=spaces,
             subject_id=subject_id,
             use_syn=use_syn,
         )
@@ -195,10 +204,10 @@ def init_single_subject_wf(
     name,
     omp_nthreads,
     output_dir,
-    output_spaces,
     reportlets_dir,
     skull_strip_fixed_seed,
     skull_strip_template,
+    spaces,
     subject_id,
     use_syn,
 ):
@@ -220,8 +229,9 @@ def init_single_subject_wf(
             :graph2use: orig
             :simple_form: yes
 
+            from collections import namedtuple
+            from niworkflows.utils.spaces import Reference, SpatialReferences
             from dmriprep.workflows.base import init_single_subject_wf
-            from collections import namedtuple, OrderedDict
             BIDSLayout = namedtuple('BIDSLayout', ['root'])
             wf = init_single_subject_wf(
                 anat_only=False,
@@ -236,12 +246,15 @@ def init_single_subject_wf(
                 name='single_subject_wf',
                 omp_nthreads=1,
                 output_dir='.',
-                output_spaces=OrderedDict([
-                    ('MNI152Lin', {}), ('fsaverage', {'density': '10k'}),
-                    ('T1w', {}), ('fsnative', {})]),
                 reportlets_dir='.',
                 skull_strip_fixed_seed=False,
-                skull_strip_template=('OASIS30ANTs', {}),
+                skull_strip_template=Reference('OASIS30ANTs'),
+                spaces=SpatialReferences(
+                    spaces=['MNI152Lin',
+                            ('fsaverage', {'density': '10k'}),
+                            'T1w',
+                            'fsnative'],
+                    checkpoint=True),
                 subject_id='test',
                 use_syn=True,
             )
@@ -273,22 +286,22 @@ def init_single_subject_wf(
         Maximum number of threads an individual process may use
     output_dir : str
         Directory in which to save derivatives
-    output_spaces : OrderedDict
-        Ordered dictionary where keys are TemplateFlow ID strings (e.g., ``MNI152Lin``,
-        ``MNI152NLin6Asym``, ``MNI152NLin2009cAsym``, or ``fsLR``) strings designating
-        nonstandard references (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.),
-        or paths pointing to custom templates organized in a TemplateFlow-like structure.
-        Values of the dictionary aggregate modifiers (e.g., the value for the key ``MNI152Lin``
-        could be ``{'resolution': 2}`` if one wants the resampling to be done on the 2mm
-        resolution version of the selected template).
     reportlets_dir : str
         Directory in which to save reportlets
     skull_strip_fixed_seed : bool
         Do not use a random seed for skull-stripping - will ensure
         run-to-run replicability when used with --omp-nthreads 1
-    skull_strip_template : tuple
-        Name of target template for brain extraction with ANTs' ``antsBrainExtraction``,
-        and corresponding dictionary of output-space modifiers.
+    skull_strip_template : :py:class:`~niworkflows.utils.space.Reference`
+        Target template for brain extraction with ANTs' ``antsBrainExtraction``.
+    spaces : :py:class:`~niworkflows.utils.spaces.SpatialReferences`
+        A container for storing, organizing, and parsing spatial normalizations. Composed of
+        :py:class:`~niworkflows.utils.spaces.Reference` objects representing spatial references.
+        Each ``Reference`` contains a space, which is a string of either TemplateFlow template IDs
+        (e.g., ``MNI152Lin``, ``MNI152NLin6Asym``, ``MNIPediatricAsym``), nonstandard references
+        (e.g., ``T1w`` or ``anat``, ``sbref``, ``run``, etc.), or a custom template located in
+        the TemplateFlow root directory. Each ``Reference`` may also contain a spec, which is a
+        dictionary with template specifications (e.g., a specification of ``{'resolution': 2}``
+        would lead to resampling on a 2mm resolution of the space).
     subject_id : str
         List of subject labels
     use_syn : bool
@@ -301,7 +314,6 @@ def init_single_subject_wf(
         FreeSurfer's ``$SUBJECTS_DIR``
 
     """
-    from ..config import NONSTANDARD_REFERENCES
     if name in ('single_subject_wf', 'single_subject_dmripreptest_wf'):
         # for documentation purposes
         subject_data = {
@@ -349,11 +361,6 @@ It is released under the [CC0]\
 
 """.format(dmriprep_ver=Version(__version__).public)
 
-    # Filter out standard spaces to a separate dict
-    std_spaces = OrderedDict([
-        (key, modifiers) for key, modifiers in output_spaces.items()
-        if key not in NONSTANDARD_REFERENCES])
-
     inputnode = pe.Node(niu.IdentityInterface(fields=['subjects_dir']),
                         name='inputnode')
 
@@ -363,10 +370,9 @@ It is released under the [CC0]\
     bids_info = pe.Node(BIDSInfo(
         bids_dir=layout.root, bids_validate=False), name='bids_info')
 
-    summary = pe.Node(SubjectSummary(
-        std_spaces=list(std_spaces.keys()),
-        nstd_spaces=list(set(NONSTANDARD_REFERENCES).intersection(output_spaces.keys()))),
-        name='summary', run_without_submitting=True)
+    summary = pe.Node(SubjectSummary(std_spaces=spaces.get_spaces(nonstandard=False),
+                                     nstd_spaces=spaces.get_spaces(standard=False)),
+                      name='summary', run_without_submitting=True)
 
     about = pe.Node(AboutSummary(version=__version__,
                                  command=' '.join(sys.argv)),
@@ -385,18 +391,18 @@ It is released under the [CC0]\
     # Preprocessing of T1w (includes registration to MNI)
     anat_preproc_wf = init_anat_preproc_wf(
         bids_root=layout.root,
-        debug=debug,
         freesurfer=freesurfer,
         hires=hires,
         longitudinal=longitudinal,
-        name="anat_preproc_wf",
         num_t1w=len(subject_data['t1w']),
         omp_nthreads=omp_nthreads,
         output_dir=output_dir,
-        output_spaces=std_spaces,
         reportlets_dir=reportlets_dir,
-        skull_strip_fixed_seed=skull_strip_fixed_seed,
         skull_strip_template=skull_strip_template,
+        spaces=spaces,
+        debug=debug,
+        name="anat_preproc_wf",
+        skull_strip_fixed_seed=skull_strip_fixed_seed,
     )
 
     workflow.connect([
