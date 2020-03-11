@@ -130,11 +130,13 @@ Standard spaces may be specified by the form \
 a keyword designating a spatial reference, and may be followed by optional, \
 colon-separated parameters. \
 Non-standard spaces imply specific orientations and sampling grids. \
+The default value of this flag (meaning, if the argument is not include in the command line) \
+is ``--output-spaces run`` - the original space and sampling grid of the original DWI run. \
 Important to note, the ``res-*`` modifier does not define the resolution used for \
-the spatial normalization. To generate no DWI outputs, use this option without specifying \
-any spatial references. For further details, please check out \
-https://www.nipreps.org/dmriprep/%s/spaces.html""" % (currentv.base_version
-                                                      if is_release else 'latest'))
+the spatial normalization. To generate no DWI outputs (if that is intended for some reason), \
+use this option without specifying any spatial references. For further details, please check out \
+https://www.nipreps.org/dmriprep/en/%s/spaces.html""" % (currentv.base_version
+                                                         if is_release else 'latest'))
 
     #  ANTs options
     g_ants = parser.add_argument_group('Specific options for ANTs registrations')
