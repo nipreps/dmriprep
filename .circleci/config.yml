@@ -470,7 +470,7 @@ jobs:
             which dmriprep | grep wheel\\/bin
             INSTALLED_VERSION=$(dmriprep --version)
             INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
-            INSTALLED_VERSION=${INSTALLED_VERSION#*"dmriprep v"}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
             echo "VERSION: \"$THISVERSION\""
             echo "INSTALLED: \"$INSTALLED_VERSION\""
             test "$INSTALLED_VERSION" = "$THISVERSION"
