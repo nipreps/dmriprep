@@ -58,7 +58,7 @@ Logging
 
 Other responsibilities
 ----------------------
-The :py:mod:`config` is responsible for other conveniency actions.
+The :py:mod:`config` is responsible for other convenience actions.
 
   * Switching Python's :obj:`multiprocessing` to *forkserver* mode.
   * Set up a filter for warnings as early as possible.

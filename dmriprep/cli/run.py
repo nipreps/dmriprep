@@ -27,7 +27,7 @@ def main():
     # CRITICAL Save the config to a file. This is necessary because the execution graph
     # is built as a separate process to keep the memory footprint low. The most
     # straightforward way to communicate with the child process is via the filesystem.
-    config_file = config.execution.work_dir / '.fmriprep.toml'
+    config_file = config.execution.work_dir / '.dmriprep.toml'
     config.to_filename(config_file)
 
     # CRITICAL Call build_workflow(config_file, retval) in a subprocess.
@@ -45,7 +45,7 @@ def main():
 
     # CRITICAL Load the config from the file. This is necessary because the ``build_workflow``
     # function executed constrained in a process may change the config (and thus the global
-    # state of fMRIPrep).
+    # state of dMRIPrep).
     config.load(config_file)
 
     if config.execution.reports_only:
@@ -85,7 +85,7 @@ def main():
     except Exception as e:
         if not config.execution.notrack:
             popylar.track_event(__ga_id__, 'run', 'error')
-        config.loggers.workflow.critical('fMRIPrep failed: %s', e)
+        config.loggers.workflow.critical('dMRIPrep failed: %s', e)
         raise
     else:
         config.loggers.workflow.log(25, 'dMRIPrep finished successfully!')
@@ -93,7 +93,7 @@ def main():
         # Bother users with the boilerplate only iff the workflow went okay.
         if (config.execution.output_dir / 'dmriprep' / 'logs' / 'CITATION.md').exists():
             config.loggers.workflow.log(
-                25, 'Works derived from this fMRIPrep execution should '
+                25, 'Works derived from this dMRIPrep execution should '
                 'include the following boilerplate:\n\n%s',
                 (config.execution.output_dir / 'dmriprep' / 'logs' / 'CITATION.md').read_text()
             )

@@ -131,7 +131,7 @@ a keyword designating a spatial reference, and may be followed by optional, \
 colon-separated parameters. \
 Non-standard spaces imply specific orientations and sampling grids. \
 Important to note, the ``res-*`` modifier does not define the resolution used for \
-the spatial normalization. To generate no BOLD outputs, use this option without specifying \
+the spatial normalization. To generate no DWI outputs, use this option without specifying \
 any spatial references. For further details, please check out \
 https://www.nipreps.org/dmriprep/%s/spaces.html""" % (currentv.base_version
                                                       if is_release else 'latest'))
@@ -205,8 +205,8 @@ https://www.nipreps.org/dmriprep/%s/spaces.html""" % (currentv.base_version
                               ' was specified.')
     g_other.add_argument('--notrack', action='store_true', default=False,
                          help='Opt-out of sending tracking information of this run to '
-                              'the FMRIPREP developers. This information helps to '
-                              'improve FMRIPREP and provides an indicator of real '
+                              'the dMRIPREP developers. This information helps to '
+                              'improve dMRIPREP and provides an indicator of real '
                               'world usage crucial for obtaining funding.')
     g_other.add_argument('--sloppy', dest='debug', action='store_true', default=False,
                          help='Use low-quality tools for speed - TESTING ONLY')
