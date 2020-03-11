@@ -40,7 +40,7 @@ class ExtractB0(SimpleInterface):
         self._results['out_file'] = extract_b0(
             self.inputs.in_file,
             self.inputs.b0_ixs,
-            newpath=runtime.cwd)
+            out_path=runtime.cwd)
         return runtime
 
 
@@ -75,10 +75,10 @@ class RescaleB0(SimpleInterface):
         self._results['out_b0s'] = rescale_b0(
             self.inputs.in_file,
             self.inputs.mask_file,
-            newpath=runtime.cwd
+            out_path=runtime.cwd
         )
         self._results['out_ref'] = median(
             self._results['out_b0s'],
-            newpath=runtime.cwd
+            out_path=runtime.cwd
         )
         return runtime
