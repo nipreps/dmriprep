@@ -28,7 +28,7 @@ def test_parser_errors(args, code):
 ])
 def test_parser_valid(tmp_path, args):
     """Check valid arguments."""
-    datapath = (tmp_path / 'data')
+    datapath = (tmp_path / 'data').absolute()
     datapath.mkdir(exist_ok=True)
     args[0] = str(datapath)
 
@@ -59,13 +59,14 @@ def test_parser_valid(tmp_path, args):
 ])
 def test_memory_arg(tmp_path, argval, gb):
     """Check the correct parsing of the memory argument."""
-    datapath = (tmp_path / 'data')
+    datapath = (tmp_path / 'data').absolute()
     datapath.mkdir(exist_ok=True)
     _fs_file = tmp_path / 'license.txt'
     _fs_file.write_text('')
 
     args = MIN_ARGS + ['--fs-license-file', str(_fs_file)] \
         + ['--mem', argval]
+    args[0] = str(datapath)
     opts = _build_parser().parse_args(args)
 
     assert opts.memory_gb == gb
