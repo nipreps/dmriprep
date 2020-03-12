@@ -507,10 +507,10 @@ def get(flat=False):
             for k, v in configs.items()}
 
 
-def dumps():
+def dumps(flat=False):
     """Format config into toml."""
     from toml import dumps
-    return dumps(get())
+    return dumps(get(flat=flat))
 
 
 def to_filename(filename):
