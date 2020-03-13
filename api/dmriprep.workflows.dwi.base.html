@@ -186,7 +186,7 @@
 <p>Orchestrating the dMRI-preprocessing workflow.</p>
 <dl class="function">
 <dt id="dmriprep.workflows.dwi.base.init_dwi_preproc_wf">
-<code class="sig-prename descclassname">dmriprep.workflows.dwi.base.</code><code class="sig-name descname">init_dwi_preproc_wf</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em>, <em class="sig-param">debug</em>, <em class="sig-param">force_syn</em>, <em class="sig-param">ignore</em>, <em class="sig-param">low_mem</em>, <em class="sig-param">omp_nthreads</em>, <em class="sig-param">output_dir</em>, <em class="sig-param">reportlets_dir</em>, <em class="sig-param">use_syn</em>, <em class="sig-param">layout=None</em>, <em class="sig-param">num_dwi=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_preproc_wf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.base.</code><code class="sig-name descname">init_dwi_preproc_wf</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_preproc_wf" title="Permalink to this definition">¶</a></dt>
 <dd><p>This workflow controls the diffusion preprocessing stages of <em>dMRIPrep</em>.</p>
 <dl>
 <dt>Workflow Graph</dt><dd><div class="figure align-default">
@@ -197,21 +197,7 @@
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dwi_file</strong> (<em>str</em>) – dwi NIfTI file</p></li>
-<li><p><strong>debug</strong> (<em>bool</em>) – Enable debugging outputs</p></li>
-<li><p><strong>force_syn</strong> (<em>bool</em>) – <strong>Temporary</strong>: Always run SyN-based SDC</p></li>
-<li><p><strong>ignore</strong> (<em>list</em>) – Preprocessing steps to skip (may include “sdc”)</p></li>
-<li><p><strong>low_mem</strong> (<em>bool</em>) – Write uncompressed .nii files in some cases to reduce memory usage</p></li>
-<li><p><strong>omp_nthreads</strong> (<em>int</em>) – Maximum number of threads an individual process may use</p></li>
-<li><p><strong>output_dir</strong> (<em>str</em>) – Directory in which to save derivatives</p></li>
-<li><p><strong>reportlets_dir</strong> (<em>str</em>) – Absolute path of a directory in which reportlets will be temporarily stored</p></li>
-<li><p><strong>use_syn</strong> (<em>bool</em>) – <strong>Experimental</strong>: Enable ANTs SyN-based susceptibility distortion correction (SDC).
-If fieldmaps are present and enabled, this is not run, by default.</p></li>
-<li><p><strong>layout</strong> (<em>BIDSLayout</em>) – BIDSLayout structure to enable metadata retrieval</p></li>
-<li><p><strong>num_dwi</strong> (<em>int</em>) – Total number of dwi files that have been set for preprocessing
-(default is 1)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>dwi_file</strong> (<em>str</em>) – dwi NIfTI file</p>
 </dd>
 <dt class="field-even">Inputs</dt>
 <dd class="field-even"><ul class="simple">

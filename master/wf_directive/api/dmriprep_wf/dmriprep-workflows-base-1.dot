@@ -1,5 +1,5 @@
 strict digraph  {
-"fsdir_run_X (bids)";
-single_subject_dmripreptest_wf;
-"fsdir_run_X (bids)" -> single_subject_dmripreptest_wf;
+"fsdir_run_20200311_121754_aa0b4fa9_6b60_4a11_af7d_02deb54a823f (bids)";
+single_subject_THP0005_wf;
+"fsdir_run_20200311_121754_aa0b4fa9_6b60_4a11_af7d_02deb54a823f (bids)" -> single_subject_THP0005_wf;
 }

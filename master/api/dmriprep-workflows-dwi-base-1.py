@@ -1,16 +1,6 @@
-from dmriprep.workflows.dwi import init_dwi_preproc_wf
-from collections import namedtuple
-BIDSLayout = namedtuple('BIDSLayout', ['root'])
-wf = init_dwi_preproc_wf(
-    dwi_file='/completely/made/up/path/sub-01_dwi.nii.gz',
-    debug=False,
-    force_syn=True,
-    ignore=[],
-    low_mem=False,
-    omp_nthreads=1,
-    output_dir='.',
-    reportlets_dir='.',
-    use_syn=True,
-    layout=BIDSLayout('.'),
-    num_dwi=1,
-)
+from dmriprep.config.testing import mock_config
+from dmriprep import config
+from dmriprep.workflows.dwi.base import init_dwi_preproc_wf
+with mock_config():
+    dwi_file = config.execution.bids_dir / 'sub-THP0005' / 'dwi'                     / 'sub-THP0005_dwi.nii.gz'
+    wf = init_dwi_preproc_wf(str(dwi_file))

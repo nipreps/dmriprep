@@ -200,22 +200,24 @@ Example:</p>
 </div>
 <div class="section" id="command-line-arguments">
 <h2>Command-Line Arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline">¶</a></h2>
-<p><p>dMRIPrep: dMRI PREProcessing workflows</p>
+<p><p>dMRIPrep: dMRI PREProcessing workflows v0.2.2+63.g199a496</p>
 </p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dmriprep</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">bids</span><span class="o">-</span><span class="n">validation</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">participant_label</span> <span class="n">PARTICIPANT_LABEL</span> <span class="p">[</span><span class="n">PARTICIPANT_LABEL</span> <span class="o">...</span><span class="p">]]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">nprocs</span> <span class="n">NPROCS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">omp</span><span class="o">-</span><span class="n">nthreads</span> <span class="n">OMP_NTHREADS</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">mem_mb</span> <span class="n">MEM_MB</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">low</span><span class="o">-</span><span class="n">mem</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">plugin</span> <span class="n">USE_PLUGIN</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">anat</span><span class="o">-</span><span class="n">only</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">boilerplate</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">ignore</span> <span class="p">{</span><span class="n">sdc</span><span class="p">}</span> <span class="p">[{</span><span class="n">sdc</span><span class="p">}</span> <span class="o">...</span><span class="p">]]</span> <span class="p">[</span><span class="o">--</span><span class="n">longitudinal</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dmriprep</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">skip_bids_validation</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">participant</span><span class="o">-</span><span class="n">label</span> <span class="n">PARTICIPANT_LABEL</span> <span class="p">[</span><span class="n">PARTICIPANT_LABEL</span> <span class="o">...</span><span class="p">]]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">bids</span><span class="o">-</span><span class="nb">filter</span><span class="o">-</span><span class="n">file</span> <span class="n">PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">nprocs</span> <span class="n">NPROCS</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">omp</span><span class="o">-</span><span class="n">nthreads</span> <span class="n">OMP_NTHREADS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mem</span> <span class="n">MEMORY_GB</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">low</span><span class="o">-</span><span class="n">mem</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">plugin</span> <span class="n">USE_PLUGIN</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">anat</span><span class="o">-</span><span class="n">only</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">boilerplate_only</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">md</span><span class="o">-</span><span class="n">only</span><span class="o">-</span><span class="n">boilerplate</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">ignore</span> <span class="p">{</span><span class="n">fieldmaps</span><span class="p">,</span><span class="n">slicetiming</span><span class="p">,</span><span class="n">sbref</span><span class="p">}</span> <span class="p">[{</span><span class="n">fieldmaps</span><span class="p">,</span><span class="n">slicetiming</span><span class="p">,</span><span class="n">sbref</span><span class="p">}</span> <span class="o">...</span><span class="p">]]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">longitudinal</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="n">spaces</span> <span class="p">[</span><span class="n">OUTPUT_SPACES</span> <span class="p">[</span><span class="n">OUTPUT_SPACES</span> <span class="o">...</span><span class="p">]]]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">skull</span><span class="o">-</span><span class="n">strip</span><span class="o">-</span><span class="n">template</span> <span class="n">SKULL_STRIP_TEMPLATE</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">skull</span><span class="o">-</span><span class="n">strip</span><span class="o">-</span><span class="n">fixed</span><span class="o">-</span><span class="n">seed</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fmap</span><span class="o">-</span><span class="n">bspline</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fmap</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">demean</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">syn</span><span class="o">-</span><span class="n">sdc</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">syn</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">license</span><span class="o">-</span><span class="n">file</span> <span class="n">PATH</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">subjects</span><span class="o">-</span><span class="nb">dir</span> <span class="n">PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">submm</span><span class="o">-</span><span class="n">recon</span> <span class="o">|</span> <span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">reconall</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORK_DIR</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">resource</span><span class="o">-</span><span class="n">monitor</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">reports</span><span class="o">-</span><span class="n">only</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">uuid</span> <span class="n">RUN_UUID</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">write</span><span class="o">-</span><span class="n">graph</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">stop</span><span class="o">-</span><span class="n">on</span><span class="o">-</span><span class="n">first</span><span class="o">-</span><span class="n">crash</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">notrack</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">sloppy</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORK_DIR</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">clean</span><span class="o">-</span><span class="n">workdir</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">resource</span><span class="o">-</span><span class="n">monitor</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">reports</span><span class="o">-</span><span class="n">only</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">uuid</span> <span class="n">RUN_UUID</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">write</span><span class="o">-</span><span class="n">graph</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">stop</span><span class="o">-</span><span class="n">on</span><span class="o">-</span><span class="n">first</span><span class="o">-</span><span class="n">crash</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">notrack</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">sloppy</span><span class="p">]</span>
                 <span class="n">bids_dir</span> <span class="n">output_dir</span> <span class="p">{</span><span class="n">participant</span><span class="p">}</span>
 </pre></div>
 </div>
@@ -245,24 +247,27 @@ Example:</p>
 <div class="section" id="Options for filtering BIDS queries">
 <h3>Options for filtering BIDS queries<a class="headerlink" href="#Options for filtering BIDS queries" title="Permalink to this headline">¶</a></h3>
 <dl class="option-list">
-<dt><kbd>--skip-bids-validation</kbd></dt>
+<dt><kbd>--skip_bids_validation, --skip-bids-validation</kbd></dt>
 <dd><p>assume the input dataset is BIDS compliant and skip the validation</p>
 </dd>
-<dt><kbd>--participant_label, --participant-label</kbd></dt>
+<dt><kbd>--participant-label, --participant_label</kbd></dt>
 <dd><p>a space delimited list of participant identifiers or a single identifier (the sub- prefix can be removed)</p>
+</dd>
+<dt><kbd>--bids-filter-file</kbd></dt>
+<dd><p>a JSON file describing custom BIDS input filter using pybids {&lt;suffix&gt;:{&lt;entity&gt;:&lt;filter&gt;,…},…} (<a class="reference external" href="https://github.com/bids-standard/pybids/blob/master/bids/layout/config/bids.json">https://github.com/bids-standard/pybids/blob/master/bids/layout/config/bids.json</a>)</p>
 </dd>
 </dl>
 </div>
 <div class="section" id="Options to handle performance">
 <h3>Options to handle performance<a class="headerlink" href="#Options to handle performance" title="Permalink to this headline">¶</a></h3>
 <dl class="option-list">
-<dt><kbd>--nprocs, --n_cpus, -n-cpus</kbd></dt>
+<dt><kbd>--nprocs, --nthreads, --n_cpus, -n-cpus</kbd></dt>
 <dd><p>maximum number of threads across all processes</p>
 </dd>
 <dt><kbd>--omp-nthreads</kbd></dt>
 <dd><p>maximum number of threads per-process</p>
 </dd>
-<dt><kbd>--mem_mb, --mem-mb</kbd></dt>
+<dt><kbd>--mem, --mem_mb, --mem-mb</kbd></dt>
 <dd><p>upper bound memory limit for dMRIPrep processes</p>
 </dd>
 <dt><kbd>--low-mem</kbd></dt>
@@ -274,11 +279,14 @@ Example:</p>
 <dt><kbd>--anat-only</kbd></dt>
 <dd><p>run anatomical workflows only</p>
 </dd>
-<dt><kbd>--boilerplate</kbd></dt>
+<dt><kbd>--boilerplate_only</kbd></dt>
 <dd><p>generate boilerplate only</p>
 </dd>
+<dt><kbd>--md-only-boilerplate</kbd></dt>
+<dd><p>skip generation of HTML and LaTeX formatted citation with pandoc</p>
+</dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>increases log verbosity for each occurence, debug level is -vvv</p>
+<dd><p>increases log verbosity for each occurrence, debug level is -vvv</p>
 </dd>
 </dl>
 </div>
@@ -286,7 +294,7 @@ Example:</p>
 <h3>Workflow configuration<a class="headerlink" href="#Workflow configuration" title="Permalink to this headline">¶</a></h3>
 <dl class="option-list">
 <dt><kbd>--ignore</kbd></dt>
-<dd><p>Possible choices: sdc</p>
+<dd><p>Possible choices: fieldmaps, slicetiming, sbref</p>
 <p>ignore selected aspects of the input dataset to disable corresponding parts of the workflow (a space delimited list)</p>
 </dd>
 <dt><kbd>--longitudinal</kbd></dt>
@@ -347,8 +355,8 @@ Example:</p>
 <dt><kbd>--no-submm-recon</kbd></dt>
 <dd><p>disable sub-millimeter (hires) reconstruction</p>
 </dd>
-<dt><kbd>--fs-no-reconall, --no-freesurfer</kbd></dt>
-<dd><p>disable FreeSurfer surface preprocessing. Note : <cite>–no-freesurfer</cite> is deprecated and will be removed in 1.2. Use <cite>–fs-no-reconall</cite> instead.</p>
+<dt><kbd>--fs-no-reconall</kbd></dt>
+<dd><p>disable FreeSurfer surface preprocessing.</p>
 </dd>
 </dl>
 </div>
@@ -357,6 +365,9 @@ Example:</p>
 <dl class="option-list">
 <dt><kbd>-w, --work-dir</kbd></dt>
 <dd><p>path where intermediate results should be stored</p>
+</dd>
+<dt><kbd>--clean-workdir</kbd></dt>
+<dd><p>Clears working directory of contents. Use of this flag is notrecommended when running concurrent processes of dMRIPrep.</p>
 </dd>
 <dt><kbd>--resource-monitor</kbd></dt>
 <dd><p>enable Nipype’s resource monitoring to keep track of memory and CPU usage</p>
@@ -374,7 +385,7 @@ Example:</p>
 <dd><p>Force stopping on first crash, even if a work directory was specified.</p>
 </dd>
 <dt><kbd>--notrack</kbd></dt>
-<dd><p>Opt-out of sending tracking information of this run to the dMRIPrep developers. This information helps to improve dMRIPrep and provides an indicator of real world usage crucial for obtaining funding.</p>
+<dd><p>Opt-out of sending tracking information of this run to the dMRIPREP developers. This information helps to improve dMRIPREP and provides an indicator of real world usage crucial for obtaining funding.</p>
 </dd>
 <dt><kbd>--sloppy</kbd></dt>
 <dd><p>Use low-quality tools for speed - TESTING ONLY</p>

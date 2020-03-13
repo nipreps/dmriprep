@@ -27,7 +27,7 @@ Example: ::
 Command-Line Arguments
 ----------------------
 .. argparse::
-   :ref: dmriprep.cli.run.get_parser
+   :ref: dmriprep.cli.parser._build_parser
    :prog: dmriprep
    :nodefault:
    :nodefaultconst:

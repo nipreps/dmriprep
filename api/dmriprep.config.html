@@ -90,7 +90,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">dmriprep.config package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dmriprep.config package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-sections">Configuration sections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging">Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-responsibilities">Other responsibilities</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="dmriprep.interfaces.html">dmriprep.interfaces package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dmriprep.utils.html">dmriprep.utils package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dmriprep.workflows.html">dmriprep.workflows package</a></li>
@@ -172,7 +178,977 @@
 
 <div class="section" id="module-dmriprep.config">
 <span id="dmriprep-config-package"></span><h1>dmriprep.config package<a class="headerlink" href="#module-dmriprep.config" title="Permalink to this headline">¶</a></h1>
-<p>Settings.</p>
+<p>A Python module to maintain unique, run-wide <em>dMRIPrep</em> settings.</p>
+<p>This module implements the memory structures to keep a consistent, singleton config.
+Settings are passed across processes via filesystem, and a copy of the settings for
+each run and subject is left under
+<code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/sub-&lt;participant_id&gt;/log/&lt;run_unique_id&gt;/dmriprep.toml</span></code>.
+Settings are stored using <abbr title="Tom's Markup Language">ToML</abbr>.
+The module has a <a class="reference internal" href="#dmriprep.config.to_filename" title="dmriprep.config.to_filename"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_filename()</span></code></a> function to allow writing out
+the settings to hard disk in <em>ToML</em> format, which looks like:</p>
+<div class="literal-block-wrapper docutils container" id="dmriprep-toml">
+<div class="code-block-caption"><span class="caption-text"><strong>Example file representation of dMRIPrep settings</strong>.</span><a class="headerlink" href="#dmriprep-toml" title="Permalink to this code">¶</a></div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[environment]</span>
+<span class="n">cpu_count</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">exec_env</span> <span class="o">=</span> <span class="s">&quot;posix&quot;</span>
+<span class="n">free_mem</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">overcommit_policy</span> <span class="o">=</span> <span class="s">&quot;heuristic&quot;</span>
+<span class="n">overcommit_limit</span> <span class="o">=</span> <span class="s">&quot;50%&quot;</span>
+<span class="n">nipype_version</span> <span class="o">=</span> <span class="s">&quot;1.4.2&quot;</span>
+<span class="n">templateflow_version</span> <span class="o">=</span> <span class="s">&quot;0.4.2&quot;</span>
+<span class="n">version</span> <span class="o">=</span> <span class="s">&quot;0.2.2&quot;</span>
+
+<span class="k">[execution]</span>
+<span class="n">bids_dir</span> <span class="o">=</span> <span class="s">&quot;THP002/&quot;</span>
+<span class="n">bids_description_hash</span> <span class="o">=</span> <span class="s">&quot;b07ee615a588acf67967d70f5b2402ffbe477b99a316433fa7fdaff4f9dad5c1&quot;</span>
+<span class="n">boilerplate_only</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">debug</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">fs_license_file</span> <span class="o">=</span> <span class="s">&quot;/opt/freesurfer/license.txt&quot;</span>
+<span class="n">fs_subjects_dir</span> <span class="o">=</span> <span class="s">&quot;opt/freesurfer/subjects&quot;</span>
+<span class="n">layout</span> <span class="o">=</span> <span class="s">&quot;BIDS Layout: .../home/oesteban/Data/THP002 | Subjects: 1 | Sessions: 2 | Runs: 2&quot;</span>
+<span class="n">log_dir</span> <span class="o">=</span> <span class="s">&quot;/tmp/dmriprep/logs&quot;</span>
+<span class="n">log_level</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">low_mem</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">md_only_boilerplate</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">notrack</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="n">output_dir</span> <span class="o">=</span> <span class="s">&quot;/tmp&quot;</span>
+<span class="n">output_spaces</span> <span class="o">=</span> <span class="s">&quot;run&quot;</span>
+<span class="n">reports_only</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">run_uuid</span> <span class="o">=</span> <span class="s">&quot;20200311-121754_aa0b4fa9-6b60-4a11-af7d-02deb54a823f&quot;</span>
+<span class="n">participant_label</span> <span class="o">=</span> <span class="k">[ &quot;THP0005&quot;,]</span>
+<span class="n">templateflow_home</span> <span class="o">=</span> <span class="s">&quot;/usr/share/templateflow&quot;</span>
+<span class="n">work_dir</span> <span class="o">=</span> <span class="s">&quot;work/&quot;</span>
+<span class="n">write_graph</span> <span class="o">=</span> <span class="kc">false</span>
+
+<span class="k">[workflow]</span>
+<span class="n">anat_only</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">fmap_bspline</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">force_syn</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">hires</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="n">ignore</span> <span class="o">=</span> <span class="k">[]</span>
+<span class="n">longitudinal</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">run_reconall</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="n">skull_strip_fixed_seed</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">skull_strip_template</span> <span class="o">=</span> <span class="s">&quot;OASIS30ANTs&quot;</span>
+<span class="n">spaces</span> <span class="o">=</span> <span class="s">&quot;run&quot;</span>
+
+<span class="k">[nipype]</span>
+<span class="n">crashfile_format</span> <span class="o">=</span> <span class="s">&quot;txt&quot;</span>
+<span class="n">get_linked_libs</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">nprocs</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">omp_nthreads</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">plugin</span> <span class="o">=</span> <span class="s">&quot;MultiProc&quot;</span>
+<span class="n">resource_monitor</span> <span class="o">=</span> <span class="kc">false</span>
+<span class="n">stop_on_first_crash</span> <span class="o">=</span> <span class="kc">false</span>
+
+<span class="k">[nipype.plugin_args]</span>
+<span class="n">maxtasksperchild</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">raise_insufficient</span> <span class="o">=</span> <span class="kc">false</span>
+</pre></div>
+</div>
+</div>
+<p>This config file is used to pass the settings across processes,
+using the <a class="reference internal" href="#dmriprep.config.load" title="dmriprep.config.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> function.</p>
+<div class="section" id="configuration-sections">
+<h2>Configuration sections<a class="headerlink" href="#configuration-sections" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dmriprep.config.environment">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">environment</code><a class="headerlink" href="#dmriprep.config.environment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read-only options regarding the platform and environment.</p>
+<p>Crawls runtime descriptive settings (e.g., default FreeSurfer license,
+execution environment, nipype and <em>dMRIPrep</em> versions, etc.).
+The <code class="docutils literal notranslate"><span class="pre">environment</span></code> section is not loaded in from file,
+only written out when settings are exported.
+This config section is useful when reporting issues,
+and these variables are tracked whenever the user does not
+opt-out using the <code class="docutils literal notranslate"><span class="pre">--notrack</span></code> argument.</p>
+<dl class="attribute">
+<dt id="dmriprep.config.environment.cpu_count">
+<code class="sig-name descname">cpu_count</code><em class="property"> = 36</em><a class="headerlink" href="#dmriprep.config.environment.cpu_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of available CPUs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.exec_docker_version">
+<code class="sig-name descname">exec_docker_version</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.environment.exec_docker_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version of Docker Engine.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.exec_env">
+<code class="sig-name descname">exec_env</code><em class="property"> = 'posix'</em><a class="headerlink" href="#dmriprep.config.environment.exec_env" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string representing the execution platform.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.free_mem">
+<code class="sig-name descname">free_mem</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.environment.free_mem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free memory at start.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.nipype_version">
+<code class="sig-name descname">nipype_version</code><em class="property"> = '1.4.2'</em><a class="headerlink" href="#dmriprep.config.environment.nipype_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nipype’s current version.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.overcommit_limit">
+<code class="sig-name descname">overcommit_limit</code><em class="property"> = '50%'</em><a class="headerlink" href="#dmriprep.config.environment.overcommit_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linux’s kernel virtual memory overcommit limits.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.overcommit_policy">
+<code class="sig-name descname">overcommit_policy</code><em class="property"> = 'heuristic'</em><a class="headerlink" href="#dmriprep.config.environment.overcommit_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linux’s kernel virtual memory overcommit policy.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.templateflow_version">
+<code class="sig-name descname">templateflow_version</code><em class="property"> = '0.4.2'</em><a class="headerlink" href="#dmriprep.config.environment.templateflow_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The TemplateFlow client version installed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.environment.version">
+<code class="sig-name descname">version</code><em class="property"> = '0.2.2+63.g199a496'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dMRIPrep</em>’s version.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dmriprep.config.execution">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">execution</code><a class="headerlink" href="#dmriprep.config.execution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure run-level settings.</p>
+<dl class="attribute">
+<dt id="dmriprep.config.execution.bids_description_hash">
+<code class="sig-name descname">bids_description_hash</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.bids_description_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checksum (SHA256) of the <code class="docutils literal notranslate"><span class="pre">dataset_description.json</span></code> of the BIDS dataset.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.bids_dir">
+<code class="sig-name descname">bids_dir</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.bids_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>An existing path to the dataset, which must be BIDS-compliant.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.bids_filters">
+<code class="sig-name descname">bids_filters</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.bids_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of BIDS selection filters.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.boilerplate_only">
+<code class="sig-name descname">boilerplate_only</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.execution.boilerplate_only" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only generate a boilerplate.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.debug">
+<code class="sig-name descname">debug</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.execution.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run in sloppy mode (meaning, suboptimal parameters that minimize run-time).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.fs_license_file">
+<code class="sig-name descname">fs_license_file</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.fs_license_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>An existing file containing a FreeSurfer license.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.fs_subjects_dir">
+<code class="sig-name descname">fs_subjects_dir</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.fs_subjects_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>FreeSurfer’s subjects directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.config.execution.init">
+<em class="property">classmethod </em><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.execution.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new BIDS Layout accessible with <a class="reference internal" href="#dmriprep.config.execution.layout" title="dmriprep.config.execution.layout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">layout</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.layout">
+<code class="sig-name descname">layout</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.layout" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSLayout</span></code> object, see <a class="reference internal" href="#dmriprep.config.execution.init" title="dmriprep.config.execution.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.log_dir">
+<code class="sig-name descname">log_dir</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.log_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to a directory that contains execution logs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.log_level">
+<code class="sig-name descname">log_level</code><em class="property"> = 25</em><a class="headerlink" href="#dmriprep.config.execution.log_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output verbosity.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.low_mem">
+<code class="sig-name descname">low_mem</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.low_mem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utilize uncompressed NIfTIs and other tricks to minimize memory allocation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.md_only_boilerplate">
+<code class="sig-name descname">md_only_boilerplate</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.execution.md_only_boilerplate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not convert boilerplate from MarkDown to LaTex and HTML.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.notrack">
+<code class="sig-name descname">notrack</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.execution.notrack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not monitor <em>dMRIPrep</em> using Google Analytics.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.output_dir">
+<code class="sig-name descname">output_dir</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.output_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Folder where derivatives will be stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.output_spaces">
+<code class="sig-name descname">output_spaces</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.output_spaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of (non)standard spaces designated (with the <code class="docutils literal notranslate"><span class="pre">--output-spaces</span></code> flag of
+the command line) as spatial references for outputs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.participant_label">
+<code class="sig-name descname">participant_label</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.execution.participant_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of participant identifiers that are to be preprocessed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.reports_only">
+<code class="sig-name descname">reports_only</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.execution.reports_only" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only build the reports, based on the reportlets found in a cached working directory.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.run_uuid">
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20200313-185511_9f5a52a3-e9f5-41fb-866c-c98bfdef1533'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique identifier of this particular run.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.templateflow_home">
+<code class="sig-name descname">templateflow_home</code><em class="property"> = PosixPath('/root/.cache/templateflow')</em><a class="headerlink" href="#dmriprep.config.execution.templateflow_home" title="Permalink to this definition">¶</a></dt>
+<dd><p>The root folder of the TemplateFlow client.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.work_dir">
+<code class="sig-name descname">work_dir</code><em class="property"> = PosixPath('/root/project/work')</em><a class="headerlink" href="#dmriprep.config.execution.work_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to a working directory where intermediate results will be available.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.execution.write_graph">
+<code class="sig-name descname">write_graph</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.execution.write_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out the computational graph corresponding to the planned preprocessing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dmriprep.config.workflow">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">workflow</code><a class="headerlink" href="#dmriprep.config.workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the particular execution graph of this workflow.</p>
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.anat_only">
+<code class="sig-name descname">anat_only</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.workflow.anat_only" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the anatomical preprocessing only.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.fmap_bspline">
+<code class="sig-name descname">fmap_bspline</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.fmap_bspline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regularize fieldmaps with a field of B-Spline basis.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.fmap_demean">
+<code class="sig-name descname">fmap_demean</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.fmap_demean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the mean from fieldmaps.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.force_syn">
+<code class="sig-name descname">force_syn</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.force_syn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run <em>fieldmap-less</em> susceptibility-derived distortions estimation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.hires">
+<code class="sig-name descname">hires</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.hires" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run FreeSurfer <code class="docutils literal notranslate"><span class="pre">recon-all</span></code> with the <code class="docutils literal notranslate"><span class="pre">-hires</span></code> flag.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.ignore">
+<code class="sig-name descname">ignore</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.ignore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ignore particular steps for <em>dMRIPrep</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.longitudinal">
+<code class="sig-name descname">longitudinal</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.workflow.longitudinal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run FreeSurfer <code class="docutils literal notranslate"><span class="pre">recon-all</span></code> with the <code class="docutils literal notranslate"><span class="pre">-logitudinal</span></code> flag.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.run_reconall">
+<code class="sig-name descname">run_reconall</code><em class="property"> = True</em><a class="headerlink" href="#dmriprep.config.workflow.run_reconall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run FreeSurfer’s surface reconstruction.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.skull_strip_fixed_seed">
+<code class="sig-name descname">skull_strip_fixed_seed</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.workflow.skull_strip_fixed_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix a seed for skull-stripping.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.skull_strip_template">
+<code class="sig-name descname">skull_strip_template</code><em class="property"> = 'OASIS30ANTs'</em><a class="headerlink" href="#dmriprep.config.workflow.skull_strip_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change default brain extraction template.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.spaces">
+<code class="sig-name descname">spaces</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.spaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keeps the <code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialReferences</span></code>
+instance keeping standard and nonstandard spaces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.use_syn">
+<code class="sig-name descname">use_syn</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.workflow.use_syn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run <em>fieldmap-less</em> susceptibility-derived distortions estimation
+in the absence of any alternatives.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dmriprep.config.nipype">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">nipype</code><a class="headerlink" href="#dmriprep.config.nipype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nipype settings.</p>
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.crashfile_format">
+<code class="sig-name descname">crashfile_format</code><em class="property"> = 'txt'</em><a class="headerlink" href="#dmriprep.config.nipype.crashfile_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>The file format for crashfiles, either text or pickle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.get_linked_libs">
+<code class="sig-name descname">get_linked_libs</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.nipype.get_linked_libs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run NiPype’s tool to enlist linked libraries for every interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.config.nipype.get_plugin">
+<em class="property">classmethod </em><code class="sig-name descname">get_plugin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.nipype.get_plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format a dictionary for Nipype consumption.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.config.nipype.init">
+<em class="property">classmethod </em><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.nipype.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set NiPype configurations.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.memory_gb">
+<code class="sig-name descname">memory_gb</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.nipype.memory_gb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimation in GB of the RAM this workflow can allocate at any given time.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.nprocs">
+<code class="sig-name descname">nprocs</code><em class="property"> = 36</em><a class="headerlink" href="#dmriprep.config.nipype.nprocs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of processes (compute tasks) that can be run in parallel (multiprocessing only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.omp_nthreads">
+<code class="sig-name descname">omp_nthreads</code><em class="property"> = 36</em><a class="headerlink" href="#dmriprep.config.nipype.omp_nthreads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of CPUs a single process can access for multithreaded execution.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.plugin">
+<code class="sig-name descname">plugin</code><em class="property"> = 'MultiProc'</em><a class="headerlink" href="#dmriprep.config.nipype.plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>NiPype’s execution plugin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.plugin_args">
+<code class="sig-name descname">plugin_args</code><em class="property"> = {'maxtasksperchild': 1, 'raise_insufficient': False}</em><a class="headerlink" href="#dmriprep.config.nipype.plugin_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings for NiPype’s execution plugin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.resource_monitor">
+<code class="sig-name descname">resource_monitor</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.nipype.resource_monitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable resource monitor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.stop_on_first_crash">
+<code class="sig-name descname">stop_on_first_crash</code><em class="property"> = True</em><a class="headerlink" href="#dmriprep.config.nipype.stop_on_first_crash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether the workflow should stop or continue after the first error.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>A config file is used to pass settings and collect information as the execution
+graph is built across processes.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dmriprep</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="n">config_file</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">execution</span><span class="o">.</span><span class="n">work_dir</span> <span class="o">/</span> <span class="s1">&#39;.dmriprep.toml&#39;</span>
+<span class="n">config</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+<span class="c1"># Call build_workflow(config_file, retval) in a subprocess</span>
+<span class="k">with</span> <span class="n">Manager</span><span class="p">()</span> <span class="k">as</span> <span class="n">mgr</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">build_workflow</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">build_workflow</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_file</span><span class="p">),</span> <span class="n">retval</span><span class="p">))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<span class="n">config</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+<span class="c1"># Access configs from any code section as:</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">setting</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dmriprep.config.loggers">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">loggers</code><a class="headerlink" href="#dmriprep.config.loggers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keep loggers easily accessible (see <a class="reference internal" href="#dmriprep.config.loggers.init" title="dmriprep.config.loggers.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>).</p>
+<dl class="attribute">
+<dt id="dmriprep.config.loggers.cli">
+<code class="sig-name descname">cli</code><em class="property"> = &lt;Logger cli (DEBUG)&gt;</em><a class="headerlink" href="#dmriprep.config.loggers.cli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command-line interface logging.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.loggers.default">
+<code class="sig-name descname">default</code><em class="property"> = &lt;RootLogger root (DEBUG)&gt;</em><a class="headerlink" href="#dmriprep.config.loggers.default" title="Permalink to this definition">¶</a></dt>
+<dd><p>The root logger.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.config.loggers.init">
+<em class="property">classmethod </em><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.loggers.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the log level, initialize all loggers into <a class="reference internal" href="#dmriprep.config.loggers" title="dmriprep.config.loggers"><code class="xref py py-class docutils literal notranslate"><span class="pre">loggers</span></code></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Add new logger levels (25: IMPORTANT, and 15: VERBOSE).</p></li>
+<li><p>Add a new sub-logger (<code class="docutils literal notranslate"><span class="pre">cli</span></code>).</p></li>
+<li><p>Logger configuration.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.loggers.interface">
+<code class="sig-name descname">interface</code><em class="property"> = &lt;Logger nipype.interface (INFO)&gt;</em><a class="headerlink" href="#dmriprep.config.loggers.interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>NiPype’s interface logger.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.loggers.utils">
+<code class="sig-name descname">utils</code><em class="property"> = &lt;Logger nipype.utils (INFO)&gt;</em><a class="headerlink" href="#dmriprep.config.loggers.utils" title="Permalink to this definition">¶</a></dt>
+<dd><p>NiPype’s utils logger.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.loggers.workflow">
+<code class="sig-name descname">workflow</code><em class="property"> = &lt;Logger nipype.workflow (INFO)&gt;</em><a class="headerlink" href="#dmriprep.config.loggers.workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>NiPype’s workflow logger.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="other-responsibilities">
+<h2>Other responsibilities<a class="headerlink" href="#other-responsibilities" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code> is responsible for other convenience actions.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Switching Python’s <a class="reference external" href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> to <em>forkserver</em> mode.</p></li>
+<li><p>Set up a filter for warnings as early as possible.</p></li>
+<li><p>Automated I/O magic operations. Some conversions need to happen in the
+store/load processes (e.g., from/to <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a> &lt;-&gt; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSLayout</span></code>, etc.)</p></li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="dmriprep.config.dumps">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">dumps</code><span class="sig-paren">(</span><em class="sig-param">flat=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.dumps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format config into toml.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">environment</code></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.config._Config</span></code></p>
+<p>Read-only options regarding the platform and environment.</p>
+<p>Crawls runtime descriptive settings (e.g., default FreeSurfer license,
+execution environment, nipype and <em>dMRIPrep</em> versions, etc.).
+The <code class="docutils literal notranslate"><span class="pre">environment</span></code> section is not loaded in from file,
+only written out when settings are exported.
+This config section is useful when reporting issues,
+and these variables are tracked whenever the user does not
+opt-out using the <code class="docutils literal notranslate"><span class="pre">--notrack</span></code> argument.</p>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">cpu_count</code><em class="property"> = 36</em></dt>
+<dd><p>Number of available CPUs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">exec_docker_version</code><em class="property"> = None</em></dt>
+<dd><p>Version of Docker Engine.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">exec_env</code><em class="property"> = 'posix'</em></dt>
+<dd><p>A string representing the execution platform.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">free_mem</code><em class="property"> = None</em></dt>
+<dd><p>Free memory at start.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">nipype_version</code><em class="property"> = '1.4.2'</em></dt>
+<dd><p>Nipype’s current version.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">overcommit_limit</code><em class="property"> = '50%'</em></dt>
+<dd><p>Linux’s kernel virtual memory overcommit limits.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">overcommit_policy</code><em class="property"> = 'heuristic'</em></dt>
+<dd><p>Linux’s kernel virtual memory overcommit policy.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">templateflow_version</code><em class="property"> = '0.4.2'</em></dt>
+<dd><p>The TemplateFlow client version installed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.2.2+63.g199a496'</em></dt>
+<dd><p><em>dMRIPrep</em>’s version.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">execution</code></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.config._Config</span></code></p>
+<p>Configure run-level settings.</p>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">bids_description_hash</code><em class="property"> = None</em></dt>
+<dd><p>Checksum (SHA256) of the <code class="docutils literal notranslate"><span class="pre">dataset_description.json</span></code> of the BIDS dataset.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">bids_dir</code><em class="property"> = None</em></dt>
+<dd><p>An existing path to the dataset, which must be BIDS-compliant.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">bids_filters</code><em class="property"> = None</em></dt>
+<dd><p>A dictionary of BIDS selection filters.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">boilerplate_only</code><em class="property"> = False</em></dt>
+<dd><p>Only generate a boilerplate.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">debug</code><em class="property"> = False</em></dt>
+<dd><p>Run in sloppy mode (meaning, suboptimal parameters that minimize run-time).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">fs_license_file</code><em class="property"> = None</em></dt>
+<dd><p>An existing file containing a FreeSurfer license.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">fs_subjects_dir</code><em class="property"> = None</em></dt>
+<dd><p>FreeSurfer’s subjects directory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">classmethod </em><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Create a new BIDS Layout accessible with <a class="reference internal" href="#dmriprep.config.execution.layout" title="dmriprep.config.execution.layout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">layout</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">layout</code><em class="property"> = None</em></dt>
+<dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSLayout</span></code> object, see <a class="reference internal" href="#dmriprep.config.execution.init" title="dmriprep.config.execution.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">log_dir</code><em class="property"> = None</em></dt>
+<dd><p>The path to a directory that contains execution logs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">log_level</code><em class="property"> = 25</em></dt>
+<dd><p>Output verbosity.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">low_mem</code><em class="property"> = None</em></dt>
+<dd><p>Utilize uncompressed NIfTIs and other tricks to minimize memory allocation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">md_only_boilerplate</code><em class="property"> = False</em></dt>
+<dd><p>Do not convert boilerplate from MarkDown to LaTex and HTML.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">notrack</code><em class="property"> = False</em></dt>
+<dd><p>Do not monitor <em>dMRIPrep</em> using Google Analytics.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">output_dir</code><em class="property"> = None</em></dt>
+<dd><p>Folder where derivatives will be stored.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">output_spaces</code><em class="property"> = None</em></dt>
+<dd><p>List of (non)standard spaces designated (with the <code class="docutils literal notranslate"><span class="pre">--output-spaces</span></code> flag of
+the command line) as spatial references for outputs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">participant_label</code><em class="property"> = None</em></dt>
+<dd><p>List of participant identifiers that are to be preprocessed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">reports_only</code><em class="property"> = False</em></dt>
+<dd><p>Only build the reports, based on the reportlets found in a cached working directory.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20200313-185511_9f5a52a3-e9f5-41fb-866c-c98bfdef1533'</em></dt>
+<dd><p>Unique identifier of this particular run.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">templateflow_home</code><em class="property"> = PosixPath('/root/.cache/templateflow')</em></dt>
+<dd><p>The root folder of the TemplateFlow client.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">work_dir</code><em class="property"> = PosixPath('/root/project/work')</em></dt>
+<dd><p>Path to a working directory where intermediate results will be available.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">write_graph</code><em class="property"> = False</em></dt>
+<dd><p>Write out the computational graph corresponding to the planned preprocessing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.config.from_dict">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param">settings</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read settings from a flat dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.config.get">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">flat=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get config as a dict.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.config.init_spaces">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">init_spaces</code><span class="sig-paren">(</span><em class="sig-param">checkpoint=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.init_spaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the <a class="reference internal" href="#dmriprep.config.workflow.spaces" title="dmriprep.config.workflow.spaces"><code class="xref py py-attr docutils literal notranslate"><span class="pre">spaces</span></code></a> setting.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.config.load">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load settings from file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">loggers</code></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Keep loggers easily accessible (see <a class="reference internal" href="#dmriprep.config.loggers.init" title="dmriprep.config.loggers.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>).</p>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">cli</code><em class="property"> = &lt;Logger cli (DEBUG)&gt;</em></dt>
+<dd><p>Command-line interface logging.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">default</code><em class="property"> = &lt;RootLogger root (DEBUG)&gt;</em></dt>
+<dd><p>The root logger.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">classmethod </em><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Set the log level, initialize all loggers into <a class="reference internal" href="#dmriprep.config.loggers" title="dmriprep.config.loggers"><code class="xref py py-class docutils literal notranslate"><span class="pre">loggers</span></code></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Add new logger levels (25: IMPORTANT, and 15: VERBOSE).</p></li>
+<li><p>Add a new sub-logger (<code class="docutils literal notranslate"><span class="pre">cli</span></code>).</p></li>
+<li><p>Logger configuration.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">interface</code><em class="property"> = &lt;Logger nipype.interface (INFO)&gt;</em></dt>
+<dd><p>NiPype’s interface logger.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">utils</code><em class="property"> = &lt;Logger nipype.utils (INFO)&gt;</em></dt>
+<dd><p>NiPype’s utils logger.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">workflow</code><em class="property"> = &lt;Logger nipype.workflow (INFO)&gt;</em></dt>
+<dd><p>NiPype’s workflow logger.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">nipype</code></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.config._Config</span></code></p>
+<p>Nipype settings.</p>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">crashfile_format</code><em class="property"> = 'txt'</em></dt>
+<dd><p>The file format for crashfiles, either text or pickle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">get_linked_libs</code><em class="property"> = False</em></dt>
+<dd><p>Run NiPype’s tool to enlist linked libraries for every interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">classmethod </em><code class="sig-name descname">get_plugin</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Format a dictionary for Nipype consumption.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<em class="property">classmethod </em><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Set NiPype configurations.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">memory_gb</code><em class="property"> = None</em></dt>
+<dd><p>Estimation in GB of the RAM this workflow can allocate at any given time.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">nprocs</code><em class="property"> = 36</em></dt>
+<dd><p>Number of processes (compute tasks) that can be run in parallel (multiprocessing only).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">omp_nthreads</code><em class="property"> = 36</em></dt>
+<dd><p>Number of CPUs a single process can access for multithreaded execution.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">plugin</code><em class="property"> = 'MultiProc'</em></dt>
+<dd><p>NiPype’s execution plugin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">plugin_args</code><em class="property"> = {'maxtasksperchild': 1, 'raise_insufficient': False}</em></dt>
+<dd><p>Settings for NiPype’s execution plugin.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">resource_monitor</code><em class="property"> = False</em></dt>
+<dd><p>Enable resource monitor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">stop_on_first_crash</code><em class="property"> = True</em></dt>
+<dd><p>Whether the workflow should stop or continue after the first error.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.config.redirect_warnings">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">redirect_warnings</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">category</em>, <em class="sig-param">filename</em>, <em class="sig-param">lineno</em>, <em class="sig-param">file=None</em>, <em class="sig-param">line=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.redirect_warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redirect other warnings.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.config.to_filename">
+<code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">to_filename</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.config.to_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write settings to file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">workflow</code></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.config._Config</span></code></p>
+<p>Configure the particular execution graph of this workflow.</p>
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">anat_only</code><em class="property"> = False</em></dt>
+<dd><p>Execute the anatomical preprocessing only.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">fmap_bspline</code><em class="property"> = None</em></dt>
+<dd><p>Regularize fieldmaps with a field of B-Spline basis.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">fmap_demean</code><em class="property"> = None</em></dt>
+<dd><p>Remove the mean from fieldmaps.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">force_syn</code><em class="property"> = None</em></dt>
+<dd><p>Run <em>fieldmap-less</em> susceptibility-derived distortions estimation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">hires</code><em class="property"> = None</em></dt>
+<dd><p>Run FreeSurfer <code class="docutils literal notranslate"><span class="pre">recon-all</span></code> with the <code class="docutils literal notranslate"><span class="pre">-hires</span></code> flag.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">ignore</code><em class="property"> = None</em></dt>
+<dd><p>Ignore particular steps for <em>dMRIPrep</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">longitudinal</code><em class="property"> = False</em></dt>
+<dd><p>Run FreeSurfer <code class="docutils literal notranslate"><span class="pre">recon-all</span></code> with the <code class="docutils literal notranslate"><span class="pre">-logitudinal</span></code> flag.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">run_reconall</code><em class="property"> = True</em></dt>
+<dd><p>Run FreeSurfer’s surface reconstruction.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">skull_strip_fixed_seed</code><em class="property"> = False</em></dt>
+<dd><p>Fix a seed for skull-stripping.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">skull_strip_template</code><em class="property"> = 'OASIS30ANTs'</em></dt>
+<dd><p>Change default brain extraction template.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">spaces</code><em class="property"> = None</em></dt>
+<dd><p>Keeps the <code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialReferences</span></code>
+instance keeping standard and nonstandard spaces.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">use_syn</code><em class="property"> = None</em></dt>
+<dd><p>Run <em>fieldmap-less</em> susceptibility-derived distortions estimation
+in the absence of any alternatives.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
