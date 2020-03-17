@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
@@ -316,4 +315,3 @@ def save_3d_to_4d(in_files):
     out_file = fname_presuffix(in_files[0], suffix="_merged")
     img_4d.to_filename(out_file)
     return out_file
-
