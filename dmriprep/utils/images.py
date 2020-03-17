@@ -73,12 +73,7 @@ def average_images(images, out_path=None):
 
 def quick_load_images(image_list, dtype=np.float32):
     """Load 3D volumes from a list of file paths into a 4D array."""
-    example_img = nb.load(image_list[0])
-    num_images = len(image_list)
-    output_matrix = np.zeros(tuple(example_img.shape) + (num_images,), dtype=dtype)
-    for image_num, image_path in enumerate(image_list):
-        output_matrix[..., image_num] = nb.load(image_path).get_fdata(dtype=dtype)
-    return output_matrix
+    return nb.concat_images([nb.load(fname) for fname in image_list]).get_fdata(dtype=dtype)
 
 
 def match_transforms(dwi_files, transforms, b0_indices):
