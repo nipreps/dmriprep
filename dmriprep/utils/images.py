@@ -1,11 +1,42 @@
+import os
 import numpy as np
 import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
 
 
-def extract_b0(in_file, b0_ixs, newpath=None):
-    """Extract the *b0* volumes from a DWI dataset."""
-    out_file = fname_presuffix(in_file, suffix="_b0", newpath=newpath)
+def extract_b0(in_file, b0_ixs, out_path=None):
+    """
+    Extract the *b0* volumes from a DWI dataset.
+
+    Parameters
+    ----------
+    in_file : str
+        DWI NIfTI file.
+    b0_ixs : list
+        List of B0 indices in `in_file`.
+    out_path : str
+        Optionally specify an output path.
+
+    Returns
+    -------
+    out_path : str
+       4D NIfTI file consisting of B0's.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> b0_ixs = np.where(np.loadtxt(str(data_dir / 'bval')) <= 50)[0].tolist()[:2]
+    >>> in_file = str(data_dir / 'dwi.nii.gz')
+    >>> out_path = extract_b0(in_file, b0_ixs)
+    >>> assert os.path.isfile(out_path)
+    """
+    if out_path is None:
+        out_path = fname_presuffix(
+            in_file, suffix="_b0"
+        )
+    else:
+        out_path = fname_presuffix(in_file, suffix="_b0",
+                                   newpath=out_path)
 
     img = nb.load(in_file)
     data = img.get_fdata(dtype="float32")
@@ -16,13 +47,43 @@ def extract_b0(in_file, b0_ixs, newpath=None):
     hdr.set_data_shape(b0.shape)
     hdr.set_xyzt_units("mm")
     hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(b0, img.affine, hdr).to_filename(out_file)
-    return out_file
+    nb.Nifti1Image(b0, img.affine, hdr).to_filename(out_path)
+    return out_path
 
 
-def rescale_b0(in_file, mask_file, newpath=None):
-    """Rescale the input volumes using the median signal intensity."""
-    out_file = fname_presuffix(in_file, suffix="_rescaled_b0", newpath=newpath)
+def rescale_b0(in_file, mask_file, out_path=None):
+    """
+    Rescale the input volumes using the median signal intensity.
+
+    Parameters
+    ----------
+    in_file : str
+        A NIfTI file consisting of one or more B0's.
+    mask_file : str
+        A B0 mask NIFTI file.
+    out_path : str
+        Optionally specify an output path.
+
+    Returns
+    -------
+    out_path : str
+       A rescaled B0 NIFTI file.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> mask_file = str(data_dir / 'dwi_mask.nii.gz')
+    >>> in_file = str(data_dir / 'dwi_b0.nii.gz')
+    >>> out_path = rescale_b0(in_file, mask_file)
+    >>> assert os.path.isfile(out_path)
+    """
+    if out_path is None:
+        out_path = fname_presuffix(
+            in_file, suffix="_rescaled_b0"
+        )
+    else:
+        out_path = fname_presuffix(in_file, suffix="_rescaled_b0",
+                                   newpath=out_path)
 
     img = nb.load(in_file)
     if img.dataobj.ndim == 3:
@@ -35,31 +96,79 @@ def rescale_b0(in_file, mask_file, newpath=None):
     median_signal = np.median(data[mask_data > 0, ...], axis=0)
     rescaled_data = 1000 * data / median_signal
     hdr = img.header.copy()
-    nb.Nifti1Image(rescaled_data, img.affine, hdr).to_filename(out_file)
-    return out_file
+    nb.Nifti1Image(rescaled_data, img.affine, hdr).to_filename(out_path)
+    return out_path
 
 
-def median(in_file, newpath=None):
-    """Average a 4D dataset across the last dimension using median."""
-    out_file = fname_presuffix(in_file, suffix="_b0ref", newpath=newpath)
+def median(in_file, out_path=None):
+    """
+    Summarize a 4D dataset across the last dimension using median.
+
+    Parameters
+    ----------
+    in_file : str
+        A NIfTI file consisting of one or more B0's.
+    out_path : str
+        Optionally specify an output path for `out_path`.
+
+    Returns
+    -------
+    out_path : str
+       A 3D B0 NIFTI file.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> in_file = str(data_dir / 'dwi_b0.nii.gz')
+    >>> out_path = median(in_file)
+    >>> assert os.path.isfile(out_path)
+    """
+    if out_path is None:
+        out_path = fname_presuffix(
+            in_file, suffix="_b0ref"
+        )
+    else:
+        out_path = fname_presuffix(in_file, suffix="_b0ref",
+                                   newpath=out_path)
 
     img = nb.load(in_file)
     if img.dataobj.ndim == 3:
         return in_file
     if img.shape[-1] == 1:
-        nb.squeeze_image(img).to_filename(out_file)
-        return out_file
+        nb.squeeze_image(img).to_filename(out_path)
+        return out_path
 
     median_data = np.median(img.get_fdata(), axis=-1)
 
     hdr = img.header.copy()
     hdr.set_xyzt_units("mm")
-    nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_file)
-    return out_file
+    nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_path)
+    return out_path
 
 
 def average_images(images, out_path=None):
-    """Average a 4D dataset across the last dimension using mean."""
+    """
+    Average a 4D dataset across the last dimension using mean.
+
+    Parameters
+    ----------
+    images : str
+        A list of NIFTI file paths.
+    out_path : str
+        Optionally specify an output path for `out_path`.
+
+    Returns
+    -------
+    out_path : str
+       A 3D NIFTI file averaged along the 4th dimension.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> in_file = str(data_dir / 'dwi_b0.nii.gz')
+    >>> out_path = average_images(in_file)
+    >>> assert os.path.isfile(out_path)
+    """
     from nilearn.image import mean_img
 
     average_img = mean_img([nb.load(img) for img in images])
@@ -71,19 +180,39 @@ def average_images(images, out_path=None):
     return out_path
 
 
-def quick_load_images(image_list, dtype=np.float32):
-    """Load 3D volumes from a list of file paths into a 4D array."""
-    return nb.concat_images([nb.load(fname) for fname in image_list]).get_fdata(dtype=dtype)
+def get_list_data(file_list, dtype=np.float32):
+    """
+    Load 3D volumes from a list of file paths into a 4D array.
+
+    Parameters
+    ----------
+    file_list : str
+        A list of file paths to 3D NIFTI images.
+    """
+    return nb.concat_images([nb.load(fname) for fname in file_list]).get_fdata(dtype=dtype)
 
 
-def match_transforms(dwi_files, transforms, b0_indices):
+def match_transforms(dwi_files, transforms, b0_ixs):
     """
     Arrange the order of a list of transforms.
-    
+
     This is a helper function for :abbr:`EMC (Eddy-currents and Motion Correction)`.
     Sorts the input list of affine transforms  to correspond with that of
     each individual dwi volume file, accounting for the indices of :math:`b = 0` volumes.
-    
+
+    Parameters
+    ----------
+    dwi_files : list
+        A list of file paths to 3D diffusion-weighted NIFTI volumes.
+    transforms : list
+        A list of ndarrays.
+    b0_ixs : list
+        List of B0 indices.
+
+    Returns
+    -------
+    out_path : str
+       A 3D NIFTI file averaged along the 4th dimension.
     """
     num_dwis = len(dwi_files)
     num_transforms = len(transforms)
@@ -92,13 +221,13 @@ def match_transforms(dwi_files, transforms, b0_indices):
         return transforms
 
     # Do sanity checks
-    if not len(transforms) == len(b0_indices):
+    if not len(transforms) == len(b0_ixs):
         raise Exception("number of transforms does not match number of b0 images")
 
     # Create a list of which emc affines go with each of the split images
     nearest_affines = []
     for index in range(num_dwis):
-        nearest_b0_num = np.argmin(np.abs(index - np.array(b0_indices)))
+        nearest_b0_num = np.argmin(np.abs(index - np.array(b0_ixs)))
         this_transform = transforms[nearest_b0_num]
         nearest_affines.append(this_transform)
 
@@ -106,7 +235,19 @@ def match_transforms(dwi_files, transforms, b0_indices):
 
 
 def save_4d_to_3d(in_file):
-    """Split a 4D dataset along the last dimension into multiple 3D volumes."""
+    """
+    Split a 4D dataset along the last dimension into multiple 3D volumes.
+
+    Parameters
+    ----------
+    in_file : str
+        DWI NIfTI file.
+
+    Returns
+    -------
+    out_files : list
+       A list of file paths to 3d NIFTI images.
+    """
     files_3d = nb.four_to_three(nb.load(in_file))
     out_files = []
     for i, file_3d in enumerate(files_3d):
@@ -118,7 +259,22 @@ def save_4d_to_3d(in_file):
 
 
 def prune_b0s_from_dwis(in_files, b0_ixs):
-    """Remove *b0* volume files from a complete list of DWI volume files."""
+    """
+    Remove *b0* volume files from a complete list of DWI volume files.
+
+    Parameters
+    ----------
+    in_files : list
+        A list of NIfTI file paths corresponding to each 3D volume of a
+        DWI image (i.e. including B0's).
+    b0_ixs : list
+        List of B0 indices.
+
+    Returns
+    -------
+    out_files : list
+       A list of file paths to 3d NIFTI images.
+    """
     if in_files[0].endswith("_warped.nii.gz"):
         out_files = [
             i
@@ -143,34 +299,21 @@ def prune_b0s_from_dwis(in_files, b0_ixs):
 
 
 def save_3d_to_4d(in_files):
-    """Concatenate a list of 3D volumes into a 4D output."""
+    """
+    Concatenate a list of 3D volumes into a 4D output.
+
+    Parameters
+    ----------
+    in_files : list
+        A list of file paths to 3D NIFTI images.
+
+    Returns
+    -------
+    out_file : str
+       A file path to a 4d NIFTI image of concatenated 3D volumes.
+    """
     img_4d = nb.funcs.concat_images([nb.load(img_3d) for img_3d in in_files])
     out_file = fname_presuffix(in_files[0], suffix="_merged")
     img_4d.to_filename(out_file)
     return out_file
 
-
-def decompose_affine(affine):
-    """Takes an transformation affine matrix A and determines
-    rotations and translations."""
-
-    def rang(b):
-        a = min(max(b, -1), 1)
-        return a
-
-    Ry = np.arcsin(A[0, 2])
-    # Rx = np.arcsin(A[1, 2] / np.cos(Ry))
-    # Rz = np.arccos(A[0, 1] / np.sin(Ry))
-
-    if (abs(Ry) - np.pi / 2) ** 2 < 1e-9:
-        Rx = 0
-        Rz = np.arctan2(-rang(A[1, 0]), rang(-A[2, 0] / A[0, 2]))
-    else:
-        c = np.cos(Ry)
-        Rx = np.arctan2(rang(A[1, 2] / c), rang(A[2, 2] / c))
-        Rz = np.arctan2(rang(A[0, 1] / c), rang(A[0, 0] / c))
-
-    rotations = [Rx, Ry, Rz]
-    translations = [A[0, 3], A[1, 3], A[2, 3]]
-
-    return rotations, translations
