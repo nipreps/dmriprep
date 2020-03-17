@@ -58,9 +58,12 @@ class DiffusionGradientTable:
         >>> os.chdir(tmpdir)
         >>> old_rasb = str(data_dir / 'dwi.tsv')
         >>> old_rasb_mat = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
+        >>> from dmriprep.utils.vectors import bvecs2ras
         >>> check = DiffusionGradientTable(
         ...     dwi_file=str(data_dir / 'dwi.nii.gz'),
         ...     rasb_file=str(data_dir / 'dwi.tsv'))
+        >>> # Conform to the orientation of the image:
+        >>> old_rasb_mat[:, :3] = bvecs2ras(check.affine, old_rasb_mat[:, :3])
         >>> affines = np.zeros((old_rasb_mat.shape[0], 4, 4))
         >>> aff_file_list = []
         >>> for ii, aff in enumerate(affines):
@@ -69,7 +72,7 @@ class DiffusionGradientTable:
         ...     aff_file_list.append(aff_file)
         >>> check._transforms = aff_file_list
         >>> out_rasb_mat = check.reorient_rasb()
-        >>> assert np.allclose(old_rasb_mat, out_rasb_mat)
+        >>> np.allclose(old_rasb_mat, out_rasb_mat)
         True
         """
         self._transforms = transforms
