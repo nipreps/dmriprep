@@ -77,9 +77,14 @@ def quick_load_images(image_list, dtype=np.float32):
 
 
 def match_transforms(dwi_files, transforms, b0_indices):
-    """Arranges the order of a list of affine transforms to correspond with that of
-    each individual dwi volume file, accounting for the indices of B0s. A helper
-    function for EMC."""
+    """
+    Arrange the order of a list of transforms.
+    
+    This is a helper function for :abbr:`EMC (Eddy-currents and Motion Correction)`.
+    Sorts the input list of affine transforms  to correspond with that of
+    each individual dwi volume file, accounting for the indices of :math:`b = 0` volumes.
+    
+    """
     num_dwis = len(dwi_files)
     num_transforms = len(transforms)
 
