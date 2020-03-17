@@ -1,5 +1,5 @@
-import numpy as np
 import nibabel as nb
+import numpy as np
 from nipype.utils.filemanip import fname_presuffix
 
 
@@ -25,7 +25,7 @@ def rescale_b0(in_file, mask_file, out_path=None):
     """Rescale the input volumes using the median signal intensity."""
     if out_path is None:
         out_path = fname_presuffix(
-            in_file, suffix='_rescaled_b0', use_ext=True)
+            in_file, suffix='_rescaled', use_ext=True)
 
     img = nb.load(in_file)
     if img.dataobj.ndim == 3:

@@ -1,22 +1,27 @@
 """Image tools interfaces."""
+from pathlib import Path
+
 from nipype import logging
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File
+    BaseInterfaceInputSpec,
+    File,
+    SimpleInterface,
+    TraitedSpec,
+    traits
 )
 
-from dmriprep.utils.images import extract_b0, rescale_b0, median
+from dmriprep.utils.images import extract_b0, median, rescale_b0
 
 LOGGER = logging.getLogger('nipype.interface')
 
 
 class _ExtractB0InputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='dwi file')
-    b0_ixs = traits.List(traits.Int, mandatory=True,
-                         desc='Index of b0s')
+    b0_ixs = traits.List(traits.Int, mandatory=True, desc='Index of b0s')
 
 
 class _ExtractB0OutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='b0 file')
+    out_file = File(exists=True, desc='output b0 file')
 
 
 class ExtractB0(SimpleInterface):
@@ -37,10 +42,18 @@ class ExtractB0(SimpleInterface):
     output_spec = _ExtractB0OutputSpec
 
     def _run_interface(self, runtime):
-        self._results['out_file'] = extract_b0(
+        from nipype.utils.filemanip import fname_presuffix
+
+        out_file = fname_presuffix(
             self.inputs.in_file,
-            self.inputs.b0_ixs,
-            out_path=runtime.cwd)
+            suffix='_b0',
+            use_ext=True,
+            newpath=str(Path(runtime.cwd).absolute()),
+        )
+
+        self._results['out_file'] = extract_b0(
+            self.inputs.in_file, self.inputs.b0_ixs, out_file
+        )
         return runtime
 
 
@@ -72,13 +85,27 @@ class RescaleB0(SimpleInterface):
     output_spec = _RescaleB0OutputSpec
 
     def _run_interface(self, runtime):
+        from nipype.utils.filemanip import fname_presuffix
+
+        out_b0s = fname_presuffix(
+            self.inputs.in_file,
+            suffix='_rescaled',
+            use_ext=True,
+            newpath=str(Path(runtime.cwd).absolute())
+        )
+        out_ref = fname_presuffix(
+            self.inputs.in_file,
+            suffix='_ref',
+            use_ext=True,
+            newpath=str(Path(runtime.cwd).absolute())
+        )
+
         self._results['out_b0s'] = rescale_b0(
             self.inputs.in_file,
-            self.inputs.mask_file,
-            out_path=runtime.cwd
+            self.inputs.mask_file, out_b0s
         )
         self._results['out_ref'] = median(
             self._results['out_b0s'],
-            out_path=runtime.cwd
+            out_path=out_ref
         )
         return runtime
