@@ -98,8 +98,8 @@ class MatchTransforms(SimpleInterface):
     """
     Interface for mapping the `match_transforms` function across lists of inputs.
     """
-    input_spec = MatchTransformsInputSpec
-    output_spec = MatchTransformsOutputSpec
+    input_spec = _MatchTransformsInputSpec
+    output_spec = _MatchTransformsOutputSpec
 
     def _run_interface(self, runtime):
         self._results["transforms"] = match_transforms(
