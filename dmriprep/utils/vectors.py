@@ -52,6 +52,25 @@ class DiffusionGradientTable:
             then bvecs and bvals will be dismissed.
         b_scale : bool
             Whether b-values should be normalized.
+
+        Example
+        -------
+        >>> os.chdir(tmpdir)
+        >>> old_rasb = str(data_dir / 'dwi.tsv')
+        >>> old_rasb_mat = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
+        >>> check = DiffusionGradientTable(
+        ...     dwi_file=str(data_dir / 'dwi.nii.gz'),
+        ...     rasb_file=str(data_dir / 'dwi.tsv'))
+        >>> affines = np.zeros((old_rasb_mat.shape[0], 4, 4))
+        >>> aff_file_list = []
+        >>> for ii, aff in enumerate(affines):
+        ...     aff_file = f'aff_{ii}.npy'
+        ...     np.save(aff_file, aff)
+        ...     aff_file_list.append(aff_file)
+        >>> check._transforms = aff_file_list
+        >>> out_rasb_mat = check.reorient_rasb()
+        >>> assert np.allclose(old_rasb_mat, out_rasb_mat)
+        True
         """
         self._transforms = transforms
         self._b_scale = b_scale
@@ -164,14 +183,15 @@ class DiffusionGradientTable:
 
     def reorient_rasb(self):
         """Reorient the vectors based o a list of affine transforms."""
-        from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
+        from dipy.core.gradients import (gradient_table_from_bvals_bvecs,
+                                         reorient_bvecs)
 
         affines = self._transforms.copy()
         bvals = self._bvals
         bvecs = self._bvecs
 
-        # Verify that number of non-B0 volumes corresponds to the number of affines.
-        # If not, raise an error.
+        # Verify that number of non-B0 volumes corresponds to the number of
+        # affines. If not, try to fix it, or raise an error:
         if len(self._bvals[self._bvals >= self._b0_thres]) != len(affines):
             b0_indices = np.where(self._bvals <= self._b0_thres)[0].tolist()
             if len(self._bvals[self._bvals >= self._b0_thres]) < len(affines):
@@ -188,7 +208,8 @@ class DiffusionGradientTable:
                 )
 
         # Build gradient table object
-        gt = gradient_table_from_bvals_bvecs(bvals, bvecs, b0_threshold=self._b0_thres)
+        gt = gradient_table_from_bvals_bvecs(bvals, bvecs,
+                                             b0_threshold=self._b0_thres)
 
         # Reorient table
         new_gt = reorient_bvecs(gt, [np.load(aff) for aff in affines])
@@ -238,7 +259,7 @@ class DiffusionGradientTable:
             np.savetxt("%s.bval" % filename, self.bvals, fmt="%.6f")
         else:
             raise ValueError('Unknown filetype "%s"' % filetype)
-        
+
 
 def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
                         bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True):
