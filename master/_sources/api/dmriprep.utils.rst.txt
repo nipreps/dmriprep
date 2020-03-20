@@ -12,5 +12,6 @@ Submodules
 .. toctree::
 
    dmriprep.utils.bids
+   dmriprep.utils.images
    dmriprep.utils.misc
    dmriprep.utils.vectors
