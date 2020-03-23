@@ -74,8 +74,7 @@ def _build_parser():
     parser.add_argument('--version', action='version', version=verstr)
 
     g_bids = parser.add_argument_group('Options for filtering BIDS queries')
-    g_bids.add_argument('--skip_bids_validation', '--skip-bids-validation', action='store_true',
-                        default=False,
+    g_bids.add_argument('--skip-bids-validation', action='store_true', default=False,
                         help='assume the input dataset is BIDS compliant and skip the validation')
     g_bids.add_argument(
         '--participant-label', '--participant_label', action='store', nargs='+', type=_drop_sub,
