@@ -379,8 +379,9 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
 
 def nonoverlapping_qspace_samples(sample_bval, sample_bvec, all_bvals,
                                   all_bvecs, cutoff=2):
-    """Ensure that none of the training samples are too close to the sample to predict.
-    Parameters
+    """
+    Checks the q-space overlap (within some distance) between a sample
+    and a collection of q-space points.
 
     Parameters
     ----------
@@ -453,6 +454,7 @@ def _rasb_to_bvec_list(in_rasb):
     ----------
     in_rasb : str or os.pathlike
         File path to a RAS-B gradient table.
+
     Returns
     -------
     List of b-vectors as floats.
