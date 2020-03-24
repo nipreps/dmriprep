@@ -113,6 +113,32 @@ def save_4d_to_3d(in_file):
 
 
 def prune_b0s_from_dwis(in_files, b0_ixs):
+    """
+    Remove *b0* volume files from a complete list of DWI volume files.
+
+    Parameters
+    ----------
+    in_files : list
+        A list of NIfTI file paths corresponding to each 3D volume of a
+        DWI image (i.e. including B0's).
+    b0_ixs : list
+        List of B0 indices.
+
+    Returns
+    -------
+    out_files : list
+       A list of file paths to 3d NIFTI images.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> b0_ixs = np.where(np.loadtxt(str(dipy_datadir / "HARDI193.bval")) <= 50)[0].tolist()[:2]
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> threeD_files = save_4d_to_3d(in_file)
+    >>> out_files = prune_b0s_from_dwis(threeD_files, b0_ixs)
+    >>> assert sum([os.path.isfile(i) for i in out_files]) == len(out_files)
+    >>> assert len(out_files) == len(threeD_files) - len(b0_ixs)
+    """
     if in_files[0].endswith("_warped.nii.gz"):
         out_files = [
             i
