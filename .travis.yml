@@ -81,9 +81,9 @@ before_script:
 script:
   - |
     if [ "$CHECK_TYPE" == "style" ]; then
-      flake8 dmriprep
+      travis_wait 60 flake8 dmriprep
     elif [ "$CHECK_TYPE" == "test" ]; then
-      pytest -n 2 -vv --doctest-modules --cov dmriprep --cov-config .coveragerc --cov-report xml:cov.xml dmriprep
+      travis_wait 60 pytest -n 2 -vv --doctest-modules --cov dmriprep --cov-config .coveragerc --cov-report xml:cov.xml dmriprep
     else
       false
     fi
