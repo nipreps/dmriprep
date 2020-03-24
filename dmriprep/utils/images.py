@@ -362,7 +362,18 @@ def save_3d_to_4d(in_files):
     >>> out_file = save_3d_to_4d(threeD_files)
     >>> assert len(threeD_files) == nb.load(out_file).shape[-1]
     """
-    img_4d = nb.funcs.concat_images([nb.load(img_3d) for img_3d in in_files])
+    # Remove one-sized extra dimensions
+    nii_list = []
+    for i, f in enumerate(in_files):
+        filenii = nb.load(f)
+        filenii = nb.squeeze_image(filenii)
+        if len(filenii.shape) == 5:
+            raise RuntimeError('Input image (%s) is 5D.' % f)
+        if filenii.dataobj.ndim == 4:
+            nii_list += nb.four_to_three(filenii)
+        else:
+            nii_list.append(filenii)
+    img_4d = nb.funcs.concat_images(nii_list)
     out_file = fname_presuffix(in_files[0], suffix="_merged")
     img_4d.to_filename(out_file)
     return out_file

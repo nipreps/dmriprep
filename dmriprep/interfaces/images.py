@@ -1,12 +1,11 @@
 """Image tools interfaces."""
-from dmriprep.utils.images import rescale_b0, median, match_transforms, extract_b0
+from pathlib import Path
 from nipype import logging
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File,
     InputMultiObject, OutputMultiObject
 )
-
-from dmriprep.utils.images import extract_b0, median, rescale_b0
+from dmriprep.utils.images import extract_b0, median, rescale_b0, match_transforms
 
 LOGGER = logging.getLogger('nipype.interface')
 
