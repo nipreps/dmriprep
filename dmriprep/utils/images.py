@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
@@ -31,11 +32,7 @@ def extract_b0(in_file, b0_ixs, out_path=None):
     """
     if out_path is None:
         out_path = fname_presuffix(
-            in_file, suffix="_b0"
-        )
-    else:
-        out_path = fname_presuffix(in_file, suffix="_b0",
-                                   newpath=out_path)
+            in_file, suffix='_b0', use_ext=True)
 
     img = nb.load(in_file)
     data = img.get_fdata(dtype="float32")
@@ -78,11 +75,7 @@ def rescale_b0(in_file, mask_file, out_path=None):
     """
     if out_path is None:
         out_path = fname_presuffix(
-            in_file, suffix="_rescaled_b0"
-        )
-    else:
-        out_path = fname_presuffix(in_file, suffix="_rescaled_b0",
-                                   newpath=out_path)
+            in_file, suffix='_rescaled', use_ext=True)
 
     img = nb.load(in_file)
     if img.dataobj.ndim == 3:
@@ -124,11 +117,7 @@ def median(in_file, out_path=None):
     """
     if out_path is None:
         out_path = fname_presuffix(
-            in_file, suffix="_b0ref"
-        )
-    else:
-        out_path = fname_presuffix(in_file, suffix="_b0ref",
-                                   newpath=out_path)
+            in_file, suffix='_b0ref', use_ext=True)
 
     img = nb.load(in_file)
     if img.dataobj.ndim == 3:
@@ -164,8 +153,9 @@ def average_images(images, out_path=None):
     Examples
     --------
     >>> os.chdir(tmpdir)
-    >>> in_file = str(data_dir / 'dwi_b0.nii.gz')
-    >>> out_path = average_images(in_file)
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> out_files = save_4d_to_3d(in_file)
+    >>> out_path = average_images(out_files)
     >>> assert os.path.isfile(out_path)
     """
     from nilearn.image import mean_img
@@ -187,6 +177,13 @@ def get_list_data(file_list, dtype=np.float32):
     ----------
     file_list : str
         A list of file paths to 3D NIFTI images.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> out_files = save_4d_to_3d(in_file)
+    >>> assert len(out_files) == get_list_data(out_files).shape[-1]
     """
     return nb.concat_images([nb.load(fname) for fname in file_list]).get_fdata(dtype=dtype)
 
@@ -210,8 +207,32 @@ def match_transforms(dwi_files, transforms, b0_ixs):
 
     Returns
     -------
-    out_path : str
-       A 3D NIFTI file averaged along the 4th dimension.
+    nearest_affines : list
+       A list of affine file paths that correspond to each of the split
+       dwi volumes.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> from dmriprep.utils.vectors import DiffusionGradientTable
+    >>> dwi_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> check = DiffusionGradientTable(
+    ...     dwi_file=dwi_file,
+    ...     bvecs=str(dipy_datadir / "HARDI193.bvec"),
+    ...     bvals=str(dipy_datadir / "HARDI193.bval"))
+    >>> check.generate_rasb()
+    >>> # Conform to the orientation of the image:
+    >>> affines = np.zeros((check.gradients.shape[0], 4, 4))
+    >>> transforms = []
+    >>> for ii, aff in enumerate(affines):
+    ...     aff_file = f'aff_{ii}.npy'
+    ...     np.save(aff_file, aff)
+    ...     transforms.append(aff_file)
+    >>> dwi_files = save_4d_to_3d(dwi_file)
+    >>> b0_ixs = np.where((check.bvals) <= 50)[0].tolist()[:2]
+    >>> nearest_affines = match_transforms(dwi_files, transforms, b0_ixs)
+    >>> assert sum([os.path.isfile(i) for i in nearest_affines]) == len(nearest_affines)
+    >>> assert len(nearest_affines) == len(dwi_files)
     """
     num_dwis = len(dwi_files)
     num_transforms = len(transforms)
@@ -246,6 +267,13 @@ def save_4d_to_3d(in_file):
     -------
     out_files : list
        A list of file paths to 3d NIFTI images.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> out_files = save_4d_to_3d(in_file)
+    >>> assert len(out_files) == nb.load(in_file).shape[-1]
     """
     files_3d = nb.four_to_three(nb.load(in_file))
     out_files = []
@@ -273,6 +301,16 @@ def prune_b0s_from_dwis(in_files, b0_ixs):
     -------
     out_files : list
        A list of file paths to 3d NIFTI images.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> b0_ixs = np.where(np.loadtxt(str(dipy_datadir / "HARDI193.bval")) <= 50)[0].tolist()[:2]
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> threeD_files = save_4d_to_3d(in_file)
+    >>> out_files = prune_b0s_from_dwis(threeD_files, b0_ixs)
+    >>> assert sum([os.path.isfile(i) for i in out_files]) == len(out_files)
+    >>> assert len(out_files) == len(threeD_files) - len(b0_ixs)
     """
     if in_files[0].endswith("_warped.nii.gz"):
         out_files = [
@@ -310,6 +348,14 @@ def save_3d_to_4d(in_files):
     -------
     out_file : str
        A file path to a 4d NIFTI image of concatenated 3D volumes.
+
+    Examples
+    --------
+    >>> os.chdir(tmpdir)
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> threeD_files = save_4d_to_3d(in_file)
+    >>> out_file = save_3d_to_4d(threeD_files)
+    >>> assert len(threeD_files) == nb.load(out_file).shape[-1]
     """
     img_4d = nb.funcs.concat_images([nb.load(img_3d) for img_3d in in_files])
     out_file = fname_presuffix(in_files[0], suffix="_merged")
