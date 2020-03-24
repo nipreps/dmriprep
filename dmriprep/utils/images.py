@@ -180,7 +180,9 @@ def get_list_data(file_list, dtype=np.float32):
     ----------
     file_list : str
         A list of file paths to 3D NIFTI images.
-
+Returns 
+--------
+Nibabel image object
     Examples
     --------
     >>> os.chdir(tmpdir)
