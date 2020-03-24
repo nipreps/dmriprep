@@ -254,6 +254,9 @@ class nipype(_Config):
     """Number of processes (compute tasks) that can be run in parallel (multiprocessing only)."""
     omp_nthreads = os.cpu_count()
     """Number of CPUs a single process can access for multithreaded execution."""
+    parameterize_dirs = False
+    """The node’s output directory will contain full parameterization of any iterable, otherwise
+    parameterizations over 32 characters will be replaced by their hash."""
     plugin = 'MultiProc'
     """NiPype's execution plugin."""
     plugin_args = {
@@ -302,6 +305,7 @@ class nipype(_Config):
                 'crashfile_format': cls.crashfile_format,
                 'get_linked_libs': cls.get_linked_libs,
                 'stop_on_first_crash': cls.stop_on_first_crash,
+                'parameterize_dirs': cls.parameterize_dirs,
             }
         })
 
