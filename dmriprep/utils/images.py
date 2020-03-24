@@ -263,7 +263,11 @@ def save_4d_to_3d(in_file):
     >>> out_files = save_4d_to_3d(in_file)
     >>> assert len(out_files) == nb.load(in_file).shape[-1]
     """
-    files_3d = nb.four_to_three(nb.load(in_file))
+    filenii = nb.load(in_file)
+    if len(filenii.shape) != 4:
+        raise RuntimeError('Input image (%s) is not 4D.' % filenii)
+
+    files_3d = nb.four_to_three(filenii)
     out_files = []
     for i, file_3d in enumerate(files_3d):
         out_file = fname_presuffix(in_file, suffix="_tmp_{}".format(i))
@@ -300,10 +304,8 @@ def save_3d_to_4d(in_files):
     for i, f in enumerate(in_files):
         filenii = nb.load(f)
         filenii = nb.squeeze_image(filenii)
-        if len(filenii.shape) == 5:
-            raise RuntimeError('Input image (%s) is 5D.' % f)
-        if filenii.dataobj.ndim == 4:
-            nii_list += nb.four_to_three(filenii)
+        if len(filenii.shape) != 3:
+            raise RuntimeError('Input image (%s) is not 3D.' % f)
         else:
             nii_list.append(filenii)
     img_4d = nb.funcs.concat_images(nii_list)
