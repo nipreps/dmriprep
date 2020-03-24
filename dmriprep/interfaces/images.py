@@ -5,7 +5,7 @@ from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File,
     InputMultiObject, OutputMultiObject
 )
-from dmriprep.utils.images import extract_b0, median, rescale_b0, match_transforms
+from dmriprep.utils.images import extract_b0, summarize_images, rescale_b0, match_transforms
 
 LOGGER = logging.getLogger('nipype.interface')
 
@@ -80,6 +80,7 @@ class RescaleB0(SimpleInterface):
     output_spec = _RescaleB0OutputSpec
 
     def _run_interface(self, runtime):
+        import numpy as np
         from nipype.utils.filemanip import fname_presuffix
 
         out_b0s = fname_presuffix(
@@ -99,8 +100,8 @@ class RescaleB0(SimpleInterface):
             self.inputs.in_file,
             self.inputs.mask_file, out_b0s
         )
-        self._results['out_ref'] = median(
-            self._results['out_b0s'],
+        self._results['out_ref'] = summarize_images(
+            self._results['out_b0s'], method=np.median,
             out_path=out_ref
         )
         return runtime

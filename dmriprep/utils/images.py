@@ -90,32 +90,48 @@ def rescale_b0(in_file, mask_file, out_path=None):
     return out_path
 
 
-def median(in_file, dtype=None, out_path=None):
+def summarize_images(in_file, method=np.median, dtype=None, out_path=None):
     """
-    Summarize a 4D dataset across the last dimension using median.
+    Summarize a 4D dataset across the last dimension using a
+    callable method.
 
     Parameters
     ----------
     in_file : str
-        A NIfTI file consisting of one or more B0's.
+        A NIfTI file consisting of one or more 3D images.
+    method : callable
+        A numpy function such as `np.mean` or `np.median`.
+    dtype : str
+        Optioally specify a datatype (e.g. 'float32').
     out_path : str
         Optionally specify an output path for `out_path`.
 
     Returns
     -------
     out_path : str
-       A 3D B0 NIFTI file.
+       A 3D NIFTI image file.
 
     Examples
     --------
     >>> os.chdir(tmpdir)
-    >>> in_file = str(data_dir / 'dwi_b0.nii.gz')
-    >>> out_path = median(in_file)
+    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
+    >>> # Median case
+    >>> out_path = summarize_images(in_file)
+    >>> assert os.path.isfile(out_path)
+    >>> # Mean case
+    >>> out_path = summarize_images(in_file, method=np.mean)
     >>> assert os.path.isfile(out_path)
     """
+
+    if not callable(method):
+        raise ValueError('method must be callable')
+
+    # TODO: Check that callable is applicable (i.e. contains `axis` arg).
+    # if method.__call__()
     if out_path is None:
         out_path = fname_presuffix(
-            in_file, suffix='_b0ref', use_ext=True)
+            in_file, suffix="%s%s" % ('_', method.__code__.co_name),
+            use_ext=True)
 
     img = nb.load(in_file)
     if img.dataobj.ndim == 3:
@@ -124,8 +140,7 @@ def median(in_file, dtype=None, out_path=None):
         nb.squeeze_image(img).to_filename(out_path)
         return out_path
 
-    median_data = np.median(img.get_fdata(dtype=dtype),
-                            axis=-1)
+    summary_data = method(img.get_fdata(dtype=dtype), axis=-1)
 
     hdr = img.header.copy()
     hdr.set_xyzt_units('mm')
@@ -133,42 +148,8 @@ def median(in_file, dtype=None, out_path=None):
         hdr.set_data_dtype(dtype)
     else:
         dtype = hdr.get_data_dtype()
-    nb.Nifti1Image(median_data.astype(dtype), img.affine, hdr).to_filename(out_path)
-    return out_path
-
-
-def average_images(images, out_path=None):
-    """
-    Average a 4D dataset across the last dimension using mean.
-
-    Parameters
-    ----------
-    images : str
-        A list of NIFTI file paths.
-    out_path : str
-        Optionally specify an output path for `out_path`.
-
-    Returns
-    -------
-    out_path : str
-       A 3D NIFTI file averaged along the 4th dimension.
-
-    Examples
-    --------
-    >>> os.chdir(tmpdir)
-    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
-    >>> out_files = save_4d_to_3d(in_file)
-    >>> out_path = average_images(out_files)
-    >>> assert os.path.isfile(out_path)
-    """
-    from nilearn.image import mean_img
-
-    average_img = mean_img([nb.load(img) for img in images])
-    if out_path is None:
-        out_path = fname_presuffix(
-            images[0], use_ext=False, suffix="_mean.nii.gz"
-        )
-    average_img.to_filename(out_path)
+    nb.Nifti1Image(summary_data.astype(dtype), img.affine,
+                   hdr).to_filename(out_path)
     return out_path
 
 
