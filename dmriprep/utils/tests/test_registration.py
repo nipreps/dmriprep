@@ -27,7 +27,17 @@ def setup_module():
     subset_t2_img = nb.Nifti1Image(subset_t2, MNI_T2_affine)
 
 
-def test_affine_registration():
+@pytest.mark.parametrize("nbins", [32, 22])
+@pytest.mark.parametrize("sampling_prop", [1, 2])
+@pytest.mark.parametrize("metric", ["MI", "CC"])
+@pytest.mark.parametrize("level_iters", [[10000, 100], [1]])
+@pytest.mark.parametrize("sigmas", [[5.0, 2.5], [0.0]])
+@pytest.mark.parametrize("factors", [[4, 2], [1]])
+@pytest.mark.parametrize("params0", [np.eye(4), None])
+@pytest.mark.parametrize("pipeline", [["rigid"], ["affine"],
+                                      ["rigid", "affine"]])
+def test_affine_registration(nbins, sampling_prop, metric, level_iters,
+                             sigmas, factors, params0, pipeline):
     moving = subset_b0
     static = subset_b0
     moving_affine = static_affine = np.eye(4)
@@ -42,15 +52,8 @@ def test_affine_registration():
     # If providing nifti image objects, don't need to provide affines:
     moving_img = nb.Nifti1Image(moving, moving_affine)
     static_img = nb.Nifti1Image(static, static_affine)
-    xformed, affine = affine_registration(moving_img, static_img)
-    npt.assert_almost_equal(affine[:3, :3], np.eye(3), decimal=1)
-
-    # Using strings with full paths as inputs also works:
-    t1_name, b0_name = dpd.get_fnames('syn_data')
-    moving = b0_name
-    static = t1_name
-    xformed, affine = affine_registration(moving, static,
-                                          level_iters=[5, 5],
-                                          sigmas=[3, 1],
-                                          factors=[4, 2])
+    xformed, affine = affine_registration(moving_img, static_img, nbins,
+                                          sampling_prop, metric, pipeline,
+                                          level_iters, sigmas, factors,
+                                          params0)
     npt.assert_almost_equal(affine[:3, :3], np.eye(3), decimal=1)
