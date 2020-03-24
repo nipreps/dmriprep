@@ -180,9 +180,11 @@ def get_list_data(file_list, dtype=np.float32):
     ----------
     file_list : str
         A list of file paths to 3D NIFTI images.
-Returns 
---------
-Nibabel image object
+
+    Returns
+    --------
+    Nibabel image object
+
     Examples
     --------
     >>> os.chdir(tmpdir)
@@ -287,56 +289,6 @@ def save_4d_to_3d(in_file):
         file_3d.to_filename(out_file)
         out_files.append(out_file)
     del files_3d
-    return out_files
-
-
-def prune_b0s_from_dwis(in_files, b0_ixs):
-    """
-    Remove *b0* volume files from a complete list of DWI volume files.
-
-    Parameters
-    ----------
-    in_files : list
-        A list of NIfTI file paths corresponding to each 3D volume of a
-        DWI image (i.e. including B0's).
-    b0_ixs : list
-        List of B0 indices.
-
-    Returns
-    -------
-    out_files : list
-       A list of file paths to 3d NIFTI images.
-
-    Examples
-    --------
-    >>> os.chdir(tmpdir)
-    >>> b0_ixs = np.where(np.loadtxt(str(dipy_datadir / "HARDI193.bval")) <= 50)[0].tolist()[:2]
-    >>> in_file = str(dipy_datadir / "HARDI193.nii.gz")
-    >>> threeD_files = save_4d_to_3d(in_file)
-    >>> out_files = prune_b0s_from_dwis(threeD_files, b0_ixs)
-    >>> assert sum([os.path.isfile(i) for i in out_files]) == len(out_files)
-    >>> assert len(out_files) == len(threeD_files) - len(b0_ixs)
-    """
-    if in_files[0].endswith("_warped.nii.gz"):
-        out_files = [
-            i
-            for j, i in enumerate(
-                sorted(
-                    in_files, key=lambda x: int(x.split("_")[-2].split(".nii.gz")[0])
-                )
-            )
-            if j not in b0_ixs
-        ]
-    else:
-        out_files = [
-            i
-            for j, i in enumerate(
-                sorted(
-                    in_files, key=lambda x: int(x.split("_")[-1].split(".nii.gz")[0])
-                )
-            )
-            if j not in b0_ixs
-        ]
     return out_files
 
 
