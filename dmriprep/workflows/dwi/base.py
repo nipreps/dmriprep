@@ -1,30 +1,15 @@
 """Orchestrating the dMRI-preprocessing workflow."""
-from nipype import logging
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+from ... import config
 from ...interfaces.vectors import CheckGradientTable
 from .util import init_dwi_reference_wf
 from .outputs import init_reportlets_wf
 
 
-LOGGER = logging.getLogger('nipype.workflow')
-
-
-def init_dwi_preproc_wf(
-    dwi_file,
-    debug,
-    force_syn,
-    ignore,
-    low_mem,
-    omp_nthreads,
-    output_dir,
-    reportlets_dir,
-    use_syn,
-    layout=None,
-    num_dwi=1,
-):
+def init_dwi_preproc_wf(dwi_file):
     """
     This workflow controls the diffusion preprocessing stages of *dMRIPrep*.
 
@@ -33,49 +18,18 @@ def init_dwi_preproc_wf(
             :graph2use: orig
             :simple_form: yes
 
-            from dmriprep.workflows.dwi import init_dwi_preproc_wf
-            from collections import namedtuple
-            BIDSLayout = namedtuple('BIDSLayout', ['root'])
-            wf = init_dwi_preproc_wf(
-                dwi_file='/completely/made/up/path/sub-01_dwi.nii.gz',
-                debug=False,
-                force_syn=True,
-                ignore=[],
-                low_mem=False,
-                omp_nthreads=1,
-                output_dir='.',
-                reportlets_dir='.',
-                use_syn=True,
-                layout=BIDSLayout('.'),
-                num_dwi=1,
-            )
+            from dmriprep.config.testing import mock_config
+            from dmriprep import config
+            from dmriprep.workflows.dwi.base import init_dwi_preproc_wf
+            with mock_config():
+                dwi_file = config.execution.bids_dir / 'sub-THP0005' / 'dwi' \
+                    / 'sub-THP0005_dwi.nii.gz'
+                wf = init_dwi_preproc_wf(str(dwi_file))
 
     Parameters
     ----------
     dwi_file : str
         dwi NIfTI file
-    debug : bool
-        Enable debugging outputs
-    force_syn : bool
-        **Temporary**: Always run SyN-based SDC
-    ignore : list
-        Preprocessing steps to skip (may include "sdc")
-    low_mem : bool
-        Write uncompressed .nii files in some cases to reduce memory usage
-    omp_nthreads : int
-        Maximum number of threads an individual process may use
-    output_dir : str
-        Directory in which to save derivatives
-    reportlets_dir : str
-        Absolute path of a directory in which reportlets will be temporarily stored
-    use_syn : bool
-        **Experimental**: Enable ANTs SyN-based susceptibility distortion correction (SDC).
-        If fieldmaps are present and enabled, this is not run, by default.
-    layout : BIDSLayout
-        BIDSLayout structure to enable metadata retrieval
-    num_dwi : int
-        Total number of dwi files that have been set for preprocessing
-        (default is 1)
 
     Inputs
     ------
@@ -103,25 +57,12 @@ def init_dwi_preproc_wf(
 
     # Build workflow
     workflow = Workflow(name=wf_name)
-    workflow.__desc__ = """
 
-Diffusion data preprocessing
-
-: For each of the {num_dwi} dwi scans found per subject (across all sessions),
- the following preprocessing was performed.
-""".format(num_dwi=num_dwi)
-
-    workflow.__postdesc__ = """\
-    """
-
-    # For doc building purposes
-    if not hasattr(layout, 'parse_file_entities'):
-        LOGGER.log(25, 'No valid layout: building empty workflow.')
-        bvec_file = '/completely/made/up/path/sub-01_dwi.bvec'
-        bval_file = '/completely/made/up/path/sub-01_dwi.bval'
-    else:
-        bvec_file = layout.get_bvec(dwi_file)
-        bval_file = layout.get_bval(dwi_file)
+    # Have some options handy
+    layout = config.execution.layout
+    omp_nthreads = config.nipype.omp_nthreads
+    # freesurfer = config.workflow.run_reconall
+    # spaces = config.workflow.spaces
 
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'bvec_file', 'bval_file',
@@ -132,8 +73,8 @@ Diffusion data preprocessing
                 't1w2fsnative_xfm', 'fsnative2t1w_xfm']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
-    inputnode.inputs.bvec_file = bvec_file
-    inputnode.inputs.bval_file = bval_file
+    inputnode.inputs.bvec_file = layout.get_bvec(dwi_file)
+    inputnode.inputs.bval_file = layout.get_bval(dwi_file)
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_dwi', 'out_bvec', 'out_bval', 'out_rasb',
@@ -142,7 +83,7 @@ Diffusion data preprocessing
 
     gradient_table = pe.Node(CheckGradientTable(), name='gradient_table')
 
-    dwi_reference_wf = init_dwi_reference_wf(omp_nthreads=1)
+    dwi_reference_wf = init_dwi_reference_wf(omp_nthreads=omp_nthreads)
 
     # MAIN WORKFLOW STRUCTURE
     workflow.connect([
@@ -161,7 +102,8 @@ Diffusion data preprocessing
             ('out_rasb', 'out_rasb')])
     ])
 
-    # REPORTING
+    # REPORTING ############################################################
+    reportlets_dir = str(config.execution.work_dir / 'reportlets')
     reportlets_wf = init_reportlets_wf(reportlets_dir)
     workflow.connect([
         (inputnode, reportlets_wf, [('dwi_file', 'inputnode.source_file')]),

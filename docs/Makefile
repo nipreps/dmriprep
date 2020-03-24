@@ -52,6 +52,7 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf reference/*
+	rm -rf api/
 
 html:
 	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

@@ -6,7 +6,9 @@ from nipype.interfaces.base import (
     SimpleInterface, BaseInterfaceInputSpec, TraitedSpec,
     File, traits, isdefined
 )
-from ..utils.vectors import DiffusionGradientTable, B0_THRESHOLD, BVEC_NORM_EPSILON
+from ..utils.vectors import (DiffusionGradientTable, B0_THRESHOLD,
+                             BVEC_NORM_EPSILON
+                             )
 
 
 class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):

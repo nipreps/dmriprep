@@ -35,15 +35,14 @@ def extract_b0(in_file, b0_ixs, out_path=None):
             in_file, suffix='_b0', use_ext=True)
 
     img = nb.load(in_file)
-    data = img.get_fdata(dtype="float32")
+    data = img.get_fdata()
 
     b0 = data[..., b0_ixs]
 
     hdr = img.header.copy()
     hdr.set_data_shape(b0.shape)
-    hdr.set_xyzt_units("mm")
-    hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(b0, img.affine, hdr).to_filename(out_path)
+    hdr.set_xyzt_units('mm')
+    nb.Nifti1Image(b0.astype(hdr.get_data_dtype()), img.affine, hdr).to_filename(out_path)
     return out_path
 
 
@@ -81,9 +80,9 @@ def rescale_b0(in_file, mask_file, out_path=None):
     if img.dataobj.ndim == 3:
         return in_file
 
-    data = img.get_fdata(dtype="float32")
+    data = img.get_fdata()
     mask_img = nb.load(mask_file)
-    mask_data = mask_img.get_fdata(dtype="float32")
+    mask_data = mask_img.get_fdata()
 
     median_signal = np.median(data[mask_data > 0, ...], axis=0)
     rescaled_data = 1000 * data / median_signal
@@ -92,7 +91,7 @@ def rescale_b0(in_file, mask_file, out_path=None):
     return out_path
 
 
-def median(in_file, out_path=None):
+def median(in_file, dtype=None, out_path=None):
     """
     Summarize a 4D dataset across the last dimension using median.
 
@@ -126,11 +125,16 @@ def median(in_file, out_path=None):
         nb.squeeze_image(img).to_filename(out_path)
         return out_path
 
-    median_data = np.median(img.get_fdata(), axis=-1)
+    median_data = np.median(img.get_fdata(dtype=dtype),
+                            axis=-1)
 
     hdr = img.header.copy()
-    hdr.set_xyzt_units("mm")
-    nb.Nifti1Image(median_data, img.affine, hdr).to_filename(out_path)
+    hdr.set_xyzt_units('mm')
+    if dtype is not None:
+        hdr.set_data_dtype(dtype)
+    else:
+        dtype = hdr.get_data_dtype()
+    nb.Nifti1Image(median_data.astype(dtype), img.affine, hdr).to_filename(out_path)
     return out_path
 
 
