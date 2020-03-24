@@ -1,16 +1,11 @@
 """Image tools interfaces."""
 from pathlib import Path
-
 from nipype import logging
 from nipype.interfaces.base import (
-    BaseInterfaceInputSpec,
-    File,
-    SimpleInterface,
-    TraitedSpec,
-    traits
+    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File,
+    InputMultiObject, OutputMultiObject
 )
-
-from dmriprep.utils.images import extract_b0, median, rescale_b0
+from dmriprep.utils.images import extract_b0, summarize_images, rescale_b0, match_transforms
 
 LOGGER = logging.getLogger('nipype.interface')
 
@@ -85,6 +80,7 @@ class RescaleB0(SimpleInterface):
     output_spec = _RescaleB0OutputSpec
 
     def _run_interface(self, runtime):
+        import numpy as np
         from nipype.utils.filemanip import fname_presuffix
 
         out_b0s = fname_presuffix(
@@ -104,8 +100,32 @@ class RescaleB0(SimpleInterface):
             self.inputs.in_file,
             self.inputs.mask_file, out_b0s
         )
-        self._results['out_ref'] = median(
-            self._results['out_b0s'],
+        self._results['out_ref'] = summarize_images(
+            self._results['out_b0s'], method=np.median,
             out_path=out_ref
+        )
+        return runtime
+
+
+class _MatchTransformsInputSpec(BaseInterfaceInputSpec):
+    b0_indices = traits.List(mandatory=True)
+    dwi_files = InputMultiObject(File(exists=True), mandatory=True)
+    transforms = InputMultiObject(File(exists=True), mandatory=True)
+
+
+class _MatchTransformsOutputSpec(TraitedSpec):
+    transforms = OutputMultiObject(File(exists=True), mandatory=True)
+
+
+class MatchTransforms(SimpleInterface):
+    """
+    Interface for mapping the `match_transforms` function across lists of inputs.
+    """
+    input_spec = _MatchTransformsInputSpec
+    output_spec = _MatchTransformsOutputSpec
+
+    def _run_interface(self, runtime):
+        self._results["transforms"] = match_transforms(
+            self.inputs.dwi_files, self.inputs.transforms, self.inputs.b0_indices
         )
         return runtime
