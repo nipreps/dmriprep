@@ -106,6 +106,7 @@ class RescaleB0(SimpleInterface):
         )
         return runtime
 
+    
 class _MatchTransformsInputSpec(BaseInterfaceInputSpec):
     b0_indices = traits.List(mandatory=True)
     dwi_files = InputMultiObject(File(exists=True), mandatory=True)
