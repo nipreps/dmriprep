@@ -243,7 +243,7 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
 
     # Check for bval-bvec discrepancy.
     if not np.all(b0s == b0_vecs):
-        raise ValueError(
+        raise UserWarning(
             'Inconsistent bvals and bvecs (%d, %d low-b, respectively).' %
             (b0s.sum(), b0_vecs.sum()))
 
