@@ -74,7 +74,7 @@ class _RegisterInputSpec(BaseInterfaceInputSpec):
         exists=True, mandatory=True, desc="image to apply transformation to"
     )
     nbins = traits.Int(default_value=32, usedefault=True)
-    sampling_prop = traits.Float(defualt_value=1, usedefault=True)
+    sampling_prop = traits.Float(default_value=1, usedefault=True)
     metric = traits.Str(default_value="MI", usedefault=True)
     level_iters = traits.List(
         trait=traits.Any(), value=[10000, 1000, 100], usedefault=True

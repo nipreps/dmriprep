@@ -8,7 +8,7 @@ from dmriprep.utils.registration import affine_registration
 
 def setup_module():
     global subset_b0, subset_dwi_data, subset_t2, subset_b0_img, \
-           subset_t2_img, gtab, hardi_affine, MNI_T2_affine
+        subset_t2_img, gtab, hardi_affine, MNI_T2_affine
     MNI_T2 = dpd.read_mni_template()
     hardi_img, gtab = dpd.read_stanford_hardi()
     MNI_T2_data = MNI_T2.get_fdata()
