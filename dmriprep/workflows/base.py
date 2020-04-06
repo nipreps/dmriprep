@@ -253,7 +253,6 @@ Diffusion data preprocessing
         workflow.connect([
             (anat_preproc_wf, dwi_preproc_wf,
              [(('outputnode.t1w_preproc', _pop), 'inputnode.t1w_preproc'),
-              ('outputnode.t1w_brain', 'inputnode.t1w_brain'),
               ('outputnode.t1w_mask', 'inputnode.t1w_mask'),
               ('outputnode.t1w_dseg', 'inputnode.t1w_dseg'),
               ('outputnode.t1w_aseg', 'inputnode.t1w_aseg'),
@@ -262,9 +261,6 @@ Diffusion data preprocessing
               ('outputnode.template', 'inputnode.template'),
               ('outputnode.anat2std_xfm', 'inputnode.anat2std_xfm'),
               ('outputnode.std2anat_xfm', 'inputnode.std2anat_xfm'),
-              ('outputnode.joint_template', 'inputnode.joint_template'),
-              ('outputnode.joint_anat2std_xfm', 'inputnode.joint_anat2std_xfm'),
-              ('outputnode.joint_std2anat_xfm', 'inputnode.joint_std2anat_xfm'),
               # Undefined if --fs-no-reconall, but this is safe
               ('outputnode.subjects_dir', 'inputnode.subjects_dir'),
               ('outputnode.subject_id', 'inputnode.subject_id'),

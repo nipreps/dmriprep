@@ -67,9 +67,8 @@ def init_dwi_preproc_wf(dwi_file):
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'bvec_file', 'bval_file',
                 'subjects_dir', 'subject_id',
-                't1w_preproc', 't1w_brain', 't1w_mask', 't1w_dseg', 't1w_tpms',
-                't1w_aseg', 't1w_aparc', 'anat2std_xfm', 'std2anat_xfm', 'template',
-                'joint_anat2std_xfm', 'joint_std2anat_xfm', 'joint_template',
+                't1w_preproc', 't1w_mask', 't1w_dseg', 't1w_tpms', 't1w_aseg', 't1w_aparc',
+                'anat2std_xfm', 'std2anat_xfm', 'template',
                 't1w2fsnative_xfm', 'fsnative2t1w_xfm']),
         name='inputnode')
     inputnode.inputs.dwi_file = dwi_file
