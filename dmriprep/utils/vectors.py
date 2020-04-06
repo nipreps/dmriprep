@@ -1,4 +1,5 @@
 """Utilities to operate on diffusion gradients."""
+from .. import config
 from pathlib import Path
 from itertools import permutations
 import nibabel as nb
@@ -265,7 +266,8 @@ class DiffusionGradientTable:
 
 
 def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
-                        bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True):
+                        bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True,
+                        raise_error=False):
     """
     Normalize b-vectors and b-values.
 
@@ -329,9 +331,10 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
 
     # Check for bval-bvec discrepancy.
     if not np.all(b0s == b0_vecs):
-        raise ValueError(
-            'Inconsistent bvals and bvecs (%d, %d low-b, respectively).' %
-            (b0s.sum(), b0_vecs.sum()))
+        msg = f"Inconsistent bvals and bvecs ({b0s.sum()}, {b0_vecs.sum()} low-b, respectively)."
+        if raise_error:
+            raise ValueError(msg)
+        config.loggers.cli.warning(msg)
 
     # Rescale b-vals if requested
     if b_scale:
