@@ -126,8 +126,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - data-v1-{{ .Revision }}
-            - data-v1-
+            - data-v2-{{ .Revision }}
+            - data-v2-
       - run:
           name: Get test data from THP002
           command: |
@@ -142,7 +142,7 @@ jobs:
       - run:
           name: Get FreeSurfer derivatives for THP002
           command: |
-            if [[ ! -d /tmp/data/THP002/derivatives/freesurfer ]]; then
+            if [[ ! -d /tmp/data/THP002/derivatives/freesurfer-6.0.1 ]]; then
               mkdir -p /tmp/data/THP002/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
                 -O THP002_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5d7d87ce7483ec0017530cc9"
@@ -193,7 +193,7 @@ jobs:
             - fslicense
             - config/nipype.cfg
       - save_cache:
-         key: data-v1-{{ .Revision }}-{{ epoch }}
+         key: data-v2-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
 
@@ -222,7 +222,7 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-v1-{{ .Revision }}
+            - data-v2-{{ .Revision }}
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -329,7 +329,7 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-v1-{{ .Revision }}
+            - data-v2-{{ .Revision }}
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
