@@ -1,14 +1,15 @@
 git+https://github.com/AleksandarPetrov/napoleon.git@0dc3f28a309ad602be5f44a9049785a1026451b3#egg=sphinxcontrib-napoleon
 git+https://github.com/rwblair/sphinxcontrib-versioning.git@39b40b0b84bf872fc398feff05344051bbce0f63#egg=sphinxcontrib-versioning
 nbsphinx
-nipype ~= 1.3.1
-niworkflows ~= 1.1.0
+nipype ~= 1.4
+niworkflows >=1.2.0rc1,<1.3
 packaging
 pydot>=1.2.3
 pydotplus
-smriprep ~= 0.4.1
+smriprep >=0.6.0rc2
 sphinx-argparse
-sphinx>=2.1.2
+sphinx >=2.1.2,<3.0
 sphinx_rtd_theme
 sphinxcontrib-apidoc ~= 0.3.0
 templateflow
+toml

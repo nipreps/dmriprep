@@ -1,0 +1,56 @@
+[environment]
+cpu_count = 8
+exec_env = "posix"
+free_mem = 1.0
+overcommit_policy = "heuristic"
+overcommit_limit = "50%"
+nipype_version = "1.4.2"
+templateflow_version = "0.4.2"
+version = "0.2.2"
+
+[execution]
+bids_dir = "THP002/"
+bids_description_hash = "b07ee615a588acf67967d70f5b2402ffbe477b99a316433fa7fdaff4f9dad5c1"
+boilerplate_only = false
+debug = false
+fs_license_file = "/opt/freesurfer/license.txt"
+fs_subjects_dir = "opt/freesurfer/subjects"
+layout = "BIDS Layout: .../home/oesteban/Data/THP002 | Subjects: 1 | Sessions: 2 | Runs: 2"
+log_dir = "/tmp/dmriprep/logs"
+log_level = 40
+low_mem = false
+md_only_boilerplate = false
+notrack = true
+output_dir = "/tmp"
+output_spaces = "run"
+reports_only = false
+run_uuid = "20200311-121754_aa0b4fa9-6b60-4a11-af7d-02deb54a823f"
+participant_label = [ "THP0005",]
+templateflow_home = "/usr/share/templateflow"
+work_dir = "work/"
+write_graph = false
+
+[workflow]
+anat_only = false
+fmap_bspline = false
+force_syn = false
+hires = true
+ignore = []
+longitudinal = false
+run_reconall = true
+skull_strip_fixed_seed = false
+skull_strip_template = "OASIS30ANTs"
+spaces = "run"
+
+[nipype]
+crashfile_format = "txt"
+get_linked_libs = false
+nprocs = 8
+omp_nthreads = 8
+plugin = "MultiProc"
+resource_monitor = false
+stop_on_first_crash = false
+
+[nipype.plugin_args]
+maxtasksperchild = 1
+raise_insufficient = false

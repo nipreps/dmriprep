@@ -97,7 +97,10 @@ language = None
 exclude_patterns = [
     '_build', 'Thumbs.db', '.DS_Store',
     'api/dmriprep.rst',
-    'api/dmriprep.cli.rst', 'api/dmriprep.cli.*.rst']
+    'api/dmriprep.cli.rst',
+    'api/dmriprep.cli.*.rst',
+    'api/dmriprep.config.testing.rst',
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -211,7 +214,7 @@ epub_exclude_files = ['search.html']
 
 apidoc_module_dir = '../dmriprep'
 apidoc_output_dir = 'api'
-apidoc_excluded_paths = ['conftest.py', '*/tests/*', 'tests/*', 'data/*']
+apidoc_excluded_paths = ['conftest.py', '*/tests/*', 'tests/*', 'data/*', 'config/testing.py']
 apidoc_separate_modules = True
 apidoc_extra_args = ['--module-first', '-d 1', '-T']
 

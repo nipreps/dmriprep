@@ -1,4 +1,5 @@
 """Utilities to operate on diffusion gradients."""
+from .. import config
 from pathlib import Path
 from itertools import permutations
 import nibabel as nb
@@ -14,11 +15,29 @@ SHELL_DIFF_THRES = 150
 class DiffusionGradientTable:
     """Data structure for DWI gradients."""
 
-    __slots__ = ['_affine', '_gradients', '_b_scale', '_bvecs', '_bvals', '_normalized',
-                 '_b0_thres', '_bvec_norm_epsilon']
+    __slots__ = [
+        "_affine",
+        "_gradients",
+        "_b_scale",
+        "_bvecs",
+        "_bvals",
+        "_normalized",
+        "_transforms",
+        "_b0_thres",
+        "_bvec_norm_epsilon",
+    ]
 
-    def __init__(self, dwi_file=None, bvecs=None, bvals=None, rasb_file=None,
-                 b_scale=True, b0_threshold=B0_THRESHOLD, bvec_norm_epsilon=BVEC_NORM_EPSILON):
+    def __init__(
+        self,
+        dwi_file=None,
+        bvecs=None,
+        bvals=None,
+        rasb_file=None,
+        b_scale=True,
+        transforms=None,
+        b0_threshold=B0_THRESHOLD,
+        bvec_norm_epsilon=BVEC_NORM_EPSILON,
+    ):
         """
         Create a new table of diffusion gradients.
 
@@ -37,7 +56,29 @@ class DiffusionGradientTable:
         b_scale : bool
             Whether b-values should be normalized.
 
+        Example
+        -------
+        >>> os.chdir(tmpdir)
+        >>> old_rasb = str(data_dir / 'dwi.tsv')
+        >>> old_rasb_mat = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
+        >>> from dmriprep.utils.vectors import bvecs2ras
+        >>> check = DiffusionGradientTable(
+        ...     dwi_file=str(data_dir / 'dwi.nii.gz'),
+        ...     rasb_file=str(data_dir / 'dwi.tsv'))
+        >>> # Conform to the orientation of the image:
+        >>> old_rasb_mat[:, :3] = bvecs2ras(check.affine, old_rasb_mat[:, :3])
+        >>> affines = np.zeros((old_rasb_mat.shape[0], 4, 4))
+        >>> aff_file_list = []
+        >>> for ii, aff in enumerate(affines):
+        ...     aff_file = f'aff_{ii}.npy'
+        ...     np.save(aff_file, aff)
+        ...     aff_file_list.append(aff_file)
+        >>> check._transforms = aff_file_list
+        >>> out_rasb_mat = check.reorient_rasb()
+        >>> np.allclose(old_rasb_mat, out_rasb_mat)
+        True
         """
+        self._transforms = transforms
         self._b_scale = b_scale
         self._b0_thres = b0_threshold
         self._bvec_norm_epsilon = bvec_norm_epsilon
@@ -89,7 +130,7 @@ class DiffusionGradientTable:
             dwi_file = nb.load(str(value))
             self._affine = dwi_file.affine.copy()
             return
-        if hasattr(value, 'affine'):
+        if hasattr(value, "affine"):
             self._affine = value.affine
         self._affine = np.array(value)
 
@@ -104,12 +145,12 @@ class DiffusionGradientTable:
         if isinstance(value, (str, Path)):
             value = np.loadtxt(str(value)).T
         else:
-            value = np.array(value, dtype='float32')
+            value = np.array(value, dtype="float32")
 
         # Correct any b0's in bvecs misstated as 10's.
         value[np.any(abs(value) >= 10, axis=1)] = np.zeros(3)
         if self.bvals is not None and value.shape[0] != self.bvals.shape[0]:
-            raise ValueError('The number of b-vectors and b-values do not match')
+            raise ValueError("The number of b-vectors and b-values do not match")
         self._bvecs = value
 
     @bvals.setter
@@ -117,7 +158,7 @@ class DiffusionGradientTable:
         if isinstance(value, (str, Path)):
             value = np.loadtxt(str(value)).flatten()
         if self.bvecs is not None and value.shape[0] != self.bvecs.shape[0]:
-            raise ValueError('The number of b-vectors and b-values do not match')
+            raise ValueError("The number of b-vectors and b-values do not match")
         self._bvals = np.array(value)
 
     @property
@@ -131,10 +172,12 @@ class DiffusionGradientTable:
             return
 
         self._bvecs, self._bvals = normalize_gradients(
-            self.bvecs, self.bvals,
+            self.bvecs,
+            self.bvals,
             b0_threshold=self._b0_thres,
             bvec_norm_epsilon=self._bvec_norm_epsilon,
-            b_scale=self._b_scale)
+            b_scale=self._b_scale,
+        )
         self._normalized = True
 
     def generate_rasb(self):
@@ -144,14 +187,52 @@ class DiffusionGradientTable:
             _ras = bvecs2ras(self.affine, self.bvecs)
             self.gradients = np.hstack((_ras, self.bvals[..., np.newaxis]))
 
+    def reorient_rasb(self):
+        """Reorient the vectors based o a list of affine transforms."""
+        from dipy.core.gradients import (gradient_table_from_bvals_bvecs,
+                                         reorient_bvecs)
+
+        affines = self._transforms.copy()
+        bvals = self._bvals
+        bvecs = self._bvecs
+
+        # Verify that number of non-B0 volumes corresponds to the number of
+        # affines. If not, try to fix it, or raise an error:
+        if len(self._bvals[self._bvals >= self._b0_thres]) != len(affines):
+            b0_indices = np.where(self._bvals <= self._b0_thres)[0].tolist()
+            if len(self._bvals[self._bvals >= self._b0_thres]) < len(affines):
+                for i in sorted(b0_indices, reverse=True):
+                    del affines[i]
+            if len(self._bvals[self._bvals >= self._b0_thres]) > len(affines):
+                ras_b_mat = self._gradients.copy()
+                ras_b_mat = np.delete(ras_b_mat, tuple(b0_indices), axis=0)
+                bvals = ras_b_mat[:, 3]
+                bvecs = ras_b_mat[:, 0:3]
+            if len(self._bvals[self._bvals > self._b0_thres]) != len(affines):
+                raise ValueError(
+                    "Affine transformations do not correspond to gradients"
+                )
+
+        # Build gradient table object
+        gt = gradient_table_from_bvals_bvecs(bvals, bvecs,
+                                             b0_threshold=self._b0_thres)
+
+        # Reorient table
+        new_gt = reorient_bvecs(gt, [np.load(aff) for aff in affines])
+
+        return np.hstack((new_gt.bvecs, new_gt.bvals[..., np.newaxis]))
+
     def generate_vecval(self):
         """Compose a bvec/bval pair in image coordinates."""
         if self.bvecs is None or self.bvals is None:
             if self.affine is None:
                 raise TypeError(
                     "Cannot generate b-vectors & b-values in image coordinates. "
-                    "Please set the corresponding DWI image's affine matrix.")
-            self._bvecs = bvecs2ras(np.linalg.inv(self.affine), self.gradients[..., :-1])
+                    "Please set the corresponding DWI image's affine matrix."
+                )
+            self._bvecs = bvecs2ras(
+                np.linalg.inv(self.affine), self.gradients[..., :-1]
+            )
             self._bvals = self.gradients[..., -1].flatten()
 
     @property
@@ -163,19 +244,25 @@ class DiffusionGradientTable:
 
         """
         self.generate_rasb()
-        return calculate_pole(self.gradients[..., :-1], bvec_norm_epsilon=self._bvec_norm_epsilon)
+        return calculate_pole(
+            self.gradients[..., :-1], bvec_norm_epsilon=self._bvec_norm_epsilon
+        )
 
-    def to_filename(self, filename, filetype='rasb'):
+    def to_filename(self, filename, filetype="rasb"):
         """Write files (RASB, bvecs/bvals) to a given path."""
-        if filetype.lower() == 'rasb':
+        if filetype.lower() == "rasb":
             self.generate_rasb()
-            np.savetxt(str(filename), self.gradients,
-                       delimiter='\t', header='\t'.join('RASB'),
-                       fmt=['%.8f'] * 3 + ['%g'])
-        elif filetype.lower() == 'fsl':
+            np.savetxt(
+                str(filename),
+                self.gradients,
+                delimiter="\t",
+                header="\t".join("RASB"),
+                fmt=["%.8f"] * 3 + ["%g"],
+            )
+        elif filetype.lower() == "fsl":
             self.generate_vecval()
-            np.savetxt('%s.bvec' % filename, self.bvecs.T, fmt='%.6f')
-            np.savetxt('%s.bval' % filename, self.bvals, fmt='%.6f')
+            np.savetxt("%s.bvec" % filename, self.bvecs.T, fmt="%.6f")
+            np.savetxt("%s.bval" % filename, self.bvals, fmt="%.6f")
         else:
             raise ValueError('Unknown filetype "%s"' % filetype)
 
@@ -280,7 +367,8 @@ class BVALScheme:
             
 
 def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
-                        bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True):
+                        bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True,
+                        raise_error=False):
     """
     Normalize b-vectors and b-values.
 
@@ -344,9 +432,10 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
 
     # Check for bval-bvec discrepancy.
     if not np.all(b0s == b0_vecs):
-        raise ValueError(
-            'Inconsistent bvals and bvecs (%d, %d low-b, respectively).' %
-            (b0s.sum(), b0_vecs.sum()))
+        msg = f"Inconsistent bvals and bvecs ({b0s.sum()}, {b0_vecs.sum()} low-b, respectively)."
+        if raise_error:
+            raise ValueError(msg)
+        config.loggers.cli.warning(msg)
 
     # Rescale b-vals if requested
     if b_scale:
