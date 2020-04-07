@@ -5,9 +5,11 @@ from itertools import permutations
 import nibabel as nb
 import numpy as np
 from dipy.core.gradients import round_bvals
+from sklearn.cluster import KMeans
 
 B0_THRESHOLD = 50
 BVEC_NORM_EPSILON = 0.1
+SHELL_DIFF_THRES = 150
 
 
 class DiffusionGradientTable:
@@ -263,6 +265,41 @@ class DiffusionGradientTable:
             np.savetxt("%s.bval" % filename, self.bvals, fmt="%.6f")
         else:
             raise ValueError('Unknown filetype "%s"' % filetype)
+
+
+def bval_centers(diffusion_table, shell_diff_thres=SHELL_DIFF_THRES):
+    """
+    Parse the available bvals from DiffusionTable into shells
+
+    Parameters
+    ----------
+    diffusion_table : DiffusionGradientTable object
+
+    Returns
+    -------
+    shell_centers : numpy.ndarray of length of bvals vector
+        Vector of bvals of shell centers
+    """
+    bvals = diffusion_table.bvals
+
+    # use kmeans to find the shelling scheme
+    for k in range(1, len(np.unique(bvals)) + 1):
+        kmeans_res = KMeans(n_clusters=k).fit(bvals.reshape(-1, 1))
+        if kmeans_res.inertia_ / len(bvals) < shell_diff_thres:
+            break
+    else:
+        raise ValueError(
+            'Sorry, bval parsing failed - no shells '
+            'are more than {} apart are found'.format(shell_diff_thres)
+        )
+
+    # convert the kclust labels to an array
+    shells = kmeans_res.cluster_centers_
+    shell_centers_vec = np.zeros(bvals.shape)
+    for i in range(shells.size):
+        shell_centers_vec[kmeans_res.labels_ == i] = shells[i][0]
+
+    return shell_centers_vec
 
 
 def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
