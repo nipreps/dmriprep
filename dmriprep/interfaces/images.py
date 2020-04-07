@@ -47,12 +47,12 @@ class ExtractB0(SimpleInterface):
         out_file = fname_presuffix(
             self.inputs.in_file,
             suffix='_b0',
-            use_ext=True,
             newpath=str(Path(runtime.cwd).absolute()),
         )
 
         self._results['out_file'] = extract_b0(
-            self.inputs.in_file, self.inputs.b0_ixs, out_file
+            self.inputs.in_file, self.inputs.b0_ixs,
+            out_path=out_file
         )
         return runtime
 
@@ -65,6 +65,7 @@ class _RescaleB0InputSpec(BaseInterfaceInputSpec):
 class _RescaleB0OutputSpec(TraitedSpec):
     out_ref = File(exists=True, desc='One average b0 file')
     out_b0s = File(exists=True, desc='series of rescaled b0 volumes')
+    signal_drift = traits.List(traits.Float, desc='estimated signal drift factors')
 
 
 class RescaleB0(SimpleInterface):
@@ -90,17 +91,15 @@ class RescaleB0(SimpleInterface):
         out_b0s = fname_presuffix(
             self.inputs.in_file,
             suffix='_rescaled',
-            use_ext=True,
             newpath=str(Path(runtime.cwd).absolute())
         )
         out_ref = fname_presuffix(
             self.inputs.in_file,
             suffix='_ref',
-            use_ext=True,
             newpath=str(Path(runtime.cwd).absolute())
         )
 
-        self._results['out_b0s'] = rescale_b0(
+        self._results['out_b0s'], self._results['signal_drift'] = rescale_b0(
             self.inputs.in_file,
             self.inputs.mask_file, out_b0s
         )
