@@ -1,0 +1,53 @@
+
+This Datasets is from a Traveling Human Phantom (THP) dataset that was
+collected for a multi-site neuroimaging reliability study.  The THP dataset
+includes repeated multi-modal magnetic resonance (MR) images
+obtained for five healthy controls performed at eight imaging centers. The
+modalities include diffusion weighted images (DWI) and three-dimensional T1
+weighted MP-RAGE and T2 SPACE sequences.  Intra-subject and inter-site
+variability for MRI scans was and can be assessed as repeated images were taken
+across multiple imaging protocols.
+
+Another use for the THP dataset could be to evaluate and improve one's tool
+against multi-modal and multi-site data. In addition to the THP dataset, which
+is useful as it is, we share our processed results. DWI datasets were processed
+to produce common rotationally invariant scalar images and diffusion tensor
+images. Anatomical images, T1 and T2, were processed with the BRAINSTools suite
+to produce anatomical segmentations. 
+
+@article{magnotta2012multicenter,
+abstract = {A number of studies are now collecting diffusion tensor imaging
+(DTI) data across sites. While the reliability of anatomical images has been
+established by a number of groups, the reliability of DTI data has not been
+studied as extensively. In this study, five healthy controls were recruited and
+imaged at eight imaging centers. Repeated measures were obtained across two
+imaging protocols allowing intra-subject and inter-site variability to be
+assessed. Regional measures within white matter were obtained for standard
+rotationally invariant measures: fractional anisotropy, mean diffusivity,
+radial diffusivity, and axial diffusivity. Intra-subject coefficient of
+variation (CV) was typically {\textless}1{\%} for all scalars and regions.
+Inter-site CV increased to {\~{}}1{\%}-3{\%}. Inter-vendor variation was
+similar to inter-site variability. This variability includes differences in the
+actual implementation of the sequence.}, author = {Magnotta, Vincent a. and
+Matsui, Joy T. and Liu, Dawei and Johnson, Hans J. and Long, Jeffrey D. and
+Bolster, Bradley D. and Mueller, Bryon a. and Lim, Kelvin O. and Mori, Susumu
+and Helmer, Karl and Turner, Jessica a. and Lowe, Mark J. and Aylward,
+Elizabeth and Flashman, Laura a. and Bonett, Greg and Paulsen, Jane S.},
+doi = {10.1089/brain.2012.0112},
+isbn = {8605457767},
+issn = {2158-0014},
+journal = {Brain Connectivity},
+keywords = {diffusion tensor,fractional anisotropy,magnetic resonance,mean diffusivity,reliability,white matter},
+mendeley-groups = {ReginaThesis,BiosketchReferences,JoysThesis,JoyCrossSectionalDWI,TEMP{\_}HOWES{\_}RE},
+month = {jan},
+number = {6},
+pages = {121018043201009},
+pmid = {23075313},
+publisher = {Mary Ann Liebert, Inc. 140 Huguenot Street, 3rd Floor New Rochelle, NY 10801 USA},
+title = {{Multi-Center Reliability of Diffusion Tensor Imaging}},
+url = {http://www.ncbi.nlm.nih.gov/pubmed/23075313 http://online.liebertpub.com/doi/abs/10.1089/brain.2012.0112 http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=3623569},
+volume = {2},
+year = {2012}
+}
+
+

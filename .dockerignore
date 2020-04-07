@@ -12,6 +12,11 @@ dmriprep.egg-info/**/*
 dmriprep.egg-info
 .eggs/**/*
 .eggs
+.pytest_cache/**/*
+.pytest_cache
+.ipynb_checkpoints/**/*
+.ipynb_checkpoints
+
 
 # housekeeping tools
 .maintenance/**/*
@@ -27,6 +32,8 @@ src/
 .gitignore
 .git/**/*
 .git
+.github/**/*
+.github
 .mailmap
 
 # other
@@ -41,7 +48,6 @@ out/
 .codecov.yml
 .coveragerc
 .pep8speaks.yml
-.readthedocs.yml
 .travis.yml
 .zenodo.json
 

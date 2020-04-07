@@ -126,8 +126,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - data-v0-{{ .Revision }}
-            - data-v0-
+            - data-v2-{{ .Revision }}
+            - data-v2-
       - run:
           name: Get test data from THP002
           command: |
@@ -142,13 +142,37 @@ jobs:
       - run:
           name: Get FreeSurfer derivatives for THP002
           command: |
-            if [[ ! -d /tmp/THP002/derivatives/freesurfer ]]; then
-              mkdir -p /tmp/THP002/derivatives
+            if [[ ! -d /tmp/data/THP002/derivatives/freesurfer-6.0.1 ]]; then
+              mkdir -p /tmp/data/THP002/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
                 -O THP002_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5d7d87ce7483ec0017530cc9"
-              tar xvzf THP002_derivatives_freesurfer.tar.gz -C /tmp/THP002/derivatives
+              tar xvzf THP002_derivatives_freesurfer.tar.gz -C /tmp/data/THP002/derivatives
+              mv /tmp/data/THP002/derivatives/freesurfer /tmp/data/THP002/derivatives/freesurfer-6.0.1
             else
               echo "FreeSurfer derivatives of THP002 were cached"
+            fi
+      - run:
+          name: Get test data (ds001771)
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/ds001771 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds001771_sub-36.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5e1f89d36822bd01f0febbdc"
+              tar xvzf ds001771_sub-36.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds001771_sub-36 was cached"
+            fi
+      - run:
+          name: Get FreeSurfer derivatives for ds001771_sub-36
+          command: |
+            if [[ ! -d /tmp/data/ds001771/derivatives/freesurfer-6.0.1 ]]; then
+              mkdir -p /tmp/data/ds001771/derivatives
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds001771_sub-36_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5e21e74fedceab00ad82e047"
+              tar xvzf ds001771_sub-36_derivatives_freesurfer.tar.gz -C /tmp/data/ds001771/derivatives
+              mv /tmp/data/ds001771/derivatives/freesurfer /tmp/data/ds001771/derivatives/freesurfer-6.0.1
+            else
+              echo "FreeSurfer derivatives of ds001771 were cached"
             fi
       - run:
           name: Store FreeSurfer license file
@@ -169,10 +193,9 @@ jobs:
             - fslicense
             - config/nipype.cfg
       - save_cache:
-         key: data-v0-{{ .Revision }}-{{ epoch }}
+         key: data-v2-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
-            - /tmp/THP002/derivatives/freesurfer
 
   THP002:
     machine:
@@ -199,7 +222,7 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-v0-{{ .Revision }}
+            - data-v2-{{ .Revision }}
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -219,19 +242,15 @@ jobs:
             docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - restore_cache:
           keys:
-            - THP002-anat-v00-{{ .Branch }}-{{ .Revision }}
-            - THP002-anat-v00-{{ .Branch }}
-            - THP002-anat-v00-master
-            - THP002-anat-v00-
+            - THP002-anat-v01-{{ .Branch }}-{{ .Revision }}
+            - THP002-anat-v01-{{ .Branch }}
+            - THP002-anat-v01-master
+            - THP002-anat-v01-
       - run:
           name: Run anatomical workflow on THP002
           no_output_timeout: 2h
           command: |
             mkdir -p /tmp/THP002/work /tmp/THP002/derivatives
-            sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/derivatives && \
-                sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/derivatives
-            sudo setfacl -d -m group:$(id -gn):rwx /tmp/THP002/work && \
-                sudo setfacl -m group:$(id -gn):rwx /tmp/THP002/work
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
                 -v /tmp/data/THP002:/data \
                 -v /tmp/THP002/derivatives:/out \
@@ -239,7 +258,8 @@ jobs:
                 -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
                 -v /tmp/THP002/work:/work \
                 --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant -vv --sloppy --anat-only \
+                nipreps/dmriprep:latest /data /out participant -vv \
+                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy --anat-only \
                 --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - run:
           name: Clean-up after anatomical run
@@ -248,9 +268,24 @@ jobs:
             rm -rf /tmp/THP002/work/reportlets
           when: on_success
       - save_cache:
-         key: THP002-anat-v00-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         key: THP002-anat-v01-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/THP002/work
+      - run:
+          name: Run full diffusion workflow on THP002
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/THP002/work /tmp/THP002/derivatives
+            docker run -e FS_LICENSE=$FS_LICENSE --rm \
+                -v /tmp/data/THP002:/data \
+                -v /tmp/THP002/derivatives:/out \
+                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
+                -v /tmp/THP002/work:/work \
+                --user $(id -u):$(id -g) \
+                nipreps/dmriprep:latest /data /out participant -vv \
+                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy \
+                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - store_artifacts:
           path: /tmp/THP002/derivatives/dmriprep
       - run:
@@ -262,14 +297,119 @@ jobs:
           name: Clean working directory
           when: on_fail
           command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/THP002
-            find /tmp/THP002/work \( -name "*.nii.gz" -or -name "*.nii" -or "*.gii" -or "*.h5" \) \
+            find /tmp/THP002/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
                 -exec sh -c 'rm -f {}; touch {}' \;
-            find /tmp/THP002/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or "*.gii" -or "*.h5" \) \
+            find /tmp/THP002/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
                 -exec sh -c 'rm -f {}; touch {}' \;
       - store_artifacts:
           path: /tmp/THP002/work
 
+  ds001771:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/ds001771
+    environment:
+      - FS_LICENSE: /tmp/fslicense/license.txt
+    steps:
+      - checkout:
+          path: /home/circleci/src/dmriprep
+      - run:
+          name: Check whether build should be skipped
+          command: |
+            cd /home/circleci/src/dmriprep
+            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
+              echo "Only docs build"
+              circleci step halt
+            fi
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds001771\]' )" != "" ]]; then
+              echo "Skipping ds001771 build"
+              circleci step halt
+            fi
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - data-v2-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-
+          paths:
+            - /tmp/docker
+      - run:
+          name: Set-up a Docker registry
+          command: |
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/dmriprep
+            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
+      - restore_cache:
+          keys:
+            - ds001771-anat-v00-{{ .Branch }}-{{ .Revision }}
+            - ds001771-anat-v00-{{ .Branch }}
+            - ds001771-anat-v00-master
+            - ds001771-anat-v00-
+      - run:
+          name: Run anatomical workflow on ds001771
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/ds001771/{work,derivatives}
+            docker run -e FS_LICENSE=$FS_LICENSE --rm \
+                -v /tmp/data/ds001771:/data \
+                -v /tmp/ds001771/derivatives:/out \
+                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
+                -v /tmp/ds001771/work:/work \
+                --user $(id -u):$(id -g) \
+                nipreps/dmriprep:latest /data /out participant -vv \
+                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy --anat-only \
+                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
+      - run:
+          name: Clean-up after anatomical run
+          command: |
+            rm -rf /tmp/ds001771/work/dmriprep_wf/fsdir*
+            rm -rf /tmp/ds001771/work/reportlets
+          when: on_success
+      - save_cache:
+         key: ds001771-anat-v00-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         paths:
+            - /tmp/ds001771/work
+      - run:
+          name: Run full diffusion workflow on ds001771
+          no_output_timeout: 2h
+          command: |
+            docker run -e FS_LICENSE=$FS_LICENSE --rm \
+                -v /tmp/data/ds001771:/data \
+                -v /tmp/ds001771/derivatives:/out \
+                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
+                -v /tmp/ds001771/work:/work \
+                --user $(id -u):$(id -g) \
+                nipreps/dmriprep:latest /data /out participant -vv \
+                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy \
+                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
+      - store_artifacts:
+          path: /tmp/ds001771/derivatives/dmriprep
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            sudo rm -rf /tmp/ds001771/work
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/ds001771
+            find /tmp/ds001771/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+            find /tmp/ds001771/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds001771/work
 
   deploy_docker_patches:
     machine:
@@ -411,7 +551,7 @@ jobs:
             which dmriprep | grep sdist\\/bin
             INSTALLED_VERSION=$(dmriprep --version)
             INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
-            INSTALLED_VERSION=${INSTALLED_VERSION#*"dmriprep v"}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
             echo "VERSION: \"$THISVERSION\""
             echo "INSTALLED: \"$INSTALLED_VERSION\""
             test "$INSTALLED_VERSION" = "$THISVERSION"
@@ -430,7 +570,7 @@ jobs:
             which dmriprep | grep wheel\\/bin
             INSTALLED_VERSION=$(dmriprep --version)
             INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
-            INSTALLED_VERSION=${INSTALLED_VERSION#*"dmriprep v"}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
             echo "VERSION: \"$THISVERSION\""
             echo "INSTALLED: \"$INSTALLED_VERSION\""
             test "$INSTALLED_VERSION" = "$THISVERSION"
@@ -564,6 +704,18 @@ workflows:
                 - /docker\/.*/
             tags:
               only: /.*/
+      - ds001771:
+          requires:
+            - build
+            - get_data
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
       - test_deploy_pypi:
           filters:
             branches:
@@ -615,6 +767,7 @@ workflows:
               ignore:
                 - /tests?\/.*/
                 - /THP002\/.*/
+                - /ds001771\/.*/
             tags:
               only: /.*/
 
