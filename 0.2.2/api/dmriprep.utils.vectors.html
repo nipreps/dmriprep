@@ -336,7 +336,7 @@ locating the hemisphere pole othewise.</p>
 
 <dl class="function">
 <dt id="dmriprep.utils.vectors.normalize_gradients">
-<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">normalize_gradients</code><span class="sig-paren">(</span><em class="sig-param">bvecs</em>, <em class="sig-param">bvals</em>, <em class="sig-param">b0_threshold=50</em>, <em class="sig-param">bvec_norm_epsilon=0.1</em>, <em class="sig-param">b_scale=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.normalize_gradients" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">normalize_gradients</code><span class="sig-paren">(</span><em class="sig-param">bvecs</em>, <em class="sig-param">bvals</em>, <em class="sig-param">b0_threshold=50</em>, <em class="sig-param">bvec_norm_epsilon=0.1</em>, <em class="sig-param">b_scale=True</em>, <em class="sig-param">raise_error=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.normalize_gradients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalize b-vectors and b-values.</p>
 <p>The resulting b-vectors will be of unit length for the non-zero b-values.
 The resultinb b-values will be normalized by the square of the
