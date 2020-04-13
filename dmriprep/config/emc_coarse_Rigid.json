@@ -1,8 +1,0 @@
-{
-    "level_iters": [100, 100],
-    "metric": "MI",
-    "sigmas": [8.0, 2.0],
-    "factors": [2, 1],
-    "sampling_prop": 0.15,
-    "nbins": 48
-}
