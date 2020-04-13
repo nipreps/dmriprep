@@ -68,7 +68,7 @@ class CheckGradientTable(SimpleInterface):
         rasb_file = _undefined(self.inputs, 'in_rasb')
 
         table = DiffusionGradientTable(
-            self.inputs.dwi_file,
+            dwi_file=self.inputs.dwi_file,
             bvecs=_undefined(self.inputs, 'in_bvec'),
             bvals=_undefined(self.inputs, 'in_bval'),
             rasb_file=rasb_file,
