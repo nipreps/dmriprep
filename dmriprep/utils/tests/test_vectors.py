@@ -46,12 +46,14 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     bval_no_b0[0] = 51
     with pytest.raises(ValueError):
         dgt = v.DiffusionGradientTable(dwi_file=dipy_test_data['dwi_file'],
-                                       bvals=bval_no_b0, bvecs=bvecs)
+                                       bvals=bval_no_b0, bvecs=bvecs,
+                                       raise_inconsistent=True)
     bvec_no_b0 = bvecs.copy()
     bvec_no_b0[0] = np.array([1.0, 0.0, 0.0])
     with pytest.raises(ValueError):
         dgt = v.DiffusionGradientTable(dwi_file=dipy_test_data['dwi_file'],
-                                       bvals=bvals, bvecs=bvec_no_b0)
+                                       bvals=bvals, bvecs=bvec_no_b0,
+                                       raise_inconsistent=True)
 
     # Corrupt b0 b-val
     bval_odd_b0 = bvals.copy()

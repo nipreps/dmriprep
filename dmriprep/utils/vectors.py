@@ -15,44 +15,57 @@ class DiffusionGradientTable:
 
     __slots__ = [
         "_affine",
-        "_gradients",
-        "_b_scale",
-        "_bvecs",
-        "_bvals",
-        "_normalized",
-        "_transforms",
         "_b0_thres",
+        "_b_scale",
+        "_bvals",
         "_bvec_norm_epsilon",
+        "_bvecs",
+        "_gradients",
+        "_normalized",
+        "_raise_inconsistent",
+        "_transforms",
     ]
 
     def __init__(
         self,
-        dwi_file=None,
-        bvecs=None,
-        bvals=None,
-        rasb_file=None,
-        b_scale=True,
-        transforms=None,
         b0_threshold=B0_THRESHOLD,
+        b_scale=True,
+        bvals=None,
         bvec_norm_epsilon=BVEC_NORM_EPSILON,
+        bvecs=None,
+        dwi_file=None,
+        raise_inconsistent=False,
+        rasb_file=None,
+        transforms=None,
     ):
         """
         Create a new table of diffusion gradients.
 
         Parameters
         ----------
+        b0_threshold : :obj:`float`
+            The upper threshold to consider a low-b shell as :math:`b=0`.
+        b_scale : :obj:`bool`
+            Automatically scale the *b*-values with the norm of the corresponding
+            *b*-vectors before the latter are normalized.
+        bvals : str or os.pathlike or numpy.ndarray
+            File path of the b-values.
+        b_vec_norm_epsilon : :obj:`float`
+            The minimum difference in the norm of two *b*-vectors to consider them different.
+        bvecs : str or os.pathlike or numpy.ndarray
+            File path of the b-vectors.
         dwi_file : str or os.pathlike or nibabel.spatialimage
             File path to the diffusion-weighted image series to which the
             bvecs/bvals correspond.
-        bvals : str or os.pathlike or numpy.ndarray
-            File path of the b-values.
-        bvecs : str or os.pathlike or numpy.ndarray
-            File path of the b-vectors.
+        raise_inconsistent : :obj:`bool`
+            If ``True``, a :obj:`ValueError` is raised when discrepancies are found between the
+            :math:`b=0` lists calculated from the *b*-vectors and *b*-values, respectively.
+            If ``False``, inconsistencies will be mended (if possible).
         rasb_file : str or os.pathlike
             File path to a RAS-B gradient table. If rasb_file is provided,
             then bvecs and bvals will be dismissed.
-        b_scale : bool
-            Whether b-values should be normalized.
+        transforms : :obj:`list` of :obj:`numpy.ndarray`
+            A list of affine transforms to rotate the list of vectors.
 
         Example
         -------
@@ -75,16 +88,18 @@ class DiffusionGradientTable:
         >>> out_rasb_mat = check.reorient_rasb()
         >>> np.allclose(old_rasb_mat, out_rasb_mat)
         True
+
         """
-        self._transforms = transforms
-        self._b_scale = b_scale
-        self._b0_thres = b0_threshold
-        self._bvec_norm_epsilon = bvec_norm_epsilon
-        self._gradients = None
-        self._bvals = None
-        self._bvecs = None
         self._affine = None
+        self._b0_thres = b0_threshold
+        self._b_scale = b_scale
+        self._bvals = None
+        self._bvec_norm_epsilon = bvec_norm_epsilon
+        self._bvecs = None
+        self._gradients = None
         self._normalized = False
+        self._raise_inconsistent = raise_inconsistent
+        self._transforms = transforms
 
         if dwi_file is not None:
             self.affine = dwi_file
@@ -175,6 +190,7 @@ class DiffusionGradientTable:
             b0_threshold=self._b0_thres,
             bvec_norm_epsilon=self._bvec_norm_epsilon,
             b_scale=self._b_scale,
+            raise_error=self._raise_inconsistent,
         )
         self._normalized = True
 
@@ -295,7 +311,7 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
     --------
     >>> bvecs = np.vstack((np.zeros(3), 2.0 * np.eye(3), -0.8 * np.eye(3), np.ones(3)))
     >>> bvals = np.array([1000] * bvecs.shape[0])
-    >>> normalize_gradients(bvecs, bvals, 50)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    >>> normalize_gradients(bvecs, bvals, 50, raise_error=True)
     Traceback (most recent call last):
     ValueError:
 
