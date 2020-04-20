@@ -71,17 +71,19 @@ from multiprocessing import set_start_method
 import warnings
 
 # cmp is not used by dmriprep, so ignore nipype-generated warnings
-warnings.filterwarnings('ignore', 'cmp not installed')
-warnings.filterwarnings('ignore', 'This has not been fully tested. Please report any failures.')
-warnings.filterwarnings('ignore', "sklearn.externals.joblib is deprecated in 0.21")
-warnings.filterwarnings('ignore', "can't resolve package from __spec__ or __package__")
-warnings.filterwarnings('ignore', category=DeprecationWarning)
-warnings.filterwarnings('ignore', category=FutureWarning)
-warnings.filterwarnings('ignore', category=ResourceWarning)
+warnings.filterwarnings("ignore", "cmp not installed")
+warnings.filterwarnings(
+    "ignore", "This has not been fully tested. Please report any failures."
+)
+warnings.filterwarnings("ignore", "sklearn.externals.joblib is deprecated in 0.21")
+warnings.filterwarnings("ignore", "can't resolve package from __spec__ or __package__")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=ResourceWarning)
 
 
 try:
-    set_start_method('forkserver')
+    set_start_method("forkserver")
 except RuntimeError:
     pass  # context has been already set
 finally:
@@ -103,59 +105,64 @@ finally:
 def redirect_warnings(message, category, filename, lineno, file=None, line=None):
     """Redirect other warnings."""
     logger = logging.getLogger()
-    logger.debug('Captured warning (%s): %s', category, message)
+    logger.debug("Captured warning (%s): %s", category, message)
 
 
 warnings.showwarning = redirect_warnings
 
-logging.addLevelName(25, 'IMPORTANT')  # Add a new level between INFO and WARNING
-logging.addLevelName(15, 'VERBOSE')  # Add a new level between INFO and DEBUG
+logging.addLevelName(25, "IMPORTANT")  # Add a new level between INFO and WARNING
+logging.addLevelName(15, "VERBOSE")  # Add a new level between INFO and DEBUG
 
 DEFAULT_MEMORY_MIN_GB = 0.01
-NONSTANDARD_REFERENCES = ['anat', 'T1w', 'dwi', 'fsnative']
+NONSTANDARD_REFERENCES = ["anat", "T1w", "dwi", "fsnative"]
 
 _exec_env = os.name
 _docker_ver = None
 # special variable set in the container
-if os.getenv('IS_DOCKER_8395080871'):
-    _exec_env = 'singularity'
-    _cgroup = Path('/proc/1/cgroup')
-    if _cgroup.exists() and 'docker' in _cgroup.read_text():
-        _docker_ver = os.getenv('DOCKER_VERSION_8395080871')
-        _exec_env = 'dmriprep-docker' if _docker_ver else 'docker'
+if os.getenv("IS_DOCKER_8395080871"):
+    _exec_env = "singularity"
+    _cgroup = Path("/proc/1/cgroup")
+    if _cgroup.exists() and "docker" in _cgroup.read_text():
+        _docker_ver = os.getenv("DOCKER_VERSION_8395080871")
+        _exec_env = "dmriprep-docker" if _docker_ver else "docker"
     del _cgroup
 
-_fs_license = os.getenv('FS_LICENSE')
-if _fs_license is None and os.getenv('FREESURFER_HOME'):
-    _fs_license = os.path.join(os.getenv('FREESURFER_HOME'), 'license.txt')
+_fs_license = os.getenv("FS_LICENSE")
+if _fs_license is None and os.getenv("FREESURFER_HOME"):
+    _fs_license = os.path.join(os.getenv("FREESURFER_HOME"), "license.txt")
 
-_templateflow_home = Path(os.getenv(
-    'TEMPLATEFLOW_HOME',
-    os.path.join(os.getenv('HOME'), '.cache', 'templateflow'))
+_templateflow_home = Path(
+    os.getenv(
+        "TEMPLATEFLOW_HOME", os.path.join(os.getenv("HOME"), ".cache", "templateflow")
+    )
 )
 
 try:
     from psutil import virtual_memory
-    _free_mem_at_start = round(virtual_memory().free / 1024**3, 1)
+
+    _free_mem_at_start = round(virtual_memory().free / 1024 ** 3, 1)
 except Exception:
     _free_mem_at_start = None
 
-_oc_limit = 'n/a'
-_oc_policy = 'n/a'
+_oc_limit = "n/a"
+_oc_policy = "n/a"
 try:
     # Memory policy may have a large effect on types of errors experienced
-    _proc_oc_path = Path('/proc/sys/vm/overcommit_memory')
+    _proc_oc_path = Path("/proc/sys/vm/overcommit_memory")
     if _proc_oc_path.exists():
-        _oc_policy = {
-            '0': 'heuristic', '1': 'always', '2': 'never'
-        }.get(_proc_oc_path.read_text().strip(), 'unknown')
-        if _oc_policy != 'never':
-            _proc_oc_kbytes = Path('/proc/sys/vm/overcommit_kbytes')
+        _oc_policy = {"0": "heuristic", "1": "always", "2": "never"}.get(
+            _proc_oc_path.read_text().strip(), "unknown"
+        )
+        if _oc_policy != "never":
+            _proc_oc_kbytes = Path("/proc/sys/vm/overcommit_kbytes")
             if _proc_oc_kbytes.exists():
                 _oc_limit = _proc_oc_kbytes.read_text().strip()
-            if _oc_limit in ('0', 'n/a') and Path('/proc/sys/vm/overcommit_ratio').exists():
-                _oc_limit = '{}%'.format(
-                    Path('/proc/sys/vm/overcommit_ratio').read_text().strip()
+            if (
+                _oc_limit in ("0", "n/a")
+                and Path("/proc/sys/vm/overcommit_ratio").exists()
+            ):
+                _oc_limit = "{}%".format(
+                    Path("/proc/sys/vm/overcommit_ratio").read_text().strip()
                 )
 except Exception:
     pass
@@ -168,7 +175,7 @@ class _Config:
 
     def __init__(self):
         """Avert instantiation."""
-        raise RuntimeError('Configuration type is not instantiable.')
+        raise RuntimeError("Configuration type is not instantiable.")
 
     @classmethod
     def load(cls, settings, init=True):
@@ -193,14 +200,14 @@ class _Config:
         """Return defined settings."""
         out = {}
         for k, v in cls.__dict__.items():
-            if k.startswith('_') or v is None:
+            if k.startswith("_") or v is None:
                 continue
             if callable(getattr(cls, k)):
                 continue
             if k in cls._paths:
                 v = str(v)
             if isinstance(v, _SRs):
-                v = ' '.join([str(s) for s in v.references]) or None
+                v = " ".join([str(s) for s in v.references]) or None
             if isinstance(v, _Ref):
                 v = str(v) or None
             out[k] = v
@@ -244,7 +251,7 @@ class environment(_Config):
 class nipype(_Config):
     """Nipype settings."""
 
-    crashfile_format = 'txt'
+    crashfile_format = "txt"
     """The file format for crashfiles, either text or pickle."""
     get_linked_libs = False
     """Run NiPype's tool to enlist linked libraries for every interface."""
@@ -257,11 +264,11 @@ class nipype(_Config):
     parameterize_dirs = False
     """The node’s output directory will contain full parameterization of any iterable, otherwise
     parameterizations over 32 characters will be replaced by their hash."""
-    plugin = 'MultiProc'
+    plugin = "MultiProc"
     """NiPype's execution plugin."""
     plugin_args = {
-        'maxtasksperchild': 1,
-        'raise_insufficient': False,
+        "maxtasksperchild": 1,
+        "raise_insufficient": False,
     }
     """Settings for NiPype's execution plugin."""
     resource_monitor = False
@@ -273,13 +280,13 @@ class nipype(_Config):
     def get_plugin(cls):
         """Format a dictionary for Nipype consumption."""
         out = {
-            'plugin': cls.plugin,
-            'plugin_args': cls.plugin_args,
+            "plugin": cls.plugin,
+            "plugin_args": cls.plugin_args,
         }
-        if cls.plugin in ('MultiProc', 'LegacyMultiProc'):
-            out['plugin_args']['nprocs'] = int(cls.nprocs)
+        if cls.plugin in ("MultiProc", "LegacyMultiProc"):
+            out["plugin_args"]["nprocs"] = int(cls.nprocs)
             if cls.memory_gb:
-                out['plugin_args']['memory_gb'] = float(cls.memory_gb)
+                out["plugin_args"]["memory_gb"] = float(cls.memory_gb)
         return out
 
     @classmethod
@@ -289,25 +296,29 @@ class nipype(_Config):
 
         # Configure resource_monitor
         if cls.resource_monitor:
-            ncfg.update_config({
-                'monitoring': {
-                    'enabled': cls.resource_monitor,
-                    'sample_frequency': '0.5',
-                    'summary_append': True,
+            ncfg.update_config(
+                {
+                    "monitoring": {
+                        "enabled": cls.resource_monitor,
+                        "sample_frequency": "0.5",
+                        "summary_append": True,
+                    }
                 }
-            })
+            )
             ncfg.enable_resource_monitor()
 
         # Nipype config (logs and execution)
-        ncfg.update_config({
-            'execution': {
-                'crashdump_dir': str(execution.log_dir),
-                'crashfile_format': cls.crashfile_format,
-                'get_linked_libs': cls.get_linked_libs,
-                'stop_on_first_crash': cls.stop_on_first_crash,
-                'parameterize_dirs': cls.parameterize_dirs,
+        ncfg.update_config(
+            {
+                "execution": {
+                    "crashdump_dir": str(execution.log_dir),
+                    "crashfile_format": cls.crashfile_format,
+                    "get_linked_libs": cls.get_linked_libs,
+                    "stop_on_first_crash": cls.stop_on_first_crash,
+                    "parameterize_dirs": cls.parameterize_dirs,
+                }
             }
-        })
+        )
 
 
 class execution(_Config):
@@ -346,13 +357,13 @@ class execution(_Config):
     the command line) as spatial references for outputs."""
     reports_only = False
     """Only build the reports, based on the reportlets found in a cached working directory."""
-    run_uuid = '%s_%s' % (strftime('%Y%m%d-%H%M%S'), uuid4())
+    run_uuid = "%s_%s" % (strftime("%Y%m%d-%H%M%S"), uuid4())
     """Unique identifier of this particular run."""
     participant_label = None
     """List of participant identifiers that are to be preprocessed."""
     templateflow_home = _templateflow_home
     """The root folder of the TemplateFlow client."""
-    work_dir = Path('work').absolute()
+    work_dir = Path("work").absolute()
     """Path to a working directory where intermediate results will be available."""
     write_graph = False
     """Write out the computational graph corresponding to the planned preprocessing."""
@@ -360,14 +371,14 @@ class execution(_Config):
     _layout = None
 
     _paths = (
-        'bids_dir',
-        'fs_license_file',
-        'fs_subjects_dir',
-        'layout',
-        'log_dir',
-        'output_dir',
-        'templateflow_home',
-        'work_dir',
+        "bids_dir",
+        "fs_license_file",
+        "fs_subjects_dir",
+        "layout",
+        "log_dir",
+        "output_dir",
+        "templateflow_home",
+        "work_dir",
     )
 
     @classmethod
@@ -376,14 +387,22 @@ class execution(_Config):
         if cls._layout is None:
             import re
             from bids.layout import BIDSLayout
-            work_dir = cls.work_dir / 'bids.db'
+
+            work_dir = cls.work_dir / "bids.db"
             work_dir.mkdir(exist_ok=True, parents=True)
             cls._layout = BIDSLayout(
                 str(cls.bids_dir),
                 validate=False,
                 # database_path=str(work_dir),
-                ignore=("code", "stimuli", "sourcedata", "models",
-                        "derivatives", re.compile(r'^\.')))
+                ignore=(
+                    "code",
+                    "stimuli",
+                    "sourcedata",
+                    "models",
+                    "derivatives",
+                    re.compile(r"^\."),
+                ),
+            )
         cls.layout = cls._layout
 
 
@@ -437,13 +456,13 @@ class loggers:
 
     default = logging.getLogger()
     """The root logger."""
-    cli = logging.getLogger('cli')
+    cli = logging.getLogger("cli")
     """Command-line interface logging."""
-    workflow = nlogging.getLogger('nipype.workflow')
+    workflow = nlogging.getLogger("nipype.workflow")
     """NiPype's workflow logger."""
-    interface = nlogging.getLogger('nipype.interface')
+    interface = nlogging.getLogger("nipype.interface")
     """NiPype's interface logger."""
-    utils = nlogging.getLogger('nipype.utils')
+    utils = nlogging.getLogger("nipype.utils")
     """NiPype's utils logger."""
 
     @classmethod
@@ -457,22 +476,18 @@ class loggers:
 
         """
         from nipype import config as ncfg
+
         _handler = logging.StreamHandler(stream=sys.stdout)
-        _handler.setFormatter(
-            logging.Formatter(fmt=cls._fmt, datefmt=cls._datefmt)
-        )
+        _handler.setFormatter(logging.Formatter(fmt=cls._fmt, datefmt=cls._datefmt))
         cls.cli.addHandler(_handler)
         cls.default.setLevel(execution.log_level)
         cls.cli.setLevel(execution.log_level)
         cls.interface.setLevel(execution.log_level)
         cls.workflow.setLevel(execution.log_level)
         cls.utils.setLevel(execution.log_level)
-        ncfg.update_config({
-            'logging': {
-                'log_directory': str(execution.log_dir),
-                'log_to_file': True
-            },
-        })
+        ncfg.update_config(
+            {"logging": {"log_directory": str(execution.log_dir), "log_to_file": True}}
+        )
 
 
 def from_dict(settings):
@@ -486,10 +501,11 @@ def from_dict(settings):
 def load(filename):
     """Load settings from file."""
     from toml import loads
+
     filename = Path(filename)
     settings = loads(filename.read_text())
     for sectionname, configs in settings.items():
-        if sectionname != 'environment':
+        if sectionname != "environment":
             section = getattr(sys.modules[__name__], sectionname)
             section.load(configs)
     init_spaces()
@@ -498,22 +514,25 @@ def load(filename):
 def get(flat=False):
     """Get config as a dict."""
     settings = {
-        'environment': environment.get(),
-        'execution': execution.get(),
-        'workflow': workflow.get(),
-        'nipype': nipype.get(),
+        "environment": environment.get(),
+        "execution": execution.get(),
+        "workflow": workflow.get(),
+        "nipype": nipype.get(),
     }
     if not flat:
         return settings
 
-    return {'.'.join((section, k)): v
-            for section, configs in settings.items()
-            for k, v in configs.items()}
+    return {
+        ".".join((section, k)): v
+        for section, configs in settings.items()
+        for k, v in configs.items()
+    }
 
 
 def dumps(flat=False):
     """Format config into toml."""
     from toml import dumps
+
     return dumps(get(flat=flat))
 
 
@@ -526,11 +545,11 @@ def to_filename(filename):
 def init_spaces(checkpoint=True):
     """Initialize the :attr:`~workflow.spaces` setting."""
     from niworkflows.utils.spaces import Reference, SpatialReferences
+
     spaces = execution.output_spaces or SpatialReferences()
     if not isinstance(spaces, SpatialReferences):
         spaces = SpatialReferences(
-            [ref for s in spaces.split(' ')
-             for ref in Reference.from_string(s)]
+            [ref for s in spaces.split(" ") for ref in Reference.from_string(s)]
         )
 
     if checkpoint and not spaces.is_cached():
