@@ -19,6 +19,7 @@ from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
 from .dwi.base import init_early_b0ref_wf
+from .fmap.base import init_fmap_estimation_wf
 
 
 def init_dmriprep_wf():
@@ -292,6 +293,12 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         ]),
     ])
 
+    fmap_estimation_wf = init_fmap_estimation_wf(subject_data["dwi"])
+    workflow.connect([
+        (referencenode, fmap_estimation_wf, [
+            ("dwi_reference", "inputnode.dwi_reference"),
+            ("dwi_mask", "inputnode.dwi_mask")]),
+    ])
     return workflow
 
 
