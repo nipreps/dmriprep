@@ -1,9 +1,9 @@
 """Orchestrating the dMRI-preprocessing workflow."""
+from ... import config
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-from ... import config
 from ...interfaces.vectors import CheckGradientTable
 from .util import init_dwi_reference_wf
 from .outputs import init_reportlets_wf

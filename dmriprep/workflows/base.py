@@ -1,4 +1,5 @@
 """dMRIPrep base processing workflows."""
+from .. import config
 import sys
 import os
 from copy import deepcopy
@@ -14,7 +15,6 @@ from niworkflows.utils.misc import fix_multi_T1w_source_name
 from smriprep.workflows.anatomical import init_anat_preproc_wf
 
 from niworkflows.utils.spaces import Reference
-from .. import config
 from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
