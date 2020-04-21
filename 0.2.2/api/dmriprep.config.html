@@ -25,6 +25,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -252,7 +253,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt id="dmriprep.config.environment.version">
-<code class="sig-name descname">version</code><em class="property"> = '0.2.2+93.g9d95e73'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.2.2+97.gd07d4b0'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -373,7 +374,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt id="dmriprep.config.execution.run_uuid">
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20200415-235348_c8d3901b-5d25-44b8-a46a-cd530e6f1c08'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20200421-202820_b5c76d7b-a7e1-4c8b-977b-7b1370106946'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -521,6 +522,13 @@ in the absence of any alternatives.</p>
 <dt id="dmriprep.config.nipype.omp_nthreads">
 <code class="sig-name descname">omp_nthreads</code><em class="property"> = 36</em><a class="headerlink" href="#dmriprep.config.nipype.omp_nthreads" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of CPUs a single process can access for multithreaded execution.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.nipype.parameterize_dirs">
+<code class="sig-name descname">parameterize_dirs</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.nipype.parameterize_dirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>The node’s output directory will contain full parameterization of any iterable, otherwise
+parameterizations over 32 characters will be replaced by their hash.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -702,7 +710,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">version</code><em class="property"> = '0.2.2+93.g9d95e73'</em></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.2.2+97.gd07d4b0'</em></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -824,7 +832,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20200415-235348_c8d3901b-5d25-44b8-a46a-cd530e6f1c08'</em></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20200421-202820_b5c76d7b-a7e1-4c8b-977b-7b1370106946'</em></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -967,6 +975,13 @@ the command line) as spatial references for outputs.</p>
 <dt>
 <code class="sig-name descname">omp_nthreads</code><em class="property"> = 36</em></dt>
 <dd><p>Number of CPUs a single process can access for multithreaded execution.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">parameterize_dirs</code><em class="property"> = False</em></dt>
+<dd><p>The node’s output directory will contain full parameterization of any iterable, otherwise
+parameterizations over 32 characters will be replaced by their hash.</p>
 </dd></dl>
 
 <dl class="attribute">

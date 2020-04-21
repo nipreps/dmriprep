@@ -1,0 +1,20 @@
+digraph structs {
+node [shape=record];
+early_b0ref_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outdwifile> dwi_file|<outinbval> in_bval|<outinbvec> in_bvec}"];
+early_b0ref_wfgradient_table [label="{IN|<indwifile> dwi_file|<ininbval> in_bval|<ininbvec> in_bvec}|{ gradient_table | vectors |  }|{OUT|<outb0ixs> b0_ixs|<outoutrasb> out_rasb}"];
+early_b0ref_wfdwi_reference_wf [label="{IN|<ininputnodeb0ixs> inputnode.b0_ixs|<ininputnodedwifile> inputnode.dwi_file}|{ dwi_reference_wf |  |  }|{OUT|<outoutputnodedwimask> outputnode.dwi_mask|<outoutputnoderefimage> outputnode.ref_image|<outoutputnodevalidationreport> outputnode.validation_report}"];
+early_b0ref_wfreportlets_wf [label="{IN|<ininputnodedwimask> inputnode.dwi_mask|<ininputnodedwiref> inputnode.dwi_ref|<ininputnodesourcefile> inputnode.source_file|<ininputnodevalidationreport> inputnode.validation_report}|{ reportlets_wf |  |  }|{OUT}"];
+early_b0ref_wfoutputnode [label="{IN|<indwimask> dwi_mask|<indwireference> dwi_reference|<inoutrasb> out_rasb}|{ outputnode | utility |  }|{OUT}"];
+early_b0ref_wfdwi_reference_wf:outoutputnodedwimask:e -> early_b0ref_wfoutputnode:indwimask:w;
+early_b0ref_wfdwi_reference_wf:outoutputnodedwimask:e -> early_b0ref_wfreportlets_wf:ininputnodedwimask:w;
+early_b0ref_wfdwi_reference_wf:outoutputnoderefimage:e -> early_b0ref_wfoutputnode:indwireference:w;
+early_b0ref_wfdwi_reference_wf:outoutputnoderefimage:e -> early_b0ref_wfreportlets_wf:ininputnodedwiref:w;
+early_b0ref_wfdwi_reference_wf:outoutputnodevalidationreport:e -> early_b0ref_wfreportlets_wf:ininputnodevalidationreport:w;
+early_b0ref_wfgradient_table:outb0ixs:e -> early_b0ref_wfdwi_reference_wf:ininputnodeb0ixs:w;
+early_b0ref_wfgradient_table:outoutrasb:e -> early_b0ref_wfoutputnode:inoutrasb:w;
+early_b0ref_wfinputnode:outdwifile:e -> early_b0ref_wfdwi_reference_wf:ininputnodedwifile:w;
+early_b0ref_wfinputnode:outdwifile:e -> early_b0ref_wfgradient_table:indwifile:w;
+early_b0ref_wfinputnode:outdwifile:e -> early_b0ref_wfreportlets_wf:ininputnodesourcefile:w;
+early_b0ref_wfinputnode:outinbval:e -> early_b0ref_wfgradient_table:ininbval:w;
+early_b0ref_wfinputnode:outinbvec:e -> early_b0ref_wfgradient_table:ininbvec:w;
+}

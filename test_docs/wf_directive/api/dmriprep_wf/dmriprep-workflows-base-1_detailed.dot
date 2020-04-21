@@ -1,6 +1,6 @@
 digraph structs {
 node [shape=record];
 dmriprep_wffsdir_run_20200311_121754_aa0b4fa9_6b60_4a11_af7d_02deb54a823f [label="{IN}|{ fsdir_run_20200311_121754_aa0b4fa9_6b60_4a11_af7d_02deb54a823f | bids |  }|{OUT|<outsubjectsdir> subjects_dir}"];
-dmriprep_wfsingle_subject_THP0005_wf [label="{IN|<ininputnodesubjectsdir> inputnode.subjects_dir}|{ single_subject_THP0005_wf |  |  }|{OUT}"];
-dmriprep_wffsdir_run_20200311_121754_aa0b4fa9_6b60_4a11_af7d_02deb54a823f:outsubjectsdir:e -> dmriprep_wfsingle_subject_THP0005_wf:ininputnodesubjectsdir:w;
+dmriprep_wfsingle_subject_THP0005_wf [label="{IN|<infsinputnodesubjectsdir> fsinputnode.subjects_dir}|{ single_subject_THP0005_wf |  |  }|{OUT}"];
+dmriprep_wffsdir_run_20200311_121754_aa0b4fa9_6b60_4a11_af7d_02deb54a823f:outsubjectsdir:e -> dmriprep_wfsingle_subject_THP0005_wf:infsinputnodesubjectsdir:w;
 }
