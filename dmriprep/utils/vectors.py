@@ -203,8 +203,7 @@ class DiffusionGradientTable:
 
     def reorient_rasb(self):
         """Reorient the vectors based o a list of affine transforms."""
-        from dipy.core.gradients import (gradient_table_from_bvals_bvecs,
-                                         reorient_bvecs)
+        from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
 
         affines = self._transforms.copy()
         bvals = self._bvals
@@ -228,8 +227,7 @@ class DiffusionGradientTable:
                 )
 
         # Build gradient table object
-        gt = gradient_table_from_bvals_bvecs(bvals, bvecs,
-                                             b0_threshold=self._b0_thres)
+        gt = gradient_table_from_bvals_bvecs(bvals, bvecs, b0_threshold=self._b0_thres)
 
         # Reorient table
         new_gt = reorient_bvecs(gt, [np.load(aff) for aff in affines])
@@ -281,9 +279,14 @@ class DiffusionGradientTable:
             raise ValueError('Unknown filetype "%s"' % filetype)
 
 
-def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
-                        bvec_norm_epsilon=BVEC_NORM_EPSILON, b_scale=True,
-                        raise_error=False):
+def normalize_gradients(
+    bvecs,
+    bvals,
+    b0_threshold=B0_THRESHOLD,
+    bvec_norm_epsilon=BVEC_NORM_EPSILON,
+    b_scale=True,
+    raise_error=False,
+):
     """
     Normalize b-vectors and b-values.
 
@@ -339,8 +342,8 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
     True
 
     """
-    bvals = np.array(bvals, dtype='float32')
-    bvecs = np.array(bvecs, dtype='float32')
+    bvals = np.array(bvals, dtype="float32")
+    bvecs = np.array(bvecs, dtype="float32")
 
     b0s = bvals < b0_threshold
     b0_vecs = np.linalg.norm(bvecs, axis=1) < bvec_norm_epsilon
@@ -364,7 +367,7 @@ def normalize_gradients(bvecs, bvals, b0_threshold=B0_THRESHOLD,
 
     # Rescale b-vecs, skipping b0's, on the appropriate axis to unit-norm length.
     bvecs[~b0s] /= np.linalg.norm(bvecs[~b0s], axis=1)[..., np.newaxis]
-    return bvecs, bvals.astype('uint16')
+    return bvecs, bvals.astype("uint16")
 
 
 def calculate_pole(bvecs, bvec_norm_epsilon=BVEC_NORM_EPSILON):
@@ -400,7 +403,7 @@ def calculate_pole(bvecs, bvec_norm_epsilon=BVEC_NORM_EPSILON):
     https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html
 
     """
-    bvecs = np.array(bvecs, dtype='float32')  # Normalize inputs
+    bvecs = np.array(bvecs, dtype="float32")  # Normalize inputs
     b0s = np.linalg.norm(bvecs, axis=1) < bvec_norm_epsilon
 
     bvecs = bvecs[~b0s]
@@ -472,7 +475,7 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
     if affine.shape == (4, 4):
         affine = affine[:3, :3]
 
-    bvecs = np.array(bvecs, dtype='float32')  # Normalize inputs
+    bvecs = np.array(bvecs, dtype="float32")  # Normalize inputs
     rotated_bvecs = affine[np.newaxis, ...].dot(bvecs.T)[0].T
     if norm is True:
         norms_bvecs = np.linalg.norm(rotated_bvecs, axis=1)

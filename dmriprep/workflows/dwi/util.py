@@ -10,10 +10,12 @@ from niworkflows.interfaces.utils import CopyXForm
 
 from ...interfaces.images import ExtractB0, RescaleB0
 
-DEFAULT_MEMORY_MIN_GB = 0.01
 
-
-def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf'):
+def init_dwi_reference_wf(
+    mem_gb,
+    omp_nthreads,
+    name='dwi_reference_wf'
+):
     """
     Build a workflow that generates a reference b0 image from a DWI dataset.
 
@@ -30,7 +32,7 @@ def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf'):
             :simple_form: yes
 
             from dmriprep.workflows.dwi.util import init_dwi_reference_wf
-            wf = init_dwi_reference_wf(omp_nthreads=1)
+            wf = init_dwi_reference_wf(mem_gb=0.01, omp_nthreads=1)
             wf.inputs.inputnode.b0_ixs=[0]
 
     Parameters
@@ -62,7 +64,7 @@ def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf'):
     validation_report
         HTML reportlet indicating whether ``dwi_file`` had a valid affine
 
-    See also
+    See Also
     --------
     * :py:func:`~dmriprep.workflows.dwi.util.init_enhance_and_skullstrip_wf`
 
@@ -77,7 +79,7 @@ def init_dwi_reference_wf(omp_nthreads, name='dwi_reference_wf'):
                                       'dwi_mask', 'validation_report']),
         name='outputnode')
 
-    validate = pe.Node(ValidateImage(), name='validate', mem_gb=DEFAULT_MEMORY_MIN_GB)
+    validate = pe.Node(ValidateImage(), name='validate', mem_gb=mem_gb)
 
     extract_b0 = pe.Node(ExtractB0(), name='extract_b0')
 
