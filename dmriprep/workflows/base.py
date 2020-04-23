@@ -293,7 +293,8 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         ]),
     ])
 
-    fmap_estimation_wf = init_fmap_estimation_wf(subject_data["dwi"])
+    fmap_estimation_wf = init_fmap_estimation_wf(
+        subject_data["dwi"], debug=config.execution.debug)
     workflow.connect([
         (referencenode, fmap_estimation_wf, [
             ("dwi_reference", "inputnode.dwi_reference"),

@@ -10,6 +10,7 @@ from ...interfaces import DerivativesDataSink
 
 def init_fmap_estimation_wf(
     epi_targets,
+    debug=False,
     generate_report=True,
     name="fmap_estimation_wf",
 ):
@@ -36,13 +37,14 @@ def init_fmap_estimation_wf(
 
     inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_reference", "dwi_mask"]),
                         name="inputnode")
+    wf.add_nodes([inputnode])  # TODO: remove when fully implemented
     # Create one outputnode with a port for each potential EPI target
-    outputnode = pe.Node(niu.IdentityInterface(fields=[_fname2outname(p) for p in epi_targets]),
-                         name="outputnode")
+    # outputnode = pe.Node(niu.IdentityInterface(fields=[_fname2outname(p) for p in epi_targets]),
+    #                      name="outputnode")
 
     # Return identity transforms for all if fieldmaps are ignored
     if "fieldmaps" in config.workflow.ignore:
-        raise NotImplementedError
+        return wf
 
     # Set-up PEPOLAR estimators only with EPIs under fmap/
     # fmap_epi = {f: layout.get_metadata(f)
@@ -51,13 +53,16 @@ def init_fmap_estimation_wf(
     #                 suffix="epi", extension=("nii", "nii.gz"))}
 
     metadata = [layout.get_metadata(p) for p in epi_targets]
+    if any("TotalReadoutTime" not in m for m in metadata):
+        return wf
+
     pedirs = [m.get("PhaseEncodingDirection", "unknown") for m in metadata]
     if len(set(pedirs) - set(("unknown",))) > 1:
         if "unknown" in pedirs or len(set(pe[0] for pe in set(pedirs))) > 1:
             raise NotImplementedError
 
         # Get EPI polarities and their metadata
-        sdc_estimate_wf = init_pepolar_estimate_wf()
+        sdc_estimate_wf = init_pepolar_estimate_wf(debug=debug)
         sdc_estimate_wf.inputs.inputnode.metadata = metadata
 
         wf.connect([
@@ -83,7 +88,7 @@ def init_fmap_estimation_wf(
     return wf
 
 
-def init_pepolar_estimate_wf(generate_report=True, name="pepolar_estimate_wf"):
+def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_estimate_wf"):
     """Initialize a barebones TOPUP implementation."""
     from nipype.interfaces.afni import Automask
     from nipype.interfaces.fsl.epi import TOPUP
@@ -98,8 +103,8 @@ def init_pepolar_estimate_wf(generate_report=True, name="pepolar_estimate_wf"):
 
     concat_blips = pe.Node(MergeSeries(), name="concat_blips")
 
-    topup = pe.Node(TOPUP(config=_pkg_fname("dmriprep", "data/flirtsch/b02b0.cnf")),
-                    name="topup")
+    topup = pe.Node(TOPUP(config=_pkg_fname(
+        "dmriprep", f"data/flirtsch/b02b0{'_quick' * debug}.cnf")), name="topup")
 
     pre_mask = pe.Node(Automask(dilate=1, outputtype="NIFTI_GZ"),
                        name="pre_mask")
