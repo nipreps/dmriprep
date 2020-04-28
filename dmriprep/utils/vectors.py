@@ -511,6 +511,6 @@ def b0mask_from_data(dwi_file, mask_file, z_thres=3.0):
     data = np.asanyarray(nb.load(dwi_file).dataobj)
     mask = np.asanyarray(nb.load(mask_file).dataobj) > 0.5
     signal_means = np.median(data[mask, np.newaxis], axis=0)
-    zscored_means = signal_means - signal_means.mean()
+    zscored_means = signal_means - np.median(signal_means)
     zscored_means /= zscored_means.std()
     return zscored_means > z_thres
