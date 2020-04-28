@@ -106,7 +106,7 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
 def test_b0mask_from_data(tmp_path):
     """Check the estimation of bzeros using the dwi data."""
 
-    highb = np.random.normal(100, 50, size=(40, 40, 40, 99))
+    highb = np.random.normal(100, 5, size=(40, 40, 40, 99))
     mask_file = tmp_path / 'mask.nii.gz'
 
     # Test 1: no lowb
