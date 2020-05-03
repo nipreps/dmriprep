@@ -264,6 +264,24 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="dmriprep.utils.vectors.b0mask_from_data">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">b0mask_from_data</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em>, <em class="sig-param">mask_file</em>, <em class="sig-param">z_thres=3.0</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.b0mask_from_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate B0 locations relative to mean signal variation.</p>
+<p>Standardizes (z-score) the average DWI signal within mask and threshold.
+This is a data-driven way of estimating which volumes in the DWI dataset are
+really encoding <em>low-b</em> acquisitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwi_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – File path to the diffusion-weighted image series.</p></li>
+<li><p><strong>mask_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – File path to a mask corresponding to the DWI file.</p></li>
+<li><p><strong>z_thres</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>) – The z-value to consider a volume as a <em>low-b</em> orientation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="dmriprep.utils.vectors.bvecs2ras">
 <code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">bvecs2ras</code><span class="sig-paren">(</span><em class="sig-param">affine</em>, <em class="sig-param">bvecs</em>, <em class="sig-param">norm=True</em>, <em class="sig-param">bvec_norm_epsilon=0.2</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.bvecs2ras" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert b-vectors given in image coordinates to RAS+.</p>
@@ -392,6 +410,12 @@ corresponding vector amplitude.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.utils.vectors.rasb_dwi_length_check">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">rasb_dwi_length_check</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em>, <em class="sig-param">rasb_file</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.rasb_dwi_length_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the number of encoding vectors and number of orientations in the DWI file.</p>
 </dd></dl>
 
 </div>
