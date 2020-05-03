@@ -1,6 +1,7 @@
 """Test vector utilities."""
 import pytest
 import numpy as np
+import nibabel as nb
 from dmriprep.utils import vectors as v
 from collections import namedtuple
 
@@ -100,3 +101,25 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     # Miscellaneous tests
     with pytest.raises(ValueError):
         dgt.to_filename("path", filetype="mrtrix")
+
+
+def test_b0mask_from_data(tmp_path):
+    """Check the estimation of bzeros using the dwi data."""
+
+    highb = np.random.normal(100, 5, size=(40, 40, 40, 99))
+    mask_file = tmp_path / 'mask.nii.gz'
+
+    # Test 1: no lowb
+    dwi_file = tmp_path / 'only_highb.nii.gz'
+    nb.Nifti1Image(highb.astype(float), np.eye(4), None).to_filename(dwi_file)
+    nb.Nifti1Image(np.ones((40, 40, 40), dtype=np.uint8),
+                   np.eye(4), None).to_filename(mask_file)
+
+    assert v.b0mask_from_data(dwi_file, mask_file).sum() == 0
+
+    # Test 1: one lowb
+    lowb = np.random.normal(400, 50, size=(40, 40, 40, 1))
+    dwi_file = tmp_path / 'dwi.nii.gz'
+    nb.Nifti1Image(np.concatenate((lowb, highb), axis=3).astype(float),
+                   np.eye(4), None).to_filename(dwi_file)
+    assert v.b0mask_from_data(dwi_file, mask_file).sum() == 1

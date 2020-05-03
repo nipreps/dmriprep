@@ -483,3 +483,34 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
         rotated_bvecs[~b0s] /= norms_bvecs[~b0s, np.newaxis]
         rotated_bvecs[b0s] = np.zeros(3)
     return rotated_bvecs
+
+
+def rasb_dwi_length_check(dwi_file, rasb_file):
+    """Check the number of encoding vectors and number of orientations in the DWI file."""
+    return nb.load(dwi_file).shape[-1] == len(np.loadtxt(rasb_file, skiprows=1))
+
+
+def b0mask_from_data(dwi_file, mask_file, z_thres=3.0):
+    """
+    Evaluate B0 locations relative to mean signal variation.
+
+    Standardizes (z-score) the average DWI signal within mask and threshold.
+    This is a data-driven way of estimating which volumes in the DWI dataset are
+    really encoding *low-b* acquisitions.
+
+    Parameters
+    ----------
+    dwi_file : :obj:`str`
+        File path to the diffusion-weighted image series.
+    mask_file : :obj:`str`
+        File path to a mask corresponding to the DWI file.
+    z_thres : :obj:`float`
+        The z-value to consider a volume as a *low-b* orientation.
+
+    """
+    data = np.asanyarray(nb.load(dwi_file).dataobj)
+    mask = np.asanyarray(nb.load(mask_file).dataobj) > 0.5
+    signal_means = np.median(data[mask, np.newaxis], axis=0)
+    zscored_means = signal_means - np.median(signal_means)
+    zscored_means /= zscored_means.std()
+    return zscored_means > z_thres
