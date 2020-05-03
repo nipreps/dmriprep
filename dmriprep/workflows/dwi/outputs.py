@@ -5,7 +5,7 @@ from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...interfaces import DerivativesDataSink
 
 
-def init_reportlets_wf(reportlets_dir, name='reportlets_wf'):
+def init_reportlets_wf(output_dir, name='reportlets_wf'):
     """Set up a battery of datasinks to store reports in the right location."""
     from niworkflows.interfaces.masks import SimpleShowMaskRPT
     workflow = Workflow(name=name)
@@ -17,12 +17,11 @@ def init_reportlets_wf(reportlets_dir, name='reportlets_wf'):
     mask_reportlet = pe.Node(SimpleShowMaskRPT(), name='mask_reportlet')
 
     ds_report_mask = pe.Node(
-        DerivativesDataSink(base_directory=reportlets_dir,
-                            desc='brain', suffix='mask'),
+        DerivativesDataSink(base_directory=output_dir, desc='brain', suffix='mask',
+                            datatype="figures"),
         name='ds_report_mask', run_without_submitting=True)
     ds_report_validation = pe.Node(
-        DerivativesDataSink(base_directory=reportlets_dir,
-                            desc='validation', keep_dtype=True),
+        DerivativesDataSink(base_directory=output_dir, desc='validation', datatype="figures"),
         name='ds_report_validation', run_without_submitting=True)
 
     workflow.connect([

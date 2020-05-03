@@ -57,7 +57,6 @@ def build_workflow(config_file, retval):
         retval["return_code"] = generate_reports(
             subject_list,
             config.execution.output_dir,
-            config.execution.work_dir,
             config.execution.run_uuid,
             config=pkgrf("dmriprep", "config/reports-spec.yml"),
             packagename="dmriprep",

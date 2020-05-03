@@ -1,7 +1,1 @@
-# General
-include CHANGES.rst
-include LICENSE
-
-# versioneer
 include versioneer.py
-include dmriprep/_version.py
