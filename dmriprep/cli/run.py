@@ -101,10 +101,8 @@ def main():
             config.loggers.workflow.log(
                 25,
                 "Works derived from this dMRIPrep execution should "
-                "include the following boilerplate:\n\n%s",
-                (
-                    config.execution.output_dir / "dmriprep" / "logs" / "CITATION.md"
-                ).read_text(),
+                "include the following boilerplate: "
+                f"{config.execution.output_dir / 'dmriprep' / 'logs' / 'CITATION.md'}."
             )
 
         if config.workflow.run_reconall:

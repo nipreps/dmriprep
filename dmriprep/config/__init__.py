@@ -324,6 +324,8 @@ class nipype(_Config):
 class execution(_Config):
     """Configure run-level settings."""
 
+    anat_derivatives = None
+    """A path where anatomical derivatives are found to fast-track *sMRIPrep*."""
     bids_dir = None
     """An existing path to the dataset, which must be BIDS-compliant."""
     bids_description_hash = None
@@ -371,6 +373,7 @@ class execution(_Config):
     _layout = None
 
     _paths = (
+        "anat_derivatives",
         "bids_dir",
         "fs_license_file",
         "fs_subjects_dir",
