@@ -93,6 +93,7 @@ def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_es
     from nipype.interfaces.afni import Automask
     from nipype.interfaces.fsl.epi import TOPUP
     from niworkflows.interfaces.nibabel import MergeSeries
+    from sdcflows.interfaces.fmap import get_trt
     from ...interfaces.images import RescaleB0
     wf = Workflow(name=name)
 
@@ -102,6 +103,10 @@ def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_es
                          name="outputnode")
 
     concat_blips = pe.Node(MergeSeries(), name="concat_blips")
+    readout_time = pe.MapNode(niu.Function(
+        input_names=["in_meta", "in_file"], function=get_trt), name="readout_time",
+        iterfield=["in_meta", "in_file"], run_without_submitting=True
+    )
 
     topup = pe.Node(TOPUP(config=_pkg_fname(
         "dmriprep", f"data/flirtsch/b02b0{'_quick' * debug}.cnf")), name="topup")
@@ -113,8 +118,10 @@ def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_es
                         name="post_mask")
     wf.connect([
         (inputnode, concat_blips, [("in_data", "in_files")]),
-        (inputnode, topup, [(("metadata", _get_ro), "readout_times"),
-                            (("metadata", _get_pedir), "encoding_direction")]),
+        (inputnode, readout_time, [("in_data", "in_file"),
+                                   ("metadata", "in_meta")]),
+        (inputnode, topup, [(("metadata", _get_pedir), "encoding_direction")]),
+        (readout_time, topup, [("out", "readout_times")]),
         (concat_blips, topup, [("out_file", "in_file")]),
         (topup, pre_mask, [("out_corrected", "in_file")]),
         (pre_mask, rescale_corrected, [("out_file", "mask_file")]),
@@ -128,15 +135,11 @@ def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_es
     return wf
 
 
-def _get_ro(metadata):
-    return [m["TotalReadoutTime"] for m in metadata]
-
-
 def _get_pedir(metadata):
     return [m["PhaseEncodingDirection"].replace("j", "y").replace("i", "x").replace("k", "z")
             for m in metadata]
 
 
-def _fname2outname(in_file):
-    from pathlib import Path
-    return Path(in_file).name.rstrip(".gz").rstrip(".nii").replace("-", "_")
+# def _fname2outname(in_file):
+#     from pathlib import Path
+#     return Path(in_file).name.rstrip(".gz").rstrip(".nii").replace("-", "_")
