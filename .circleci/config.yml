@@ -358,6 +358,7 @@ jobs:
           name: Run full diffusion workflow on ds001771
           no_output_timeout: 2h
           command: |
+            mkdir -p /tmp/ds001771/work /tmp/ds001771/derivatives
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
                 -v /tmp/data/ds001771:/data \
                 -v /tmp/ds001771/derivatives:/out \
