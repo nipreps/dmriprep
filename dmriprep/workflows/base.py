@@ -194,10 +194,22 @@ It is released under the [CC0]\
                             desc="about", keep_dtype=True),
         name="ds_report_about", run_without_submitting=True)
 
+    anat_derivatives = config.execution.anat_derivatives
+    if anat_derivatives:
+        from smriprep.utils.bids import collect_derivatives
+        std_spaces = spaces.get_spaces(nonstandard=False, dim=(3,))
+        anat_derivatives = collect_derivatives(
+            anat_derivatives.absolute(),
+            subject_id,
+            std_spaces,
+            config.workflow.run_reconall,
+        )
+
     # Preprocessing of T1w (includes registration to MNI)
     anat_preproc_wf = init_anat_preproc_wf(
         bids_root=str(config.execution.bids_dir),
         debug=config.execution.debug is True,
+        existing_derivatives=anat_derivatives,
         freesurfer=config.workflow.run_reconall,
         hires=config.workflow.hires,
         longitudinal=config.workflow.longitudinal,

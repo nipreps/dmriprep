@@ -114,6 +114,11 @@ def _build_parser():
         "{<suffix>:{<entity>:<filter>,...},...} "
         "(https://github.com/bids-standard/pybids/blob/master/bids/layout/config/bids.json)",
     )
+    g_bids.add_argument(
+        "--anat-derivatives", action='store', metavar="PATH", type=PathExists,
+        help="Reuse the anatomical derivatives from another fMRIPrep run or calculated "
+             "with an alternative processing tool (NOT RECOMMENDED)."
+    )
 
     g_perfm = parser.add_argument_group("Options to handle performance")
     g_perfm.add_argument(
