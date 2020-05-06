@@ -176,8 +176,8 @@ jobs:
             if [[ ! -d /tmp/data/ds001771/derivatives ]]; then
               mkdir -p /tmp/data/ds001771/derivatives
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds001771-deriv.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5eb251fba2199500215d1dc3"
-              tar xvzf ds001771-deriv.tar.gz -C /tmp/data/ds001771/
+                -O ds001771-derivs.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5eb251fba2199500215d1dc3"
+              tar xvzf ds001771-derivs.tar.gz -C /tmp/data/ds001771/
             else
               echo "Anatomical derivatives of ds001771 were cached"
             fi
