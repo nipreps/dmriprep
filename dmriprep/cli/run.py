@@ -129,7 +129,6 @@ def main():
         failed_reports = generate_reports(
             config.execution.participant_label,
             config.execution.output_dir,
-            config.execution.work_dir,
             config.execution.run_uuid,
             config=pkgrf("dmriprep", "config/reports-spec.yml"),
             packagename="dmriprep",

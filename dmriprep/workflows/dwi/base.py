@@ -88,8 +88,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
     ])
 
     # REPORTING ############################################################
-    reportlets_dir = str(config.execution.work_dir / 'reportlets')
-    reportlets_wf = init_reportlets_wf(reportlets_dir)
+    reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
     workflow.connect([
         (inputnode, reportlets_wf, [('dwi_file', 'inputnode.source_file')]),
         (dwi_reference_wf, reportlets_wf, [
