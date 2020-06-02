@@ -6,6 +6,7 @@ from nipype.interfaces import utility as niu, fsl, afni
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from niworkflows.interfaces.images import ValidateImage
 from niworkflows.interfaces.fixes import FixN4BiasFieldCorrection as N4BiasFieldCorrection
+from niworkflows.interfaces.nibabel import ApplyMask
 from niworkflows.interfaces.utils import CopyXForm
 
 from ...interfaces.images import ExtractB0, RescaleB0
@@ -212,8 +213,10 @@ def init_enhance_and_skullstrip_dwi_wf(
     combine_masks = pe.Node(fsl.BinaryMaths(operation='mul'),
                             name='combine_masks')
 
+    normalize = pe.Node(niu.Function(function=_normalize), name="normalize")
+
     # Compute masked brain
-    apply_mask = pe.Node(fsl.ApplyMask(), name='apply_mask')
+    apply_mask = pe.Node(ApplyMask(), name='apply_mask')
 
     workflow.connect([
         (inputnode, n4_correct, [('in_file', 'input_image'),
@@ -230,11 +233,30 @@ def init_enhance_and_skullstrip_dwi_wf(
         (skullstrip_first_pass, combine_masks, [('mask_file', 'in_file')]),
         (skullstrip_second_pass, fixhdr_skullstrip2, [('out_file', 'in_file')]),
         (fixhdr_skullstrip2, combine_masks, [('out_file', 'operand_file')]),
-        (fixhdr_unifize, apply_mask, [('out_file', 'in_file')]),
-        (combine_masks, apply_mask, [('out_file', 'mask_file')]),
+        (combine_masks, apply_mask, [('out_file', 'in_mask')]),
         (combine_masks, outputnode, [('out_file', 'mask_file')]),
+        (n4_correct, normalize, [('output_image', 'in_file')]),
+        (normalize, apply_mask, [('out', 'in_file')]),
+        (normalize, outputnode, [('out', 'bias_corrected_file')]),
         (apply_mask, outputnode, [('out_file', 'skull_stripped_file')]),
-        (n4_correct, outputnode, [('output_image', 'bias_corrected_file')]),
     ])
 
     return workflow
+
+
+def _normalize(in_file, newmax=2000, perc=98.0):
+    from pathlib import Path
+    import numpy as np
+    import nibabel as nb
+
+    nii = nb.load(in_file)
+    data = nii.get_fdata()
+    data[data < 0] = 0
+    if data.max() >= 2**15 - 1:
+        data *= newmax / np.percentile(data.reshape(-1), perc)
+
+    out_file = str(Path("normalized.nii.gz").absolute())
+    hdr = nii.header.copy()
+    hdr.set_data_dtype('int16')
+    nii.__class__(data.astype('int16'), nii.affine, hdr).to_filename(out_file)
+    return out_file
