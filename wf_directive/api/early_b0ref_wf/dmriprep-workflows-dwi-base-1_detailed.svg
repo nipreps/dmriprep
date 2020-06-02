@@ -126,8 +126,8 @@
 <!-- early_b0ref_wfinputnode&#45;&gt;early_b0ref_wfreportlets_wf -->
 <g id="edge10" class="edge">
 <title>early_b0ref_wfinputnode:e&#45;&gt;early_b0ref_wfreportlets_wf:w</title>
-<path fill="none" stroke="#000000" d="M196,-468.5C383.3692,-468.5 895.4192,-394.0188 1009,-245 1034.0557,-212.1267 1014.0502,-193.0236 1009,-152 1006.9849,-135.6311 1002.0151,-132.3689 1000,-116 999.1495,-109.0912 994.2308,-64.4148 996.2097,-44.5254"/>
-<polygon fill="#000000" stroke="#000000" points="999.5548,-45.5855 1000,-35 993.0507,-42.9974 999.5548,-45.5855"/>
+<path fill="none" stroke="#000000" d="M196,-468.5C383.3692,-468.5 895.4192,-394.0188 1009,-245 1034.0557,-212.1267 1014.0502,-193.0236 1009,-152 1006.9849,-135.6311 1002.0151,-132.3689 1000,-116 998.256,-101.8335 987.9595,-59.2014 992.746,-42.1563"/>
+<polygon fill="#000000" stroke="#000000" points="995.3391,-44.5146 1000,-35 990.4231,-39.5314 995.3391,-44.5146"/>
 </g>
 <!-- early_b0ref_wfgradient_table&#45;&gt;early_b0ref_wfdwi_reference_wf -->
 <g id="edge6" class="edge">
@@ -138,40 +138,40 @@
 <!-- early_b0ref_wfoutputnode -->
 <g id="node5" class="node">
 <title>early_b0ref_wfoutputnode</title>
-<polygon fill="none" stroke="#000000" points="715.5,-12 715.5,-104 982.5,-104 982.5,-12 715.5,-12"/>
-<text text-anchor="middle" x="775" y="-88.8" font-family="Times,serif" font-size="14.00" fill="#000000">IN</text>
-<polyline fill="none" stroke="#000000" points="715.5,-81 834.5,-81 "/>
-<text text-anchor="middle" x="775" y="-65.8" font-family="Times,serif" font-size="14.00" fill="#000000">dwi_mask</text>
-<polyline fill="none" stroke="#000000" points="715.5,-58 834.5,-58 "/>
-<text text-anchor="middle" x="775" y="-42.8" font-family="Times,serif" font-size="14.00" fill="#000000">dwi_reference</text>
-<polyline fill="none" stroke="#000000" points="715.5,-35 834.5,-35 "/>
-<text text-anchor="middle" x="775" y="-19.8" font-family="Times,serif" font-size="14.00" fill="#000000">out_rasb</text>
-<polyline fill="none" stroke="#000000" points="834.5,-12 834.5,-104 "/>
-<text text-anchor="middle" x="883.5" y="-85.3" font-family="Times,serif" font-size="14.00" fill="#000000">outputnode</text>
-<polyline fill="none" stroke="#000000" points="834.5,-74 932.5,-74 "/>
-<text text-anchor="middle" x="883.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">utility</text>
-<polyline fill="none" stroke="#000000" points="834.5,-43 932.5,-43 "/>
-<text text-anchor="middle" x="883.5" y="-23.8" font-family="Times,serif" font-size="14.00" fill="#000000"> </text>
-<polyline fill="none" stroke="#000000" points="932.5,-12 932.5,-104 "/>
-<text text-anchor="middle" x="957.5" y="-54.3" font-family="Times,serif" font-size="14.00" fill="#000000">OUT</text>
+<polygon fill="none" stroke="#000000" points="710,-12 710,-104 982,-104 982,-12 710,-12"/>
+<text text-anchor="middle" x="772" y="-88.8" font-family="Times,serif" font-size="14.00" fill="#000000">IN</text>
+<polyline fill="none" stroke="#000000" points="710,-81 834,-81 "/>
+<text text-anchor="middle" x="772" y="-65.8" font-family="Times,serif" font-size="14.00" fill="#000000">dwi_mask</text>
+<polyline fill="none" stroke="#000000" points="710,-58 834,-58 "/>
+<text text-anchor="middle" x="772" y="-42.8" font-family="Times,serif" font-size="14.00" fill="#000000">dwi_reference</text>
+<polyline fill="none" stroke="#000000" points="710,-35 834,-35 "/>
+<text text-anchor="middle" x="772" y="-19.8" font-family="Times,serif" font-size="14.00" fill="#000000">gradients_rasb</text>
+<polyline fill="none" stroke="#000000" points="834,-12 834,-104 "/>
+<text text-anchor="middle" x="883" y="-85.3" font-family="Times,serif" font-size="14.00" fill="#000000">outputnode</text>
+<polyline fill="none" stroke="#000000" points="834,-74 932,-74 "/>
+<text text-anchor="middle" x="883" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">utility</text>
+<polyline fill="none" stroke="#000000" points="834,-43 932,-43 "/>
+<text text-anchor="middle" x="883" y="-23.8" font-family="Times,serif" font-size="14.00" fill="#000000"> </text>
+<polyline fill="none" stroke="#000000" points="932,-12 932,-104 "/>
+<text text-anchor="middle" x="957" y="-54.3" font-family="Times,serif" font-size="14.00" fill="#000000">OUT</text>
 </g>
 <!-- early_b0ref_wfgradient_table&#45;&gt;early_b0ref_wfoutputnode -->
 <g id="edge7" class="edge">
 <title>early_b0ref_wfgradient_table:e&#45;&gt;early_b0ref_wfoutputnode:w</title>
-<path fill="none" stroke="#000000" d="M468,-296.5C476.0326,-296.5 468.748,-158.8149 473,-152 535.6899,-51.5222 589.9612,-24.5121 704.8025,-23.0628"/>
-<polygon fill="#000000" stroke="#000000" points="705.0218,-26.5616 715,-23 704.9786,-19.5617 705.0218,-26.5616"/>
+<path fill="none" stroke="#000000" d="M468,-296.5C476.0326,-296.5 468.7778,-158.8334 473,-152 534.2521,-52.8672 587.0062,-24.5882 699.9678,-23.066"/>
+<polygon fill="#000000" stroke="#000000" points="700.0233,-26.5658 710,-23 699.9772,-19.566 700.0233,-26.5658"/>
 </g>
 <!-- early_b0ref_wfdwi_reference_wf&#45;&gt;early_b0ref_wfreportlets_wf -->
 <g id="edge2" class="edge">
 <title>early_b0ref_wfdwi_reference_wf:e&#45;&gt;early_b0ref_wfreportlets_wf:w</title>
-<path fill="none" stroke="#000000" d="M1000,-210.5C1012.0282,-210.5 993.8919,-120.0065 996.0224,-90.3133"/>
-<polygon fill="#000000" stroke="#000000" points="999.291,-91.5711 1000,-81 992.8536,-88.8217 999.291,-91.5711"/>
+<path fill="none" stroke="#000000" d="M1000,-210.5C1024.7309,-210.5 985.7024,-114.861 992.501,-87.9625"/>
+<polygon fill="#000000" stroke="#000000" points="995.0531,-90.369 1000,-81 990.2902,-85.2392 995.0531,-90.369"/>
 </g>
 <!-- early_b0ref_wfdwi_reference_wf&#45;&gt;early_b0ref_wfreportlets_wf -->
 <g id="edge4" class="edge">
 <title>early_b0ref_wfdwi_reference_wf:e&#45;&gt;early_b0ref_wfreportlets_wf:w</title>
-<path fill="none" stroke="#000000" d="M1000,-186.5C1011.9353,-186.5 993.9391,-96.7053 996.0531,-67.2414"/>
-<polygon fill="#000000" stroke="#000000" points="999.291,-68.5711 1000,-58 992.8535,-65.8217 999.291,-68.5711"/>
+<path fill="none" stroke="#000000" d="M1000,-186.5C1024.5399,-186.5 985.8129,-91.5995 992.5589,-64.9087"/>
+<polygon fill="#000000" stroke="#000000" points="995.0531,-67.369 1000,-58 990.2902,-62.2392 995.0531,-67.369"/>
 </g>
 <!-- early_b0ref_wfdwi_reference_wf&#45;&gt;early_b0ref_wfreportlets_wf -->
 <g id="edge5" class="edge">
@@ -182,14 +182,14 @@
 <!-- early_b0ref_wfdwi_reference_wf&#45;&gt;early_b0ref_wfoutputnode -->
 <g id="edge1" class="edge">
 <title>early_b0ref_wfdwi_reference_wf:e&#45;&gt;early_b0ref_wfoutputnode:w</title>
-<path fill="none" stroke="#000000" d="M1000,-210.5C1013,-210.5 1008.4029,-161.9193 1000,-152 916.9965,-54.0176 798.0035,-202.4824 715,-104.5 708.0313,-96.2737 703.2818,-82.5594 706.406,-75.1415"/>
-<polygon fill="#000000" stroke="#000000" points="708.2154,-78.1376 715,-70 704.6216,-72.1305 708.2154,-78.1376"/>
+<path fill="none" stroke="#000000" d="M1000,-210.5C1013,-210.5 1008.4167,-161.9075 1000,-152 915.44,-52.4629 794.56,-204.0371 710,-104.5 703.0198,-96.2834 698.2749,-82.5651 701.403,-75.1441"/>
+<polygon fill="#000000" stroke="#000000" points="703.2159,-78.138 710,-70 699.6217,-72.1312 703.2159,-78.138"/>
 </g>
 <!-- early_b0ref_wfdwi_reference_wf&#45;&gt;early_b0ref_wfoutputnode -->
 <g id="edge3" class="edge">
 <title>early_b0ref_wfdwi_reference_wf:e&#45;&gt;early_b0ref_wfoutputnode:w</title>
-<path fill="none" stroke="#000000" d="M1000,-186.5C1015.3333,-186.5 1009.9111,-163.6996 1000,-152 916.9965,-54.0176 798.0035,-202.4824 715,-104.5 700.8202,-87.7612 692.059,-57.6222 705.285,-48.6124"/>
-<polygon fill="#000000" stroke="#000000" points="706.2519,-51.9768 715,-46 704.4341,-45.2169 706.2519,-51.9768"/>
+<path fill="none" stroke="#000000" d="M1000,-186.5C1015.3333,-186.5 1009.9274,-163.6858 1000,-152 915.44,-52.4629 794.56,-204.0371 710,-104.5 695.7968,-87.7811 687.0517,-57.6284 700.2833,-48.6138"/>
+<polygon fill="#000000" stroke="#000000" points="701.2525,-51.9776 710,-46 699.4341,-45.2179 701.2525,-51.9776"/>
 </g>
 </g>
 </svg>

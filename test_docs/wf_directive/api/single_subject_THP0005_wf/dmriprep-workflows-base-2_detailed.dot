@@ -1,8 +1,9 @@
 digraph structs {
 node [shape=record];
 single_subject_THP0005_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outdwidata> dwi_data}"];
-single_subject_THP0005_wfsplit_info [label="{IN|<inintuple> in_tuple}|{ split_info | utility |  }|{OUT|<outbval> bval|<outbvec> bvec|<outdwifile> dwi_file}"];
-single_subject_THP0005_wfearly_b0ref_wf [label="{IN|<ininputnodedwifile> inputnode.dwi_file|<ininputnodeinbval> inputnode.in_bval|<ininputnodeinbvec> inputnode.in_bvec}|{ early_b0ref_wf |  |  }|{OUT}"];
+single_subject_THP0005_wfsplit_info [label="{IN|<inintuple> in_tuple}|{ split_info | utility |  }|{OUT|<outbval> bval|<outbvec> bvec|<outdwifile> dwi_file|<outmetadata> metadata}"];
+single_subject_THP0005_wfearly_b0ref_wf [label="{IN|<ininputnodedwifile> inputnode.dwi_file|<ininputnodeinbval> inputnode.in_bval|<ininputnodeinbvec> inputnode.in_bvec}|{ early_b0ref_wf |  |  }|{OUT|<outoutputnodedwimask> outputnode.dwi_mask|<outoutputnodedwireference> outputnode.dwi_reference|<outoutputnodegradientsrasb> outputnode.gradients_rasb}"];
+single_subject_THP0005_wfreferencenode [label="{IN|<indwifile> dwi_file|<indwimask> dwi_mask|<indwireference> dwi_reference|<ingradientsrasb> gradients_rasb|<inmetadata> metadata}|{ referencenode | utility |  }|{OUT}"];
 single_subject_THP0005_wfabout [label="{IN}|{ about | reports |  }|{OUT|<outoutreport> out_report}"];
 single_subject_THP0005_wfbidssrc [label="{IN}|{ bidssrc |  |  }|{OUT|<outdwi> dwi|<outflair> flair|<outroi> roi|<outt1w> t1w|<outt2w> t2w}"];
 single_subject_THP0005_wfds_report_about [label="{IN|<ininfile> in_file|<insourcefile> source_file}|{ ds_report_about |  |  }|{OUT}"];
@@ -24,11 +25,16 @@ single_subject_THP0005_wfbidssrc:outt1w:e -> single_subject_THP0005_wfds_report_
 single_subject_THP0005_wfbidssrc:outt1w:e -> single_subject_THP0005_wfsummary:int1w:w;
 single_subject_THP0005_wfbidssrc:outt2w:e -> single_subject_THP0005_wfanat_preproc_wf:ininputnodet2w:w;
 single_subject_THP0005_wfbidssrc:outt2w:e -> single_subject_THP0005_wfsummary:int2w:w;
+single_subject_THP0005_wfearly_b0ref_wf:outoutputnodedwimask:e -> single_subject_THP0005_wfreferencenode:indwimask:w;
+single_subject_THP0005_wfearly_b0ref_wf:outoutputnodedwireference:e -> single_subject_THP0005_wfreferencenode:indwireference:w;
+single_subject_THP0005_wfearly_b0ref_wf:outoutputnodegradientsrasb:e -> single_subject_THP0005_wfreferencenode:ingradientsrasb:w;
 single_subject_THP0005_wffsinputnode:outsubjectsdir:e -> single_subject_THP0005_wfanat_preproc_wf:ininputnodesubjectsdir:w;
 single_subject_THP0005_wffsinputnode:outsubjectsdir:e -> single_subject_THP0005_wfsummary:insubjectsdir:w;
 single_subject_THP0005_wfinputnode:outdwidata:e -> single_subject_THP0005_wfsplit_info:inintuple:w;
 single_subject_THP0005_wfsplit_info:outbval:e -> single_subject_THP0005_wfearly_b0ref_wf:ininputnodeinbval:w;
 single_subject_THP0005_wfsplit_info:outbvec:e -> single_subject_THP0005_wfearly_b0ref_wf:ininputnodeinbvec:w;
 single_subject_THP0005_wfsplit_info:outdwifile:e -> single_subject_THP0005_wfearly_b0ref_wf:ininputnodedwifile:w;
+single_subject_THP0005_wfsplit_info:outdwifile:e -> single_subject_THP0005_wfreferencenode:indwifile:w;
+single_subject_THP0005_wfsplit_info:outmetadata:e -> single_subject_THP0005_wfreferencenode:inmetadata:w;
 single_subject_THP0005_wfsummary:outoutreport:e -> single_subject_THP0005_wfds_report_summary:ininfile:w;
 }
