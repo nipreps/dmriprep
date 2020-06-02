@@ -12,9 +12,9 @@ from niworkflows.interfaces.bids import (
     BIDSInfo, BIDSFreeSurferDir
 )
 from niworkflows.utils.misc import fix_multi_T1w_source_name
+from niworkflows.utils.spaces import Reference
 from smriprep.workflows.anatomical import init_anat_preproc_wf
 
-from niworkflows.utils.spaces import Reference
 from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
@@ -253,21 +253,28 @@ It is released under the [CC0]\
     anat_preproc_wf.__postdesc__ = (anat_preproc_wf.__postdesc__ or "") + f"""
 Diffusion data preprocessing
 
-: For each of the {len(subject_data["dwi"])} dwi scans found per subject
- (across all sessions), the following preprocessing was performed."""
+: For each of the {len(subject_data["dwi"])} DWI scans found per subject
+ (across all sessions), the gradient table was vetted and converted into the *RASb*
+format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled b-values),
+and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
+"""
 
     layout = config.execution.layout
+    dwi_data = tuple([
+        (dwi, layout.get_metadata(dwi), layout.get_bvec(dwi), layout.get_bval(dwi))
+        for dwi in subject_data["dwi"]
+    ])
+
     inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_data"]),
                         name="inputnode")
-    inputnode.iterables = [(
-        "dwi_data", tuple([
-            (dwi, layout.get_bvec(dwi), layout.get_bval(dwi),
-             layout.get_metadata(dwi)["PhaseEncodingDirection"])
-            for dwi in subject_data["dwi"]
-        ])
-    )]
+    inputnode.iterables = [("dwi_data", dwi_data)]
+
+    referencenode = pe.JoinNode(niu.IdentityInterface(
+        fields=["dwi_file", "metadata", "dwi_reference", "dwi_mask", "gradients_rasb"]),
+        name="referencenode", joinsource="inputnode", run_without_submitting=True)
+
     split_info = pe.Node(niu.Function(
-        function=_unpack, output_names=["dwi_file", "bvec", "bval", "pedir"]),
+        function=_unpack, output_names=["dwi_file", "metadata", "bvec", "bval"]),
         name="split_info", run_without_submitting=True)
 
     early_b0ref_wf = init_early_b0ref_wf()
@@ -276,6 +283,13 @@ Diffusion data preprocessing
         (split_info, early_b0ref_wf, [("dwi_file", "inputnode.dwi_file"),
                                       ("bvec", "inputnode.in_bvec"),
                                       ("bval", "inputnode.in_bval")]),
+        (split_info, referencenode, [("dwi_file", "dwi_file"),
+                                     ("metadata", "metadata")]),
+        (early_b0ref_wf, referencenode, [
+            ("outputnode.dwi_reference", "dwi_reference"),
+            ("outputnode.dwi_mask", "dwi_mask"),
+            ("outputnode.gradients_rasb", "gradients_rasb"),
+        ]),
     ])
 
     return workflow

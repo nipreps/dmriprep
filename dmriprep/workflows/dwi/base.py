@@ -53,11 +53,6 @@ def init_early_b0ref_wf(
     """
     # Build workflow
     workflow = Workflow(name=name)
-    workflow.__postdesc__ = """
-For every run and subject, the gradient table was vetted and converted into the *RASb*
-format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled b-values),
-and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
-"""
 
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['dwi_file', 'in_bvec', 'in_bval']),
@@ -84,7 +79,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         (dwi_reference_wf, outputnode, [
             ('outputnode.ref_image', 'dwi_reference'),
             ('outputnode.dwi_mask', 'dwi_mask')]),
-        (gradient_table, outputnode, [('out_rasb', 'out_rasb')])
+        (gradient_table, outputnode, [('out_rasb', 'gradients_rasb')])
     ])
 
     # REPORTING ############################################################
