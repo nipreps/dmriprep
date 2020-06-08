@@ -26,6 +26,19 @@ sections:
     caption: Surfaces (white and pial) reconstructed with FreeSurfer (<code>recon-all</code>)
       overlaid on the participant's T1w template.
     subtitle: Surface reconstruction
+- name: Fieldmaps
+  ordering: session,run
+  reportlets:
+  - bids: {datatype: figures, desc: pepolar, suffix: fieldmap}
+    caption: Inhomogeneities of the *B0* field introduce (oftentimes severe) spatial distortions
+      along the phase-encoding direction of the image. Utilizing two or more images with different
+      phase-encoding polarities (PEPolar) or directions, it is possible to estimate the inhomogeneity
+      of the field. The plot below shows a reference EPI (echo-planar imaging) volume generated
+      using two or more EPI images with varying phase-encoding blips.
+    description: Hover on the panels with the mouse pointer to also visualize the intensity of the
+      inhomogeneity of the field in Hertz.
+    static: false
+    subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
 - name: Diffusion
   ordering: session,acquisition,run
   reportlets:

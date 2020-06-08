@@ -92,6 +92,9 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     AFNI_PLUGINPATH="/usr/lib/afni/plugins"
 ENV PATH="/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH"
 
+COPY .docker/fsl-6.0/bin/topup /usr/share/fsl/5.0/bin/topup
+COPY .docker/fsl-6.0/lib/* /usr/lib/fsl/5.0/
+
 # Installing ANTs 2.2.0 (NeuroDocker build)
 ENV ANTSPATH=/usr/lib/ants
 RUN mkdir -p $ANTSPATH && \
