@@ -11,6 +11,7 @@ ds_report_about;
 "split_info (utility)";
 early_b0ref_wf;
 "referencenode (utility)";
+fmap_estimation_wf;
 "fsinputnode (utility)" -> anat_preproc_wf;
 "fsinputnode (utility)" -> "summary (reports)";
 "summary (reports)" -> ds_report_summary;
@@ -26,4 +27,5 @@ bidssrc -> ds_report_about;
 "split_info (utility)" -> early_b0ref_wf;
 "split_info (utility)" -> "referencenode (utility)";
 early_b0ref_wf -> "referencenode (utility)";
+"referencenode (utility)" -> fmap_estimation_wf;
 }

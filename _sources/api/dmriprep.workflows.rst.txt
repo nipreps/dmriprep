@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
 
    dmriprep.workflows.dwi
+   dmriprep.workflows.fmap
 
 Submodules
 ----------
