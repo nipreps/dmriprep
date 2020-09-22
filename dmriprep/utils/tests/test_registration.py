@@ -20,8 +20,7 @@ def setup_module():
 
     # Select some arbitrary chunks of data so this goes quicker
     subset_b0 = mean_b0[40:50, 40:50, 40:50]
-    subset_dwi_data = nb.Nifti1Image(hardi_data[40:50, 40:50, 40:50],
-                                     hardi_affine)
+    subset_dwi_data = nb.Nifti1Image(hardi_data[40:50, 40:50, 40:50], hardi_affine)
     subset_t2 = MNI_T2_data[40:60, 40:60, 40:60]
     subset_b0_img = nb.Nifti1Image(subset_b0, hardi_affine)
     subset_t2_img = nb.Nifti1Image(subset_t2, MNI_T2_affine)
@@ -34,10 +33,10 @@ def setup_module():
 @pytest.mark.parametrize("sigmas", [[5.0, 2.5], [0.0]])
 @pytest.mark.parametrize("factors", [[4, 2], [1]])
 @pytest.mark.parametrize("params0", [np.eye(4), None])
-@pytest.mark.parametrize("pipeline", [["rigid"], ["affine"],
-                                      ["rigid", "affine"]])
-def test_affine_registration(nbins, sampling_prop, metric, level_iters,
-                             sigmas, factors, params0, pipeline):
+@pytest.mark.parametrize("pipeline", [["rigid"], ["affine"], ["rigid", "affine"]])
+def test_affine_registration(
+    nbins, sampling_prop, metric, level_iters, sigmas, factors, params0, pipeline
+):
     moving = subset_b0
     static = subset_b0
     moving_affine = static_affine = np.eye(4)
@@ -52,8 +51,16 @@ def test_affine_registration(nbins, sampling_prop, metric, level_iters,
     # If providing nifti image objects, don't need to provide affines:
     moving_img = nb.Nifti1Image(moving, moving_affine)
     static_img = nb.Nifti1Image(static, static_affine)
-    xformed, affine = affine_registration(moving_img, static_img, nbins,
-                                          sampling_prop, metric, pipeline,
-                                          level_iters, sigmas, factors,
-                                          params0)
+    xformed, affine = affine_registration(
+        moving_img,
+        static_img,
+        nbins,
+        sampling_prop,
+        metric,
+        pipeline,
+        level_iters,
+        sigmas,
+        factors,
+        params0,
+    )
     npt.assert_almost_equal(affine[:3, :3], np.eye(3), decimal=1)
