@@ -20,7 +20,7 @@ LOGGER = logging.getLogger("nipype.interface")
 
 class _ApplyAffineInputSpec(BaseInterfaceInputSpec):
     moving_image = File(
-        exists=True, mandatory=True, desc="image to apply transformation from"
+        exists=True, mandatory=True, desc="image that will be resampled into the reference"
     )
     fixed_image = File(
         exists=True, mandatory=True, desc="image to apply transformation to"
