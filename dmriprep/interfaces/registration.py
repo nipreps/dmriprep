@@ -84,7 +84,7 @@ class _RegisterInputSpec(BaseInterfaceInputSpec):
     factors = traits.List(trait=traits.Any(), value=[4, 2, 1], usedefault=True)
     params0 = traits.ArrayOrNone(value=None, usedefault=True)
     pipeline = traits.List(
-        trait=traits.Any(),
+        traits.Enum(*REG_TYPES),
         value=list(REG_TYPES),
         usedefault=True,
     )
