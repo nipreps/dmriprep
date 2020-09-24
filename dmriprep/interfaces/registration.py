@@ -16,6 +16,7 @@ from nipype.interfaces.base import (
 
 
 LOGGER = logging.getLogger("nipype.interface")
+REG_TYPES = ("c_of_mass", "translation", "rigid", "affine")
 
 
 class _ApplyAffineInputSpec(BaseInterfaceInputSpec):
