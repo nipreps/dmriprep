@@ -107,7 +107,6 @@ class Register(SimpleInterface):
     def _run_interface(self, runtime):
         from dmriprep.utils.registration import affine_registration
 
-        reg_types = ["c_of_mass", "translation", "rigid", "affine"]
         pipeline = [
             getattr(dmriprep.utils.register, i)
             for i in self.inputs.pipeline
