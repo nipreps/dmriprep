@@ -84,7 +84,7 @@ class _RegisterInputSpec(BaseInterfaceInputSpec):
     params0 = traits.ArrayOrNone(value=None, usedefault=True)
     pipeline = traits.List(
         trait=traits.Any(),
-        value=["c_of_mass", "translation", "rigid", "affine"],
+        value=list(REG_TYPES),
         usedefault=True,
     )
 
