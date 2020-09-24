@@ -24,7 +24,7 @@ class _ApplyAffineInputSpec(BaseInterfaceInputSpec):
         exists=True, mandatory=True, desc="image that will be resampled into the reference"
     )
     fixed_image = File(
-        exists=True, mandatory=True, desc="image to apply transformation to"
+        exists=True, mandatory=True, desc="image defining the reference coordinate system"
     )
     transform_affine = InputMultiObject(
         File(exists=True), mandatory=True, desc="transformation affine"
