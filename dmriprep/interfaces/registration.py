@@ -111,7 +111,7 @@ class Register(SimpleInterface):
         pipeline = [
             getattr(dmriprep.utils.register, i)
             for i in self.inputs.pipeline
-            if i in reg_types
+            if i in REG_TYPES
         ]
 
         warped_image_nifti, forward_transform_mat = affine_registration(
