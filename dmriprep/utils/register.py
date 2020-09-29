@@ -6,12 +6,14 @@ import attr
 import numpy as np
 import nibabel as nb
 from dipy.align.metrics import CCMetric, EMMetric, SSDMetric
+
 from dipy.align.imaffine import (
     transform_centers_of_mass,
     AffineMap,
     MutualInformationMetric,
     AffineRegistration,
 )
+
 from dipy.align.transforms import (
     TranslationTransform3D,
     RigidTransform3D,
@@ -21,12 +23,13 @@ from nipype.utils.filemanip import fname_presuffix
 
 syn_metric_dict = {"CC": CCMetric, "EM": EMMetric, "SSD": SSDMetric}
 
+
 __all__ = [
     "c_of_mass",
     "translation",
     "rigid",
     "affine",
-    "affine_registration",
+    "AffineRegistration",
 ]
 
 
