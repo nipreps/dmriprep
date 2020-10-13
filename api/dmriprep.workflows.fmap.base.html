@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>dmriprep.workflows.fmap.base module &mdash; dmriprep 0.2.2 documentation</title>
+  <title>dmriprep.workflows.fmap.base module &mdash; dmriprep 0.3.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.3.0
               </div>
             
           
@@ -182,9 +182,12 @@
   
 
 
+    
+    
 
 
 
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../master/api/dmriprep.workflows.fmap.base.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
 <div class="section" id="module-dmriprep.workflows.fmap.base">
 <span id="dmriprep-workflows-fmap-base-module"></span><h1>dmriprep.workflows.fmap.base module<a class="headerlink" href="#module-dmriprep.workflows.fmap.base" title="Permalink to this headline">¶</a></h1>
 <p>Deploy a susceptibility-distortion estimation strategy.</p>
@@ -195,12 +198,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>participant_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The particular subject for which the BIDS layout will be queried.</p></li>
-<li><p><strong>epi_targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">os.pathlike</span></code>) – A list of <abbr title="echo planar imaging">EPI</abbr> scans that will be corrected for
+<li><p><strong>participant_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The particular subject for which the BIDS layout will be queried.</p></li>
+<li><p><strong>epi_targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">os.pathlike</span></code>) – A list of <abbr title="echo planar imaging">EPI</abbr> scans that will be corrected for
 susceptibility distortions with the estimated fieldmaps.</p></li>
-<li><p><strong>omp_nthreads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – Number of CPUs available to individual processes for multithreaded execution.</p></li>
-<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether fast (and less accurate) execution parameters should be used whenever available.</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – A unique workflow name to build Nipype’s workflow hierarchy.</p></li>
+<li><p><strong>omp_nthreads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – Number of CPUs available to individual processes for multithreaded execution.</p></li>
+<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether fast (and less accurate) execution parameters should be used whenever available.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – A unique workflow name to build Nipype’s workflow hierarchy.</p></li>
 </ul>
 </dd>
 </dl>
@@ -260,7 +263,7 @@ susceptibility distortions with the estimated fieldmaps.</p></li>
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
         <span class="fa fa-book"> Other Versions</span>
-        v: master
+        v: 0.3.0
         <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions">
@@ -268,6 +271,7 @@ susceptibility distortions with the estimated fieldmaps.</p></li>
             <dt>Tags</dt>
             <dd><a href="../0.2.1/index.html">0.2.1</a></dd>
             <dd><a href="../0.2.2/index.html">0.2.2</a></dd>
+            <dd><a href="../0.3.0/api/dmriprep.workflows.fmap.base.html">0.3.0</a></dd>
         </dl>
         <dl>
             <dt>Branches</dt>

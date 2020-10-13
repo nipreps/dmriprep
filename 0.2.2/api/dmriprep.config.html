@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>dmriprep.config package &mdash; dmriprep 0.2.2 documentation</title>
+  <title>dmriprep.config package &mdash; dmriprep 0.3.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.3.0
               </div>
             
           
@@ -256,7 +256,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt id="dmriprep.config.environment.version">
-<code class="sig-name descname">version</code><em class="property"> = '0.2.2+117.ga2cd0de'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.3.0'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -383,7 +383,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt id="dmriprep.config.execution.run_uuid">
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20200925-125706_741b9154-962c-4278-a56f-c8fea671819f'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20201013-154152_d88e4236-4b10-4b82-8f7a-db5db7d55703'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -644,10 +644,10 @@ graph is built across processes.</p>
 <p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code> is responsible for other convenience actions.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Switching Python’s <a class="reference external" href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> to <em>forkserver</em> mode.</p></li>
+<li><p>Switching Python’s <a class="reference external" href="https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiprocessing</span></code></a> to <em>forkserver</em> mode.</p></li>
 <li><p>Set up a filter for warnings as early as possible.</p></li>
 <li><p>Automated I/O magic operations. Some conversions need to happen in the
-store/load processes (e.g., from/to <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a> &lt;-&gt; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>,
+store/load processes (e.g., from/to <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a> &lt;-&gt; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>,
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BIDSLayout</span></code>, etc.)</p></li>
 </ul>
 </div></blockquote>
@@ -719,7 +719,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">version</code><em class="property"> = '0.2.2+117.ga2cd0de'</em></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.3.0'</em></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -847,7 +847,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20200925-125706_741b9154-962c-4278-a56f-c8fea671819f'</em></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20201013-154152_d88e4236-4b10-4b82-8f7a-db5db7d55703'</em></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -898,7 +898,7 @@ the command line) as spatial references for outputs.</p>
 <dl class="class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">dmriprep.config.</code><code class="sig-name descname">loggers</code></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Keep loggers easily accessible (see <a class="reference internal" href="#dmriprep.config.loggers.init" title="dmriprep.config.loggers.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>).</p>
 <dl class="attribute">
 <dt>
@@ -1175,6 +1175,7 @@ in the absence of any alternatives.</p>
             <dt>Tags</dt>
             <dd><a href="../../0.2.1/api/dmriprep.config.html">0.2.1</a></dd>
             <dd><a href="dmriprep.config.html">0.2.2</a></dd>
+            <dd><a href="../../0.3.0/api/dmriprep.config.html">0.3.0</a></dd>
         </dl>
         <dl>
             <dt>Branches</dt>

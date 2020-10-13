@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Development road map &mdash; dmriprep 0.3.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/banner.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="What’s new?" href="changes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> dmriprep
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">What’s new?</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Development road map</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-3-targetted-for-march-1st-2020">Version 0.3 (Targetted for March 1st, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-4-april-1st-2020">Version 0.4 (April 1st, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-5-may-1st-2020">Version 0.5 (May 1st, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-0-targetted-for-september-2020">Version 1.0 (Targetted for September 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#long-term-plans">Long-term plans</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dmriprep</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Development road map</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/roadmap.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../master/roadmap.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
+<div class="section" id="development-road-map">
+<h1>Development road map<a class="headerlink" href="#development-road-map" title="Permalink to this headline">¶</a></h1>
+<p>This road-map serves as a guide for developers as well as a way for us to
+communicate to users and other stake-holders aboout the expectations they should
+have about the current functionality of the software and future developments.</p>
+<div class="section" id="version-0-3-targetted-for-march-1st-2020">
+<h2>Version 0.3 (Targetted for March 1st, 2020)<a class="headerlink" href="#version-0-3-targetted-for-march-1st-2020" title="Permalink to this headline">¶</a></h2>
+<p>This version should be considered an early alpha of the software, but will
+contain a full pipeline of processing from a raw BIDS dataset to analyzable data.</p>
+<p>At this point, the processing pipeline will include the following major steps:</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>Susceptibility distortion correction.</dt><dd><p>Using <a class="reference external" href="https://github.com/poldracklab/sdcflows">SDCFlows</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Signal drift estimation</dt><dd><p>Leveraging the <span class="math notranslate nohighlight">\(b=0\)</span> extraction, rescaling and averaging that was merged in <a class="reference external" href="https://github.com/nipreps/dmriprep/pull/50">#50</a></p>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="version-0-4-april-1st-2020">
+<h2>Version 0.4 (April 1st, 2020)<a class="headerlink" href="#version-0-4-april-1st-2020" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Head motion correction.</p>
+<blockquote>
+<div><p>A SHOREline-based approach, ported from QSIPREP. In cases where the data are
+“shelled”, 3dSHORE will be used as the diffusion model. If the data are
+single-shell, we will use SFM as the diffusion model.</p>
+</div></blockquote>
+</li>
+<li><p>Eddy current correction.</p>
+<blockquote>
+<div><p>We will explore the possible adaptations of the HMC based on SHOREline above.
+In cases where the data are “shelled”, 3dSHORE will be
+used as the diffusion model. If the data are single-shell, we will use SFM
+as the diffusion model.</p>
+</div></blockquote>
+</li>
+<li><p>Framewise-displacement calculation</p>
+<blockquote>
+<div><p>We will identify volumes that are outliers in terms of head motion, or other
+severe artifacts that make them likely candidates for exclusion from further
+analysis.</p>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="version-0-5-may-1st-2020">
+<h2>Version 0.5 (May 1st, 2020)<a class="headerlink" href="#version-0-5-may-1st-2020" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Registration between dMRI and T1w image.</p></li>
+<li><p>Identification of outlier measurements (+ imputation?)</p></li>
+</ol>
+<p>If we get around to doing thesee steps earlier, they can also be included in
+earlier releases.</p>
+</div>
+<div class="section" id="version-1-0-targetted-for-september-2020">
+<h2>Version 1.0 (Targetted for September 2020)<a class="headerlink" href="#version-1-0-targetted-for-september-2020" title="Permalink to this headline">¶</a></h2>
+<p>After integrating the above steps, we will spend the time leading to a 1.0
+testing the software on various datasets, evaluating and validating the
+resulting derivatives.</p>
+</div>
+<div class="section" id="long-term-plans">
+<h2>Long-term plans<a class="headerlink" href="#long-term-plans" title="Permalink to this headline">¶</a></h2>
+<p>In the long run we would like to explore the following processing steps:</p>
+<ul class="simple">
+<li><p>Gibbs ringing (using DIPY’s image-based implementation).</p></li>
+<li><p>Denoising (e.g., MP-PCA)</p></li>
+<li><p>Rician bias correction</p></li>
+<li><p>Gradient non-linearity correction</p></li>
+<li><p>B1 inhomogeneity field estimation and <abbr title="High-Performance Computing">INU (intensity non-uniformity) correction</abbr></p></li>
+<li><p>Signal drift correction</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="changes.html" class="btn btn-neutral float-left" title="What’s new?" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright Copyright 2019, The dMRIPrep developers
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 0.3.0
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../0.2.1/index.html">0.2.1</a></dd>
+            <dd><a href="../0.2.2/index.html">0.2.2</a></dd>
+            <dd><a href="roadmap.html">0.3.0</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../master/roadmap.html">master</a></dd>
+            <dd><a href="../test_docs/index.html">test_docs</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

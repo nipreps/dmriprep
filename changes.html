@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>What’s new? &mdash; dmriprep 0.2.2 documentation</title>
+  <title>What’s new? &mdash; dmriprep 0.3.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.3.0
               </div>
             
           
@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">What’s new?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#october-13-2020">0.3.0 (October 13, 2020)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#january-15-2020">0.2.2 (January 15, 2020)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#december-12-2019">0.2.1 (December 12, 2019)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#september-06-2019">0.2.0 (September 06, 2019)</a></li>
@@ -170,16 +171,69 @@
   
 
 
+    
+    
 
 
 
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="master/changes.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
 <div class="section" id="what-s-new">
 <h1>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="october-13-2020">
+<h2>0.3.0 (October 13, 2020)<a class="headerlink" href="#october-13-2020" title="Permalink to this headline">¶</a></h2>
+<p>A long overdue minor release initiating the 0.3.x series and including the milestones set for the 0.3.0 version in our roadmap.</p>
+<p>A full list of changes can be found below.</p>
+<ul class="simple">
+<li><p>FIX: Revise vector tests broken when addressing other issues (#103)</p></li>
+<li><p>FIX: Minor refactor of DWI/brainmasks utilities and dtypes (#101)</p></li>
+<li><p>FIX: Test pin to <code class="docutils literal notranslate"><span class="pre">reports_bug</span></code> branch (#59)</p></li>
+<li><p>FIX: CircleCI <code class="docutils literal notranslate"><span class="pre">on_fail</span></code> command (#61)</p></li>
+<li><p>ENH: An initial implementation of SD estimation. (#97)</p></li>
+<li><p>ENH: Minor refactor reorganizing base workflows, in prep for #97 (#110)</p></li>
+<li><p>ENH: Use new <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code> from <em>NiWorkflows</em> 1.2.0 (#108)</p></li>
+<li><p>ENH: Port the new <em>anatomical fast-track</em> from <em>fMRIPrep</em> (#109)</p></li>
+<li><p>ENH: Data-driven <em>b0</em> identification tool (#107)</p></li>
+<li><p>ENH: Do not raise error in all instances of <em>b</em>-vecs/vals inconsistencies (#100)</p></li>
+<li><p>ENH: Update <code class="docutils literal notranslate"><span class="pre">DiffusionGradientTable</span></code> interface to support vector reorientation (#89)</p></li>
+<li><p>ENH: Update image utility output path behavior (#81)</p></li>
+<li><p>ENH: Adopt <code class="docutils literal notranslate"><span class="pre">config</span></code> module (#88)</p></li>
+<li><p>ENH: Added <code class="docutils literal notranslate"><span class="pre">ds001771/sub-36</span></code> dataset and FS derivatives (#67)</p></li>
+<li><p>DOC: Add nipreps developers and year to <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> file (#69)</p></li>
+<li><p>DOC: Roadmap documentation (#58)</p></li>
+<li><p>DOC: Document the fact that we are using popylar/GA for usage tracking (#63)</p></li>
+<li><p>MAINT: Remove the leftovers of AFQ in <code class="docutils literal notranslate"><span class="pre">.afq/</span></code> (#106)</p></li>
+<li><p>MAINT: Refactor the workflow to use <em>Nipype</em> iterables (#105)</p></li>
+<li><p>MAINT: Add ds001771 to the smoke-tests battery (#91)</p></li>
+<li><p>MAINT: Revisions after previous maintenance commit (#83) (#85)</p></li>
+<li><p>MAINT: Update dependencies (#83)</p></li>
+</ul>
+<div class="admonition-author-list-for-papers-based-on-dmriprep-0-3-x-series admonition">
+<p class="admonition-title">Author list for papers based on <em>dMRIPrep</em> 0.3.x series</p>
+<p>As described in the <a class="reference external" href="https://www.nipreps.org/community/CONTRIBUTING/#recognizing-contributions">Contributor Guidelines</a>,
+anyone listed as developer or contributor may write and submit manuscripts
+about <em>dMRIPrep</em>.
+To do so, please move the author(s) name(s) to the front of the following list:</p>
+<p>Joseph, Michael <sup>1</sup>; Pisner, Derek <sup>2</sup>; Richie-Halford, Adam <sup>3</sup>; Lerma-Usabiaga, Garikoitz <sup>4</sup>; Keshavan, Anisha <sup>3</sup>; Kent, James D. <sup>5</sup>; Cieslak, Matthew <sup>6</sup>; Poldrack, Russell A. <sup>7</sup>; Rokem, Ariel <sup>8</sup>; Esteban, Oscar <sup>9</sup>.</p>
+<p>Affiliations:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>The Centre for Addiction and Mental Health</p></li>
+<li><p>Department of Psychology, University of Texas at Austin, TX, USA</p></li>
+<li><p>The University of Washington, eScience Institute</p></li>
+<li><p>Department of Psychology, Stanford University, CA, USA</p></li>
+<li><p>Neuroscience Program, University of Iowa</p></li>
+<li><p>Perelman School of Medicine, University of Pennsylvania, PA, USA</p></li>
+<li><p>Department of Psychology, Stanford University</p></li>
+<li><p>The University of Washington eScience Institute</p></li>
+<li><p>Dep. of Radiology, Lausanne University Hospital and University of Lausanne</p></li>
+</ol>
+</div></blockquote>
+</div>
+</div>
 <div class="section" id="january-15-2020">
 <h2>0.2.2 (January 15, 2020)<a class="headerlink" href="#january-15-2020" title="Permalink to this headline">¶</a></h2>
 <p>A release to show the deployment process on the Sprint.</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>ENH: b0 reference and skullstrip workflow (#50)</p></li>
 <li><p>FIX: Version on docker target of <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> (#54)</p></li>
 <li><p>FIX/ENH: Remove sentry tracking and add popylar tracking. (#51)</p></li>
@@ -187,13 +241,11 @@
 <li><p>ENH: Set up customized report specification (#34)</p></li>
 <li><p>MAINT: Use a local docker registry instead of load/save (#46)</p></li>
 </ul>
-</div></blockquote>
 </div>
 <div class="section" id="december-12-2019">
 <h2>0.2.1 (December 12, 2019)<a class="headerlink" href="#december-12-2019" title="Permalink to this headline">¶</a></h2>
 <p>A bugfix release to test that versioned documentation is working.</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>FIX: Remove count of DWI scans according to <code class="docutils literal notranslate"><span class="pre">task_id</span></code> (#10)</p></li>
 <li><p>ENH: Vector representation and checking utilities (#26)</p></li>
 <li><p>ENH: Start running smoke tests on CircleCI (#31)</p></li>
@@ -207,7 +259,6 @@
 <li><p>MAINT: Fix typos and add Makefiles (#11)</p></li>
 <li><p>MAINT: Add TravisCI for code linting with <code class="docutils literal notranslate"><span class="pre">flake8</span></code> (#18)</p></li>
 </ul>
-</div></blockquote>
 </div>
 <div class="section" id="september-06-2019">
 <h2>0.2.0 (September 06, 2019)<a class="headerlink" href="#september-06-2019" title="Permalink to this headline">¶</a></h2>
@@ -277,7 +328,7 @@ dMRIPrep will bring the contents of this branch back in as a plugin.</p>
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
         <span class="fa fa-book"> Other Versions</span>
-        v: master
+        v: 0.3.0
         <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions">
@@ -285,6 +336,7 @@ dMRIPrep will bring the contents of this branch back in as a plugin.</p>
             <dt>Tags</dt>
             <dd><a href="0.2.1/changes.html">0.2.1</a></dd>
             <dd><a href="0.2.2/changes.html">0.2.2</a></dd>
+            <dd><a href="0.3.0/changes.html">0.3.0</a></dd>
         </dl>
         <dl>
             <dt>Branches</dt>
