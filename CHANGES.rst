@@ -1,14 +1,16 @@
 0.3.0 (October 13, 2020)
 ========================
-A long overdue release including the milestones set for the 0.3.0 version in our roadmap.
+A long overdue minor release initiating the 0.3.x series and including the milestones set for the 0.3.0 version in our roadmap.
+
+A full list of changes can be found below.
 
 * FIX: Revise vector tests broken when addressing other issues (#103)
 * FIX: Minor refactor of DWI/brainmasks utilities and dtypes (#101)
-* FIX: test pin to reports_bug branch (#59)
-* FIX: circleci on_fail command (#61)
+* FIX: Test pin to ``reports_bug`` branch (#59)
+* FIX: CircleCI ``on_fail`` command (#61)
 * ENH: An initial implementation of SD estimation. (#97)
 * ENH: Minor refactor reorganizing base workflows, in prep for #97 (#110)
-* ENH: Use new ``DerivativesDataSink`` from NiWorkflows 1.2.0 (#108)
+* ENH: Use new ``DerivativesDataSink`` from *NiWorkflows* 1.2.0 (#108)
 * ENH: Port the new *anatomical fast-track* from *fMRIPrep* (#109)
 * ENH: Data-driven *b0* identification tool (#107)
 * ENH: Do not raise error in all instances of *b*-vecs/vals inconsistencies (#100)
@@ -25,6 +27,27 @@ A long overdue release including the milestones set for the 0.3.0 version in our
 * MAINT: Revisions after previous maintenance commit (#83) (#85)
 * MAINT: Update dependencies (#83)
 
+.. admonition:: Author list for papers based on *dMRIPrep* 0.3.x series
+
+    As described in the `Contributor Guidelines
+    <https://www.nipreps.org/community/CONTRIBUTING/#recognizing-contributions>`__,
+    anyone listed as developer or contributor may write and submit manuscripts
+    about *dMRIPrep*.
+    To do so, please move the author(s) name(s) to the front of the following list:
+
+    Joseph, Michael \ :sup:`1`\ ; Pisner, Derek \ :sup:`2`\ ; Richie-Halford, Adam \ :sup:`3`\ ; Lerma-Usabiaga, Garikoitz \ :sup:`4`\ ; Keshavan, Anisha \ :sup:`3`\ ; Kent, James D. \ :sup:`5`\ ; Cieslak, Matthew \ :sup:`6`\ ; Poldrack, Russell A. \ :sup:`7`\ ; Rokem, Ariel \ :sup:`8`\ ; Esteban, Oscar \ :sup:`9`\ .
+
+    Affiliations:
+
+      1. The Centre for Addiction and Mental Health
+      2. Department of Psychology, University of Texas at Austin, TX, USA
+      3. The University of Washington, eScience Institute
+      4. Department of Psychology, Stanford University, CA, USA
+      5. Neuroscience Program, University of Iowa
+      6. Perelman School of Medicine, University of Pennsylvania, PA, USA
+      7. Department of Psychology, Stanford University
+      8. The University of Washington eScience Institute
+      9. Dep. of Radiology, Lausanne University Hospital and University of Lausanne
 
 0.2.2 (January 15, 2020)
 ========================
