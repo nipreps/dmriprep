@@ -219,6 +219,23 @@ use this option without specifying any spatial references. For further details, 
 https://www.nipreps.org/dmriprep/en/%s/spaces.html"""
         % (currentv.base_version if is_release else "latest"),
     )
+    g_conf.add_argument(
+        "--bold2t1w-init",
+        action="store",
+        default="register",
+        choices=["register", "header"],
+        help='Either "register" (the default) to initialize volumes at center or "header"'
+        " to use the header information when coregistering BOLD to T1w images.",
+    )
+    g_conf.add_argument(
+        "--bold2t1w-dof",
+        action="store",
+        default=6,
+        choices=[6, 9, 12],
+        type=int,
+        help="Degrees of freedom when registering BOLD to T1w images. "
+        "6 degrees (rotation and translation) are used by default.",
+    )
 
     #  ANTs options
     g_ants = parser.add_argument_group("Specific options for ANTs registrations")
