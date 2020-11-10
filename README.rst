@@ -25,7 +25,6 @@ dMRIPrep
 
 About
 -----
-
 The preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
 the data before fitting a particular model.
 Generally, researchers create ad-hoc preprocessing workflows for each dataset,
@@ -41,8 +40,8 @@ workflow, which can help ensure the validity of inference and the interpretabili
 of results.
 
 The workflow is based on `Nipype <https://nipype.readthedocs.io>`__ and
-encompasses a large set of tools from other neuroimaging package. This pipeline
-was designed to provide the best software implementation for each state of
+encompasses a large set of tools from other neuroimaging packages.
+This pipeline was designed to provide the best software implementation for each state of
 preprocessing, and will be updated as newer and better neuroimaging software
 becomes available.
 
@@ -52,10 +51,9 @@ providing outputs that can be easily submitted to a variety of diffusion models.
 
 Getting involved
 ----------------
-
 We welcome all contributions!
 We'd like to ask you to familiarize yourself with our `contributing guidelines <https:/www.nipreps.org/community/CONTRIBUTING>`__.
-For ideas for contributing to `dMRIPrep`, please see the current list of `issues <https://github.com/nipreps/dmriprep/issues>`__.
+For ideas for contributing to *dMRIPrep*, please see the current list of `issues <https://github.com/nipreps/dmriprep/issues>`__.
 For making your contribution, we use the GitHub flow, which is
 nicely explained in the chapter `Contributing to a Project <http://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project>`__ in Pro Git
 by Scott Chacon and also in the `Making a change section <https://www.nipreps.org/community/CONTRIBUTING/#making-a-change>`__ of our guidelines.
