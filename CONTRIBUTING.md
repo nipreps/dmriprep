@@ -1,2 +1,2 @@
-Please check the [contributing guidelines of the NiPreps organization](https:/www.nipreps.org/community/CONTRIBUTING)
+Please check the [contributing guidelines of the NiPreps organization](https://www.nipreps.org/community/CONTRIBUTING)
 
