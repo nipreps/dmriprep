@@ -166,13 +166,16 @@
 
 <div class="section" id="dmriprep">
 <h1>dMRIPrep<a class="headerlink" href="#dmriprep" title="Permalink to this headline">¶</a></h1>
-<a class="reference external image-reference" href="https://mattermost.brainhack.org/brainhack/channels/dmriprep"><img alt="https://badgen.net/badge/chat/on%20mattermost/blue" src="https://badgen.net/badge/chat/on%20mattermost/blue" /></a>
+<a class="reference external image-reference" href="https://mattermost.brainhack.org/brainhack/channels/dmriprep"><img alt="https://img.shields.io/badge/chat-mattermost-blue" src="https://img.shields.io/badge/chat-mattermost-blue" /></a>
+<a class="reference external image-reference" href="https://hub.docker.com/r/nipreps/dmriprep/tags/"><img alt="https://img.shields.io/badge/docker-nipreps/dmriprep-brightgreen.svg?logo=docker&amp;style=flat" src="https://img.shields.io/badge/docker-nipreps/dmriprep-brightgreen.svg?logo=docker&amp;style=flat" /></a>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/dmriprep"><img alt="https://img.shields.io/pypi/v/dmriprep.svg" src="https://img.shields.io/pypi/v/dmriprep.svg" /></a>
 <a class="reference external image-reference" href="https://circleci.com/gh/nipreps/dmriprep"><img alt="https://circleci.com/gh/nipreps/dmriprep.svg?style=svg" src="https://circleci.com/gh/nipreps/dmriprep.svg?style=svg" /></a>
 <a class="reference external image-reference" href="https://travis-ci.org/nipreps/dmriprep"><img alt="https://travis-ci.org/nipreps/dmriprep.svg?branch=master" src="https://travis-ci.org/nipreps/dmriprep.svg?branch=master" /></a>
 <a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.3392201"><img alt="https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg" src="https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg" /></a>
 <p>[<a class="reference external" href="https://www.nipreps.org/dmriprep/">Documentation</a>]
 [<a class="reference external" href="https://neurostars.org/tags/dmriprep">Support at neurostars.org</a>]</p>
+<div class="section" id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
 <p>The preprocessing of diffusion MRI (dMRI) involves numerous steps to clean and standardize
 the data before fitting a particular model.
 Generally, researchers create ad-hoc preprocessing workflows for each dataset,
@@ -187,13 +190,28 @@ dMRIPrep equips neuroscientists with an easy-to-use and transparent preprocessin
 workflow, which can help ensure the validity of inference and the interpretability
 of results.</p>
 <p>The workflow is based on <a class="reference external" href="https://nipype.readthedocs.io">Nipype</a> and
-encompases a large set of tools from other neuroimaging package. This pipeline
-was designed to provide the best software implementation for each state of
+encompasses a large set of tools from other neuroimaging packages.
+This pipeline was designed to provide the best software implementation for each state of
 preprocessing, and will be updated as newer and better neuroimaging software
 becomes available.</p>
 <p>dMRIPrep performs basic preprocessing steps such as head-motion correction,
 susceptibility-derived distortion correction, eddy current correction, etc.
 providing outputs that can be easily submitted to a variety of diffusion models.</p>
+</div>
+<div class="section" id="getting-involved">
+<h2>Getting involved<a class="headerlink" href="#getting-involved" title="Permalink to this headline">¶</a></h2>
+<p>We welcome all contributions!
+We’d like to ask you to familiarize yourself with our <a class="reference external" href="https:/www.nipreps.org/community/CONTRIBUTING">contributing guidelines</a>.
+For ideas for contributing to <em>dMRIPrep</em>, please see the current list of <a class="reference external" href="https://github.com/nipreps/dmriprep/issues">issues</a>.
+For making your contribution, we use the GitHub flow, which is
+nicely explained in the chapter <a class="reference external" href="http://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project">Contributing to a Project</a> in Pro Git
+by Scott Chacon and also in the <a class="reference external" href="https://www.nipreps.org/community/CONTRIBUTING/#making-a-change">Making a change section</a> of our guidelines.
+If you’re still not sure where to begin, feel free to pop into <a class="reference external" href="https://mattermost.brainhack.org/brainhack/channels/dmriprep">Mattermost</a> and introduce yourself!
+Our project maintainers will do their best to answer any question or concerns and will be happy to help you find somewhere to get started.</p>
+<p>Want to learn more about our future plans for developing <cite>dMRIPrep</cite>?
+Please take a look at our <a class="reference external" href="https://github.com/nipreps/dmriprep/milestones">milestones board</a> and <a class="reference external" href="https://www.nipreps.org/dmriprep/roadmap.html">project roadmap</a>.</p>
+<p>We ask that all contributors to <cite>dMRIPrep</cite> across all project-related spaces (including but not limited to: GitHub, Mattermost, and project emails), adhere to our <a class="reference external" href="https://www.nipreps.org/community/CODE_OF_CONDUCT">code of conduct</a>.</p>
+</div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
