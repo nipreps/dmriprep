@@ -15,7 +15,10 @@
     "orcid": "0000-0003-3554-043X"
   },
   {
-    "affiliation": "Department of Psychology, Stanford University, CA, USA",
+    "affiliation": [
+      "Basque Center on Cognition, Brain and Language (BCBL)",
+      "Department of Psychology, Stanford University"
+    ],
     "name": "Lerma-Usabiaga, Garikoitz",
     "orcid": "0000-0001-9800-4816"
   },
