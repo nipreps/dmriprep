@@ -1,5 +1,6 @@
 """Utilities to operate on diffusion gradients."""
 from .. import config
+from collections import Counter
 from pathlib import Path
 from itertools import permutations
 import nibabel as nb
@@ -173,6 +174,11 @@ class DiffusionGradientTable:
         if self.bvecs is not None and value.shape[0] != self.bvecs.shape[0]:
             raise ValueError("The number of b-vectors and b-values do not match")
         self._bvals = np.array(value)
+
+    @property
+    def count_shells(self):
+        """Count the number of volumes per b-value."""
+        return Counter(sorted(self._bvals))
 
     @property
     def b0mask(self):
