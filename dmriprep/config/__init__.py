@@ -436,11 +436,9 @@ class workflow(_Config):
     ignore = None
     """Ignore particular steps for *dMRIPrep*."""
     longitudinal = False
-    """Number of ICA components to be estimated by MELODIC
-    (positive = exact, negative = maximum)."""
-    bold2t1w_dof = None
-    """Degrees of freedom of the BOLD-to-T1w registration steps."""
     bold2t1w_init = "register"
+    """Whether to use standard coregistration ('register') or to initialize coregistration from the
+    BOLD image-header ('header')."""
     """Run FreeSurfer ``recon-all`` with the ``-logitudinal`` flag."""
     run_reconall = True
     """Run FreeSurfer's surface reconstruction."""

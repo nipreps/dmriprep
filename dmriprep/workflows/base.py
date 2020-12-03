@@ -360,13 +360,16 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         # Mask the T1
         t1w_brain = pe.Node(ApplyMask(), name='t1w_brain')
 
-        bbr_wf = init_bbreg_wf(use_bbr=True, bold2t1w_dof=config.workflow.bold2t1w_dof,
-                               bold2t1w_init=config.workflow.bold2t1w_init, omp_nthreads=config.nipype.omp_nthreads)
+        bbr_wf = init_bbreg_wf(
+            bold2t1w_init=config.workflow.bold2t1w_init,
+            omp_nthreads=config.nipype.omp_nthreads,
+            use_bbr=True,
+        )
 
         workflow.connect([
             # T1 Mask
             (anat_preproc_wf, t1w_brain, [('outputnode.t1w_preproc', 'in_file'),
-                                        ('outputnode.t1w_mask', 'in_mask')]),
+                                          ('outputnode.t1w_mask', 'in_mask')]),
             # BBregister
             (split_info, bbr_wf, [('dwi_file', 'inputnode.in_file')]),
             (t1w_brain, bbr_wf, [('out_file', 'inputnode.t1w_brain')]),
