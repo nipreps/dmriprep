@@ -385,7 +385,9 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
                 ("outputnode.t1w_mask", "in_mask"),
             ]),
             # BBRegister
-            (split_info, bbr_wf, [("dwi_file", "inputnode.in_file")]),
+            (early_b0ref_wf, bbr_wf, [
+                ("outputnode.dwi_reference", "inputnode.in_file")
+            ]),
             (t1w_brain, bbr_wf, [("out_file", "inputnode.t1w_brain")]),
             (anat_preproc_wf, bbr_wf, [("outputnode.t1w_dseg", "inputnode.t1w_dseg")]),
             (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
