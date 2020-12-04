@@ -357,7 +357,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
     if config.workflow.run_reconall:
         from niworkflows.interfaces.nibabel import ApplyMask
 
-        # Mask the T1
+        # Mask the T1w
         t1w_brain = pe.Node(ApplyMask(), name='t1w_brain')
 
         bbr_wf = init_bbreg_wf(
@@ -367,10 +367,10 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         )
 
         workflow.connect([
-            # T1 Mask
+            # T1w Mask
             (anat_preproc_wf, t1w_brain, [('outputnode.t1w_preproc', 'in_file'),
                                           ('outputnode.t1w_mask', 'in_mask')]),
-            # BBregister
+            # BBRegister
             (split_info, bbr_wf, [('dwi_file', 'inputnode.in_file')]),
             (t1w_brain, bbr_wf, [('out_file', 'inputnode.t1w_brain')]),
             (anat_preproc_wf, bbr_wf, [('outputnode.t1w_dseg', 'inputnode.t1w_dseg')]),
