@@ -8,11 +8,11 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+from niworkflows.anat.coregistration import init_bbreg_wf
 from niworkflows.interfaces.bids import BIDSInfo, BIDSFreeSurferDir
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
 from smriprep.workflows.anatomical import init_anat_preproc_wf
-from fmriprep.workflows.bold.registration import init_bbreg_wf
 
 from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
@@ -362,10 +362,9 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         t1w_brain = pe.Node(ApplyMask(), name="t1w_brain")
 
         bbr_wf = init_bbreg_wf(
-            bold2t1w_dof=6,
-            bold2t1w_init=config.workflow.dwi2t1w_init,
+            debug=config.execution.debug,
+            epi2t1w_init=config.workflow.dwi2t1w_init,
             omp_nthreads=config.nipype.omp_nthreads,
-            use_bbr=True,
         )
 
         ds_report_reg = pe.Node(
@@ -388,8 +387,6 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             (early_b0ref_wf, bbr_wf, [
                 ("outputnode.dwi_reference", "inputnode.in_file")
             ]),
-            (t1w_brain, bbr_wf, [("out_file", "inputnode.t1w_brain")]),
-            (anat_preproc_wf, bbr_wf, [("outputnode.t1w_dseg", "inputnode.t1w_dseg")]),
             (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
             (bids_info, bbr_wf, [(("subject", _prefix), "inputnode.subject_id")]),
             (anat_preproc_wf, bbr_wf, [
