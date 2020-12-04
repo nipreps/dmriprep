@@ -362,10 +362,20 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         t1w_brain = pe.Node(ApplyMask(), name="t1w_brain")
 
         bbr_wf = init_bbreg_wf(
+            bold2t1w_dof=6,
             bold2t1w_init=config.workflow.dwi2t1w_init,
             omp_nthreads=config.nipype.omp_nthreads,
             use_bbr=True,
         )
+
+        ds_report_reg = pe.Node(
+            DerivativesDataSink(base_directory=str(output_dir), datatype="figures",),
+            name="ds_report_reg",
+            run_without_submitting=True,
+        )
+
+        def _bold_reg_suffix(fallback):
+            return "coreg" if fallback else "bbregister"
 
         # fmt:off
         workflow.connect([
@@ -383,6 +393,9 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             (anat_preproc_wf, bbr_wf, [
                 ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")
             ]),
+            (bbr_wf, ds_report_reg, [
+                ('outputnode.out_report', 'in_file'),
+                (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
         ])
         # fmt:on
 
