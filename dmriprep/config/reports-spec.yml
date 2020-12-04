@@ -53,7 +53,7 @@ sections:
     caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
       were aligned with <code>mri_coreg</code> (FreeSurfer).
       WARNING - <code>bbregister</code> refinement rejected.
-    descriptions: Note that nearest-neighbor interpolation is used in this reportlet
+    description: Note that nearest-neighbor interpolation is used in this reportlet
       in order to highlight potential slice Inhomogeneities and other artifacts, whereas
       the final images are resampled using cubic B-Spline interpolation.
     static: false
@@ -61,7 +61,7 @@ sections:
   - bids: {datatype: figures, desc: bbregister, suffix: dwi}
     caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
       were aligned with <code>bbregister</code> (FreeSurfer).
-    descriptions: Note that nearest-neighbor interpolation is used in this reportlet
+    description: Note that nearest-neighbor interpolation is used in this reportlet
       in order to highlight potential slice Inhomogeneities and other artifacts, whereas
       the final images are resampled using cubic B-Spline interpolation.
     static: false

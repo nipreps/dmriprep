@@ -391,10 +391,11 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             (t1w_brain, bbr_wf, [("out_file", "inputnode.t1w_brain")]),
             (anat_preproc_wf, bbr_wf, [("outputnode.t1w_dseg", "inputnode.t1w_dseg")]),
             (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
-            (bids_info, bbr_wf, [("subject", "inputnode.subject_id")]),
+            (bids_info, bbr_wf, [(("subject", _prefix), "inputnode.subject_id")]),
             (anat_preproc_wf, bbr_wf, [
                 ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")
             ]),
+            (split_info, ds_report_reg, [("dwi_file", "source_file")]),
             (bbr_wf, ds_report_reg, [
                 ('outputnode.out_report', 'in_file'),
                 (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
