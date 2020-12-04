@@ -17,8 +17,6 @@ from smriprep.workflows.anatomical import init_anat_preproc_wf
 from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
-from .dwi.base import init_early_b0ref_wf
-from .fmap.base import init_fmap_estimation_wf
 
 
 def init_dmriprep_wf():
@@ -287,6 +285,7 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
+    from .dwi.base import init_early_b0ref_wf
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
     anat_preproc_wf.__postdesc__ = (
@@ -399,17 +398,71 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         ])
         # fmt:on
 
-    fmap_estimation_wf = init_fmap_estimation_wf(
-        subject_data["dwi"], debug=config.execution.debug
+    if "fieldmap" in config.workflow.ignore:
+        return workflow
+
+    from niworkflows.interfaces.utility import KeySelect
+    from sdcflows import fieldmaps as fm
+    from sdcflows.utils.wrangler import find_estimators
+    from sdcflows.workflows.base import init_fmap_preproc_wf
+
+    # SDCFlows connection
+    # Step 1: Run basic heuristics to identify available data for fieldmap estimation
+    estimators = find_estimators(layout)
+
+    if not estimators and config.workflow.use_syn:  # Add fieldmap-less estimators
+        # estimators = [fm.FieldmapEstimation()]
+        raise NotImplementedError
+
+    # Step 2: Manually add further estimators (e.g., fieldmap-less)
+    fmap_wf = init_fmap_preproc_wf(
+        debug=config.execution.debug,
+        estimators=estimators,
+        omp_nthreads=config.nipype.omp_nthreads,
+        output_dir=str(output_dir),
+        subject=subject_id,
     )
-    # fmt:off
-    workflow.connect([
-        (referencenode, fmap_estimation_wf, [
-            ("dwi_reference", "inputnode.dwi_reference"),
-            ("dwi_mask", "inputnode.dwi_mask"),
-        ]),
-    ])
-    # fmt:on
+
+    # Overwrite ``out_path_base`` of sdcflows's DataSinks
+    for node in fmap_wf.list_node_names():
+        if node.split(".")[-1].startswith("ds_"):
+            fmap_wf.get_node(node).interface.out_path_base = "dmriprep"
+    workflow.add_nodes([fmap_wf])
+
+    # Step 3: Manually connect PEPOLAR
+    for estimator in estimators:
+        if estimator.method != fm.EstimatorType.PEPOLAR:
+            continue
+
+        suffices = set(s.suffix for s in estimator.sources)
+
+        if sorted(suffices) == ["epi"]:
+            getattr(fmap_wf.inputs, f"in_{estimator.bids_id}").in_data = [
+                str(s.path) for s in estimator.sources
+            ]
+            getattr(fmap_wf.inputs, f"in_{estimator.bids_id}").metadata = [
+                s.metadata for s in estimator.sources
+            ]
+        else:
+            est_id = estimator.bids_id
+            fmap_select = pe.MapNode(
+                KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
+                name=f"fmap_select_{est_id}",
+                run_without_submitting=True,
+                iterfields=["key"]
+            )
+            fmap_select.inputs.key = [
+                str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
+            ]
+            # fmt:off
+            workflow.connect([
+                (referencenode, fmap_select, [("dwi_file", "keys"),
+                                              ("metadata", "metadata"),
+                                              ("dwi_reference", "dwi_reference"),
+                                              ("gradients_rasb", "gradients_rasb")]),
+            ])
+            # fmt:on
+
     return workflow
 
 
