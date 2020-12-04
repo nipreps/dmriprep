@@ -5,18 +5,16 @@ from nipype.interfaces import utility as niu, fsl, afni
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from niworkflows.interfaces.images import ValidateImage
-from niworkflows.interfaces.fixes import FixN4BiasFieldCorrection as N4BiasFieldCorrection
+from niworkflows.interfaces.fixes import (
+    FixN4BiasFieldCorrection as N4BiasFieldCorrection,
+)
 from niworkflows.interfaces.nibabel import ApplyMask
 from niworkflows.interfaces.utils import CopyXForm
 
 from ...interfaces.images import ExtractB0, RescaleB0
 
 
-def init_dwi_reference_wf(
-    mem_gb,
-    omp_nthreads,
-    name='dwi_reference_wf'
-):
+def init_dwi_reference_wf(mem_gb, omp_nthreads, name="dwi_reference_wf"):
     """
     Build a workflow that generates a reference b0 image from a DWI dataset.
 
@@ -72,52 +70,63 @@ def init_dwi_reference_wf(
     """
     workflow = Workflow(name=name)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['dwi_file', 'b0_ixs']),
-                        name='inputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["dwi_file", "b0_ixs"]), name="inputnode"
+    )
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=['dwi_file', 'raw_ref_image', 'ref_image',
-                                      'ref_image_brain',
-                                      'dwi_mask', 'validation_report']),
-        name='outputnode')
+        niu.IdentityInterface(
+            fields=[
+                "dwi_file",
+                "raw_ref_image",
+                "ref_image",
+                "ref_image_brain",
+                "dwi_mask",
+                "validation_report",
+            ]
+        ),
+        name="outputnode",
+    )
 
-    validate = pe.Node(ValidateImage(), name='validate', mem_gb=mem_gb)
+    validate = pe.Node(ValidateImage(), name="validate", mem_gb=mem_gb)
 
-    extract_b0 = pe.Node(ExtractB0(), name='extract_b0')
+    extract_b0 = pe.Node(ExtractB0(), name="extract_b0")
 
-    reg_b0 = pe.Node(fsl.MCFLIRT(ref_vol=0, interpolation='sinc'), name='reg_b0')
+    reg_b0 = pe.Node(fsl.MCFLIRT(ref_vol=0, interpolation="sinc"), name="reg_b0")
 
-    pre_mask = pe.Node(afni.Automask(dilate=1, outputtype='NIFTI_GZ'),
-                       name='pre_mask')
+    pre_mask = pe.Node(afni.Automask(dilate=1, outputtype="NIFTI_GZ"), name="pre_mask")
 
-    rescale_b0 = pe.Node(RescaleB0(), name='rescale_b0')
+    rescale_b0 = pe.Node(RescaleB0(), name="rescale_b0")
 
     enhance_and_skullstrip_dwi_wf = init_enhance_and_skullstrip_dwi_wf(
-        omp_nthreads=omp_nthreads)
+        omp_nthreads=omp_nthreads
+    )
 
+    # fmt:off
     workflow.connect([
-        (inputnode, validate, [('dwi_file', 'in_file')]),
-        (validate, extract_b0, [('out_file', 'in_file')]),
-        (inputnode, extract_b0, [('b0_ixs', 'b0_ixs')]),
-        (extract_b0, reg_b0, [('out_file', 'in_file')]),
-        (reg_b0, pre_mask, [('out_file', 'in_file')]),
-        (reg_b0, rescale_b0, [('out_file', 'in_file')]),
-        (pre_mask, rescale_b0, [('out_file', 'mask_file')]),
-        (rescale_b0, enhance_and_skullstrip_dwi_wf, [('out_ref', 'inputnode.in_file')]),
-        (pre_mask, enhance_and_skullstrip_dwi_wf, [('out_file', 'inputnode.pre_mask')]),
-        (validate, outputnode, [('out_file', 'dwi_file'),
-                                ('out_report', 'validation_report')]),
-        (rescale_b0, outputnode, [('out_ref', 'raw_ref_image')]),
+        (inputnode, validate, [("dwi_file", "in_file")]),
+        (validate, extract_b0, [("out_file", "in_file")]),
+        (inputnode, extract_b0, [("b0_ixs", "b0_ixs")]),
+        (extract_b0, reg_b0, [("out_file", "in_file")]),
+        (reg_b0, pre_mask, [("out_file", "in_file")]),
+        (reg_b0, rescale_b0, [("out_file", "in_file")]),
+        (pre_mask, rescale_b0, [("out_file", "mask_file")]),
+        (rescale_b0, enhance_and_skullstrip_dwi_wf, [("out_ref", "inputnode.in_file")]),
+        (pre_mask, enhance_and_skullstrip_dwi_wf, [("out_file", "inputnode.pre_mask")]),
+        (validate, outputnode, [("out_file", "dwi_file"), ("out_report", "validation_report")]),
+        (rescale_b0, outputnode, [("out_ref", "raw_ref_image")]),
         (enhance_and_skullstrip_dwi_wf, outputnode, [
-            ('outputnode.bias_corrected_file', 'ref_image'),
-            ('outputnode.mask_file', 'dwi_mask'),
-            ('outputnode.skull_stripped_file', 'ref_image_brain')]),
+            ("outputnode.bias_corrected_file", "ref_image"),
+            ("outputnode.mask_file", "dwi_mask"),
+            ("outputnode.skull_stripped_file", "ref_image_brain"),
+        ]),
     ])
+    # fmt:on
     return workflow
 
 
 def init_enhance_and_skullstrip_dwi_wf(
-        name='enhance_and_skullstrip_dwi_wf',
-        omp_nthreads=1):
+    name="enhance_and_skullstrip_dwi_wf", omp_nthreads=1
+):
     """
     Enhance a *b0* reference and perform brain extraction.
 
@@ -177,70 +186,93 @@ def init_enhance_and_skullstrip_dwi_wf(
 
     """
     workflow = Workflow(name=name)
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'pre_mask']),
-                        name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=[
-        'mask_file', 'skull_stripped_file', 'bias_corrected_file']), name='outputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
+    )
+    outputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=["mask_file", "skull_stripped_file", "bias_corrected_file"]
+        ),
+        name="outputnode",
+    )
 
     # Run N4 normally, force num_threads=1 for stability (images are small, no need for >1)
-    n4_correct = pe.Node(N4BiasFieldCorrection(
-        dimension=3, copy_header=True, bspline_fitting_distance=200), shrink_factor=2,
-        name='n4_correct', n_procs=1)
+    n4_correct = pe.Node(
+        N4BiasFieldCorrection(
+            dimension=3, copy_header=True, bspline_fitting_distance=200
+        ),
+        shrink_factor=2,
+        name="n4_correct",
+        n_procs=1,
+    )
     n4_correct.inputs.rescale_intensities = True
 
     # Create a generous BET mask out of the bias-corrected EPI
-    skullstrip_first_pass = pe.Node(fsl.BET(frac=0.2, mask=True),
-                                    name='skullstrip_first_pass')
-    bet_dilate = pe.Node(fsl.DilateImage(
-        operation='max', kernel_shape='sphere', kernel_size=6.0,
-        internal_datatype='char'), name='skullstrip_first_dilate')
-    bet_mask = pe.Node(fsl.ApplyMask(), name='skullstrip_first_mask')
+    skullstrip_first_pass = pe.Node(
+        fsl.BET(frac=0.2, mask=True), name="skullstrip_first_pass"
+    )
+    bet_dilate = pe.Node(
+        fsl.DilateImage(
+            operation="max",
+            kernel_shape="sphere",
+            kernel_size=6.0,
+            internal_datatype="char",
+        ),
+        name="skullstrip_first_dilate",
+    )
+    bet_mask = pe.Node(fsl.ApplyMask(), name="skullstrip_first_mask")
 
     # Use AFNI's unifize for T2 contrast & fix header
-    unifize = pe.Node(afni.Unifize(
-        t2=True, outputtype='NIFTI_GZ',
-        args='-clfrac 0.2 -rbt 18.3 65.0 90.0',
-        out_file='uni.nii.gz'), name='unifize')
-    fixhdr_unifize = pe.Node(CopyXForm(), name='fixhdr_unifize', mem_gb=0.1)
+    unifize = pe.Node(
+        afni.Unifize(
+            t2=True,
+            outputtype="NIFTI_GZ",
+            args="-clfrac 0.2 -rbt 18.3 65.0 90.0",
+            out_file="uni.nii.gz",
+        ),
+        name="unifize",
+    )
+    fixhdr_unifize = pe.Node(CopyXForm(), name="fixhdr_unifize", mem_gb=0.1)
 
     # Run AFNI's 3dAutomask to extract a refined brain mask
-    skullstrip_second_pass = pe.Node(afni.Automask(dilate=1,
-                                                   outputtype='NIFTI_GZ'),
-                                     name='skullstrip_second_pass')
-    fixhdr_skullstrip2 = pe.Node(CopyXForm(), name='fixhdr_skullstrip2', mem_gb=0.1)
+    skullstrip_second_pass = pe.Node(
+        afni.Automask(dilate=1, outputtype="NIFTI_GZ"), name="skullstrip_second_pass"
+    )
+    fixhdr_skullstrip2 = pe.Node(CopyXForm(), name="fixhdr_skullstrip2", mem_gb=0.1)
 
     # Take intersection of both masks
-    combine_masks = pe.Node(fsl.BinaryMaths(operation='mul'),
-                            name='combine_masks')
+    combine_masks = pe.Node(fsl.BinaryMaths(operation="mul"), name="combine_masks")
 
     normalize = pe.Node(niu.Function(function=_normalize), name="normalize")
 
     # Compute masked brain
-    apply_mask = pe.Node(ApplyMask(), name='apply_mask')
+    apply_mask = pe.Node(ApplyMask(), name="apply_mask")
 
+    # fmt:off
     workflow.connect([
-        (inputnode, n4_correct, [('in_file', 'input_image'),
-                                 ('pre_mask', 'mask_image')]),
-        (inputnode, fixhdr_unifize, [('in_file', 'hdr_file')]),
-        (inputnode, fixhdr_skullstrip2, [('in_file', 'hdr_file')]),
-        (n4_correct, skullstrip_first_pass, [('output_image', 'in_file')]),
-        (skullstrip_first_pass, bet_dilate, [('mask_file', 'in_file')]),
-        (bet_dilate, bet_mask, [('out_file', 'mask_file')]),
-        (skullstrip_first_pass, bet_mask, [('out_file', 'in_file')]),
-        (bet_mask, unifize, [('out_file', 'in_file')]),
-        (unifize, fixhdr_unifize, [('out_file', 'in_file')]),
-        (fixhdr_unifize, skullstrip_second_pass, [('out_file', 'in_file')]),
-        (skullstrip_first_pass, combine_masks, [('mask_file', 'in_file')]),
-        (skullstrip_second_pass, fixhdr_skullstrip2, [('out_file', 'in_file')]),
-        (fixhdr_skullstrip2, combine_masks, [('out_file', 'operand_file')]),
-        (combine_masks, apply_mask, [('out_file', 'in_mask')]),
-        (combine_masks, outputnode, [('out_file', 'mask_file')]),
-        (n4_correct, normalize, [('output_image', 'in_file')]),
-        (normalize, apply_mask, [('out', 'in_file')]),
-        (normalize, outputnode, [('out', 'bias_corrected_file')]),
-        (apply_mask, outputnode, [('out_file', 'skull_stripped_file')]),
-    ])
-
+        (inputnode, n4_correct, [("in_file", "input_image"),
+                                 ("pre_mask", "mask_image")]),
+        (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
+        (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
+        (n4_correct, skullstrip_first_pass, [("output_image", "in_file")]),
+        (skullstrip_first_pass, bet_dilate, [("mask_file", "in_file")]),
+        (bet_dilate, bet_mask, [("out_file", "mask_file")]),
+        (skullstrip_first_pass, bet_mask, [("out_file", "in_file")]),
+        (bet_mask, unifize, [("out_file", "in_file")]),
+        (unifize, fixhdr_unifize, [("out_file", "in_file")]),
+        (fixhdr_unifize, skullstrip_second_pass, [("out_file", "in_file")]),
+        (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
+        (skullstrip_second_pass, fixhdr_skullstrip2, [("out_file", "in_file")]),
+        (fixhdr_skullstrip2, combine_masks, [("out_file", "operand_file")]),
+        (combine_masks, apply_mask, [("out_file", "in_mask")]),
+        (combine_masks, outputnode, [("out_file", "mask_file")]),
+        (n4_correct, normalize, [("output_image", "in_file")]),
+        (normalize, apply_mask, [("out", "in_file")]),
+        (normalize, outputnode, [("out", "bias_corrected_file")]),
+        (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
+    ]
+    )
+    # fmt:on
     return workflow
 
 
@@ -252,11 +284,11 @@ def _normalize(in_file, newmax=2000, perc=98.0):
     nii = nb.load(in_file)
     data = nii.get_fdata()
     data[data < 0] = 0
-    if data.max() >= 2**15 - 1:
+    if data.max() >= 2 ** 15 - 1:
         data *= newmax / np.percentile(data.reshape(-1), perc)
 
     out_file = str(Path("normalized.nii.gz").absolute())
     hdr = nii.header.copy()
-    hdr.set_data_dtype('int16')
-    nii.__class__(data.astype('int16'), nii.affine, hdr).to_filename(out_file)
+    hdr.set_data_dtype("int16")
+    nii.__class__(data.astype("int16"), nii.affine, hdr).to_filename(out_file)
     return out_file

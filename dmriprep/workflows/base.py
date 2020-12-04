@@ -8,9 +8,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-from niworkflows.interfaces.bids import (
-    BIDSInfo, BIDSFreeSurferDir
-)
+from niworkflows.interfaces.bids import BIDSInfo, BIDSFreeSurferDir
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
 from smriprep.workflows.anatomical import init_anat_preproc_wf
@@ -50,9 +48,11 @@ def init_dmriprep_wf():
             BIDSFreeSurferDir(
                 derivatives=config.execution.output_dir,
                 freesurfer_home=os.getenv("FREESURFER_HOME"),
-                spaces=config.workflow.spaces.get_fs_spaces()),
+                spaces=config.workflow.spaces.get_fs_spaces(),
+            ),
             name=f"fsdir_run_{config.execution.run_uuid.replace('-', '_')}",
-            run_without_submitting=True)
+            run_without_submitting=True,
+        )
         if config.execution.fs_subjects_dir is not None:
             fsdir.inputs.subjects_dir = str(config.execution.fs_subjects_dir.absolute())
 
@@ -60,21 +60,30 @@ def init_dmriprep_wf():
         single_subject_wf = init_single_subject_wf(subject_id)
 
         single_subject_wf.config["execution"]["crashdump_dir"] = str(
-            config.execution.output_dir / "dmriprep" / f"sub-{subject_id}"
-            / "log" / config.execution.run_uuid
+            config.execution.output_dir
+            / "dmriprep"
+            / f"sub-{subject_id}"
+            / "log"
+            / config.execution.run_uuid
         )
 
         for node in single_subject_wf._get_all_nodes():
             node.config = deepcopy(single_subject_wf.config)
         if freesurfer:
-            dmriprep_wf.connect(fsdir, "subjects_dir",
-                                single_subject_wf, "fsinputnode.subjects_dir")
+            dmriprep_wf.connect(
+                fsdir, "subjects_dir", single_subject_wf, "fsinputnode.subjects_dir"
+            )
         else:
             dmriprep_wf.add_nodes([single_subject_wf])
 
         # Dump a copy of the config file into the log directory
-        log_dir = config.execution.output_dir / "dmriprep" / f"sub-{subject_id}" \
-            / "log" / config.execution.run_uuid
+        log_dir = (
+            config.execution.output_dir
+            / "dmriprep"
+            / f"sub-{subject_id}"
+            / "log"
+            / config.execution.run_uuid
+        )
         log_dir.mkdir(exist_ok=True, parents=True)
         config.to_filename(log_dir / "dmriprep.toml")
 
@@ -117,9 +126,7 @@ def init_single_subject_wf(subject_id):
 
     """
     name = f"single_subject_{subject_id}_wf"
-    subject_data = collect_data(
-        config.execution.layout,
-        subject_id)[0]
+    subject_data = collect_data(config.execution.layout, subject_id)[0]
 
     if "flair" in config.workflow.ignore:
         subject_data["flair"] = []
@@ -130,12 +137,16 @@ def init_single_subject_wf(subject_id):
 
     # Make sure we always go through these two checks
     if not anat_only and not subject_data["dwi"]:
-        raise Exception(f"No DWI data found for participant {subject_id}. "
-                        "All workflows require DWI images.")
+        raise Exception(
+            f"No DWI data found for participant {subject_id}. "
+            "All workflows require DWI images."
+        )
 
     if not subject_data["t1w"]:
-        raise Exception(f"No T1w images found for participant {subject_id}. "
-                        "All workflows require T1w images.")
+        raise Exception(
+            f"No T1w images found for participant {subject_id}. "
+            "All workflows require T1w images."
+        )
 
     workflow = Workflow(name=name)
     workflow.__desc__ = f"""
@@ -168,34 +179,54 @@ It is released under the [CC0]\
     spaces = config.workflow.spaces
     output_dir = config.execution.output_dir
 
-    fsinputnode = pe.Node(niu.IdentityInterface(fields=["subjects_dir"]),
-                          name="fsinputnode")
+    fsinputnode = pe.Node(
+        niu.IdentityInterface(fields=["subjects_dir"]), name="fsinputnode"
+    )
 
-    bidssrc = pe.Node(BIDSDataGrabber(subject_data=subject_data, anat_only=anat_only),
-                      name="bidssrc")
+    bidssrc = pe.Node(
+        BIDSDataGrabber(subject_data=subject_data, anat_only=anat_only), name="bidssrc"
+    )
 
-    bids_info = pe.Node(BIDSInfo(
-        bids_dir=config.execution.bids_dir, bids_validate=False), name="bids_info")
+    bids_info = pe.Node(
+        BIDSInfo(bids_dir=config.execution.bids_dir, bids_validate=False),
+        name="bids_info",
+    )
 
-    summary = pe.Node(SubjectSummary(std_spaces=spaces.get_spaces(nonstandard=False),
-                                     nstd_spaces=spaces.get_spaces(standard=False)),
-                      name="summary", run_without_submitting=True)
+    summary = pe.Node(
+        SubjectSummary(
+            std_spaces=spaces.get_spaces(nonstandard=False),
+            nstd_spaces=spaces.get_spaces(standard=False),
+        ),
+        name="summary",
+        run_without_submitting=True,
+    )
 
-    about = pe.Node(AboutSummary(version=config.environment.version,
-                                 command=" ".join(sys.argv)),
-                    name="about", run_without_submitting=True)
+    about = pe.Node(
+        AboutSummary(version=config.environment.version, command=" ".join(sys.argv)),
+        name="about",
+        run_without_submitting=True,
+    )
 
     ds_report_summary = pe.Node(
-        DerivativesDataSink(base_directory=str(output_dir), desc="summary", datatype="figures"),
-        name="ds_report_summary", run_without_submitting=True)
+        DerivativesDataSink(
+            base_directory=str(output_dir), desc="summary", datatype="figures"
+        ),
+        name="ds_report_summary",
+        run_without_submitting=True,
+    )
 
     ds_report_about = pe.Node(
-        DerivativesDataSink(base_directory=str(output_dir), desc="about", datatype="figures"),
-        name="ds_report_about", run_without_submitting=True)
+        DerivativesDataSink(
+            base_directory=str(output_dir), desc="about", datatype="figures"
+        ),
+        name="ds_report_about",
+        run_without_submitting=True,
+    )
 
     anat_derivatives = config.execution.anat_derivatives
     if anat_derivatives:
         from smriprep.utils.bids import collect_derivatives
+
         std_spaces = spaces.get_spaces(nonstandard=False, dim=(3,))
         anat_derivatives = collect_derivatives(
             anat_derivatives.absolute(),
@@ -217,30 +248,36 @@ It is released under the [CC0]\
         skull_strip_fixed_seed=config.workflow.skull_strip_fixed_seed,
         skull_strip_mode="force",
         skull_strip_template=Reference.from_string(
-            config.workflow.skull_strip_template)[0],
+            config.workflow.skull_strip_template
+        )[0],
         spaces=spaces,
         t1w=subject_data["t1w"],
     )
 
+    # fmt:off
     workflow.connect([
         (fsinputnode, anat_preproc_wf, [("subjects_dir", "inputnode.subjects_dir")]),
         (bidssrc, bids_info, [(("t1w", fix_multi_T1w_source_name), "in_file")]),
         (fsinputnode, summary, [("subjects_dir", "subjects_dir")]),
-        (bidssrc, summary, [("t1w", "t1w"),
-                            ("t2w", "t2w"),
-                            ("dwi", "dwi")]),
+        (bidssrc, summary, [("t1w", "t1w"), ("t2w", "t2w"), ("dwi", "dwi")]),
         (bids_info, summary, [("subject", "subject_id")]),
         (bids_info, anat_preproc_wf, [(("subject", _prefix), "inputnode.subject_id")]),
-        (bidssrc, anat_preproc_wf, [("t1w", "inputnode.t1w"),
-                                    ("t2w", "inputnode.t2w"),
-                                    ("roi", "inputnode.roi"),
-                                    ("flair", "inputnode.flair")]),
-        (bidssrc, ds_report_summary, [(("t1w", fix_multi_T1w_source_name), "source_file")]),
+        (bidssrc, anat_preproc_wf, [
+            ("t1w", "inputnode.t1w"),
+            ("t2w", "inputnode.t2w"),
+            ("roi", "inputnode.roi"),
+            ("flair", "inputnode.flair"),
+        ]),
+        (bidssrc, ds_report_summary, [
+            (("t1w", fix_multi_T1w_source_name), "source_file"),
+        ]),
         (summary, ds_report_summary, [("out_report", "in_file")]),
-        (bidssrc, ds_report_about, [(("t1w", fix_multi_T1w_source_name), "source_file")]),
+        (bidssrc, ds_report_about, [
+            (("t1w", fix_multi_T1w_source_name), "source_file")
+        ]),
         (about, ds_report_about, [("out_report", "in_file")]),
     ])
-
+    # fmt:off
     # Overwrite ``out_path_base`` of smriprep's DataSinks
     for node in workflow.list_node_names():
         if node.split(".")[-1].startswith("ds_"):
@@ -251,7 +288,9 @@ It is released under the [CC0]\
 
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of bold datasets
-    anat_preproc_wf.__postdesc__ = (anat_preproc_wf.__postdesc__ or "") + f"""
+    anat_preproc_wf.__postdesc__ = (
+        (anat_preproc_wf.__postdesc__ or "")
+        + f"""
 Diffusion data preprocessing
 
 : For each of the {len(subject_data["dwi"])} DWI scans found per subject
@@ -259,31 +298,52 @@ Diffusion data preprocessing
 format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled b-values),
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """
+    )
 
     layout = config.execution.layout
-    dwi_data = tuple([
-        (dwi, layout.get_metadata(dwi), layout.get_bvec(dwi), layout.get_bval(dwi))
-        for dwi in subject_data["dwi"]
-    ])
+    dwi_data = tuple(
+        [
+            (dwi, layout.get_metadata(dwi), layout.get_bvec(dwi), layout.get_bval(dwi))
+            for dwi in subject_data["dwi"]
+        ]
+    )
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_data"]),
-                        name="inputnode")
+    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_data"]), name="inputnode")
     inputnode.iterables = [("dwi_data", dwi_data)]
 
-    referencenode = pe.JoinNode(niu.IdentityInterface(
-        fields=["dwi_file", "metadata", "dwi_reference", "dwi_mask", "gradients_rasb"]),
-        name="referencenode", joinsource="inputnode", run_without_submitting=True)
+    referencenode = pe.JoinNode(
+        niu.IdentityInterface(
+            fields=[
+                "dwi_file",
+                "metadata",
+                "dwi_reference",
+                "dwi_mask",
+                "gradients_rasb",
+            ]
+        ),
+        name="referencenode",
+        joinsource="inputnode",
+        run_without_submitting=True,
+    )
 
-    split_info = pe.Node(niu.Function(
-        function=_unpack, output_names=["dwi_file", "metadata", "bvec", "bval"]),
-        name="split_info", run_without_submitting=True)
+    split_info = pe.Node(
+        niu.Function(
+            function=_unpack, output_names=["dwi_file", "metadata", "bvec", "bval"]
+        ),
+        name="split_info",
+        run_without_submitting=True,
+    )
 
     early_b0ref_wf = init_early_b0ref_wf()
+
+    # fmt:off
     workflow.connect([
         (inputnode, split_info, [("dwi_data", "in_tuple")]),
-        (split_info, early_b0ref_wf, [("dwi_file", "inputnode.dwi_file"),
-                                      ("bvec", "inputnode.in_bvec"),
-                                      ("bval", "inputnode.in_bval")]),
+        (split_info, early_b0ref_wf, [
+            ("dwi_file", "inputnode.dwi_file"),
+            ("bvec", "inputnode.in_bvec"),
+            ("bval", "inputnode.in_bval"),
+        ]),
         (split_info, referencenode, [("dwi_file", "dwi_file"),
                                      ("metadata", "metadata")]),
         (early_b0ref_wf, referencenode, [
@@ -292,14 +352,19 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             ("outputnode.gradients_rasb", "gradients_rasb"),
         ]),
     ])
+    # fmt:on
 
     fmap_estimation_wf = init_fmap_estimation_wf(
-        subject_data["dwi"], debug=config.execution.debug)
+        subject_data["dwi"], debug=config.execution.debug
+    )
+    # fmt:off
     workflow.connect([
         (referencenode, fmap_estimation_wf, [
             ("dwi_reference", "inputnode.dwi_reference"),
-            ("dwi_mask", "inputnode.dwi_mask")]),
+            ("dwi_mask", "inputnode.dwi_mask"),
+        ]),
     ])
+    # fmt:on
     return workflow
 
 
