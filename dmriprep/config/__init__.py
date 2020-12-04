@@ -425,6 +425,9 @@ class workflow(_Config):
 
     anat_only = False
     """Execute the anatomical preprocessing only."""
+    dwi2t1w_init = "register"
+    """Whether to use standard coregistration ('register') or to initialize coregistration from the
+    DWI header ('header')."""
     fmap_bspline = None
     """Regularize fieldmaps with a field of B-Spline basis."""
     fmap_demean = None
@@ -436,9 +439,6 @@ class workflow(_Config):
     ignore = None
     """Ignore particular steps for *dMRIPrep*."""
     longitudinal = False
-    bold2t1w_init = "register"
-    """Whether to use standard coregistration ('register') or to initialize coregistration from the
-    BOLD image-header ('header')."""
     """Run FreeSurfer ``recon-all`` with the ``-logitudinal`` flag."""
     run_reconall = True
     """Run FreeSurfer's surface reconstruction."""

@@ -12,13 +12,14 @@ from niworkflows.interfaces.bids import BIDSInfo, BIDSFreeSurferDir
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
 from smriprep.workflows.anatomical import init_anat_preproc_wf
+from fmriprep.workflows.bold.registration import init_bbreg_wf
 
 from ..interfaces import DerivativesDataSink, BIDSDataGrabber
 from ..interfaces.reports import SubjectSummary, AboutSummary
 from ..utils.bids import collect_data
 from .dwi.base import init_early_b0ref_wf
 from .fmap.base import init_fmap_estimation_wf
-from .dwi.registration import init_bbreg_wf
+
 
 def init_dmriprep_wf():
     """
@@ -287,7 +288,7 @@ It is released under the [CC0]\
         return workflow
 
     # Append the dMRI section to the existing anatomical excerpt
-    # That way we do not need to stream down the number of bold datasets
+    # That way we do not need to stream down the number of DWI datasets
     anat_preproc_wf.__postdesc__ = (
         (anat_preproc_wf.__postdesc__ or "")
         + f"""
@@ -358,28 +359,42 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         from niworkflows.interfaces.nibabel import ApplyMask
 
         # Mask the T1w
-        t1w_brain = pe.Node(ApplyMask(), name='t1w_brain')
+        t1w_brain = pe.Node(ApplyMask(), name="t1w_brain")
 
         bbr_wf = init_bbreg_wf(
-            bold2t1w_init=config.workflow.bold2t1w_init,
+            bold2t1w_init=config.workflow.dwi2t1w_init,
             omp_nthreads=config.nipype.omp_nthreads,
             use_bbr=True,
         )
 
-        workflow.connect([
-            # T1w Mask
-            (anat_preproc_wf, t1w_brain, [('outputnode.t1w_preproc', 'in_file'),
-                                          ('outputnode.t1w_mask', 'in_mask')]),
-            # BBRegister
-            (split_info, bbr_wf, [('dwi_file', 'inputnode.in_file')]),
-            (t1w_brain, bbr_wf, [('out_file', 'inputnode.t1w_brain')]),
-            (anat_preproc_wf, bbr_wf, [('outputnode.t1w_dseg', 'inputnode.t1w_dseg')]),
-            (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
-            (bids_info, bbr_wf, [('subject', 'inputnode.subject_id')]),
-            (anat_preproc_wf, bbr_wf, [
-                ('outputnode.fsnative2t1w_xfm', 'inputnode.fsnative2t1w_xfm')
-            ])
-        ])
+        workflow.connect(
+            [
+                # T1w Mask
+                (
+                    anat_preproc_wf,
+                    t1w_brain,
+                    [
+                        ("outputnode.t1w_preproc", "in_file"),
+                        ("outputnode.t1w_mask", "in_mask"),
+                    ],
+                ),
+                # BBRegister
+                (split_info, bbr_wf, [("dwi_file", "inputnode.in_file")]),
+                (t1w_brain, bbr_wf, [("out_file", "inputnode.t1w_brain")]),
+                (
+                    anat_preproc_wf,
+                    bbr_wf,
+                    [("outputnode.t1w_dseg", "inputnode.t1w_dseg")],
+                ),
+                (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
+                (bids_info, bbr_wf, [("subject", "inputnode.subject_id")]),
+                (
+                    anat_preproc_wf,
+                    bbr_wf,
+                    [("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")],
+                ),
+            ]
+        )
 
     fmap_estimation_wf = init_fmap_estimation_wf(
         subject_data["dwi"], debug=config.execution.debug

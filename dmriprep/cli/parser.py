@@ -191,7 +191,7 @@ def _build_parser():
         action="store",
         nargs="+",
         default=[],
-        choices=["fieldmaps", "slicetiming", "sbref"],
+        choices=["fieldmaps", "sbref"],
         help="ignore selected aspects of the input dataset to disable corresponding "
         "parts of the workflow (a space delimited list)",
     )
@@ -220,12 +220,12 @@ https://www.nipreps.org/dmriprep/en/%s/spaces.html"""
         % (currentv.base_version if is_release else "latest"),
     )
     g_conf.add_argument(
-        "--bold2t1w-init",
+        "--dwi2t1w-init",
         action="store",
         default="register",
         choices=["register", "header"],
         help='Either "register" (the default) to initialize volumes at center or "header"'
-        " to use the header information when coregistering BOLD to T1w images.",
+        " to use the header information when coregistering DWI to T1w images.",
     )
 
     #  ANTs options
