@@ -216,18 +216,31 @@
 <span class="go">True</span>
 </pre></div>
 </div>
-<dl class="attribute">
-<dt id="dmriprep.interfaces.vectors.CheckGradientTable.input_spec">
-<code class="sig-name descname">input_spec</code><a class="headerlink" href="#dmriprep.interfaces.vectors.CheckGradientTable.input_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_CheckGradientTableInputSpec</span></code></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="dmriprep.interfaces.vectors.CheckGradientTable.output_spec">
-<code class="sig-name descname">output_spec</code><a class="headerlink" href="#dmriprep.interfaces.vectors.CheckGradientTable.output_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_CheckGradientTableOutputSpec</span></code></p>
-</dd></dl>
-
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><p><strong>dwi_file</strong> (<em>a pathlike object or string representing an existing file</em>)</p>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>b0_threshold</strong> (<em>a float</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">50</span></code>)</p></li>
+<li><p><strong>b_scale</strong> (<em>a boolean</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>bvec_norm_epsilon</strong> (<em>a float</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>)</p></li>
+<li><p><strong>in_bval</strong> (<em>a pathlike object or string representing an existing file</em>) – Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">in_rasb</span></code>.</p></li>
+<li><p><strong>in_bvec</strong> (<em>a pathlike object or string representing an existing file</em>) – Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">in_rasb</span></code>.</p></li>
+<li><p><strong>in_rasb</strong> (<em>a pathlike object or string representing an existing file</em>) – Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">in_bval</span></code>, <code class="docutils literal notranslate"><span class="pre">in_bvec</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b0_ixs</strong> (<em>a list of items which are an integer</em>)</p></li>
+<li><p><strong>full_sphere</strong> (<em>a boolean</em>)</p></li>
+<li><p><strong>out_bval</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
+<li><p><strong>out_bvec</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
+<li><p><strong>out_rasb</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
+<li><p><strong>pole</strong> (<em>a tuple of the form: (a float, a float, a float)</em>)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

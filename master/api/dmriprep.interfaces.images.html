@@ -199,18 +199,17 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">extract_b0</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  
 </pre></div>
 </div>
-<dl class="attribute">
-<dt id="dmriprep.interfaces.images.ExtractB0.input_spec">
-<code class="sig-name descname">input_spec</code><a class="headerlink" href="#dmriprep.interfaces.images.ExtractB0.input_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_ExtractB0InputSpec</span></code></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="dmriprep.interfaces.images.ExtractB0.output_spec">
-<code class="sig-name descname">output_spec</code><a class="headerlink" href="#dmriprep.interfaces.images.ExtractB0.output_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_ExtractB0OutputSpec</span></code></p>
-</dd></dl>
-
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b0_ixs</strong> (<em>a list of items which are an integer</em>) – Index of b0s.</p></li>
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Dwi file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output b0 file.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
@@ -226,18 +225,21 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">rescale_b0</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  
 </pre></div>
 </div>
-<dl class="attribute">
-<dt id="dmriprep.interfaces.images.RescaleB0.input_spec">
-<code class="sig-name descname">input_spec</code><a class="headerlink" href="#dmriprep.interfaces.images.RescaleB0.input_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_RescaleB0InputSpec</span></code></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="dmriprep.interfaces.images.RescaleB0.output_spec">
-<code class="sig-name descname">output_spec</code><a class="headerlink" href="#dmriprep.interfaces.images.RescaleB0.output_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_RescaleB0OutputSpec</span></code></p>
-</dd></dl>
-
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – B0s file.</p></li>
+<li><p><strong>mask_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Mask file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>out_b0s</strong> (<em>a pathlike object or string representing an existing file</em>) – Series of rescaled b0 volumes.</p></li>
+<li><p><strong>out_ref</strong> (<em>a pathlike object or string representing an existing file</em>) – One average b0 file.</p></li>
+<li><p><strong>signal_drift</strong> (<em>a list of items which are a float</em>) – Estimated signal drift factors.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

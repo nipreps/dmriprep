@@ -190,66 +190,53 @@
 <dt id="dmriprep.interfaces.reports.AboutSummary">
 <em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">AboutSummary</code><span class="sig-paren">(</span><em class="sig-param">from_file=None</em>, <em class="sig-param">resource_monitor=None</em>, <em class="sig-param">**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.AboutSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.interfaces.reports.SummaryInterface" title="dmriprep.interfaces.reports.SummaryInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.interfaces.reports.SummaryInterface</span></code></a></p>
-<dl class="attribute">
-<dt id="dmriprep.interfaces.reports.AboutSummary.input_spec">
-<code class="sig-name descname">input_spec</code><a class="headerlink" href="#dmriprep.interfaces.reports.AboutSummary.input_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#dmriprep.interfaces.reports.AboutSummaryInputSpec" title="dmriprep.interfaces.reports.AboutSummaryInputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">AboutSummaryInputSpec</span></code></a></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="dmriprep.interfaces.reports.AboutSummaryInputSpec">
-<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">AboutSummaryInputSpec</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.AboutSummaryInputSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.BaseInterfaceInputSpec</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<em>a string</em>) – DMRIPrep command.</p></li>
+<li><p><strong>version</strong> (<em>a string</em>) – DMRIPrep version.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><p><strong>out_report</strong> (<em>a pathlike object or string representing an existing file</em>) – HTML segment containing summary.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="dmriprep.interfaces.reports.SubjectSummary">
 <em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">SubjectSummary</code><span class="sig-paren">(</span><em class="sig-param">from_file=None</em>, <em class="sig-param">resource_monitor=None</em>, <em class="sig-param">**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.SubjectSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.interfaces.reports.SummaryInterface" title="dmriprep.interfaces.reports.SummaryInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.interfaces.reports.SummaryInterface</span></code></a></p>
-<dl class="attribute">
-<dt id="dmriprep.interfaces.reports.SubjectSummary.input_spec">
-<code class="sig-name descname">input_spec</code><a class="headerlink" href="#dmriprep.interfaces.reports.SubjectSummary.input_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#dmriprep.interfaces.reports.SubjectSummaryInputSpec" title="dmriprep.interfaces.reports.SubjectSummaryInputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubjectSummaryInputSpec</span></code></a></p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="dmriprep.interfaces.reports.SubjectSummary.output_spec">
-<code class="sig-name descname">output_spec</code><a class="headerlink" href="#dmriprep.interfaces.reports.SubjectSummary.output_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#dmriprep.interfaces.reports.SubjectSummaryOutputSpec" title="dmriprep.interfaces.reports.SubjectSummaryOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubjectSummaryOutputSpec</span></code></a></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="dmriprep.interfaces.reports.SubjectSummaryInputSpec">
-<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">SubjectSummaryInputSpec</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.SubjectSummaryInputSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.BaseInterfaceInputSpec</span></code></p>
-</dd></dl>
-
-<dl class="class">
-<dt id="dmriprep.interfaces.reports.SubjectSummaryOutputSpec">
-<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">SubjectSummaryOutputSpec</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.SubjectSummaryOutputSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#dmriprep.interfaces.reports.SummaryOutputSpec" title="dmriprep.interfaces.reports.SummaryOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">dmriprep.interfaces.reports.SummaryOutputSpec</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwi</strong> (<em>a list of items which are a pathlike object or string representing an existing file or a list of items which are a pathlike object or string representing an existing file</em>) – DWI files.</p></li>
+<li><p><strong>nstd_spaces</strong> (<em>a list of items which are a string</em>) – List of non-standard spaces.</p></li>
+<li><p><strong>std_spaces</strong> (<em>a list of items which are a string</em>) – List of standard spaces.</p></li>
+<li><p><strong>subject_id</strong> (<em>a string</em>) – Subject ID.</p></li>
+<li><p><strong>subjects_dir</strong> (<em>a pathlike object or string representing a directory</em>) – FreeSurfer subjects directory.</p></li>
+<li><p><strong>t1w</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – T1w structural images.</p></li>
+<li><p><strong>t2w</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – T2w structural images.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing an existing file</em>) – HTML segment containing summary.</p></li>
+<li><p><strong>subject_id</strong> (<em>a string</em>) – FreeSurfer subject ID.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="dmriprep.interfaces.reports.SummaryInterface">
 <em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">SummaryInterface</code><span class="sig-paren">(</span><em class="sig-param">from_file=None</em>, <em class="sig-param">resource_monitor=None</em>, <em class="sig-param">**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.SummaryInterface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
-<dl class="attribute">
-<dt id="dmriprep.interfaces.reports.SummaryInterface.output_spec">
-<code class="sig-name descname">output_spec</code><a class="headerlink" href="#dmriprep.interfaces.reports.SummaryInterface.output_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#dmriprep.interfaces.reports.SummaryOutputSpec" title="dmriprep.interfaces.reports.SummaryOutputSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SummaryOutputSpec</span></code></a></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="dmriprep.interfaces.reports.SummaryOutputSpec">
-<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.reports.</code><code class="sig-name descname">SummaryOutputSpec</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.reports.SummaryOutputSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.specs.TraitedSpec</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_report</strong> (<em>a pathlike object or string representing an existing file</em>) – HTML segment containing summary.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
