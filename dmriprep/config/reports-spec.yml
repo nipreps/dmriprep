@@ -49,6 +49,23 @@ sections:
       all b=0 found in the dataset, after accounting for signal drift.
       The red contour shows the brain mask calculated using this reference b=0.
     subtitle: Reference b=0 and brain mask
+  - bids: {datatype: figures, desc: coreg, suffix: dwi}
+    caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
+      were aligned with <code>mri_coreg</code> (FreeSurfer).
+      WARNING - <code>bbregister</code> refinement rejected.
+    description: Note that nearest-neighbor interpolation is used in this reportlet
+      in order to highlight potential slice Inhomogeneities and other artifacts, whereas
+      the final images are resampled using cubic B-Spline interpolation.
+    static: false
+    subtitle: Alignment of functional and anatomical MRI data (volume based)
+  - bids: {datatype: figures, desc: bbregister, suffix: dwi}
+    caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
+      were aligned with <code>bbregister</code> (FreeSurfer).
+    description: Note that nearest-neighbor interpolation is used in this reportlet
+      in order to highlight potential slice Inhomogeneities and other artifacts, whereas
+      the final images are resampled using cubic B-Spline interpolation.
+    static: false
+    subtitle: Alignment of functional and anatomical MRI data (surface driven)
 - name: About
   reportlets:
   - bids: {datatype: figures, desc: about, suffix: T1w}

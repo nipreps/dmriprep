@@ -425,6 +425,9 @@ class workflow(_Config):
 
     anat_only = False
     """Execute the anatomical preprocessing only."""
+    dwi2t1w_init = "register"
+    """Whether to use standard coregistration ('register') or to initialize coregistration from the
+    DWI header ('header')."""
     fmap_bspline = None
     """Regularize fieldmaps with a field of B-Spline basis."""
     fmap_demean = None
