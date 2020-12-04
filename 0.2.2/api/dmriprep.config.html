@@ -226,7 +226,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt id="dmriprep.config.environment.free_mem">
-<code class="sig-name descname">free_mem</code><em class="property"> = None</em><a class="headerlink" href="#dmriprep.config.environment.free_mem" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">free_mem</code><em class="property"> = 27.7</em><a class="headerlink" href="#dmriprep.config.environment.free_mem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Free memory at start.</p>
 </dd></dl>
 
@@ -256,7 +256,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt id="dmriprep.config.environment.version">
-<code class="sig-name descname">version</code><em class="property"> = '0.3.0+19.g7002869'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.3.0+29.g6e409a2'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -383,7 +383,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt id="dmriprep.config.execution.run_uuid">
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20201204-151742_23a5da26-a597-4e8c-b642-2a015f427749'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20201204-173416_9652fc3d-9c7d-4275-96fe-788e8567e180'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -415,6 +415,13 @@ the command line) as spatial references for outputs.</p>
 <dt id="dmriprep.config.workflow.anat_only">
 <code class="sig-name descname">anat_only</code><em class="property"> = False</em><a class="headerlink" href="#dmriprep.config.workflow.anat_only" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the anatomical preprocessing only.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dmriprep.config.workflow.dwi2t1w_init">
+<code class="sig-name descname">dwi2t1w_init</code><em class="property"> = 'register'</em><a class="headerlink" href="#dmriprep.config.workflow.dwi2t1w_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether to use standard coregistration (‘register’) or to initialize coregistration from the
+DWI header (‘header’).</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -689,7 +696,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">free_mem</code><em class="property"> = None</em></dt>
+<code class="sig-name descname">free_mem</code><em class="property"> = 27.7</em></dt>
 <dd><p>Free memory at start.</p>
 </dd></dl>
 
@@ -719,7 +726,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">version</code><em class="property"> = '0.3.0+19.g7002869'</em></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.3.0+29.g6e409a2'</em></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -847,7 +854,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20201204-151742_23a5da26-a597-4e8c-b642-2a015f427749'</em></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20201204-173416_9652fc3d-9c7d-4275-96fe-788e8567e180'</em></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -1046,6 +1053,13 @@ parameterizations over 32 characters will be replaced by their hash.</p>
 <dt>
 <code class="sig-name descname">anat_only</code><em class="property"> = False</em></dt>
 <dd><p>Execute the anatomical preprocessing only.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="sig-name descname">dwi2t1w_init</code><em class="property"> = 'register'</em></dt>
+<dd><p>Whether to use standard coregistration (‘register’) or to initialize coregistration from the
+DWI header (‘header’).</p>
 </dd></dl>
 
 <dl class="attribute">
