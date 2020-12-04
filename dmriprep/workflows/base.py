@@ -367,34 +367,24 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             use_bbr=True,
         )
 
-        workflow.connect(
-            [
-                # T1w Mask
-                (
-                    anat_preproc_wf,
-                    t1w_brain,
-                    [
-                        ("outputnode.t1w_preproc", "in_file"),
-                        ("outputnode.t1w_mask", "in_mask"),
-                    ],
-                ),
-                # BBRegister
-                (split_info, bbr_wf, [("dwi_file", "inputnode.in_file")]),
-                (t1w_brain, bbr_wf, [("out_file", "inputnode.t1w_brain")]),
-                (
-                    anat_preproc_wf,
-                    bbr_wf,
-                    [("outputnode.t1w_dseg", "inputnode.t1w_dseg")],
-                ),
-                (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
-                (bids_info, bbr_wf, [("subject", "inputnode.subject_id")]),
-                (
-                    anat_preproc_wf,
-                    bbr_wf,
-                    [("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")],
-                ),
-            ]
-        )
+        # fmt:off
+        workflow.connect([
+            # T1w Mask
+            (anat_preproc_wf, t1w_brain, [
+                ("outputnode.t1w_preproc", "in_file"),
+                ("outputnode.t1w_mask", "in_mask"),
+            ]),
+            # BBRegister
+            (split_info, bbr_wf, [("dwi_file", "inputnode.in_file")]),
+            (t1w_brain, bbr_wf, [("out_file", "inputnode.t1w_brain")]),
+            (anat_preproc_wf, bbr_wf, [("outputnode.t1w_dseg", "inputnode.t1w_dseg")]),
+            (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
+            (bids_info, bbr_wf, [("subject", "inputnode.subject_id")]),
+            (anat_preproc_wf, bbr_wf, [
+                ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")
+            ]),
+        ])
+        # fmt:on
 
     fmap_estimation_wf = init_fmap_estimation_wf(
         subject_data["dwi"], debug=config.execution.debug
