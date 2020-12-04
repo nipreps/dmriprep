@@ -102,7 +102,7 @@ def main():
                 25,
                 "Works derived from this dMRIPrep execution should "
                 "include the following boilerplate: "
-                f"{config.execution.output_dir / 'dmriprep' / 'logs' / 'CITATION.md'}."
+                f"{config.execution.output_dir / 'dmriprep' / 'logs' / 'CITATION.md'}.",
             )
 
         if config.workflow.run_reconall:

@@ -9,13 +9,10 @@ from ...interfaces import DerivativesDataSink
 
 
 def init_fmap_estimation_wf(
-    epi_targets,
-    debug=False,
-    generate_report=True,
-    name="fmap_estimation_wf",
+    epi_targets, debug=False, generate_report=True, name="fmap_estimation_wf",
 ):
     """
-    Setup a fieldmap estimation strategy and write results to derivatives folder.
+    Set-up a fieldmap estimation strategy and write results to derivatives folder.
 
     Parameters
     ----------
@@ -35,8 +32,9 @@ def init_fmap_estimation_wf(
     layout = config.execution.layout
     wf = Workflow(name=name)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_reference", "dwi_mask"]),
-                        name="inputnode")
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask"]), name="inputnode"
+    )
     wf.add_nodes([inputnode])  # TODO: remove when fully implemented
     # Create one outputnode with a port for each potential EPI target
     # outputnode = pe.Node(niu.IdentityInterface(fields=[_fname2outname(p) for p in epi_targets]),
@@ -65,57 +63,81 @@ def init_fmap_estimation_wf(
         sdc_estimate_wf = init_pepolar_estimate_wf(debug=debug)
         sdc_estimate_wf.inputs.inputnode.metadata = metadata
 
+        # fmt:off
         wf.connect([
             (inputnode, sdc_estimate_wf, [("dwi_reference", "inputnode.in_data")]),
         ])
+        # fmt:on
         if generate_report:
             from sdcflows.interfaces.reportlets import FieldmapReportlet
-            pepolar_report = pe.Node(FieldmapReportlet(reference_label="SDC'd B0"),
-                                     name="pepolar_report")
-            ds_report_pepolar = pe.Node(DerivativesDataSink(
-                base_directory=str(config.execution.output_dir), datatype="figures",
-                suffix="fieldmap", desc="pepolar", dismiss_entities=("acquisition", "dir")),
-                name="ds_report_pepolar")
+
+            pepolar_report = pe.Node(
+                FieldmapReportlet(reference_label="SDC'd B0"), name="pepolar_report"
+            )
+            ds_report_pepolar = pe.Node(
+                DerivativesDataSink(
+                    base_directory=str(config.execution.output_dir),
+                    datatype="figures",
+                    suffix="fieldmap",
+                    desc="pepolar",
+                    dismiss_entities=("acquisition", "dir"),
+                ),
+                name="ds_report_pepolar",
+            )
             ds_report_pepolar.inputs.source_file = epi_targets[0]
+            # fmt:off
             wf.connect([
                 (sdc_estimate_wf, pepolar_report, [
                     ("outputnode.fieldmap", "fieldmap"),
                     ("outputnode.corrected", "reference"),
-                    ("outputnode.corrected_mask", "mask")]),
+                    ("outputnode.corrected_mask", "mask"),
+                ]),
                 (pepolar_report, ds_report_pepolar, [("out_report", "in_file")]),
             ])
+            # fmt:on
 
     return wf
 
 
-def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_estimate_wf"):
+def init_pepolar_estimate_wf(
+    debug=False, generate_report=True, name="pepolar_estimate_wf"
+):
     """Initialize a barebones TOPUP implementation."""
     from nipype.interfaces.afni import Automask
     from nipype.interfaces.fsl.epi import TOPUP
     from niworkflows.interfaces.nibabel import MergeSeries
     from sdcflows.interfaces.fmap import get_trt
     from ...interfaces.images import RescaleB0
+
     wf = Workflow(name=name)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["metadata", "in_data"]),
-                        name="inputnode")
-    outputnode = pe.Node(niu.IdentityInterface(fields=["fieldmap", "corrected", "corrected_mask"]),
-                         name="outputnode")
-
-    concat_blips = pe.Node(MergeSeries(), name="concat_blips")
-    readout_time = pe.MapNode(niu.Function(
-        input_names=["in_meta", "in_file"], function=get_trt), name="readout_time",
-        iterfield=["in_meta", "in_file"], run_without_submitting=True
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["metadata", "in_data"]), name="inputnode"
+    )
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=["fieldmap", "corrected", "corrected_mask"]),
+        name="outputnode",
     )
 
-    topup = pe.Node(TOPUP(config=_pkg_fname(
-        "dmriprep", f"data/flirtsch/b02b0{'_quick' * debug}.cnf")), name="topup")
+    concat_blips = pe.Node(MergeSeries(), name="concat_blips")
+    readout_time = pe.MapNode(
+        niu.Function(input_names=["in_meta", "in_file"], function=get_trt),
+        name="readout_time",
+        iterfield=["in_meta", "in_file"],
+        run_without_submitting=True,
+    )
 
-    pre_mask = pe.Node(Automask(dilate=1, outputtype="NIFTI_GZ"),
-                       name="pre_mask")
+    topup = pe.Node(
+        TOPUP(
+            config=_pkg_fname("dmriprep", f"data/flirtsch/b02b0{'_quick' * debug}.cnf")
+        ),
+        name="topup",
+    )
+
+    pre_mask = pe.Node(Automask(dilate=1, outputtype="NIFTI_GZ"), name="pre_mask")
     rescale_corrected = pe.Node(RescaleB0(), name="rescale_corrected")
-    post_mask = pe.Node(Automask(outputtype="NIFTI_GZ"),
-                        name="post_mask")
+    post_mask = pe.Node(Automask(outputtype="NIFTI_GZ"), name="post_mask")
+    # fmt:off
     wf.connect([
         (inputnode, concat_blips, [("in_data", "in_files")]),
         (inputnode, readout_time, [("in_data", "in_file"),
@@ -131,13 +153,18 @@ def init_pepolar_estimate_wf(debug=False, generate_report=True, name="pepolar_es
         (rescale_corrected, outputnode, [("out_ref", "corrected")]),
         (post_mask, outputnode, [("out_file", "corrected_mask")]),
     ])
-
+    # fmt:on
     return wf
 
 
 def _get_pedir(metadata):
-    return [m["PhaseEncodingDirection"].replace("j", "y").replace("i", "x").replace("k", "z")
-            for m in metadata]
+    return [
+        m["PhaseEncodingDirection"]
+        .replace("j", "y")
+        .replace("i", "x")
+        .replace("k", "z")
+        for m in metadata
+    ]
 
 
 # def _fname2outname(in_file):

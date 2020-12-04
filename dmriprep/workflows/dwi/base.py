@@ -9,9 +9,7 @@ from .util import init_dwi_reference_wf
 from .outputs import init_reportlets_wf
 
 
-def init_early_b0ref_wf(
-    name="early_b0ref_wf",
-):
+def init_early_b0ref_wf(name="early_b0ref_wf",):
     """
     Build an early :math:`b = 0` average reference for internal consumption of *dMRIPrep*.
 
@@ -54,41 +52,49 @@ def init_early_b0ref_wf(
     # Build workflow
     workflow = Workflow(name=name)
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['dwi_file', 'in_bvec', 'in_bval']),
-        name='inputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["dwi_file", "in_bvec", "in_bval"]),
+        name="inputnode",
+    )
 
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['dwi_reference', 'dwi_mask', 'gradients_rasb']),
-        name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask", "gradients_rasb"]),
+        name="outputnode",
+    )
 
-    gradient_table = pe.Node(CheckGradientTable(), name='gradient_table')
+    gradient_table = pe.Node(CheckGradientTable(), name="gradient_table")
 
     dwi_reference_wf = init_dwi_reference_wf(
-        mem_gb=config.DEFAULT_MEMORY_MIN_GB,
-        omp_nthreads=config.nipype.omp_nthreads)
+        mem_gb=config.DEFAULT_MEMORY_MIN_GB, omp_nthreads=config.nipype.omp_nthreads
+    )
 
     # MAIN WORKFLOW STRUCTURE
+    # fmt:off
     workflow.connect([
-        (inputnode, gradient_table, [
-            ('dwi_file', 'dwi_file'),
-            ('in_bvec', 'in_bvec'),
-            ('in_bval', 'in_bval')]),
-        (inputnode, dwi_reference_wf, [('dwi_file', 'inputnode.dwi_file')]),
-        (gradient_table, dwi_reference_wf, [('b0_ixs', 'inputnode.b0_ixs')]),
+        (inputnode, gradient_table, [("dwi_file", "dwi_file"),
+                                     ("in_bvec", "in_bvec"),
+                                     ("in_bval", "in_bval")]),
+        (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
+        (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
         (dwi_reference_wf, outputnode, [
-            ('outputnode.ref_image', 'dwi_reference'),
-            ('outputnode.dwi_mask', 'dwi_mask')]),
-        (gradient_table, outputnode, [('out_rasb', 'gradients_rasb')])
+            ("outputnode.ref_image", "dwi_reference"),
+            ("outputnode.dwi_mask", "dwi_mask"),
+        ]),
+        (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
+    # fmt:on
 
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
+    # fmt:off
     workflow.connect([
-        (inputnode, reportlets_wf, [('dwi_file', 'inputnode.source_file')]),
+        (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
         (dwi_reference_wf, reportlets_wf, [
-            ('outputnode.ref_image', 'inputnode.dwi_ref'),
-            ('outputnode.dwi_mask', 'inputnode.dwi_mask'),
-            ('outputnode.validation_report', 'inputnode.validation_report')]),
+            ("outputnode.ref_image", "inputnode.dwi_ref"),
+            ("outputnode.dwi_mask", "inputnode.dwi_mask"),
+            ("outputnode.validation_report", "inputnode.validation_report"),
+        ]),
     ])
+    # fmt:on
+
     return workflow
