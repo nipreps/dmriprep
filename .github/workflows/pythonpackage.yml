@@ -79,7 +79,12 @@ jobs:
         python -m venv /tmp/setup_develop
         source /tmp/setup_develop/bin/activate
         python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
-        python -m pip install numpy scipy "Cython >= 0.28.5" # sklearn needs this
+        # sklearn needs these dependencies
+        if [ "${{ matrix.python-version }}" == "3.6" ]; then
+            python -m pip install "numpy < 1.20" scipy "Cython >= 0.28.5"  # numpy 1.20 drops Py3.6
+        else
+            python -m pip install numpy scipy "Cython >= 0.28.5"
+        fi
         python -m pip install scikit-learn  # otherwise it attempts to build it
         python setup.py develop
         INSTALLED_VERSION=$(python -c 'import dmriprep; print(dmriprep.__version__, end="")')
