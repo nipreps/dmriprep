@@ -163,13 +163,13 @@ jobs:
           command: |
             datalad install -r https://github.com/nipreps-data/ds001771.git
             datalad update -r --merge -d ds001771/
-            datalad get -r -d ds001771/ ds001771/sub-36/anat/*
-            datalad get -r -d ds001771/ ds001771/sub-36/dwi/*
-            datalad get -r -d ds001771/ ds001771/sub-36/fmap/*
-            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/smriprep-0.6.0/*
-            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/mri/*
-            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white
-            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.white
+            datalad get -J 2 -r -d ds001771/ ds001771/sub-36/anat/*
+            datalad get -J 2 -r -d ds001771/ ds001771/sub-36/dwi/*
+            datalad get -J 2 -r -d ds001771/ ds001771/sub-36/fmap/*
+            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/smriprep-0.6.0/*
+            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/mri/*
+            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white
+            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.white
 
       - save_cache:
           key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
@@ -187,10 +187,10 @@ jobs:
           command: |
             datalad install -r https://github.com/nipreps-data/ds000206.git
             datalad update -r --merge -d ds000206/
-            datalad get -r -d ds000206/ ds000206/sub-05/*
-            datalad get -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/mri/*
-            datalad get -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/lh.white
-            datalad get -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/rh.white
+            datalad get -J 2 -r -d ds000206/ ds000206/sub-05/*
+            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/mri/*
+            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/lh.white
+            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/rh.white
 
       - save_cache:
           key: data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
@@ -213,6 +213,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
+            - templateflow
             - fslicense
             - config/nipype.cfg
 
