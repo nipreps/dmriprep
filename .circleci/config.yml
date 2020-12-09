@@ -190,8 +190,7 @@ jobs:
             datalad install -r https://github.com/nipreps-data/ds000206.git
             datalad update -r --merge -d ds000206/
             datalad get -J 2 -r -d ds000206/ ds000206/sub-05/*
-            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/mri/* \
-                                                         ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/*
+            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/*
 
       - save_cache:
           key: data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
