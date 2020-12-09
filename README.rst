@@ -14,8 +14,8 @@ dMRIPrep
 .. image:: https://circleci.com/gh/nipreps/dmriprep.svg?style=svg
     :target: https://circleci.com/gh/nipreps/dmriprep
 
-.. image:: https://travis-ci.org/nipreps/dmriprep.svg?branch=master
-    :target: https://travis-ci.org/nipreps/dmriprep
+.. image:: https://github.com/nipreps/dmriprep/workflows/Python%20package/badge.svg
+    :target: https://github.com/nipreps/dmriprep/actions
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3392201.svg
     :target: https://doi.org/10.5281/zenodo.3392201
