@@ -168,8 +168,10 @@ jobs:
             datalad get -J 2 -r -d ds001771/ ds001771/sub-36/fmap/*
             datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/smriprep-0.6.0/*
             datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/mri/*
-            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white
-            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.white
+            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white \
+                                                         ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.white \
+                                                         ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.thickness \
+                                                         ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.thickness
 
       - save_cache:
           key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
@@ -188,9 +190,8 @@ jobs:
             datalad install -r https://github.com/nipreps-data/ds000206.git
             datalad update -r --merge -d ds000206/
             datalad get -J 2 -r -d ds000206/ ds000206/sub-05/*
-            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/mri/*
-            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/lh.white
-            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/rh.white
+            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/mri/* \
+                                                         ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/*
 
       - save_cache:
           key: data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
