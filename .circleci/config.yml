@@ -505,7 +505,7 @@ jobs:
             python -m venv /tmp/sdist
             source /tmp/sdist/bin/activate
             python -m pip install -U pip
-            python -m pip install "setuptools>=30.3.0" twine
+            python -m pip install "setuptools>=40.8.0" twine
       - run:
           name: Build dMRIPrep
           command: |
@@ -540,7 +540,7 @@ jobs:
             python -m venv /tmp/wheel
             source /tmp/wheel/bin/activate
             python -m pip install -U pip
-            python -m pip install "setuptools>=30.3.0" twine
+            python -m pip install "setuptools>=40.8.0" twine
             THISVERSION=$( python get_version.py )
             THISVERSION=${THISVERSION%.dirty*}
             THISVERSION=${CIRCLE_TAG:-$THISVERSION}
@@ -568,7 +568,7 @@ jobs:
             python -m venv /tmp/sdist
             source /tmp/sdist/bin/activate
             python -m pip install -U pip
-            python -m pip install "setuptools>=30.3.0" twine
+            python -m pip install "setuptools>=40.8.0" wheel twine
       - run:
           name: Build dMRIPrep
           command: |
