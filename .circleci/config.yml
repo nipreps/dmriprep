@@ -119,72 +119,84 @@ jobs:
             - src/dmriprep
 
   get_data:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
-    working_directory: /home/circleci/data
+    docker:
+      - image: continuumio/miniconda3:4.9.2-alpine
+    working_directory: /tmp/data
+    environment:
+      - TEMPLATEFLOW_HOME: /tmp/templateflow
     steps:
       - restore_cache:
           keys:
-            - data-thp-v1-{{ .Revision }}
-            - data-thp-v1-
+            - env-v1-{{ .Branch }}-
+            - env-v1-master-
+            - env-v1-
       - run:
-          name: Get test data from THP002
+          name: Setup git-annex & DataLad
           command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/THP002 ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O THP002_data.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5d7d89fc9defac0019179fdf"
-              tar xvzf THP002_data.tar.gz -C /tmp/data/
-            else
-              echo "Dataset THP002 was cached"
-            fi
+            conda install -y -c anaconda -c conda-forge git-annex datalad
+            python -m pip install --no-cache-dir -U datalad-osf
+            git config --global user.name 'NiPreps Bot'
+            git config --global user.email 'nipreps@gmail.com'
+
       - run:
-          name: Get FreeSurfer derivatives for THP002
+          name: Setup TemplateFlow
           command: |
-            if [[ ! -d /tmp/data/THP002/derivatives/freesurfer-6.0.1 ]]; then
-              mkdir -p /tmp/data/THP002/derivatives
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O THP002_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5d7d87ce7483ec0017530cc9"
-              tar xvzf THP002_derivatives_freesurfer.tar.gz -C /tmp/data/THP002/derivatives
-              mv /tmp/data/THP002/derivatives/freesurfer /tmp/data/THP002/derivatives/freesurfer-6.0.1
-            else
-              echo "FreeSurfer derivatives of THP002 were cached"
-            fi
+            python -m pip install --no-cache-dir -U templateflow
+            python -c "from templateflow import api as tfapi; \
+                       tfapi.get('OASIS30ANTs', resolution=1, desc=None, suffix='T1w'); \
+                       tfapi.get('OASIS30ANTs', resolution=1, desc='BrainCerebellumExtraction', suffix='mask'); "
+
       - save_cache:
-         key: data-thp-v1-{{ .Revision }}-{{ epoch }}
-         paths:
-            - /tmp/data/THP002
+          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
+          paths:
+            - /tmp/templateflow
+            - /opt/conda
+
       - restore_cache:
           keys:
-            - data-ds001771-v1-{{ .Revision }}
-            - data-ds001771-v1-
+            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
+            - data-ds001771-v3-{{ .Branch }}-
+            - data-ds001771-v3-master-
+            - data-ds001771-v3-
       - run:
-          name: Get test data (ds001771)
+          name: Install ds001771
           command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/ds001771 ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds001771_sub-36.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5e1f89d36822bd01f0febbdc"
-              tar xvzf ds001771_sub-36.tar.gz -C /tmp/data/
-            else
-              echo "Dataset ds001771_sub-36 was cached"
-            fi
-      - run:
-          name: Get anatomical derivatives for ds001771
-          command: |
-            if [[ ! -d /tmp/data/ds001771/derivatives ]]; then
-              mkdir -p /tmp/data/ds001771/derivatives
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds001771-derivs.tar.gz "https://files.osf.io/v1/resources/8k95s/providers/osfstorage/5eb251fba2199500215d1dc3"
-              tar xvzf ds001771-derivs.tar.gz -C /tmp/data/ds001771/
-            else
-              echo "Anatomical derivatives of ds001771 were cached"
-            fi
+            datalad install -r https://github.com/nipreps-data/ds001771.git
+            datalad update -r --merge -d ds001771/
+            datalad get -r -d ds001771/ ds001771/sub-36/anat/*
+            datalad get -r -d ds001771/ ds001771/sub-36/dwi/*
+            datalad get -r -d ds001771/ ds001771/sub-36/fmap/*
+            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/smriprep-0.6.0/*
+            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/mri/*
+            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white
+            datalad get -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.white
+
       - save_cache:
-         key: data-ds001771-v1-{{ .Revision }}-{{ epoch }}
-         paths:
+          key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          paths:
             - /tmp/data/ds001771
+
+      - restore_cache:
+          keys:
+            - data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v1-{{ .Branch }}-
+            - data-ds000206-v1-master-
+            - data-ds000206-v1-
+      - run:
+          name: Install ds000206
+          command: |
+            datalad install -r https://github.com/nipreps-data/ds000206.git
+            datalad update -r --merge -d ds000206/
+            datalad get -r -d ds000206/ ds000206/sub-05/*
+            datalad get -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/mri/*
+            datalad get -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/lh.white
+            datalad get -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/surf/rh.white
+
+      - save_cache:
+          key: data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          paths:
+            - /tmp/data/ds000206
+
       - run:
           name: Store FreeSurfer license file
           command: |
@@ -204,10 +216,10 @@ jobs:
             - fslicense
             - config/nipype.cfg
 
-  THP002:
+  ds000206:
     machine:
       image: circleci/classic:201711-01
-    working_directory: /tmp/THP002
+    working_directory: /tmp/ds000206
     environment:
       - FS_LICENSE: /tmp/fslicense/license.txt
     steps:
@@ -221,15 +233,19 @@ jobs:
               echo "Only docs build"
               circleci step halt
             fi
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?THP002\]' )" != "" ]]; then
-              echo "Skipping THP002 build"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds000206\]' )" != "" ]]; then
+              echo "Skipping ds000206 build"
               circleci step halt
             fi
       - attach_workspace:
           at: /tmp
       - restore_cache:
           keys:
-            - data-thp-v1-{{ .Revision }}
+            - data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+            - data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v1-{{ .Branch }}-
+            - data-ds000206-v1-master-
+            - data-ds000206-v1-
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -249,21 +265,22 @@ jobs:
             docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - restore_cache:
           keys:
-            - THP002-anat-v01-{{ .Branch }}-{{ .Revision }}
-            - THP002-anat-v01-{{ .Branch }}
-            - THP002-anat-v01-master
-            - THP002-anat-v01-
+            - ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}
+            - ds000206-anat-v01-{{ .Branch }}
+            - ds000206-anat-v01-master
+            - ds000206-anat-v01-
       - run:
-          name: Run anatomical workflow on THP002
+          name: Run anatomical workflow on ds000206
           no_output_timeout: 2h
           command: |
-            mkdir -p /tmp/THP002/work /tmp/THP002/derivatives
+            mkdir -p /tmp/ds000206/work /tmp/ds000206/derivatives
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
-                -v /tmp/data/THP002:/data \
-                -v /tmp/THP002/derivatives:/out \
+                -v /tmp/data/ds000206:/data \
+                -v /tmp/ds000206/derivatives:/out \
                 -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
                 -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
-                -v /tmp/THP002/work:/work \
+                -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
+                -v /tmp/ds000206/work:/work \
                 --user $(id -u):$(id -g) \
                 nipreps/dmriprep:latest /data /out participant -vv \
                 --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy --anat-only \
@@ -271,45 +288,46 @@ jobs:
       - run:
           name: Clean-up after anatomical run
           command: |
-            rm -rf /tmp/THP002/work/dmriprep_wf/fsdir*
-            rm -rf /tmp/THP002/work/reportlets
+            rm -rf /tmp/ds000206/work/dmriprep_wf/fsdir*
+            rm -rf /tmp/ds000206/work/reportlets
           when: on_success
       - save_cache:
-         key: THP002-anat-v01-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         key: ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
          paths:
-            - /tmp/THP002/work
+            - /tmp/ds000206/work
       - run:
-          name: Run full diffusion workflow on THP002
+          name: Run full diffusion workflow on ds000206
           no_output_timeout: 2h
           command: |
-            mkdir -p /tmp/THP002/work /tmp/THP002/derivatives
+            mkdir -p /tmp/ds000206/work /tmp/ds000206/derivatives
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
-                -v /tmp/data/THP002:/data \
-                -v /tmp/THP002/derivatives:/out \
+                -v /tmp/data/ds000206:/data \
+                -v /tmp/ds000206/derivatives:/out \
                 -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
                 -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
-                -v /tmp/THP002/work:/work \
+                -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
+                -v /tmp/ds000206/work:/work \
                 --user $(id -u):$(id -g) \
                 nipreps/dmriprep:latest /data /out participant -vv \
                 --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy \
                 --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - store_artifacts:
-          path: /tmp/THP002/derivatives/dmriprep
+          path: /tmp/ds000206/derivatives/dmriprep
       - run:
           name: Clean working directory
           when: on_success
           command: |
-            sudo rm -rf /tmp/THP002/work
+            sudo rm -rf /tmp/ds000206/work
       - run:
           name: Clean working directory
           when: on_fail
           command: |
-            find /tmp/THP002/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+            find /tmp/ds000206/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
                 -exec sh -c 'rm -f {}; touch {}' \;
-            find /tmp/THP002/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+            find /tmp/ds000206/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
                 -exec sh -c 'rm -f {}; touch {}' \;
       - store_artifacts:
-          path: /tmp/THP002/work
+          path: /tmp/ds000206/work
 
   ds001771:
     machine:
@@ -336,7 +354,11 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds001771-v1-{{ .Revision }}
+            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
+            - data-ds001771-v3-{{ .Branch }}-
+            - data-ds001771-v3-master-
+            - data-ds001771-v3-
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -363,6 +385,7 @@ jobs:
                 -v /tmp/data/ds001771:/data \
                 -v /tmp/ds001771/derivatives:/out \
                 -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
+                -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
                 -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
                 -v /tmp/ds001771/work:/work \
                 --user $(id -u):$(id -g) \
@@ -671,7 +694,7 @@ workflows:
             tags:
               only: /.*/
 
-      - THP002:
+      - ds000206:
           requires:
             - build
             - get_data
@@ -745,7 +768,7 @@ workflows:
             branches:
               ignore:
                 - /tests?\/.*/
-                - /THP002\/.*/
+                - /ds000206\/.*/
                 - /ds001771\/.*/
             tags:
               only: /.*/
