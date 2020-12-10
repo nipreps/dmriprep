@@ -8,7 +8,6 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-from niworkflows.anat.coregistration import init_bbreg_wf
 from niworkflows.interfaces.bids import BIDSInfo, BIDSFreeSurferDir
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
@@ -124,6 +123,8 @@ def init_single_subject_wf(subject_id):
         FreeSurfer's ``$SUBJECTS_DIR``
 
     """
+    from ..utils.misc import sub_prefix as _prefix
+
     name = f"single_subject_{subject_id}_wf"
     subject_data = collect_data(config.execution.layout, subject_id)[0]
 
@@ -285,7 +286,7 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    from .dwi.base import init_early_b0ref_wf
+    from .dwi.base import init_dwi_preproc_wf
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
     anat_preproc_wf.__postdesc__ = (
@@ -300,115 +301,39 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
 """
     )
 
-    layout = config.execution.layout
-    dwi_data = tuple(
-        [
-            (dwi, layout.get_metadata(dwi), layout.get_bvec(dwi), layout.get_bval(dwi))
-            for dwi in subject_data["dwi"]
-        ]
-    )
+    for dwi_file in subject_data["dwi"]:
+        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_data"]), name="inputnode")
-    inputnode.iterables = [("dwi_data", dwi_data)]
-
-    referencenode = pe.JoinNode(
-        niu.IdentityInterface(
-            fields=[
-                "dwi_file",
-                "metadata",
-                "dwi_reference",
-                "dwi_mask",
-                "gradients_rasb",
-            ]
-        ),
-        name="referencenode",
-        joinsource="inputnode",
-        run_without_submitting=True,
-    )
-
-    split_info = pe.Node(
-        niu.Function(
-            function=_unpack, output_names=["dwi_file", "metadata", "bvec", "bval"]
-        ),
-        name="split_info",
-        run_without_submitting=True,
-    )
-
-    early_b0ref_wf = init_early_b0ref_wf()
-
-    # fmt:off
-    workflow.connect([
-        (inputnode, split_info, [("dwi_data", "in_tuple")]),
-        (split_info, early_b0ref_wf, [
-            ("dwi_file", "inputnode.dwi_file"),
-            ("bvec", "inputnode.in_bvec"),
-            ("bval", "inputnode.in_bval"),
-        ]),
-        (split_info, referencenode, [("dwi_file", "dwi_file"),
-                                     ("metadata", "metadata")]),
-        (early_b0ref_wf, referencenode, [
-            ("outputnode.dwi_reference", "dwi_reference"),
-            ("outputnode.dwi_mask", "dwi_mask"),
-            ("outputnode.gradients_rasb", "gradients_rasb"),
-        ]),
-    ])
-    # fmt:on
-
-    if config.workflow.run_reconall:
-        from niworkflows.interfaces.nibabel import ApplyMask
-
-        # Mask the T1w
-        t1w_brain = pe.Node(ApplyMask(), name="t1w_brain")
-
-        bbr_wf = init_bbreg_wf(
-            debug=config.execution.debug,
-            epi2t1w_init=config.workflow.dwi2t1w_init,
-            omp_nthreads=config.nipype.omp_nthreads,
-        )
-
-        ds_report_reg = pe.Node(
-            DerivativesDataSink(base_directory=str(output_dir), datatype="figures",),
-            name="ds_report_reg",
-            run_without_submitting=True,
-        )
-
-        def _bold_reg_suffix(fallback):
-            return "coreg" if fallback else "bbregister"
-
-        # fmt:off
+        # fmt: off
         workflow.connect([
-            # T1w Mask
-            (anat_preproc_wf, t1w_brain, [
-                ("outputnode.t1w_preproc", "in_file"),
-                ("outputnode.t1w_mask", "in_mask"),
-            ]),
-            # BBRegister
-            (early_b0ref_wf, bbr_wf, [
-                ("outputnode.dwi_reference", "inputnode.in_file")
-            ]),
-            (fsinputnode, bbr_wf, [("subjects_dir", "inputnode.subjects_dir")]),
-            (bids_info, bbr_wf, [(("subject", _prefix), "inputnode.subject_id")]),
-            (anat_preproc_wf, bbr_wf, [
-                ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")
-            ]),
-            (split_info, ds_report_reg, [("dwi_file", "source_file")]),
-            (bbr_wf, ds_report_reg, [
-                ('outputnode.out_report', 'in_file'),
-                (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
+            (anat_preproc_wf, dwi_preproc_wf,
+             [("outputnode.t1w_preproc", "inputnode.t1w_preproc"),
+              ("outputnode.t1w_mask", "inputnode.t1w_mask"),
+              ("outputnode.t1w_dseg", "inputnode.t1w_dseg"),
+              ("outputnode.t1w_aseg", "inputnode.t1w_aseg"),
+              ("outputnode.t1w_aparc", "inputnode.t1w_aparc"),
+              ("outputnode.t1w_tpms", "inputnode.t1w_tpms"),
+              ("outputnode.template", "inputnode.template"),
+              ("outputnode.anat2std_xfm", "inputnode.anat2std_xfm"),
+              ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
+              # Undefined if --fs-no-reconall, but this is safe
+              ("outputnode.subjects_dir", "inputnode.subjects_dir"),
+              ("outputnode.t1w2fsnative_xfm", "inputnode.t1w2fsnative_xfm"),
+              ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")]),
+            (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
         ])
-        # fmt:on
+        # fmt: on
 
     if "fieldmap" in config.workflow.ignore:
         return workflow
 
-    from niworkflows.interfaces.utility import KeySelect
     from sdcflows import fieldmaps as fm
     from sdcflows.utils.wrangler import find_estimators
     from sdcflows.workflows.base import init_fmap_preproc_wf
 
     # SDCFlows connection
     # Step 1: Run basic heuristics to identify available data for fieldmap estimation
-    estimators = find_estimators(layout)
+    estimators = find_estimators(config.execution.layout)
 
     if not estimators and config.workflow.use_syn:  # Add fieldmap-less estimators
         # estimators = [fm.FieldmapEstimation()]
@@ -444,31 +369,25 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
                 s.metadata for s in estimator.sources
             ]
         else:
-            est_id = estimator.bids_id
-            fmap_select = pe.MapNode(
-                KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
-                name=f"fmap_select_{est_id}",
-                run_without_submitting=True,
-                iterfields=["key"]
-            )
-            fmap_select.inputs.key = [
-                str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
-            ]
-            # fmt:off
-            workflow.connect([
-                (referencenode, fmap_select, [("dwi_file", "keys"),
-                                              ("metadata", "metadata"),
-                                              ("dwi_reference", "dwi_reference"),
-                                              ("gradients_rasb", "gradients_rasb")]),
-            ])
-            # fmt:on
+            raise NotImplementedError
+            # from niworkflows.interfaces.utility import KeySelect
+            # est_id = estimator.bids_id
+            # fmap_select = pe.MapNode(
+            #     KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
+            #     name=f"fmap_select_{est_id}",
+            #     run_without_submitting=True,
+            #     iterfields=["key"]
+            # )
+            # fmap_select.inputs.key = [
+            #     str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
+            # ]
+            # # fmt:off
+            # workflow.connect([
+            #     (referencenode, fmap_select, [("dwi_file", "keys"),
+            #                                   ("metadata", "metadata"),
+            #                                   ("dwi_reference", "dwi_reference"),
+            #                                   ("gradients_rasb", "gradients_rasb")]),
+            # ])
+            # # fmt:on
 
     return workflow
-
-
-def _prefix(subid):
-    return "-".join(("sub", subid.lstrip("sub-")))
-
-
-def _unpack(in_tuple):
-    return in_tuple

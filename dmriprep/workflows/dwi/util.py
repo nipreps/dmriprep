@@ -16,7 +16,7 @@ from ...interfaces.images import ExtractB0, RescaleB0
 
 def init_dwi_reference_wf(mem_gb, omp_nthreads, name="dwi_reference_wf"):
     """
-    Build a workflow that generates a reference b0 image from a DWI dataset.
+    Build a workflow that generates a reference :math:`b = 0` image from a DWI dataset.
 
     To generate the reference *b0*, this workflow takes in a DWI dataset,
     extracts the b0s, registers them to each other, rescales the signal
