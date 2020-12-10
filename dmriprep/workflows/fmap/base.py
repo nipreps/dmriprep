@@ -106,7 +106,7 @@ def init_pepolar_estimate_wf(
     from nipype.interfaces.afni import Automask
     from nipype.interfaces.fsl.epi import TOPUP
     from niworkflows.interfaces.nibabel import MergeSeries
-    from sdcflows.interfaces.fmap import get_trt
+    from sdcflows.utils.epimanip import get_trt
     from ...interfaces.images import RescaleB0
 
     wf = Workflow(name=name)
