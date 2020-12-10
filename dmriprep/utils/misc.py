@@ -15,3 +15,19 @@ def check_deps(workflow):
             and which(node.interface._cmd.split()[0]) is None
         )
     )
+
+
+def sub_prefix(subid):
+    """
+    Make sure the subject ID has the sub- prefix.
+
+    Examples
+    --------
+    >>> sub_prefix("sub-01")
+    'sub-01'
+
+    >>> sub_prefix("01")
+    'sub-01'
+
+    """
+    return f"sub-{subid.replace('sub-', '')}"
