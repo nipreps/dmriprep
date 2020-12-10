@@ -6,7 +6,8 @@ niworkflows >=1.4.0rc0,<1.5
 packaging
 pydot>=1.2.3
 pydotplus
-git+https://github.com/poldracklab/smriprep.git@master#egg=smriprep
+smriprep >= 0.7.0
+sdcflows >= 2.0.0rc2
 sphinx-argparse
 sphinx >=2.1.2,<3.0
 sphinx_rtd_theme
