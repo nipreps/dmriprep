@@ -192,9 +192,9 @@
 <span id="dmriprep-workflows-dwi-base-module"></span><h1>dmriprep.workflows.dwi.base module<a class="headerlink" href="#module-dmriprep.workflows.dwi.base" title="Permalink to this headline">¶</a></h1>
 <p>Orchestrating the dMRI-preprocessing workflow.</p>
 <dl class="function">
-<dt id="dmriprep.workflows.dwi.base.init_early_b0ref_wf">
-<code class="sig-prename descclassname">dmriprep.workflows.dwi.base.</code><code class="sig-name descname">init_early_b0ref_wf</code><span class="sig-paren">(</span><em class="sig-param">name='early_b0ref_wf'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_early_b0ref_wf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build an early <span class="math notranslate nohighlight">\(b = 0\)</span> average reference for internal consumption of <em>dMRIPrep</em>.</p>
+<dt id="dmriprep.workflows.dwi.base.init_dwi_preproc_wf">
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.base.</code><code class="sig-name descname">init_dwi_preproc_wf</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_preproc_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a preprocessing workflow for one DWI run.</p>
 <dl>
 <dt>Workflow Graph</dt><dd><div class="figure align-default">
 <img alt="../_images/dmriprep-workflows-dwi-base-1.png" src="../_images/dmriprep-workflows-dwi-base-1.png" />
@@ -203,15 +203,18 @@
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Inputs</dt>
-<dd class="field-odd"><ul class="simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dwi_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – One diffusion MRI dataset to be processed.</p>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
 <li><p><strong>dwi_file</strong> – dwi NIfTI file</p></li>
 <li><p><strong>in_bvec</strong> – File path of the b-vectors</p></li>
 <li><p><strong>in_bval</strong> – File path of the b-values</p></li>
 </ul>
 </dd>
-<dt class="field-even">Outputs</dt>
-<dd class="field-even"><ul class="simple">
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
 <li><p><strong>dwi_reference</strong> – A 3D <span class="math notranslate nohighlight">\(b = 0\)</span> reference, before susceptibility distortion correction.</p></li>
 <li><p><strong>dwi_mask</strong> – A 3D, binary mask of the <code class="docutils literal notranslate"><span class="pre">dwi_reference</span></code> above.</p></li>
 <li><p><strong>gradients_rasb</strong> – A <em>RASb</em> (RAS+ coordinates, scaled b-values, normalized b-vectors, BIDS-compatible)

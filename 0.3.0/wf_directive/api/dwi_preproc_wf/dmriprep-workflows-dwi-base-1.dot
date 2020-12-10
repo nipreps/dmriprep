@@ -2,13 +2,21 @@ strict digraph  {
 "inputnode (utility)";
 "gradient_table (vectors)";
 dwi_reference_wf;
+bbreg_wf;
+"t1w_brain (nibabel)";
+ds_report_reg;
 reportlets_wf;
 "outputnode (utility)";
 "inputnode (utility)" -> "gradient_table (vectors)";
 "inputnode (utility)" -> dwi_reference_wf;
+"inputnode (utility)" -> bbreg_wf;
+"inputnode (utility)" -> "t1w_brain (nibabel)";
+"inputnode (utility)" -> ds_report_reg;
 "inputnode (utility)" -> reportlets_wf;
 "gradient_table (vectors)" -> dwi_reference_wf;
 "gradient_table (vectors)" -> "outputnode (utility)";
 dwi_reference_wf -> "outputnode (utility)";
+dwi_reference_wf -> bbreg_wf;
 dwi_reference_wf -> reportlets_wf;
+bbreg_wf -> ds_report_reg;
 }
