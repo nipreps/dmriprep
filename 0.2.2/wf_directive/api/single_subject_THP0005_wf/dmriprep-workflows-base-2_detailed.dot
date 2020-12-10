@@ -12,13 +12,12 @@ single_subject_THP0005_wfbids_info [label="{IN|<ininfile> in_file}|{ bids_info |
 single_subject_THP0005_wffsinputnode [label="{IN}|{ fsinputnode | utility |  }|{OUT|<outsubjectsdir> subjects_dir}"];
 single_subject_THP0005_wfsummary [label="{IN|<indwi> dwi|<insubjectid> subject_id|<insubjectsdir> subjects_dir|<int1w> t1w|<int2w> t2w}|{ summary | reports |  }|{OUT|<outoutreport> out_report}"];
 single_subject_THP0005_wfds_report_summary [label="{IN|<ininfile> in_file|<insourcefile> source_file}|{ ds_report_summary |  |  }|{OUT}"];
-single_subject_THP0005_wfanat_preproc_wf [label="{IN|<ininputnodeflair> inputnode.flair|<ininputnoderoi> inputnode.roi|<ininputnodesubjectid> inputnode.subject_id|<ininputnodesubjectsdir> inputnode.subjects_dir|<ininputnodet1w> inputnode.t1w|<ininputnodet2w> inputnode.t2w}|{ anat_preproc_wf |  |  }|{OUT|<outoutputnodefsnative2t1wxfm> outputnode.fsnative2t1w_xfm|<outoutputnodet1wdseg> outputnode.t1w_dseg|<outoutputnodet1wmask> outputnode.t1w_mask|<outoutputnodet1wpreproc> outputnode.t1w_preproc}"];
-single_subject_THP0005_wft1w_brain [label="{IN|<ininfile> in_file|<ininmask> in_mask}|{ t1w_brain | nibabel |  }|{OUT|<outoutfile> out_file}"];
-single_subject_THP0005_wfbbreg_wf [label="{IN|<ininputnodefsnative2t1wxfm> inputnode.fsnative2t1w_xfm|<ininputnodeinfile> inputnode.in_file|<ininputnodesubjectid> inputnode.subject_id|<ininputnodesubjectsdir> inputnode.subjects_dir|<ininputnodet1wbrain> inputnode.t1w_brain|<ininputnodet1wdseg> inputnode.t1w_dseg}|{ bbreg_wf |  |  }|{OUT|<outoutputnodefallback> outputnode.fallback|<outoutputnodeoutreport> outputnode.out_report}"];
+single_subject_THP0005_wfanat_preproc_wf [label="{IN|<ininputnodeflair> inputnode.flair|<ininputnoderoi> inputnode.roi|<ininputnodesubjectid> inputnode.subject_id|<ininputnodesubjectsdir> inputnode.subjects_dir|<ininputnodet1w> inputnode.t1w|<ininputnodet2w> inputnode.t2w}|{ anat_preproc_wf |  |  }|{OUT|<outoutputnodefsnative2t1wxfm> outputnode.fsnative2t1w_xfm|<outoutputnodet1wmask> outputnode.t1w_mask|<outoutputnodet1wpreproc> outputnode.t1w_preproc}"];
+single_subject_THP0005_wfbbreg_wf [label="{IN|<ininputnodefsnative2t1wxfm> inputnode.fsnative2t1w_xfm|<ininputnodeinfile> inputnode.in_file|<ininputnodesubjectid> inputnode.subject_id|<ininputnodesubjectsdir> inputnode.subjects_dir}|{ bbreg_wf |  |  }|{OUT|<outoutputnodefallback> outputnode.fallback|<outoutputnodeoutreport> outputnode.out_report}"];
 single_subject_THP0005_wfds_report_reg [label="{IN|<indesc> desc|<ininfile> in_file|<insourcefile> source_file}|{ ds_report_reg |  |  }|{OUT}"];
+single_subject_THP0005_wft1w_brain [label="{IN|<ininfile> in_file|<ininmask> in_mask}|{ t1w_brain | nibabel |  }|{OUT}"];
 single_subject_THP0005_wfabout:outoutreport:e -> single_subject_THP0005_wfds_report_about:ininfile:w;
 single_subject_THP0005_wfanat_preproc_wf:outoutputnodefsnative2t1wxfm:e -> single_subject_THP0005_wfbbreg_wf:ininputnodefsnative2t1wxfm:w;
-single_subject_THP0005_wfanat_preproc_wf:outoutputnodet1wdseg:e -> single_subject_THP0005_wfbbreg_wf:ininputnodet1wdseg:w;
 single_subject_THP0005_wfanat_preproc_wf:outoutputnodet1wmask:e -> single_subject_THP0005_wft1w_brain:ininmask:w;
 single_subject_THP0005_wfanat_preproc_wf:outoutputnodet1wpreproc:e -> single_subject_THP0005_wft1w_brain:ininfile:w;
 single_subject_THP0005_wfbbreg_wf:outoutputnodefallback:e -> single_subject_THP0005_wfds_report_reg:indesc:w;
@@ -53,5 +52,4 @@ single_subject_THP0005_wfsplit_info:outdwifile:e -> single_subject_THP0005_wfear
 single_subject_THP0005_wfsplit_info:outdwifile:e -> single_subject_THP0005_wfreferencenode:indwifile:w;
 single_subject_THP0005_wfsplit_info:outmetadata:e -> single_subject_THP0005_wfreferencenode:inmetadata:w;
 single_subject_THP0005_wfsummary:outoutreport:e -> single_subject_THP0005_wfds_report_summary:ininfile:w;
-single_subject_THP0005_wft1w_brain:outoutfile:e -> single_subject_THP0005_wfbbreg_wf:ininputnodet1wbrain:w;
 }

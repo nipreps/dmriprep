@@ -22,7 +22,6 @@ anat_preproc_wf -> "t1w_brain (nibabel)";
 anat_preproc_wf -> bbreg_wf;
 "summary (reports)" -> ds_report_summary;
 bbreg_wf -> ds_report_reg;
-"t1w_brain (nibabel)" -> bbreg_wf;
 bidssrc -> "bids_info (bids)";
 bidssrc -> "summary (reports)";
 bidssrc -> anat_preproc_wf;
