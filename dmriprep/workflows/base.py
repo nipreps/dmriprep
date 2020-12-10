@@ -321,15 +321,10 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
               ("outputnode.t1w2fsnative_xfm", "inputnode.t1w2fsnative_xfm"),
               ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")]),
             (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
-            (fmap_wf, dwi_preproc_wf, 
-             [("outputnode.fmap", "inputnode.fmap"),
-              ("outputnode.fmap_ref", "inputnode.fmap"),
-              ("outputnode.fmap_coeff", "inputnode.fmap"),
-              ("outputnode.fmap_mask", "inputnode.fmap")])
+        ])
         # fmt: on
 
     if "fieldmap" in config.workflow.ignore:
-        sdc = False
         return workflow
 
     from sdcflows import fieldmaps as fm

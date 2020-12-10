@@ -6,9 +6,9 @@ from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...interfaces import DerivativesDataSink
-from sdcflows.workflows.apply.registration import init_coeff2epi_wf
 
-def init_dwi_preproc_wf(dwi_file):
+
+def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     """
     Build a preprocessing workflow for one DWI run.
 
@@ -30,7 +30,8 @@ def init_dwi_preproc_wf(dwi_file):
     ----------
     dwi_file : :obj:`os.PathLike`
         One diffusion MRI dataset to be processed.
-    sdc : :bool:
+    has_fieldmap : :obj:`bool`
+        Build the workflow with a path to register a fieldmap to the DWI.
 
     Inputs
     ------
@@ -82,6 +83,11 @@ def init_dwi_preproc_wf(dwi_file):
                 "dwi_file",
                 "in_bvec",
                 "in_bval",
+                # From fmap
+                "fmap",
+                "fmap_ref",
+                "fmap_coeff",
+                "fmap_mask",
                 # From anatomical
                 "t1w_preproc",
                 "t1w_mask",
@@ -115,26 +121,21 @@ def init_dwi_preproc_wf(dwi_file):
         mem_gb=config.DEFAULT_MEMORY_MIN_GB, omp_nthreads=config.nipype.omp_nthreads
     )
 
-    coeff2epi_wf = init_coeff2epi_wf(omp_nthreads=config.nipype.omp_nthreads, write_coeff=True)
-
     # MAIN WORKFLOW STRUCTURE
-    # fmt:off
+    # fmt: off
     workflow.connect([
         (inputnode, gradient_table, [("dwi_file", "dwi_file"),
                                      ("in_bvec", "in_bvec"),
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
-        (dwi_reference_wf, coeff2epi_wf, [
-            ("outputnode.ref_image", "target_ref"),
-            ("outputnode.dwi_mask", "target_mask"),
         #outputnode, [
         #    ("outputnode.ref_image", "dwi_reference"),
         #    ("outputnode.dwi_mask", "dwi_mask"),
-        ]),
+        #]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
-    # fmt:on
+    # fmt: on
 
     if config.workflow.run_reconall:
         from niworkflows.interfaces.nibabel import ApplyMask
@@ -162,7 +163,7 @@ def init_dwi_preproc_wf(dwi_file):
         def _bold_reg_suffix(fallback):
             return "coreg" if fallback else "bbregister"
 
-        # fmt:off
+        # fmt: off
         workflow.connect([
             (inputnode, bbr_wf, [
                 ("fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm"),
@@ -181,11 +182,30 @@ def init_dwi_preproc_wf(dwi_file):
                 ('outputnode.out_report', 'in_file'),
                 (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
         ])
-        # fmt:on
+        # fmt: on
+
+    if has_fieldmap:
+        from sdcflows.workflows.apply.registration import init_coeff2epi_wf
+        from sdcflows.workflows.apply.correction import init_unwarp_wf
+
+        coeff2epi_wf = init_coeff2epi_wf(
+            omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
+        )
+        unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
+
+        # fmt: off
+        workflow.connect([
+            (dwi_reference_wf, coeff2epi_wf, [
+                ("outputnode.ref_image", "inputnode.target_ref"),
+                ("outputnode.dwi_mask", "inputnode.target_mask")]),
+            (coeff2epi_wf, unwarp_wf, [
+                ("outputnode.fmap_coeff", "inputnode.fmap_coeff")])
+        ])
+        # fmt: on
 
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
-    # fmt:off
+    # fmt: off
     workflow.connect([
         (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
         (dwi_reference_wf, reportlets_wf, [
@@ -194,7 +214,7 @@ def init_dwi_preproc_wf(dwi_file):
             ("outputnode.validation_report", "inputnode.validation_report"),
         ]),
     ])
-    # fmt:on
+    # fmt: on
 
     return workflow
 
