@@ -6,7 +6,7 @@ from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...interfaces import DerivativesDataSink
-
+from sdcflows.workflows.apply.registration import init_coeff2epi_wf
 
 def init_dwi_preproc_wf(dwi_file):
     """
@@ -30,6 +30,7 @@ def init_dwi_preproc_wf(dwi_file):
     ----------
     dwi_file : :obj:`os.PathLike`
         One diffusion MRI dataset to be processed.
+    sdc : :bool:
 
     Inputs
     ------
@@ -39,6 +40,10 @@ def init_dwi_preproc_wf(dwi_file):
         File path of the b-vectors
     in_bval
         File path of the b-values
+    fmap_coeff
+        File path of the fieldmap coefficients
+    fmap_mask
+        File path of the fieldmap mask
 
     Outputs
     -------
@@ -110,6 +115,8 @@ def init_dwi_preproc_wf(dwi_file):
         mem_gb=config.DEFAULT_MEMORY_MIN_GB, omp_nthreads=config.nipype.omp_nthreads
     )
 
+    coeff2epi_wf = init_coeff2epi_wf(omp_nthreads=config.nipype.omp_nthreads, write_coeff=True)
+
     # MAIN WORKFLOW STRUCTURE
     # fmt:off
     workflow.connect([
@@ -118,9 +125,12 @@ def init_dwi_preproc_wf(dwi_file):
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
-        (dwi_reference_wf, outputnode, [
-            ("outputnode.ref_image", "dwi_reference"),
-            ("outputnode.dwi_mask", "dwi_mask"),
+        (dwi_reference_wf, coeff2epi_wf, [
+            ("outputnode.ref_image", "target_ref"),
+            ("outputnode.dwi_mask", "target_mask"),
+        #outputnode, [
+        #    ("outputnode.ref_image", "dwi_reference"),
+        #    ("outputnode.dwi_mask", "dwi_mask"),
         ]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
