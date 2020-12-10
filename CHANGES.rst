@@ -1,3 +1,21 @@
+0.4.0 (December 10, 2020)
+=========================
+A minor release including T1w-DWI registration with FreeSurfer's ``bbregister``.
+This minor release also includes some documentation improvements and a fair
+amount of maintenance tasks, the most salient of which is migrating our test
+data to a DataLad + GiHub + OSF infrastructure that will allow more flexibly
+update test datasets.
+
+  * ENH: Use ``bbregister`` upstreamed to *NiWorkflows*, with sloppy mode (#131)
+  * ENH: Port ``bbregister`` T1w-DWI registration from *fMRIPrep* (#125)
+  * DOC: Link NeuroHackademy session's video. (#120)
+  * DOC: Update readme and delete contributing guidelines in favour of nipreps website (#127)
+  * DOC: Add base SVG file for the "figure1" (aka the workflow) flowchart (#124)
+  * MAINT: Move test data to a full-datalad settings (#134)
+  * MAINT: Move packaging tests from TravisCI to GitHub Actions (#135)
+  * STY/MAINT: Preparing the first large overhaul of *dMRIPrep* (#130)
+  * MAINT: Adding J. Veraart and E. Dickie to the contributors list (#126, #133)
+
 0.3.0 (October 13, 2020)
 ========================
 A long overdue minor release initiating the 0.3.x series and including the milestones set for the 0.3.0 version in our roadmap.
