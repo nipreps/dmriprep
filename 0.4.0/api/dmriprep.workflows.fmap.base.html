@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>dmriprep.workflows.fmap.base module &mdash; dmriprep 0.4.0 documentation</title>
+  <title>dmriprep.workflows.fmap.base module &mdash; dmriprep 0.3.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.4.0
+                0.3.0
               </div>
             
           
@@ -187,34 +187,9 @@
 
 
 
-    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/dmriprep.workflows.fmap.base.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
-<div class="section" id="module-dmriprep.workflows.fmap.base">
-<span id="dmriprep-workflows-fmap-base-module"></span><h1>dmriprep.workflows.fmap.base module<a class="headerlink" href="#module-dmriprep.workflows.fmap.base" title="Permalink to this headline">¶</a></h1>
-<p>Deploy a susceptibility-distortion estimation strategy.</p>
-<dl class="function">
-<dt id="dmriprep.workflows.fmap.base.init_fmap_estimation_wf">
-<code class="sig-prename descclassname">dmriprep.workflows.fmap.base.</code><code class="sig-name descname">init_fmap_estimation_wf</code><span class="sig-paren">(</span><em class="sig-param">epi_targets</em>, <em class="sig-param">debug=False</em>, <em class="sig-param">generate_report=True</em>, <em class="sig-param">name='fmap_estimation_wf'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.fmap.base.init_fmap_estimation_wf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set-up a fieldmap estimation strategy and write results to derivatives folder.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>participant_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The particular subject for which the BIDS layout will be queried.</p></li>
-<li><p><strong>epi_targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">os.pathlike</span></code>) – A list of <abbr title="echo planar imaging">EPI</abbr> scans that will be corrected for
-susceptibility distortions with the estimated fieldmaps.</p></li>
-<li><p><strong>omp_nthreads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – Number of CPUs available to individual processes for multithreaded execution.</p></li>
-<li><p><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether fast (and less accurate) execution parameters should be used whenever available.</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – A unique workflow name to build Nipype’s workflow hierarchy.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="dmriprep.workflows.fmap.base.init_pepolar_estimate_wf">
-<code class="sig-prename descclassname">dmriprep.workflows.fmap.base.</code><code class="sig-name descname">init_pepolar_estimate_wf</code><span class="sig-paren">(</span><em class="sig-param">debug=False</em>, <em class="sig-param">generate_report=True</em>, <em class="sig-param">name='pepolar_estimate_wf'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.fmap.base.init_pepolar_estimate_wf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize a barebones TOPUP implementation.</p>
-</dd></dl>
-
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of dmriprep.</p>
+<div class="section" id="dmriprep-workflows-fmap-base-module">
+<h1>dmriprep.workflows.fmap.base module<a class="headerlink" href="#dmriprep-workflows-fmap-base-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -276,7 +251,7 @@ susceptibility distortions with the estimated fieldmaps.</p></li>
         </dl>
         <dl>
             <dt>Branches</dt>
-            <dd><a href="../../master/api/dmriprep.workflows.fmap.base.html">master</a></dd>
+            <dd><a href="../../master/index.html">master</a></dd>
         </dl>
     </div>
 </div>
