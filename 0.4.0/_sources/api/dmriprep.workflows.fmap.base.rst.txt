@@ -1,0 +1,7 @@
+dmriprep.workflows.fmap.base module
+===================================
+
+.. automodule:: dmriprep.workflows.fmap.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,14 @@
+dmriprep.workflows.fmap package
+===============================
+
+.. automodule:: dmriprep.workflows.fmap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   dmriprep.workflows.fmap.base

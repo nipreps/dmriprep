@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>What’s new? &mdash; dmriprep 0.3.0 documentation</title>
+  <title>What’s new? &mdash; dmriprep 0.4.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                0.3.0
+                0.4.0
               </div>
             
           
@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">What’s new?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#december-10-2020">0.4.0 (December 10, 2020)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#october-13-2020">0.3.0 (October 13, 2020)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#january-15-2020">0.2.2 (January 15, 2020)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#december-12-2019">0.2.1 (December 12, 2019)</a></li>
@@ -171,11 +172,35 @@
   
 
 
+    
+    
 
 
 
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="master/changes.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
 <div class="section" id="what-s-new">
 <h1>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="december-10-2020">
+<h2>0.4.0 (December 10, 2020)<a class="headerlink" href="#december-10-2020" title="Permalink to this headline">¶</a></h2>
+<p>A minor release including T1w-DWI registration with FreeSurfer’s <code class="docutils literal notranslate"><span class="pre">bbregister</span></code>.
+This minor release also includes some documentation improvements and a fair
+amount of maintenance tasks, the most salient of which is migrating our test
+data to a DataLad + GiHub + OSF infrastructure that will allow more flexibly
+update test datasets.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ENH: Use <code class="docutils literal notranslate"><span class="pre">bbregister</span></code> upstreamed to <em>NiWorkflows</em>, with sloppy mode (#131)</p></li>
+<li><p>ENH: Port <code class="docutils literal notranslate"><span class="pre">bbregister</span></code> T1w-DWI registration from <em>fMRIPrep</em> (#125)</p></li>
+<li><p>DOC: Link NeuroHackademy session’s video. (#120)</p></li>
+<li><p>DOC: Update readme and delete contributing guidelines in favour of nipreps website (#127)</p></li>
+<li><p>DOC: Add base SVG file for the “figure1” (aka the workflow) flowchart (#124)</p></li>
+<li><p>MAINT: Move test data to a full-datalad settings (#134)</p></li>
+<li><p>MAINT: Move packaging tests from TravisCI to GitHub Actions (#135)</p></li>
+<li><p>STY/MAINT: Preparing the first large overhaul of <em>dMRIPrep</em> (#130)</p></li>
+<li><p>MAINT: Adding J. Veraart and E. Dickie to the contributors list (#126, #133)</p></li>
+</ul>
+</div></blockquote>
+</div>
 <div class="section" id="october-13-2020">
 <h2>0.3.0 (October 13, 2020)<a class="headerlink" href="#october-13-2020" title="Permalink to this headline">¶</a></h2>
 <p>A long overdue minor release initiating the 0.3.x series and including the milestones set for the 0.3.0 version in our roadmap.</p>
@@ -325,7 +350,7 @@ dMRIPrep will bring the contents of this branch back in as a plugin.</p>
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
         <span class="fa fa-book"> Other Versions</span>
-        v: master
+        v: 0.4.0
         <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions">
@@ -334,11 +359,11 @@ dMRIPrep will bring the contents of this branch back in as a plugin.</p>
             <dd><a href="0.2.1/changes.html">0.2.1</a></dd>
             <dd><a href="0.2.2/changes.html">0.2.2</a></dd>
             <dd><a href="0.3.0/changes.html">0.3.0</a></dd>
+            <dd><a href="0.4.0/changes.html">0.4.0</a></dd>
         </dl>
         <dl>
             <dt>Branches</dt>
             <dd><a href="master/changes.html">master</a></dd>
-            <dd><a href="test_docs/changes.html">test_docs</a></dd>
         </dl>
     </div>
 </div>

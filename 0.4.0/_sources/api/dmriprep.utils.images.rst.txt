@@ -1,0 +1,7 @@
+dmriprep.utils.images module
+============================
+
+.. automodule:: dmriprep.utils.images
+   :members:
+   :undoc-members:
+   :show-inheritance:
