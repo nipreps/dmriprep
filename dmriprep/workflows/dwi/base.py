@@ -21,7 +21,10 @@ def init_dwi_preproc_wf(dwi_file):
             from dmriprep import config
             from dmriprep.workflows.dwi.base import init_dwi_preproc_wf
             with mock_config():
-                wf = init_dwi_preproc_wf()
+                wf = init_dwi_preproc_wf(
+                    f"{config.execution.layout.root}/"
+                    "sub-THP0005/dwi/sub-THP0005_dwi.nii.gz"
+                )
 
     Parameters
     ----------
@@ -139,7 +142,8 @@ def init_dwi_preproc_wf(dwi_file):
 
         ds_report_reg = pe.Node(
             DerivativesDataSink(
-                base_directory=str(config.execution.output_dir), datatype="figures",
+                base_directory=str(config.execution.output_dir),
+                datatype="figures",
             ),
             name="ds_report_reg",
             run_without_submitting=True,
@@ -199,6 +203,7 @@ def _get_wf_name(filename):
 
     """
     from pathlib import Path
+
     fname = Path(filename).name.rpartition(".nii")[0].replace("_dwi", "_wf")
-    fname_nosub = '_'.join(fname.split("_")[1:])
+    fname_nosub = "_".join(fname.split("_")[1:])
     return f"dwi_preproc_{fname_nosub.replace('.', '_').replace(' ', '').replace('-', '_')}"
