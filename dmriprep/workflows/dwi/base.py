@@ -80,6 +80,16 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
 
+    if has_fieldmap:
+        from sdcflows.fieldmaps import get_identifier
+
+        estimator_key = get_identifier(dwi_file)
+        if not estimator_key:
+            has_fieldmap = False
+            config.loggers.workflow.critical(
+                f"None of the available B0 fieldmaps are associated to <{dwi_file}>"
+            )
+
     # Build workflow
     workflow = Workflow(name=_get_wf_name(dwi_file.name))
 
@@ -157,8 +167,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
         ds_report_reg = pe.Node(
             DerivativesDataSink(
-                base_directory=str(config.execution.output_dir),
-                datatype="figures",
+                base_directory=str(config.execution.output_dir), datatype="figures",
             ),
             name="ds_report_reg",
             run_without_submitting=True,
@@ -216,9 +225,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from sdcflows.workflows.apply.registration import init_coeff2epi_wf
     from sdcflows.workflows.apply.correction import init_unwarp_wf
 
-    # TODO: Requires nipreps/sdcflows#148
-    # from sdcflows.utils.fieldmap import get_identifier
-
     coeff2epi_wf = init_coeff2epi_wf(
         omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
     )
@@ -230,12 +236,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         name="output_select",
         run_without_submitting=True,
     )
-    # estimator_key = get_identifier(dwi_file)
-    # if len(estimator_key) != 1:
-    #     raise RuntimeError(
-    #         f"Incorrect number of fieldmap estimator IDs ({len(estimator_key)})."
-    #     )
-    # output_select.inputs.key = estimator_key
+    output_select.inputs.key = estimator_key[0]
+    if len(estimator_key) > 1:
+        config.loggers.workflow.warning(
+            f"Several fieldmaps <{', '.join(estimator_key)}> are "
+            f"'IntendedFor' <{dwi_file}>, using {estimator_key[0]}"
+        )
 
     # fmt: off
     workflow.connect([
