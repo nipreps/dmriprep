@@ -191,7 +191,7 @@
 <p>Orchestrating the dMRI-preprocessing workflow.</p>
 <dl class="function">
 <dt id="dmriprep.workflows.dwi.base.init_dwi_preproc_wf">
-<code class="sig-prename descclassname">dmriprep.workflows.dwi.base.</code><code class="sig-name descname">init_dwi_preproc_wf</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_preproc_wf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.base.</code><code class="sig-name descname">init_dwi_preproc_wf</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em>, <em class="sig-param">has_fieldmap=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_preproc_wf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build a preprocessing workflow for one DWI run.</p>
 <dl>
 <dt>Workflow Graph</dt><dd><div class="figure align-default">
@@ -202,13 +202,21 @@
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dwi_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – One diffusion MRI dataset to be processed.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwi_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – One diffusion MRI dataset to be processed.</p></li>
+<li><p><strong>has_fieldmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Build the workflow with a path to register a fieldmap to the DWI.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Inputs</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>dwi_file</strong> – dwi NIfTI file</p></li>
 <li><p><strong>in_bvec</strong> – File path of the b-vectors</p></li>
 <li><p><strong>in_bval</strong> – File path of the b-values</p></li>
+<li><p><strong>fmap</strong> – File path of the fieldmap</p></li>
+<li><p><strong>fmap_ref</strong> – File path of the fieldmap reference</p></li>
+<li><p><strong>fmap_coeff</strong> – File path of the fieldmap coefficients</p></li>
+<li><p><strong>fmap_mask</strong> – File path of the fieldmap mask</p></li>
+<li><p><strong>fmap_id</strong> – The BIDS modality label of the fieldmap being used</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Outputs</dt>

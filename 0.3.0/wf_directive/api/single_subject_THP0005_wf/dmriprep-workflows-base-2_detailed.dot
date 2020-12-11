@@ -1,6 +1,5 @@
 digraph structs {
 node [shape=record];
-single_subject_THP0005_wffmap_preproc_wf [label="{IN}|{ fmap_preproc_wf |  |  }|{OUT}"];
 single_subject_THP0005_wfabout [label="{IN}|{ about | reports |  }|{OUT|<outoutreport> out_report}"];
 single_subject_THP0005_wfbidssrc [label="{IN}|{ bidssrc |  |  }|{OUT|<outdwi> dwi|<outflair> flair|<outroi> roi|<outt1w> t1w|<outt2w> t2w}"];
 single_subject_THP0005_wfds_report_about [label="{IN|<ininfile> in_file|<insourcefile> source_file}|{ ds_report_about |  |  }|{OUT}"];

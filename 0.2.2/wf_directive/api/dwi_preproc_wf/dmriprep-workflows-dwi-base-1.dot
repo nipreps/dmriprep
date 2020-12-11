@@ -15,8 +15,9 @@ reportlets_wf;
 "inputnode (utility)" -> reportlets_wf;
 "gradient_table (vectors)" -> dwi_reference_wf;
 "gradient_table (vectors)" -> "outputnode (utility)";
-dwi_reference_wf -> "outputnode (utility)";
 dwi_reference_wf -> bbreg_wf;
 dwi_reference_wf -> reportlets_wf;
+dwi_reference_wf -> "outputnode (utility)";
 bbreg_wf -> ds_report_reg;
+"outputnode (utility)" -> reportlets_wf;
 }
