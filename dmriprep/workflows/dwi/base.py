@@ -223,7 +223,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
     )
     unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
-    unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(dwi_file)
+    unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
 
     output_select = pe.Node(
         KeySelect(fields=["fmap", "fmap_ref", "fmap_coeff", "fmap_mask"]),
@@ -251,7 +251,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         (dwi_reference_wf, coeff2epi_wf, [
             ("outputnode.ref_image", "inputnode.target_ref"),
             ("outputnode.dwi_mask", "inputnode.target_mask")]),
-        (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "distorted")]),
+        (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "inputnode.distorted")]),
         (coeff2epi_wf, unwarp_wf, [
             ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
         (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference")]),
