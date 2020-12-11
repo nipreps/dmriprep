@@ -222,7 +222,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         name="output_select",
         run_without_submitting=True,
     )
-    # output_select.inputs.key = get_identifier(dwi_file)
+    # estimator_key = get_identifier(dwi_file)
+    # if len(estimator_key) != 1:
+    #     raise RuntimeError(
+    #         f"Incorrect number of fieldmap estimator IDs ({len(estimator_key)})."
+    #     )
+    # output_select.inputs.key = estimator_key
 
     # fmt: off
     workflow.connect([
