@@ -300,29 +300,35 @@ format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """
     )
-
+    dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
         dwi_preproc_wf = init_dwi_preproc_wf(dwi_file)
+        dwi_preproc_list.append(dwi_preproc_wf)
 
-        # fmt: off
-        workflow.connect([
-            (anat_preproc_wf, dwi_preproc_wf,
-             [("outputnode.t1w_preproc", "inputnode.t1w_preproc"),
-              ("outputnode.t1w_mask", "inputnode.t1w_mask"),
-              ("outputnode.t1w_dseg", "inputnode.t1w_dseg"),
-              ("outputnode.t1w_aseg", "inputnode.t1w_aseg"),
-              ("outputnode.t1w_aparc", "inputnode.t1w_aparc"),
-              ("outputnode.t1w_tpms", "inputnode.t1w_tpms"),
-              ("outputnode.template", "inputnode.template"),
-              ("outputnode.anat2std_xfm", "inputnode.anat2std_xfm"),
-              ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
-              # Undefined if --fs-no-reconall, but this is safe
-              ("outputnode.subjects_dir", "inputnode.subjects_dir"),
-              ("outputnode.t1w2fsnative_xfm", "inputnode.t1w2fsnative_xfm"),
-              ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm")]),
-            (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
-        ])
-        # fmt: on
+    dwi_preproc_list_wf = pe.Node(niu.IdentityInterface(fields=["dwi_workflows"]),
+                                  name="dwi_preproc_list_wf")
+    dwi_preproc_list_wf.iterables = [("dwi_workflows", dwi_preproc_list)]
+
+    # fmt: off
+    workflow.connect([
+        (anat_preproc_wf, dwi_preproc_list_wf, [
+            ("outputnode.t1w_preproc", "inputnode.t1w_preproc"),
+            ("outputnode.t1w_mask", "inputnode.t1w_mask"),
+            ("outputnode.t1w_dseg", "inputnode.t1w_dseg"),
+            ("outputnode.t1w_aseg", "inputnode.t1w_aseg"),
+            ("outputnode.t1w_aparc", "inputnode.t1w_aparc"),
+            ("outputnode.t1w_tpms", "inputnode.t1w_tpms"),
+            ("outputnode.template", "inputnode.template"),
+            ("outputnode.anat2std_xfm", "inputnode.anat2std_xfm"),
+            ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
+            # Undefined if --fs-no-reconall, but this is safe
+            ("outputnode.subjects_dir", "inputnode.subjects_dir"),
+            ("outputnode.t1w2fsnative_xfm", "inputnode.t1w2fsnative_xfm"),
+            ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm"),
+        ]),
+        (bids_info, dwi_preproc_list_wf, [("subject", "inputnode.subject_id")]),
+    ])
+    # fmt: on
 
     if "fieldmap" in config.workflow.ignore:
         return workflow
@@ -347,7 +353,16 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         output_dir=str(output_dir),
         subject=subject_id,
     )
-
+    # fmt: off
+    workflow.connect([
+        (fmap_wf, dwi_preproc_list_wf, [
+            ("outputnode.fmap", "inputnode.fmap"),
+            ("outputnode.fmap_ref", "inputnode.fmap_ref"),
+            ("outputnode.fmap_coeff", "inputnode.fmap_coeff"),
+            ("outputnode.fmap_mask", "inputnode.fmap_mask"),
+        ]),
+    ])
+    # fmt: on
     # Overwrite ``out_path_base`` of sdcflows's DataSinks
     for node in fmap_wf.list_node_names():
         if node.split(".")[-1].startswith("ds_"):
