@@ -8,7 +8,7 @@ from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...interfaces import DerivativesDataSink
 
 
-def init_dwi_preproc_wf(dwi_file):
+def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     """
     Build a preprocessing workflow for one DWI run.
 
@@ -30,6 +30,8 @@ def init_dwi_preproc_wf(dwi_file):
     ----------
     dwi_file : :obj:`os.PathLike`
         One diffusion MRI dataset to be processed.
+    has_fieldmap : :obj:`bool`
+        Build the workflow with a path to register a fieldmap to the DWI.
 
     Inputs
     ------
@@ -39,6 +41,17 @@ def init_dwi_preproc_wf(dwi_file):
         File path of the b-vectors
     in_bval
         File path of the b-values
+    fmap
+        File path of the fieldmap
+    fmap_ref
+        File path of the fieldmap reference
+    fmap_coeff
+        File path of the fieldmap coefficients
+    fmap_mask
+        File path of the fieldmap mask
+    fmap_id
+        The BIDS modality label of the fieldmap being used
+
 
     Outputs
     -------
@@ -67,6 +80,16 @@ def init_dwi_preproc_wf(dwi_file):
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
 
+    if has_fieldmap:
+        from sdcflows.fieldmaps import get_identifier
+
+        estimator_key = get_identifier(dwi_file)
+        if not estimator_key:
+            has_fieldmap = False
+            config.loggers.workflow.critical(
+                f"None of the available B0 fieldmaps are associated to <{dwi_file}>"
+            )
+
     # Build workflow
     workflow = Workflow(name=_get_wf_name(dwi_file.name))
 
@@ -77,6 +100,12 @@ def init_dwi_preproc_wf(dwi_file):
                 "dwi_file",
                 "in_bvec",
                 "in_bval",
+                # From SDCFlows
+                "fmap",
+                "fmap_ref",
+                "fmap_coeff",
+                "fmap_mask",
+                "fmap_id",
                 # From anatomical
                 "t1w_preproc",
                 "t1w_mask",
@@ -111,20 +140,16 @@ def init_dwi_preproc_wf(dwi_file):
     )
 
     # MAIN WORKFLOW STRUCTURE
-    # fmt:off
+    # fmt: off
     workflow.connect([
         (inputnode, gradient_table, [("dwi_file", "dwi_file"),
                                      ("in_bvec", "in_bvec"),
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
-        (dwi_reference_wf, outputnode, [
-            ("outputnode.ref_image", "dwi_reference"),
-            ("outputnode.dwi_mask", "dwi_mask"),
-        ]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
-    # fmt:on
+    # fmt: on
 
     if config.workflow.run_reconall:
         from niworkflows.interfaces.nibabel import ApplyMask
@@ -142,8 +167,7 @@ def init_dwi_preproc_wf(dwi_file):
 
         ds_report_reg = pe.Node(
             DerivativesDataSink(
-                base_directory=str(config.execution.output_dir),
-                datatype="figures",
+                base_directory=str(config.execution.output_dir), datatype="figures",
             ),
             name="ds_report_reg",
             run_without_submitting=True,
@@ -152,7 +176,7 @@ def init_dwi_preproc_wf(dwi_file):
         def _bold_reg_suffix(fallback):
             return "coreg" if fallback else "bbregister"
 
-        # fmt:off
+        # fmt: off
         workflow.connect([
             (inputnode, bbr_wf, [
                 ("fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm"),
@@ -171,20 +195,74 @@ def init_dwi_preproc_wf(dwi_file):
                 ('outputnode.out_report', 'in_file'),
                 (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
         ])
-        # fmt:on
+        # fmt: on
 
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
-    # fmt:off
+    # fmt: off
     workflow.connect([
         (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
         (dwi_reference_wf, reportlets_wf, [
-            ("outputnode.ref_image", "inputnode.dwi_ref"),
-            ("outputnode.dwi_mask", "inputnode.dwi_mask"),
             ("outputnode.validation_report", "inputnode.validation_report"),
         ]),
+        (outputnode, reportlets_wf, [
+            ("dwi_reference", "inputnode.dwi_ref"),
+            ("dwi_mask", "inputnode.dwi_mask"),
+        ]),
     ])
-    # fmt:on
+    # fmt: on
+
+    if not has_fieldmap:
+        # fmt: off
+        workflow.connect([
+            (dwi_reference_wf, outputnode, [("outputnode.ref_image", "dwi_reference"),
+                                            ("outputnode.dwi_mask", "dwi_mask")]),
+        ])
+        # fmt: on
+        return workflow
+
+    from niworkflows.interfaces.utility import KeySelect
+    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
+    from sdcflows.workflows.apply.correction import init_unwarp_wf
+
+    coeff2epi_wf = init_coeff2epi_wf(
+        omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
+    )
+    unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
+    unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
+
+    output_select = pe.Node(
+        KeySelect(fields=["fmap", "fmap_ref", "fmap_coeff", "fmap_mask"]),
+        name="output_select",
+        run_without_submitting=True,
+    )
+    output_select.inputs.key = estimator_key[0]
+    if len(estimator_key) > 1:
+        config.loggers.workflow.warning(
+            f"Several fieldmaps <{', '.join(estimator_key)}> are "
+            f"'IntendedFor' <{dwi_file}>, using {estimator_key[0]}"
+        )
+
+    # fmt: off
+    workflow.connect([
+        (inputnode, output_select, [("fmap", "fmap"),
+                                    ("fmap_ref", "fmap_ref"),
+                                    ("fmap_coeff", "fmap_coeff"),
+                                    ("fmap_mask", "fmap_mask"),
+                                    ("fmap_id", "keys")]),
+        (output_select, coeff2epi_wf, [
+            ("fmap_ref", "inputnode.fmap_ref"),
+            ("fmap_coeff", "inputnode.fmap_coeff"),
+            ("fmap_mask", "inputnode.fmap_mask")]),
+        (dwi_reference_wf, coeff2epi_wf, [
+            ("outputnode.ref_image", "inputnode.target_ref"),
+            ("outputnode.dwi_mask", "inputnode.target_mask")]),
+        (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "inputnode.distorted")]),
+        (coeff2epi_wf, unwarp_wf, [
+            ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
+        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference")]),
+    ])
+    # fmt: on
 
     return workflow
 
