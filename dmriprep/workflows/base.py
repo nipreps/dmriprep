@@ -287,6 +287,7 @@ It is released under the [CC0]\
         return workflow
 
     from .dwi.base import init_dwi_preproc_wf
+
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
     anat_preproc_wf.__postdesc__ = (
@@ -300,77 +301,87 @@ format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """
     )
+
+    # SDC Step 0: Determine whether fieldmaps can/should be estimated
+    fmap_estimators = None
+    if "fieldmap" not in config.workflow.ignore:
+        from sdcflows import fieldmaps as fm
+        from sdcflows.utils.wrangler import find_estimators
+        from sdcflows.workflows.base import init_fmap_preproc_wf
+
+        # SDC Step 1: Run basic heuristics to identify available data for fieldmap estimation
+        fmap_estimators = find_estimators(config.execution.layout)
+
+        # Add fieldmap-less estimators
+        if not fmap_estimators and config.workflow.use_syn:
+            # estimators = [fm.FieldmapEstimation()]
+            raise NotImplementedError
+
+    # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
-        dwi_preproc_wf = init_dwi_preproc_wf(dwi_file)
+        dwi_preproc_wf = init_dwi_preproc_wf(
+            dwi_file,
+            has_fieldmap=bool(fmap_estimators),
+        )
+
+        # fmt: off
+        workflow.connect([
+            (anat_preproc_wf, dwi_preproc_wf, [
+                ("outputnode.t1w_preproc", "inputnode.t1w_preproc"),
+                ("outputnode.t1w_mask", "inputnode.t1w_mask"),
+                ("outputnode.t1w_dseg", "inputnode.t1w_dseg"),
+                ("outputnode.t1w_aseg", "inputnode.t1w_aseg"),
+                ("outputnode.t1w_aparc", "inputnode.t1w_aparc"),
+                ("outputnode.t1w_tpms", "inputnode.t1w_tpms"),
+                ("outputnode.template", "inputnode.template"),
+                ("outputnode.anat2std_xfm", "inputnode.anat2std_xfm"),
+                ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
+                # Undefined if --fs-no-reconall, but this is safe
+                ("outputnode.subjects_dir", "inputnode.subjects_dir"),
+                ("outputnode.t1w2fsnative_xfm", "inputnode.t1w2fsnative_xfm"),
+                ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm"),
+            ]),
+            (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
+        ])
+        # fmt: on
+
+        # Keep a handle to each workflow
         dwi_preproc_list.append(dwi_preproc_wf)
 
-    dwi_preproc_list_wf = pe.Node(niu.IdentityInterface(fields=["dwi_workflows"]),
-                                  name="dwi_preproc_list_wf")
-    dwi_preproc_list_wf.iterables = [("dwi_workflows", dwi_preproc_list)]
-
-    # fmt: off
-    workflow.connect([
-        (anat_preproc_wf, dwi_preproc_list_wf, [
-            ("outputnode.t1w_preproc", "inputnode.t1w_preproc"),
-            ("outputnode.t1w_mask", "inputnode.t1w_mask"),
-            ("outputnode.t1w_dseg", "inputnode.t1w_dseg"),
-            ("outputnode.t1w_aseg", "inputnode.t1w_aseg"),
-            ("outputnode.t1w_aparc", "inputnode.t1w_aparc"),
-            ("outputnode.t1w_tpms", "inputnode.t1w_tpms"),
-            ("outputnode.template", "inputnode.template"),
-            ("outputnode.anat2std_xfm", "inputnode.anat2std_xfm"),
-            ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
-            # Undefined if --fs-no-reconall, but this is safe
-            ("outputnode.subjects_dir", "inputnode.subjects_dir"),
-            ("outputnode.t1w2fsnative_xfm", "inputnode.t1w2fsnative_xfm"),
-            ("outputnode.fsnative2t1w_xfm", "inputnode.fsnative2t1w_xfm"),
-        ]),
-        (bids_info, dwi_preproc_list_wf, [("subject", "inputnode.subject_id")]),
-    ])
-    # fmt: on
-
-    if "fieldmap" in config.workflow.ignore:
+    if not fmap_estimators:
         return workflow
 
-    from sdcflows import fieldmaps as fm
-    from sdcflows.utils.wrangler import find_estimators
-    from sdcflows.workflows.base import init_fmap_preproc_wf
-
-    # SDCFlows connection
-    # Step 1: Run basic heuristics to identify available data for fieldmap estimation
-    estimators = find_estimators(config.execution.layout)
-
-    if not estimators and config.workflow.use_syn:  # Add fieldmap-less estimators
-        # estimators = [fm.FieldmapEstimation()]
-        raise NotImplementedError
-
-    # Step 2: Manually add further estimators (e.g., fieldmap-less)
+    # SDC Step 2: Manually add further estimators (e.g., fieldmap-less)
     fmap_wf = init_fmap_preproc_wf(
         debug=config.execution.debug,
-        estimators=estimators,
+        estimators=fmap_estimators,
         omp_nthreads=config.nipype.omp_nthreads,
         output_dir=str(output_dir),
         subject=subject_id,
     )
-    # fmt: off
-    workflow.connect([
-        (fmap_wf, dwi_preproc_list_wf, [
-            ("outputnode.fmap", "inputnode.fmap"),
-            ("outputnode.fmap_ref", "inputnode.fmap_ref"),
-            ("outputnode.fmap_coeff", "inputnode.fmap_coeff"),
-            ("outputnode.fmap_mask", "inputnode.fmap_mask"),
-        ]),
-    ])
-    # fmt: on
+
+    # TODO: Requires nipreps/sdcflows#147
+    for dwi_preproc_wf in dwi_preproc_list:
+        # fmt: off
+        workflow.connect([
+            (fmap_wf, dwi_preproc_wf, [
+                ("outputnode.fmap", "inputnode.fmap"),
+                ("outputnode.fmap_ref", "inputnode.fmap_ref"),
+                ("outputnode.fmap_coeff", "inputnode.fmap_coeff"),
+                ("outputnode.fmap_mask", "inputnode.fmap_mask"),
+                ("outputnode.fmap_id", "inputnode.fmap_id"),
+            ]),
+        ])
+        # fmt: on
+
     # Overwrite ``out_path_base`` of sdcflows's DataSinks
     for node in fmap_wf.list_node_names():
         if node.split(".")[-1].startswith("ds_"):
             fmap_wf.get_node(node).interface.out_path_base = "dmriprep"
-    workflow.add_nodes([fmap_wf])
 
     # Step 3: Manually connect PEPOLAR
-    for estimator in estimators:
+    for estimator in fmap_estimators:
         if estimator.method != fm.EstimatorType.PEPOLAR:
             continue
 
@@ -387,18 +398,18 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             raise NotImplementedError
             # from niworkflows.interfaces.utility import KeySelect
             # est_id = estimator.bids_id
-            # fmap_select = pe.MapNode(
+            # estim_select = pe.MapNode(
             #     KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
             #     name=f"fmap_select_{est_id}",
             #     run_without_submitting=True,
             #     iterfields=["key"]
             # )
-            # fmap_select.inputs.key = [
+            # estim_select.inputs.key = [
             #     str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
             # ]
             # # fmt:off
             # workflow.connect([
-            #     (referencenode, fmap_select, [("dwi_file", "keys"),
+            #     (referencenode, estim_select, [("dwi_file", "keys"),
             #                                   ("metadata", "metadata"),
             #                                   ("dwi_reference", "dwi_reference"),
             #                                   ("gradients_rasb", "gradients_rasb")]),

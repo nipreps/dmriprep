@@ -83,7 +83,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                 "dwi_file",
                 "in_bvec",
                 "in_bval",
-                # From fmap
+                # From SDCFlows
                 "fmap",
                 "fmap_ref",
                 "fmap_coeff",
@@ -129,10 +129,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
-        #outputnode, [
-        #    ("outputnode.ref_image", "dwi_reference"),
-        #    ("outputnode.dwi_mask", "dwi_mask"),
-        #]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
     # fmt: on
@@ -184,35 +180,68 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         ])
         # fmt: on
 
-    if has_fieldmap:
-        from sdcflows.workflows.apply.registration import init_coeff2epi_wf
-        from sdcflows.workflows.apply.correction import init_unwarp_wf
-
-        coeff2epi_wf = init_coeff2epi_wf(
-            omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
-        )
-        unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
-
-        # fmt: off
-        workflow.connect([
-            (dwi_reference_wf, coeff2epi_wf, [
-                ("outputnode.ref_image", "inputnode.target_ref"),
-                ("outputnode.dwi_mask", "inputnode.target_mask")]),
-            (coeff2epi_wf, unwarp_wf, [
-                ("outputnode.fmap_coeff", "inputnode.fmap_coeff")])
-        ])
-        # fmt: on
-
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
     # fmt: off
     workflow.connect([
         (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
         (dwi_reference_wf, reportlets_wf, [
-            ("outputnode.ref_image", "inputnode.dwi_ref"),
-            ("outputnode.dwi_mask", "inputnode.dwi_mask"),
             ("outputnode.validation_report", "inputnode.validation_report"),
         ]),
+        (outputnode, reportlets_wf, [
+            ("dwi_reference", "inputnode.dwi_ref"),
+            ("dwi_mask", "inputnode.dwi_mask"),
+        ]),
+    ])
+    # fmt: on
+
+    if not has_fieldmap:
+        # fmt: off
+        workflow.connect([
+            (dwi_reference_wf, outputnode, [("outputnode.ref_image", "dwi_reference"),
+                                            ("outputnode.dwi_mask", "dwi_mask")]),
+        ])
+        # fmt: on
+        return workflow
+
+    from niworkflows.interfaces.utility import KeySelect
+    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
+    from sdcflows.workflows.apply.correction import init_unwarp_wf
+
+    # TODO: Requires nipreps/sdcflows#148
+    # from sdcflows.utils.fieldmap import get_identifier
+
+    coeff2epi_wf = init_coeff2epi_wf(
+        omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
+    )
+    unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
+    unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(dwi_file)
+
+    output_select = pe.Node(
+        KeySelect(fields=["fmap", "fmap_ref", "fmap_coeff", "fmap_mask"]),
+        name="output_select",
+        run_without_submitting=True,
+    )
+    # output_select.inputs.key = get_identifier(dwi_file)
+
+    # fmt: off
+    workflow.connect([
+        (inputnode, output_select, [("fmap", "fmap"),
+                                    ("fmap_ref", "fmap_ref"),
+                                    ("fmap_coeff", "fmap_coeff"),
+                                    ("fmap_mask", "fmap_mask"),
+                                    ("fmap_id", "keys")]),
+        (output_select, coeff2epi_wf, [
+            ("fmap_ref", "inputnode.fmap_ref"),
+            ("fmap_coeff", "inputnode.fmap_coeff"),
+            ("fmap_mask", "inputnode.fmap_mask")]),
+        (dwi_reference_wf, coeff2epi_wf, [
+            ("outputnode.ref_image", "inputnode.target_ref"),
+            ("outputnode.dwi_mask", "inputnode.target_mask")]),
+        (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "distorted")]),
+        (coeff2epi_wf, unwarp_wf, [
+            ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
+        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference")]),
     ])
     # fmt: on
 
