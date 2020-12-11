@@ -41,10 +41,17 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         File path of the b-vectors
     in_bval
         File path of the b-values
+    fmap
+        File path of the fieldmap
+    fmap_ref
+        File path of the fieldmap reference
     fmap_coeff
         File path of the fieldmap coefficients
     fmap_mask
         File path of the fieldmap mask
+    fmap_id
+        The BIDS modality label of the fieldmap being used
+
 
     Outputs
     -------
@@ -88,6 +95,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                 "fmap_ref",
                 "fmap_coeff",
                 "fmap_mask",
+                "fmap_id",
                 # From anatomical
                 "t1w_preproc",
                 "t1w_mask",
