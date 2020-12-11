@@ -52,7 +52,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     fmap_id
         The BIDS modality label of the fieldmap being used
 
-
     Outputs
     -------
     dwi_reference
@@ -81,13 +80,17 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     )
 
     if has_fieldmap:
+        import re
         from sdcflows.fieldmaps import get_identifier
 
-        estimator_key = get_identifier(dwi_file)
+        dwi_rel = re.sub(
+            r"^sub-[a-zA-Z0-9]*/", "", str(dwi_file.relative_to(layout.root))
+        )
+        estimator_key = get_identifier(dwi_rel)
         if not estimator_key:
             has_fieldmap = False
             config.loggers.workflow.critical(
-                f"None of the available B0 fieldmaps are associated to <{dwi_file}>"
+                f"None of the available B0 fieldmaps are associated to <{dwi_rel}>"
             )
 
     # Build workflow
@@ -167,7 +170,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
         ds_report_reg = pe.Node(
             DerivativesDataSink(
-                base_directory=str(config.execution.output_dir), datatype="figures",
+                base_directory=str(config.execution.output_dir),
+                datatype="figures",
             ),
             name="ds_report_reg",
             run_without_submitting=True,
