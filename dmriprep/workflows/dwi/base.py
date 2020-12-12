@@ -230,9 +230,14 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from sdcflows.workflows.apply.correction import init_unwarp_wf
 
     coeff2epi_wf = init_coeff2epi_wf(
-        omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
+        debug=config.execution.debug,
+        omp_nthreads=config.nipype.omp_nthreads,
+        write_coeff=True,
     )
-    unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
+    unwarp_wf = init_unwarp_wf(
+        debug=config.execution.debug,
+        omp_nthreads=config.nipype.omp_nthreads
+    )
     unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
 
     output_select = pe.Node(
