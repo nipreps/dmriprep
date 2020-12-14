@@ -439,7 +439,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
             config.nipype.plugin = _plugin
             config.nipype.plugin_args = plugin_settings.get("plugin_args", {})
             config.nipype.nprocs = config.nipype.plugin_args.get(
-                "nprocs", config.nipype.nprocs
+                "n_procs", config.nipype.nprocs
             )
 
     # Resource management options

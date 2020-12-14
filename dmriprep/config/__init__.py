@@ -279,12 +279,17 @@ class nipype(_Config):
     @classmethod
     def get_plugin(cls):
         """Format a dictionary for Nipype consumption."""
+        nprocs = int(cls.nprocs)
+        if nprocs == 1:
+            cls.plugin = "Linear"
+            return {"plugin": "Linear"}
+
         out = {
             "plugin": cls.plugin,
             "plugin_args": cls.plugin_args,
         }
         if cls.plugin in ("MultiProc", "LegacyMultiProc"):
-            out["plugin_args"]["nprocs"] = int(cls.nprocs)
+            out["plugin_args"]["n_procs"] = int(cls.nprocs)
             if cls.memory_gb:
                 out["plugin_args"]["memory_gb"] = float(cls.memory_gb)
         return out
