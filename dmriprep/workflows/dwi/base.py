@@ -202,7 +202,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
 
     # Eddy distortion correction
-    # Need acqp, dwi, mask, in_index
     eddy_wf = init_eddy_wf()
     # fmt:off
     workflow.connect([
@@ -210,13 +209,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
             ("outputnode.ref_image", "inputnode.dwi_file"),
             ("outputnode.dwi_mask", "inputnode.dwi_mask"),
         ]),
-        (inputnode, gradient_table, [
-            ("in_bvec", "in_bvec"),
-            ("in_bval", "in_bval")
+        (inputnode, eddy_wf, [
+            ("in_bvec", "inputnode.in_bvec"),
+            ("in_bval", "inputnode.in_bval")
         ]),
     ])
     # fmt:on
-
 
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(
@@ -360,13 +358,13 @@ def gen_acqparams(in_file, total_readout_time=0.05):
     # Get encoding direction from json
     if metadata.get("PhaseEncodingDirection"):
         pe_dir = metadata.get("PhaseEncodingDirection")
-    else
+    else:
         pe_dir = metadata.get("PhaseEncodingAxis")
 
     # Get readout time from json, use default of 0.05 otherwise
     if metadata.get("TotalReadoutTime"):
         total_readout = metadata.get("TotalReadoutTime")
-    else
+    else:
         total_readout = total_readout_time
 
     # Construct the acqp file lines
@@ -384,24 +382,29 @@ def init_eddy_wf(
     ):
     """
     Create an eddy workflow for head motion distortion correction on the dwi.
+
     Parameters
     ----------
-    dwi_file : :obj:`str`, optional
-        Workflow name (default: ``"eddy_wf"``)
-    dwi_mask : :obj:`str`, optional
-        Workflow name (default: ``"eddy_wf"``)
-    in_bvec : :obj:`str`, optional
-        Workflow name (default: ``"eddy_wf"``)
-    in_bval : :obj:`str`, optional
-        Workflow name (default: ``"eddy_wf"``)
+    name : str
+        Name of workflow (default: ``eddy_wf``)
+
+    Inputs
+    ----------
+    dwi_file
+        dwi NIfTI file
+    dwi_mask
+        Skull-stripping mask of reference image
+    in_bvec
+        File containing bvecs of dwi
+    in_bval
+        File containing bvals of dwi
+    
     Outputs
     -------
-    out_<B0FieldIdentifier>.fmap :
-        The preprocessed fieldmap.
-    out_<B0FieldIdentifier>.fmap_ref :
-        The preprocessed fieldmap reference.
-    out_<B0FieldIdentifier>.fmap_coeff :
-        The preprocessed fieldmap coefficients.
+    out_eddy :
+        The eddy corrected diffusion image.
+    out_rotated_bvecs :
+        Rotated bvecs for each volume after eddy.
     """
     from nipype.interfaces.fsl import ApplyMask, Eddy, EddyQuad
 
@@ -460,12 +463,12 @@ def init_eddy_wf(
     # fmt:off
     workflow.connect([
         (inputnode, eddy, [
-            ("dwi_file", "inputnode.fieldmap"),
-            ("dwi_mask", "inputnode.fmap_ref"),
-            ("in_bvec", "inputnode.fmap_coeff"),
-            ("in_bval", "inputnode.fmap_coeff"),
+            ("dwi_file", "in_file"),
+            ("dwi_mask", "in_mask"),
+            ("in_bvec", "in_bvec"),
+            ("in_bval", "in_bval"),
         ]),
-        (acqp, eddy, [("out_file", "in_acqp")]),
+        (eddy_acqp, eddy, [("out_file", "in_acqp")]),
         (gen_idx, eddy, [("out_file", "in_index")]),
         # Eddy Quad Outputs
         (inputnode, eddy_quad, [
@@ -473,7 +476,7 @@ def init_eddy_wf(
             ("in_bval", "bval_file"),
         ]),
         (eddy, eddy_quad, [("out_rotated_bvecs", "bvec_file")]),
-        (acqp, eddy_quad, [("out_file", "param_file")]),
+        (eddy_acqp, eddy_quad, [("out_file", "param_file")]),
         (gen_idx, eddy_quad, [("out_file", "idx_file")]),
         (eddy, outputnode, [
             ("out_corrected", "out_eddy"),
