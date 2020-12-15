@@ -205,7 +205,7 @@ def _build_parser():
         nargs="*",
         action=OutputReferencesAction,
         help="""\
-Standard and non-standard spaces to resample anatomical and functional images to. \
+Standard and non-standard spaces to resample anatomical and diffusion images to. \
 Standard spaces may be specified by the form \
 ``<SPACE>[:cohort-<label>][:res-<resolution>][...]``, where ``<SPACE>`` is \
 a keyword designating a spatial reference, and may be followed by optional, \
