@@ -306,6 +306,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
     return workflow
 
+
 def _get_wf_name(filename):
     """
     Derive the workflow name for supplied DWI file.
