@@ -57,7 +57,7 @@ sections:
       in order to highlight potential slice Inhomogeneities and other artifacts, whereas
       the final images are resampled using cubic B-Spline interpolation.
     static: false
-    subtitle: Alignment of functional and anatomical MRI data (volume based)
+    subtitle: Alignment of diffusion anatomical MRI data (volume based)
   - bids: {datatype: figures, desc: bbregister, suffix: dwi}
     caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
       were aligned with <code>bbregister</code> (FreeSurfer).
@@ -65,7 +65,7 @@ sections:
       in order to highlight potential slice Inhomogeneities and other artifacts, whereas
       the final images are resampled using cubic B-Spline interpolation.
     static: false
-    subtitle: Alignment of functional and anatomical MRI data (surface driven)
+    subtitle: Alignment of diffusion and anatomical MRI data (surface driven)
 - name: About
   reportlets:
   - bids: {datatype: figures, desc: about, suffix: T1w}
