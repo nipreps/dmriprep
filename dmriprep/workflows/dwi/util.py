@@ -299,8 +299,6 @@ def gen_index(in_file):
     import os
     import numpy as np
     import nibabel as nib
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import fsl, utility as niu
     from nipype.utils.filemanip import fname_presuffix
 
     out_file = fname_presuffix(
@@ -315,16 +313,16 @@ def gen_index(in_file):
     np.savetxt(out_file, index_lines_reshape, fmt="%i")
     return out_file
 
+
 def gen_acqparams(in_file, total_readout_time=0.05):
     # Generate the acqp file for eddy
     import os
-    import numpy as np
-    import nibabel as nb
+    from ... import config
     from nipype.utils.filemanip import fname_presuffix
 
     # Get the metadata for the dwi
     layout = config.execution.layout
-    metadata = str(layout.get_metadata(dwi_file))
+    metadata = str(layout.get_metadata(in_file))
 
     # Generate output file name
     out_file = fname_presuffix(
@@ -366,9 +364,7 @@ def gen_acqparams(in_file, total_readout_time=0.05):
     return out_file
 
 
-def init_eddy_wf(
-        name="eddy_wf",
-    ):
+def init_eddy_wf(name="eddy_wf"):
     """
     Create an eddy workflow for head motion distortion correction on the dwi.
 
@@ -387,7 +383,7 @@ def init_eddy_wf(
         File containing bvecs of dwi
     in_bval
         File containing bvals of dwi
-    
+
     Outputs
     -------
     out_eddy :
@@ -395,7 +391,7 @@ def init_eddy_wf(
     out_rotated_bvecs :
         Rotated bvecs for each volume after eddy.
     """
-    from nipype.interfaces.fsl import ApplyMask, Eddy, EddyQuad
+    from nipype.interfaces.fsl import Eddy, EddyQuad
 
     inputnode = pe.Node(
         niu.IdentityInterface(
