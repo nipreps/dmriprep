@@ -95,6 +95,36 @@ ENV PATH="/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH"
 COPY .docker/fsl-6.0/bin/topup /usr/share/fsl/5.0/bin/topup
 COPY .docker/fsl-6.0/lib/* /usr/lib/fsl/5.0/
 
+ENV FSLDIR="/opt/fsl-6.0.1" \
+    PATH="/opt/fsl-6.0.1/bin:$PATH" \
+    FSLOUTPUTTYPE="NIFTI_GZ"
+
+RUN apt-get update -qq && \
+    apt-get install -y -q --no-install-recommends \
+           bc \
+           dc \
+           file \
+           libfontconfig1 \
+           libfreetype6 \
+           libgl1-mesa-dev \
+           libglu1-mesa-dev \
+           libgomp1 \
+           libice6 \
+           libxcursor1 \
+           libxft2 \
+           libxinerama1 \
+           libxrandr2 \
+           libxrender1 \
+           libxt6 \
+           python \
+           wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "Downloading FSL ..." && \
+    wget -q http://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
+    chmod 775 fslinstaller.py && \
+    /usr/bin/python fslinstaller.py -d /opt/fsl-6.0.1 -V 6.0.1 -q
+
 # Installing ANTs 2.3.3 (NeuroDocker build)
 # Note: the URL says 2.3.4 but it is actually 2.3.3
 ENV ANTSPATH=/usr/lib/ants
