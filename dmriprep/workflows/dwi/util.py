@@ -304,7 +304,6 @@ def gen_index(in_file):
     out_file = fname_presuffix(
         in_file,
         suffix="_index.txt",
-        newpath=os.path.abspath("."),
         use_ext=False,
     )
     vols = nib.load(in_file).shape[-1]
@@ -314,10 +313,9 @@ def gen_index(in_file):
     return out_file
 
 
-def gen_acqparams(in_file, total_readout_time=0.05):
+def gen_acqparams(in_file, total_readout_time, pe_dir):
     # Generate the acqp file for eddy
-    import os
-    from ... import config
+    from pathlib import Path
     from nipype.utils.filemanip import fname_presuffix
 
     # Get the metadata for the dwi
@@ -328,7 +326,6 @@ def gen_acqparams(in_file, total_readout_time=0.05):
     out_file = fname_presuffix(
         in_file,
         suffix="_acqparams.txt",
-        newpath=os.path.abspath("."),
         use_ext=False,
     )
 
@@ -358,19 +355,18 @@ def gen_acqparams(in_file, total_readout_time=0.05):
     acq_param_lines = acq_param_dict[pe_dir] % total_readout
 
     # Write to the acqp file
-    with open(out_file, "w") as f:
-        f.write(acq_param_lines)
+    Path(out_file).write_text(acq_param_lines)
 
     return out_file
 
 
 def init_eddy_wf(name="eddy_wf"):
     """
-    Create an eddy workflow for head motion distortion correction on the dwi.
+    Create a workflow for head-motion & Eddy currents distortion estimation with FSL ``eddy``.
 
     Parameters
     ----------
-    name : str
+    name : :obj:`str`
         Name of workflow (default: ``eddy_wf``)
 
     Inputs
@@ -390,6 +386,7 @@ def init_eddy_wf(name="eddy_wf"):
         The eddy corrected diffusion image.
     out_rotated_bvecs :
         Rotated bvecs for each volume after eddy.
+
     """
     from nipype.interfaces.fsl import Eddy, EddyQuad
 
@@ -419,7 +416,7 @@ def init_eddy_wf(name="eddy_wf"):
 
     eddy = pe.Node(
         Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
-        name="fsl_eddy",
+        name="eddy",
     )
 
     # Generate the acqp file for eddy
@@ -439,7 +436,7 @@ def init_eddy_wf(name="eddy_wf"):
             output_names=["out_file"],
             function=gen_index,
         ),
-        name="gen_index",
+        name="gen_idx",
     )
 
     eddy_quad = pe.Node(EddyQuad(verbose=True), name="eddy_quad")
