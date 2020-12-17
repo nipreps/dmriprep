@@ -202,7 +202,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
 
     # REPORTING ############################################################
-    reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
+    reportlets_wf = init_reportlets_wf(
+        str(config.execution.output_dir),
+        sdc_report=has_fieldmap,
+    )
     # fmt: off
     workflow.connect([
         (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
@@ -225,6 +228,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
         return workflow
 
+    from niworkflows.interfaces import SimpleBeforeAfter
     from niworkflows.interfaces.utility import KeySelect
     from sdcflows.workflows.apply.registration import init_coeff2epi_wf
     from sdcflows.workflows.apply.correction import init_unwarp_wf
@@ -252,6 +256,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
             f"'IntendedFor' <{dwi_file}>, using {estimator_key[0]}"
         )
 
+    sdc_report = pe.Node(
+        SimpleBeforeAfter(before_label="Distorted", after_label="Corrected",),
+        name="sdc_report",
+        mem_gb=0.1,
+    )
+
     # fmt: off
     workflow.connect([
         (inputnode, output_select, [("fmap", "fmap"),
@@ -269,7 +279,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "inputnode.distorted")]),
         (coeff2epi_wf, unwarp_wf, [
             ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
-        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference")]),
+        (dwi_reference_wf, sdc_report, [("outputnode.ref_image", "before")]),
+        (unwarp_wf, sdc_report, [("outputnode.corrected", "after"),
+                                 ("outputnode.corrected_mask", "wm_seg")]),
+        (sdc_report, reportlets_wf, [("out_report", "inputnode.sdc_report")]),
+        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference"),
+                                 ("outputnode.corrected_mask", "dwi_mask")]),
     ])
     # fmt: on
 

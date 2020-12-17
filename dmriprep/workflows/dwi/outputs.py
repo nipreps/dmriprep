@@ -5,7 +5,7 @@ from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...interfaces import DerivativesDataSink
 
 
-def init_reportlets_wf(output_dir, name="reportlets_wf"):
+def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
     """Set up a battery of datasinks to store reports in the right location."""
     from niworkflows.interfaces.masks import SimpleShowMaskRPT
 
@@ -13,7 +13,7 @@ def init_reportlets_wf(output_dir, name="reportlets_wf"):
 
     inputnode = pe.Node(
         niu.IdentityInterface(
-            fields=["source_file", "dwi_ref", "dwi_mask", "validation_report"]
+            fields=["source_file", "dwi_ref", "dwi_mask", "validation_report", "sdc_report"]
         ),
         name="inputnode",
     )
@@ -44,4 +44,18 @@ def init_reportlets_wf(output_dir, name="reportlets_wf"):
         (mask_reportlet, ds_report_mask, [("out_report", "in_file")]),
     ])
     # fmt:on
+    if sdc_report:
+        ds_report_sdc = pe.Node(
+            DerivativesDataSink(
+                base_directory=output_dir, desc="sdc", suffix="dwi", datatype="figures"
+            ),
+            name="ds_report_sdc",
+            run_without_submitting=True,
+        )
+        # fmt:off
+        workflow.connect([
+            (inputnode, ds_report_sdc, [("source_file", "source_file"),
+                                        ("sdc_report", "in_file")]),
+        ])
+        # fmt:on
     return workflow
