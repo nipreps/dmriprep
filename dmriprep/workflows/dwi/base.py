@@ -203,17 +203,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
 
     # Eddy distortion correction
-    eddy_wf = init_eddy_wf()
+    eddy_wf = init_eddy_wf(in_meta=layout.get_metadata(dwi_file))
     # fmt:off
     workflow.connect([
         (dwi_reference_wf, eddy_wf, [
             ("outputnode.ref_image", "inputnode.dwi_file"),
-            ("outputnode.dwi_mask", "inputnode.dwi_mask"),
-        ]),
-        (inputnode, eddy_wf, [
-            ("in_bvec", "inputnode.in_bvec"),
-            ("in_bval", "inputnode.in_bval")
-        ]),
+        ])
     ])
     # fmt:on
 

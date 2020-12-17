@@ -296,7 +296,6 @@ def _normalize(in_file, newmax=2000, perc=98.0):
 
 def gen_index(in_file):
     # Generate the index file for eddy
-    import os
     import numpy as np
     import nibabel as nib
     from nipype.utils.filemanip import fname_presuffix
@@ -313,14 +312,11 @@ def gen_index(in_file):
     return out_file
 
 
-def gen_acqparams(in_file, total_readout_time, pe_dir):
+def gen_acqparams(in_file, in_meta, total_readout_time, pe_dir=None):
     # Generate the acqp file for eddy
+    from sdcflows.utils.epimanip import get_trt
     from pathlib import Path
     from nipype.utils.filemanip import fname_presuffix
-
-    # Get the metadata for the dwi
-    layout = config.execution.layout
-    metadata = str(layout.get_metadata(in_file))
 
     # Generate output file name
     out_file = fname_presuffix(
@@ -340,18 +336,15 @@ def gen_acqparams(in_file, total_readout_time, pe_dir):
     }
 
     # Get encoding direction from json
-    if metadata.get("PhaseEncodingDirection"):
-        pe_dir = metadata.get("PhaseEncodingDirection")
+    if pe_dir is not None:
+        pe_dir = pe_dir
     else:
-        pe_dir = metadata.get("PhaseEncodingAxis")
+        pe_dir = in_meta.get("PhaseEncodingDirection")
 
-    # Get readout time from json, use default of 0.05 otherwise
-    if metadata.get("TotalReadoutTime"):
-        total_readout = metadata.get("TotalReadoutTime")
-    else:
-        total_readout = total_readout_time
+    # Get readout time from dwi
+    total_readout = get_trt(in_meta=in_meta, in_file=in_file)
 
-    # Construct the acqp file lines
+    # Construct the acqp file line
     acq_param_lines = acq_param_dict[pe_dir] % total_readout
 
     # Write to the acqp file
@@ -360,12 +353,14 @@ def gen_acqparams(in_file, total_readout_time, pe_dir):
     return out_file
 
 
-def init_eddy_wf(name="eddy_wf"):
+def init_eddy_wf(in_meta, name="eddy_wf"):
     """
     Create a workflow for head-motion & Eddy currents distortion estimation with FSL ``eddy``.
 
     Parameters
     ----------
+    in_meta : :obj:`dict`
+        Metadata of diffusion image.
     name : :obj:`str`
         Name of workflow (default: ``eddy_wf``)
 
@@ -373,31 +368,18 @@ def init_eddy_wf(name="eddy_wf"):
     ----------
     dwi_file
         dwi NIfTI file
-    dwi_mask
-        Skull-stripping mask of reference image
-    in_bvec
-        File containing bvecs of dwi
-    in_bval
-        File containing bvals of dwi
 
     Outputs
     -------
     out_eddy :
-        The eddy corrected diffusion image.
-    out_rotated_bvecs :
-        Rotated bvecs for each volume after eddy.
+        The eddy corrected diffusion image..
 
     """
-    from nipype.interfaces.fsl import Eddy, EddyQuad
+    from nipype.interfaces.fsl import EddyCorrect
 
     inputnode = pe.Node(
         niu.IdentityInterface(
-            fields=[
-                "dwi_file",
-                "dwi_mask",
-                "in_bvec",
-                "in_bval",
-            ]
+            fields=["dwi_file"]
         ),
         name="inputnode",
     )
@@ -405,8 +387,7 @@ def init_eddy_wf(name="eddy_wf"):
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                "out_eddy",
-                "out_rotated_bvecs"
+                "out_eddy"
             ]
         ),
         name="outputnode",
@@ -414,45 +395,19 @@ def init_eddy_wf(name="eddy_wf"):
 
     workflow = Workflow(name=name)
 
-    eddy = pe.Node(
-        Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
-        name="eddy",
-    )
-
-    # Generate the acqp file for eddy
-    eddy_acqp = pe.Node(
-        niu.Function(
-            input_names=["in_file"],
-            output_names=["out_file"],
-            function=gen_acqparams,
-        ),
-        name="eddy_acqp",
-    )
-
-    # Generate the index file for eddy
-    gen_idx = pe.Node(
-        niu.Function(
-            input_names=["in_file"],
-            output_names=["out_file"],
-            function=gen_index,
-        ),
-        name="gen_idx",
+    eddy_correct = pe.Node(
+        EddyCorrect(),
+        name="eddy_correct",
     )
 
     # Connect the workflow
     # fmt:off
     workflow.connect([
-        (inputnode, eddy, [
-            ("dwi_file", "in_file"),
-            ("dwi_mask", "in_mask"),
-            ("in_bvec", "in_bvec"),
-            ("in_bval", "in_bval"),
+        (inputnode, eddy_correct, [
+            ("dwi_file", "in_file")
         ]),
-        (eddy_acqp, eddy, [("out_file", "in_acqp")]),
-        (gen_idx, eddy, [("out_file", "in_index")]),
-        (eddy, outputnode, [
-            ("out_corrected", "out_eddy"),
-            ("out_rotated_bvecs", "out_rotated_bvecs")
+        (eddy_correct, outputnode, [
+            ("out_corrected", "out_eddy")
         ]),
     ])
     # fmt:on
