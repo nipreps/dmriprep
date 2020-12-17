@@ -353,14 +353,12 @@ def gen_acqparams(in_file, in_meta, total_readout_time, pe_dir=None):
     return out_file
 
 
-def init_eddy_wf(in_meta, name="eddy_wf"):
+def init_eddy_wf(name="eddy_wf"):
     """
     Create a workflow for head-motion & Eddy currents distortion estimation with FSL ``eddy``.
 
     Parameters
     ----------
-    in_meta : :obj:`dict`
-        Metadata of diffusion image.
     name : :obj:`str`
         Name of workflow (default: ``eddy_wf``)
 
@@ -407,7 +405,7 @@ def init_eddy_wf(in_meta, name="eddy_wf"):
             ("dwi_file", "in_file")
         ]),
         (eddy_correct, outputnode, [
-            ("out_corrected", "out_eddy")
+            ("eddy_corrected", "out_eddy")
         ]),
     ])
     # fmt:on
