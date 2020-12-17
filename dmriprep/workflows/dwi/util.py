@@ -439,8 +439,6 @@ def init_eddy_wf(name="eddy_wf"):
         name="gen_idx",
     )
 
-    eddy_quad = pe.Node(EddyQuad(verbose=True), name="eddy_quad")
-
     # Connect the workflow
     # fmt:off
     workflow.connect([
@@ -452,14 +450,6 @@ def init_eddy_wf(name="eddy_wf"):
         ]),
         (eddy_acqp, eddy, [("out_file", "in_acqp")]),
         (gen_idx, eddy, [("out_file", "in_index")]),
-        # Eddy Quad Outputs
-        (inputnode, eddy_quad, [
-            ("dwi_mask", "mask_file"),
-            ("in_bval", "bval_file"),
-        ]),
-        (eddy, eddy_quad, [("out_rotated_bvecs", "bvec_file")]),
-        (eddy_acqp, eddy_quad, [("out_file", "param_file")]),
-        (gen_idx, eddy_quad, [("out_file", "idx_file")]),
         (eddy, outputnode, [
             ("out_corrected", "out_eddy"),
             ("out_rotated_bvecs", "out_rotated_bvecs")
