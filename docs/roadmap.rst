@@ -4,7 +4,7 @@ Development road-map
 ====================
 This road-map serves as a guide for developers as well as a way for us to
 communicate to users and other stake-holders about the expectations they should
-have about the current functionality of the software and future developments.
+have for the current functionality of the software and future developments.
 
 If you would like to be part of the team developing this road-map, please be sure to
 read our `Contributors Guidelines <https://www.nipreps.org/community/CONTRIBUTING>`__.
@@ -26,7 +26,7 @@ alpha releases, which makes *dMRIPrep* go ahead of *fMRIPrep* in addressing dist
 :math:`B_0` inhomogeneity.
 
 This release will also include Salim's efforts in `#144 <https://github.com/nipreps/dmriprep/pull/144>`__
-to provide a temporary implementation of head-motion and Eddy-currents correction using
+to provide a temporary implementation of head-motion and eddy-currents correction using
 FSL's ``eddy``.
 This temporary solution will be replaced by our 3dSHORE-based algorithm ported from QSIPREP,
 and left in place for researchers who prefer this option.
