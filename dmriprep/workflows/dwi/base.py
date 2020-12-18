@@ -71,7 +71,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from ...interfaces.vectors import CheckGradientTable
     from .util import init_dwi_reference_wf
     from .outputs import init_reportlets_wf
-    from .util import init_eddy_wf
+    from .eddy import init_eddy_wf
 
     layout = config.execution.layout
 
