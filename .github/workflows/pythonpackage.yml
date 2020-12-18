@@ -15,7 +15,6 @@ jobs:
       matrix:
         python-version: [3.7, 3.8]
         pip: ["pip~=18.1", "pip>=20.3"]
-        setuptools: ["setuptools==40.8.0", "setuptools"]
         
     steps:
     - name: Set up Python ${{ matrix.python-version }}
@@ -48,7 +47,7 @@ jobs:
       run: |
         python -m venv /tmp/install_sdist
         source /tmp/install_sdist/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "${{ matrix.pip }}" setuptools
         python -m pip install dist/dmriprep*.tar.gz
         INSTALLED_VERSION=$(python -c 'import dmriprep; print(dmriprep.__version__, end="")')
         echo "VERSION: \"${THISVERSION}\""
@@ -58,7 +57,7 @@ jobs:
       run: |
         python -m venv /tmp/install_wheel
         source /tmp/install_wheel/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "${{ matrix.pip }}" setuptools
         python -m pip install dist/dmriprep*.whl
         INSTALLED_VERSION=$(python -c 'import dmriprep; print(dmriprep.__version__, end="")')
         echo "INSTALLED: \"${INSTALLED_VERSION}\""
@@ -67,7 +66,7 @@ jobs:
       run: |
         python -m venv /tmp/setup_install
         source /tmp/setup_install/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "${{ matrix.pip }}" setuptools
         python -m pip install numpy scipy "Cython >= 0.28.5" # sklearn needs this
         python -m pip install scikit-learn  # otherwise it attempts to build it
         python setup.py install
@@ -78,13 +77,9 @@ jobs:
       run: |
         python -m venv /tmp/setup_develop
         source /tmp/setup_develop/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "${{ matrix.pip }}" setuptools
         # sklearn needs these dependencies
-        if [ "${{ matrix.python-version }}" == "3.6" ]; then
-            python -m pip install "numpy < 1.20" scipy "Cython >= 0.28.5"  # numpy 1.20 drops Py3.6
-        else
-            python -m pip install numpy scipy "Cython >= 0.28.5"
-        fi
+        python -m pip install numpy scipy "Cython >= 0.28.5"
         python -m pip install scikit-learn  # otherwise it attempts to build it
         python setup.py develop
         INSTALLED_VERSION=$(python -c 'import dmriprep; print(dmriprep.__version__, end="")')
