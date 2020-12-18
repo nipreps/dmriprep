@@ -35,18 +35,18 @@ sections:
       mapping of the field, using Spiral Echo Imaging (SEI) or postprocessing a "phase-difference"
       acquisition. The plot below shows an anatomical "magnitude" reference and the corresponding
       fieldmap.
-    description: Hover on the panels with the mouse pointer to also visualize the intensity of the
-      inhomogeneity of the field in Hertz.
+    description: Hover over the panels with the mouse pointer to also visualize the intensity of the
+      field inhomogeneity in Hertz.
     static: false
     subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
   - bids: {datatype: figures, desc: phasediff, suffix: fieldmap}
     caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
-      along the phase-encoding direction of the image. A Gradient-Recalled Echo scheme for the 
+      along the phase-encoding direction of the image. A Gradient-Recalled Echo (GRE) scheme for the 
       mapping of the <em>B<sub>0</sub></em> inhomogeneities by subtracting the phase maps obtained at
       two subsequent echoes. The plot below shows an anatomical "magnitude" reference and the corresponding
       fieldmap.
-    description: Hover on the panels with the mouse pointer to also visualize the intensity of the
-      inhomogeneity of the field in Hertz.
+    description: Hover over the panels with the mouse pointer to also visualize the intensity of the
+      field inhomogeneity in Hertz.
     static: false
     subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
   - bids: {datatype: figures, desc: pepolar, suffix: fieldmap}
@@ -71,7 +71,7 @@ sections:
     subtitle: Reference <em>b=0</em> and brain mask
   - bids: {datatype: figures, desc: sdc, suffix: dwi}
     caption: Susceptibility distortions correction (SDC).
-    description: The reportlet shows a <em>b=0</em> reference <em>before</em> and <em>after</em> correction.
+    description: The reportlet shows a <em>b=0</em> reference <em>before</em> and <em>after</em> distortion correction.
     static: false
     subtitle: Unwarping of susceptibility distortions
   - bids: {datatype: figures, desc: coreg, suffix: dwi}
