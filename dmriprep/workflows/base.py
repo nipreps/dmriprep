@@ -253,6 +253,7 @@ It is released under the [CC0]\
         spaces=spaces,
         t1w=subject_data["t1w"],
     )
+    anat_preproc_wf.__desc__ = f"\n\n{anat_preproc_wf.__desc__}"
 
     # fmt:off
     workflow.connect([
@@ -290,9 +291,9 @@ It is released under the [CC0]\
 
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
-    anat_preproc_wf.__postdesc__ = (
-        (anat_preproc_wf.__postdesc__ or "")
-        + f"""
+    anat_preproc_wf.__postdesc__ = f"""\
+{anat_preproc_wf.__postdesc__ or ''}
+
 Diffusion data preprocessing
 
 : For each of the {len(subject_data["dwi"])} DWI scans found per subject
@@ -300,7 +301,6 @@ Diffusion data preprocessing
 format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled b-values),
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """
-    )
 
     # SDC Step 0: Determine whether fieldmaps can/should be estimated
     fmap_estimators = None
@@ -360,6 +360,12 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         output_dir=str(output_dir),
         subject=subject_id,
     )
+    fmap_wf.__desc__ = f"""
+*B<sub>0</sub>* fieldmap data preprocessing
+
+: A total of {len(fmap_estimators)} fieldmaps were found available within the input
+BIDS structure for this particular subject.
+"""
 
     # TODO: Requires nipreps/sdcflows#147
     for dwi_preproc_wf in dwi_preproc_list:

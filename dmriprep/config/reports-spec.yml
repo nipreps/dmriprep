@@ -27,10 +27,30 @@ sections:
       overlaid on the participant's T1w template.
     subtitle: Surface reconstruction
 - name: Fieldmaps
-  ordering: session,run
+  ordering: session,run,fmapid
   reportlets:
+  - bids: {datatype: figures, desc: mapped, suffix: fieldmap}
+    caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
+      along the phase-encoding direction of the image. Some scanners produce a <em>B<sub>0</sub></em>
+      mapping of the field, using Spiral Echo Imaging (SEI) or postprocessing a "phase-difference"
+      acquisition. The plot below shows an anatomical "magnitude" reference and the corresponding
+      fieldmap.
+    description: Hover over the panels with the mouse pointer to also visualize the intensity of the
+      field inhomogeneity in Hertz.
+    static: false
+    subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
+  - bids: {datatype: figures, desc: phasediff, suffix: fieldmap}
+    caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
+      along the phase-encoding direction of the image. A Gradient-Recalled Echo (GRE) scheme for the 
+      mapping of the <em>B<sub>0</sub></em> inhomogeneities by subtracting the phase maps obtained at
+      two subsequent echoes. The plot below shows an anatomical "magnitude" reference and the corresponding
+      fieldmap.
+    description: Hover over the panels with the mouse pointer to also visualize the intensity of the
+      field inhomogeneity in Hertz.
+    static: false
+    subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
   - bids: {datatype: figures, desc: pepolar, suffix: fieldmap}
-    caption: Inhomogeneities of the *B0* field introduce (oftentimes severe) spatial distortions
+    caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
       along the phase-encoding direction of the image. Utilizing two or more images with different
       phase-encoding polarities (PEPolar) or directions, it is possible to estimate the inhomogeneity
       of the field. The plot below shows a reference EPI (echo-planar imaging) volume generated
@@ -44,11 +64,16 @@ sections:
   reportlets:
   - bids: {datatype: figures, desc: validation, suffix: dwi}
   - bids: {datatype: figures, desc: brain, suffix: mask}
-    caption: Average b=0 that serves for reference in early preprocessing steps.
-    descriptions: The reference b=0 is obtained as the voxel-wise median across
-      all b=0 found in the dataset, after accounting for signal drift.
-      The red contour shows the brain mask calculated using this reference b=0.
-    subtitle: Reference b=0 and brain mask
+    caption: Average <em>b=0</em> that serves for reference in early preprocessing steps.
+    descriptions: The reference <em>b=0</em> is obtained as the voxel-wise median across
+      all <em>b=0</em> found in the dataset, after accounting for signal drift.
+      The red contour shows the brain mask calculated using this reference <em>b=0</em>.
+    subtitle: Reference <em>b=0</em> and brain mask
+  - bids: {datatype: figures, desc: sdc, suffix: dwi}
+    caption: Susceptibility distortions correction (SDC).
+    description: The reportlet shows a <em>b=0</em> reference <em>before</em> and <em>after</em> distortion correction.
+    static: false
+    subtitle: Unwarping of susceptibility distortions
   - bids: {datatype: figures, desc: coreg, suffix: dwi}
     caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
       were aligned with <code>mri_coreg</code> (FreeSurfer).

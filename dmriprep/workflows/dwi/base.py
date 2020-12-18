@@ -52,7 +52,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     fmap_id
         The BIDS modality label of the fieldmap being used
 
-
     Outputs
     -------
     dwi_reference
@@ -81,13 +80,17 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     )
 
     if has_fieldmap:
+        import re
         from sdcflows.fieldmaps import get_identifier
 
-        estimator_key = get_identifier(dwi_file)
+        dwi_rel = re.sub(
+            r"^sub-[a-zA-Z0-9]*/", "", str(dwi_file.relative_to(layout.root))
+        )
+        estimator_key = get_identifier(dwi_rel)
         if not estimator_key:
             has_fieldmap = False
             config.loggers.workflow.critical(
-                f"None of the available B0 fieldmaps are associated to <{dwi_file}>"
+                f"None of the available B0 fieldmaps are associated to <{dwi_rel}>"
             )
 
     # Build workflow
@@ -167,7 +170,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
         ds_report_reg = pe.Node(
             DerivativesDataSink(
-                base_directory=str(config.execution.output_dir), datatype="figures",
+                base_directory=str(config.execution.output_dir),
+                datatype="figures",
             ),
             name="ds_report_reg",
             run_without_submitting=True,
@@ -198,7 +202,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
 
     # REPORTING ############################################################
-    reportlets_wf = init_reportlets_wf(str(config.execution.output_dir))
+    reportlets_wf = init_reportlets_wf(
+        str(config.execution.output_dir),
+        sdc_report=has_fieldmap,
+    )
     # fmt: off
     workflow.connect([
         (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
@@ -221,14 +228,20 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
         return workflow
 
+    from niworkflows.interfaces import SimpleBeforeAfter
     from niworkflows.interfaces.utility import KeySelect
     from sdcflows.workflows.apply.registration import init_coeff2epi_wf
     from sdcflows.workflows.apply.correction import init_unwarp_wf
 
     coeff2epi_wf = init_coeff2epi_wf(
-        omp_nthreads=config.nipype.omp_nthreads, write_coeff=True
+        debug=config.execution.debug,
+        omp_nthreads=config.nipype.omp_nthreads,
+        write_coeff=True,
     )
-    unwarp_wf = init_unwarp_wf(omp_nthreads=config.nipype.omp_nthreads)
+    unwarp_wf = init_unwarp_wf(
+        debug=config.execution.debug,
+        omp_nthreads=config.nipype.omp_nthreads
+    )
     unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
 
     output_select = pe.Node(
@@ -242,6 +255,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
             f"Several fieldmaps <{', '.join(estimator_key)}> are "
             f"'IntendedFor' <{dwi_file}>, using {estimator_key[0]}"
         )
+
+    sdc_report = pe.Node(
+        SimpleBeforeAfter(before_label="Distorted", after_label="Corrected",),
+        name="sdc_report",
+        mem_gb=0.1,
+    )
 
     # fmt: off
     workflow.connect([
@@ -260,7 +279,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "inputnode.distorted")]),
         (coeff2epi_wf, unwarp_wf, [
             ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
-        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference")]),
+        (dwi_reference_wf, sdc_report, [("outputnode.ref_image", "before")]),
+        (unwarp_wf, sdc_report, [("outputnode.corrected", "after"),
+                                 ("outputnode.corrected_mask", "wm_seg")]),
+        (sdc_report, reportlets_wf, [("out_report", "inputnode.sdc_report")]),
+        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference"),
+                                 ("outputnode.corrected_mask", "dwi_mask")]),
     ])
     # fmt: on
 
