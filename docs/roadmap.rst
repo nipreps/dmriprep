@@ -3,14 +3,14 @@
 Development road-map
 ====================
 This road-map serves as a guide for developers as well as a way for us to
-communicate to users and other stake-holders aboout the expectations they should
+communicate to users and other stake-holders about the expectations they should
 have about the current functionality of the software and future developments.
 
-If you want to be part of the team developing this road-map, please make sure you
-take a look into our `Contributors Guidelines <https://www.nipreps.org/community/CONTRIBUTING>`__.
+If you would like to be part of the team developing this road-map, please be sure to
+read our `Contributors Guidelines <https://www.nipreps.org/community/CONTRIBUTING>`__.
 Then, please write one of the developers to be invited to our bi-weekly meetings.
 
-This road-map proposes a :abbr:`RERO (release early, release often)` planning, scheduling
+This road-map proposes a :abbr:`RERO (release early, release often)` philosophy, scheduling
 a monthly release until the first stable 1.0 release is reached.
 
 .. important::
@@ -26,7 +26,7 @@ alpha releases, which makes *dMRIPrep* go ahead of *fMRIPrep* in addressing dist
 :math:`B_0` inhomogeneity.
 
 This release will also include Salim's efforts in `#144 <https://github.com/nipreps/dmriprep/pull/144>`__
-to provide with a temporary implementation of head-motion and Eddy-currents correction using
+to provide a temporary implementation of head-motion and Eddy-currents correction using
 FSL's ``eddy``.
 This temporary solution will be replaced by our 3dSHORE-based algorithm ported from QSIPREP,
 and left in place for researchers who prefer this option.
@@ -114,7 +114,7 @@ Version 0.9 (May, 2021)
 
   - Determine an appropriate dataset
   - Plan for benchmarking experiments (`#121 <https://github.com/nipreps/dmriprep/issues/121>`__)
-  - Start with addressing issues as the are reported
+  - Start with addressing issues as they are reported
 
 Version 1.0 (Targetted for September 2021)
 ------------------------------------------
