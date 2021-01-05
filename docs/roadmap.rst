@@ -8,7 +8,7 @@ have for the current functionality of the software and future developments.
 
 If you would like to be part of the team developing this road-map, please be sure to
 read our `Contributors Guidelines <https://www.nipreps.org/community/CONTRIBUTING>`__.
-Then, please write one of the developers to be invited to our bi-weekly meetings.
+Then, you can contact the developers through the `Mattermost channel <https://mattermost.brainhack.org/brainhack/channels/dmriprep>`__ to be invited to our bi-weekly meetings.
 
 This road-map proposes a :abbr:`RERO (release early, release often)` philosophy, scheduling
 a monthly release until the first stable 1.0 release is reached.
@@ -90,6 +90,8 @@ focus on the implementation of steps addressing noise in DWI:
 #. Identification of outlier measurements (+ imputation?)
 
 #. Implementation of component-based noise identification techniques
+
+    - Comparison of multiple approaches including MP-PCA, NLMeans, and Patch2Self (`#132 <https://github.com/nipreps/dmriprep/issues/132>`__)
 
 #. Gibbs-ringing: investigate whether it should be estimated if other techniques
    are in place (i.e., component-based above), and ordering of steps.
