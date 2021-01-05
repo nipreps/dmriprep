@@ -93,6 +93,7 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
 ENV PATH="/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH"
 
 COPY .docker/fsl-6.0/bin/topup /usr/share/fsl/5.0/bin/topup
+COPY .docker/fsl-6.0/bin/imglob /usr/share/fsl/5.0/bin/imglob
 COPY .docker/fsl-6.0/lib/* /usr/lib/fsl/5.0/
 
 # Installing ANTs 2.3.3 (NeuroDocker build)
