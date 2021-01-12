@@ -1,5 +1,6 @@
 """Utilities to operate on diffusion gradients."""
 from .. import config
+from collections import Counter
 from pathlib import Path
 from itertools import permutations
 import nibabel as nb
@@ -175,6 +176,11 @@ class DiffusionGradientTable:
         self._bvals = np.array(value)
 
     @property
+    def count_shells(self):
+        """Count the number of volumes per b-value."""
+        return Counter(sorted(self._bvals))
+
+    @property
     def b0mask(self):
         """Get a mask of low-b frames."""
         return np.squeeze(self.gradients[..., -1] < self._b0_thres)
@@ -291,7 +297,7 @@ def normalize_gradients(
     Normalize b-vectors and b-values.
 
     The resulting b-vectors will be of unit length for the non-zero b-values.
-    The resultinb b-values will be normalized by the square of the
+    The resulting b-values will be normalized by the square of the
     corresponding vector amplitude.
 
     Parameters

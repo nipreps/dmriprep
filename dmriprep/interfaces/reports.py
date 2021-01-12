@@ -30,6 +30,16 @@ SUBJECT_TEMPLATE = """\
 \t</ul>
 """
 
+DIFFUSION_TEMPLATE = """\
+\t\t<details open>
+\t\t<summary>Summary</summary>
+\t\t<ul class="elem-desc">
+\t\t\t<li>Phase-encoding (PE) direction: {pe_direction}</li>
+\t\t\t<li>Distinct shells: {shells_dist}</li>
+\t\t</ul>
+\t\t</details>
+"""
+
 ABOUT_TEMPLATE = """\t<ul>
 \t\t<li>dMRIPrep version: {version}</li>
 \t\t<li>dMRIPrep command: <code>{command}</code></li>
@@ -116,6 +126,25 @@ class SubjectSummary(SummaryInterface):
             std_spaces=", ".join(self.inputs.std_spaces),
             nstd_spaces=", ".join(self.inputs.nstd_spaces),
             freesurfer_status=freesurfer_status,
+        )
+
+
+class DiffusionSummaryInputSpec(BaseInterfaceInputSpec):
+    pe_direction = traits.Enum(
+        None, "i", "i-", "j", "j-", "k", "k-", desc="Phase-encoding direction detected"
+    )
+    shells_dist = traits.Dict(mandatory=True, desc="Number of distinct shells")
+
+
+class DiffusionSummary(SummaryInterface):
+    input_spec = DiffusionSummaryInputSpec
+
+    def _generate_segment(self):
+        pe_direction = self.inputs.pe_direction
+        shells_dist = self.inputs.shells_dist
+
+        return DIFFUSION_TEMPLATE.format(
+            pe_direction=pe_direction, shells_dist=shells_dist
         )
 
 
