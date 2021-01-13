@@ -62,13 +62,13 @@ def init_eddy_wf(name="eddy_wf"):
         Name of workflow (default: ``eddy_wf``)
 
     Inputs
-    ----------
+    ------
     dwi_file
         dwi NIfTI file
 
     Outputs
     -------
-    out_eddy :
+    out_eddy
         The eddy corrected diffusion image..
 
     """
@@ -81,7 +81,7 @@ def init_eddy_wf(name="eddy_wf"):
     workflow = Workflow(name=name)
     workflow.__desc__ = f"""\
 Geometrical distortions derived from the so-called Eddy-currents, and head-motion
-realignment parameters were estimated with the joint modeling of FSL ``eddy_correct``
+realignment parameters were estimated with the joint modeling of ``eddy_correct``,
 included in FSL {EddyCorrect().version} [@eddy].
 """
 
