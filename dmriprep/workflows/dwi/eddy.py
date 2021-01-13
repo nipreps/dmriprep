@@ -52,7 +52,7 @@ def gen_eddy_textfiles(in_file, in_meta):
     return out_acqparams, out_index
 
 
-def init_eddy_wf(name="eddy_wf"):
+def init_eddy_wf(debug=False, name="eddy_wf"):
     """
     Create a workflow for head-motion & Eddy currents distortion estimation with FSL.
 
@@ -72,26 +72,71 @@ def init_eddy_wf(name="eddy_wf"):
         The eddy corrected diffusion image..
 
     """
-    from nipype.interfaces.fsl import EddyCorrect
+    from nipype.interfaces.fsl import Eddy
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["dwi_file"]), name="inputnode",)
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=[
+                "dwi_file",
+                "metadata",
+                "dwi_mask",
+                "in_bvec",
+                "in_bval"
+            ]
+        ),
+        name="inputnode",
+    )
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["out_eddy"]), name="outputnode",)
+    outputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=[
+                "out_rotated_bvecs",
+                "out_eddy"
+            ]
+        ),
+        name="outputnode",
+    )
 
     workflow = Workflow(name=name)
     workflow.__desc__ = f"""\
 Geometrical distortions derived from the so-called Eddy-currents, and head-motion
-realignment parameters were estimated with the joint modeling of ``eddy_correct``,
-included in FSL {EddyCorrect().version} [@eddy].
+realignment parameters were estimated with the joint modeling of ``eddy_openmp``,
+included in FSL {Eddy().version} [@eddy].
 """
+    eddy = pe.Node(
+        Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
+        name="eddy",
+    )
 
-    eddy_correct = pe.Node(EddyCorrect(), name="eddy_correct",)
+    if debug:
+        eddy.inputs.niter = 1
 
-    # Connect the workflow
+    # Generate the acqp and index files for eddy
+    gen_eddy_files = pe.Node(
+        niu.Function(
+            input_names=["in_file", "in_meta"],
+            output_names=["out_acqparams", "out_index"],
+            function=gen_eddy_textfiles,
+        ),
+        name="gen_eddy_files",
+    )
+
     # fmt:off
     workflow.connect([
-        (inputnode, eddy_correct, [("dwi_file", "in_file")]),
-        (eddy_correct, outputnode, [("eddy_corrected", "out_eddy")]),
+        (inputnode, eddy, [
+            ("dwi_file", "in_file"),
+            ("dwi_mask", "in_mask"),
+            ("in_bvec", "in_bvec"),
+            ("in_bval", "in_bval"),
+        ]),
+        (inputnode, gen_eddy_files, [
+            ("dwi_file", "in_file"),
+            ("metadata", "in_meta")
+        ]),
+        (eddy, outputnode, [
+            ("out_corrected", "out_eddy"),
+            ("out_rotated_bvecs", "out_rotated_bvecs")
+        ]),
     ])
     # fmt:on
     return workflow
