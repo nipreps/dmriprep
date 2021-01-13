@@ -104,7 +104,7 @@ realignment parameters were estimated with the joint modeling of ``eddy_openmp``
 included in FSL {Eddy().version} [@eddy].
 """
     eddy = pe.Node(
-        Eddy(repol=True, cnr_maps=True, residuals=True, method="jac"),
+        Eddy(),
         name="eddy",
     )
 
@@ -132,6 +132,10 @@ included in FSL {Eddy().version} [@eddy].
         (inputnode, gen_eddy_files, [
             ("dwi_file", "in_file"),
             ("metadata", "in_meta")
+        ]),
+        (gen_eddy_files, eddy, [
+            ("out_acqparams", "in_acqp"),
+            ("out_index", "in_index"),
         ]),
         (eddy, outputnode, [
             ("out_corrected", "out_eddy"),
