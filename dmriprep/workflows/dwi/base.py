@@ -208,7 +208,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     # fmt:off
     workflow.connect([
         (dwi_reference_wf, eddy_wf, [
-            ("outputnode.ref_image", "inputnode.dwi_file"),
+            ("outputnode.dwi_file", "inputnode.dwi_file"),
             ("outputnode.dwi_mask", "inputnode.dwi_mask"),
         ]),
         (inputnode, eddy_wf, [
