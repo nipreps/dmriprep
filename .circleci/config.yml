@@ -379,7 +379,7 @@ jobs:
             docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - run:
           name: Run full diffusion workflow on ds001771
-          no_output_timeout: 2h
+          no_output_timeout: 4h
           command: |
             mkdir -p /tmp/ds001771/work /tmp/ds001771/derivatives
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
