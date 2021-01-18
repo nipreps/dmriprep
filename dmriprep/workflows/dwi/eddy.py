@@ -43,9 +43,18 @@ def gen_eddy_textfiles(in_file, in_meta):
     fsl_pe["ijk".index(pe_dir[0])] = "-1" if pe_dir.endswith("-") else "1"
 
     # Write to the acqp file
-    Path(out_acqparams).write_text(
-        f"{' '.join(fsl_pe)} {get_trt(in_meta, in_file=in_file):0.7f}"
-    )
+    try:
+        Path(out_acqparams).write_text(
+            f"{' '.join(fsl_pe)} {get_trt(in_meta, in_file=in_file):0.7f}"
+        )
+    except ValueError:
+        config.loggers.workflow.warning(
+            f"'TotalReadoutTime' not found for <{dwi_file}>, using"
+            f"a default value of 0.05 instead."
+        )
+        Path(out_acqparams).write_text(
+            f"{' '.join(fsl_pe)} {0.05}"
+        )
 
     out_index = fname_presuffix(in_file, suffix="_index.txt", use_ext=False,)
     Path(out_index).write_text(f"{' '.join(['1'] * nb.load(in_file).shape[3])}")
