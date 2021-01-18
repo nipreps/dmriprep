@@ -48,10 +48,6 @@ def gen_eddy_textfiles(in_file, in_meta):
             f"{' '.join(fsl_pe)} {get_trt(in_meta, in_file=in_file):0.7f}"
         )
     except ValueError:
-        config.loggers.workflow.warning(
-            f"'TotalReadoutTime' not found for <{dwi_file}>, using"
-            f"a default value of 0.05 instead."
-        )
         Path(out_acqparams).write_text(
             f"{' '.join(fsl_pe)} {0.05}"
         )
