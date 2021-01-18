@@ -77,7 +77,7 @@ def init_eddy_wf(debug=False, name="eddy_wf"):
         The eddy corrected diffusion image..
 
     """
-    from nipype.interfaces.fsl import Eddy
+    from nipype.interfaces.fsl import Eddy, ExtractROI
 
     inputnode = pe.Node(
         niu.IdentityInterface(
@@ -96,6 +96,7 @@ def init_eddy_wf(debug=False, name="eddy_wf"):
         niu.IdentityInterface(
             fields=[
                 "out_rotated_bvecs",
+                "eddy_ref_image",
                 "out_eddy"
             ]
         ),
@@ -127,6 +128,8 @@ included in FSL {Eddy().version} [@eddy].
         name="gen_eddy_files",
     )
 
+    eddy_ref_img = pe.Node(ExtractROI(t_min=0, t_size=1), name="eddy_roi")
+
     # fmt:off
     workflow.connect([
         (inputnode, eddy, [
@@ -147,6 +150,8 @@ included in FSL {Eddy().version} [@eddy].
             ("out_corrected", "out_eddy"),
             ("out_rotated_bvecs", "out_rotated_bvecs")
         ]),
+        (eddy, eddy_ref_img, [("out_corrected", "in_file")]),
+        (eddy_ref_img, outputnode, [("roi_file", "eddy_ref_image")]),
     ])
     # fmt:on
     return workflow

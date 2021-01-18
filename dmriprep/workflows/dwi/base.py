@@ -233,8 +233,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
             ("in_bvec", "inputnode.in_bvec"),
             ("in_bval", "inputnode.in_bval")
         ]),
-        (dwi_reference_wf, eddy_report, [("outputnode.dwi_file", "before")]),
-        (eddy_wf, eddy_report, [('outputnode.out_eddy', 'after')]),
+        (dwi_reference_wf, eddy_report, [("outputnode.ref_image", "before")]),
+        (eddy_wf, eddy_report, [('outputnode.eddy_ref_image', 'after')]),
         (dwi_reference_wf, ds_report_eddy, [("outputnode.dwi_file", "source_file")]),
         (eddy_report, ds_report_eddy, [("out_report", "in_file")]),
     ])
