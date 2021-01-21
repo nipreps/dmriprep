@@ -91,6 +91,13 @@ sections:
       the final images are resampled using cubic B-Spline interpolation.
     static: false
     subtitle: Alignment of diffusion and anatomical MRI data (surface driven)
+  - bids: {datatype: figures, desc: eddy, suffix: dwi}
+    caption: Head-motion and eddy current corrected diffusion data
+    description: Geometrical distortions derived from the so-called Eddy-currents, 
+    and head-motion realignment parameters were estimated with the joint modeling of 
+    <code>{eddy_openmp}</code>, included in FSL.
+    static: false
+    subtitle: Eddy corrected diffusion data
 - name: About
   reportlets:
   - bids: {datatype: figures, desc: about, suffix: T1w}

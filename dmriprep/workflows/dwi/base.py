@@ -210,7 +210,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     ds_report_eddy = pe.Node(
         DerivativesDataSink(
             base_directory=str(config.execution.output_dir),
-            desc="eddy_corrected",
+            desc="eddy",
             datatype="figures",
         ),
         name="ds_report_eddy",
