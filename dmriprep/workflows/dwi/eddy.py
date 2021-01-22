@@ -117,6 +117,8 @@ included in FSL {Eddy().version} [@eddy].
     if debug:
         eddy.inputs.niter = 1
         eddy.inputs.is_shelled = True
+        eddy.inputs.dont_peas = True
+        eddy.inputs.nvoxhp = 10
 
     # Generate the acqp and index files for eddy
     gen_eddy_files = pe.Node(
