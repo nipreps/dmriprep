@@ -313,12 +313,19 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         fmap_estimators = find_estimators(
             layout=config.execution.layout,
             subject=subject_id,
+            fmapless=config.workflow.use_syn,
+            force_fmapless=config.workflow.force_syn,
         )
 
-        # Add fieldmap-less estimators
-        if not fmap_estimators and config.workflow.use_syn:
-            # estimators = [fm.FieldmapEstimation()]
-            raise NotImplementedError
+        if (
+            any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
+            and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))
+        ):
+            # Although this check would go better within parser, allow datasets with fieldmaps
+            # not to require spatial standardization of the T1w.
+            raise RuntimeError("""\
+Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
+Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
 
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
@@ -353,6 +360,10 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         dwi_preproc_list.append(dwi_preproc_wf)
 
     if not fmap_estimators:
+        config.loggers.workflow.warning(
+            "Data for fieldmap estimation not present. Please note that these data "
+            "will not be corrected for susceptibility distortions."
+        )
         return workflow
 
     # SDC Step 2: Manually add further estimators (e.g., fieldmap-less)
@@ -370,7 +381,6 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
 BIDS structure for this particular subject.
 """
 
-    # TODO: Requires nipreps/sdcflows#147
     for dwi_preproc_wf in dwi_preproc_list:
         # fmt: off
         workflow.connect([
@@ -391,38 +401,52 @@ BIDS structure for this particular subject.
 
     # Step 3: Manually connect PEPOLAR
     for estimator in fmap_estimators:
-        if estimator.method != fm.EstimatorType.PEPOLAR:
+        config.loggers.workflow.info(f"""\
+Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
+<{', '.join(s.path.name for s in estimator.sources)}>""")
+        if estimator.method in (fm.EstimatorType.MAPPED, fm.EstimatorType.PHASEDIFF):
             continue
 
         suffices = set(s.suffix for s in estimator.sources)
 
-        if sorted(suffices) == ["epi"]:
+        if estimator.method == fm.EstimatorType.PEPOLAR and sorted(suffices) == ["epi"]:
             getattr(fmap_wf.inputs, f"in_{estimator.bids_id}").in_data = [
                 str(s.path) for s in estimator.sources
             ]
             getattr(fmap_wf.inputs, f"in_{estimator.bids_id}").metadata = [
                 s.metadata for s in estimator.sources
             ]
-        else:
-            raise NotImplementedError
-            # from niworkflows.interfaces.utility import KeySelect
-            # est_id = estimator.bids_id
-            # estim_select = pe.MapNode(
-            #     KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
-            #     name=f"fmap_select_{est_id}",
-            #     run_without_submitting=True,
-            #     iterfields=["key"]
-            # )
-            # estim_select.inputs.key = [
-            #     str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
-            # ]
-            # # fmt:off
-            # workflow.connect([
-            #     (referencenode, estim_select, [("dwi_file", "keys"),
-            #                                   ("metadata", "metadata"),
-            #                                   ("dwi_reference", "dwi_reference"),
-            #                                   ("gradients_rasb", "gradients_rasb")]),
-            # ])
-            # # fmt:on
+            continue
+
+        if estimator.method == fm.EstimatorType.PEPOLAR:
+            raise NotImplementedError(
+                "Sophisticated PEPOLAR schemes (e.g., using DWI+EPI) are unsupported."
+            )
+
+        if estimator.method == fm.EstimatorType.ANAT:
+            from niworkflows.interfaces.utility import KeySelect
+            est_id = estimator.bids_id
+            estim_select = pe.MapNode(
+                KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
+                name=f"fmap_select_{est_id}",
+                run_without_submitting=True,
+                iterfield=["key"]
+            )
+            estim_select.inputs.key = [
+                str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
+            ]
+            # fmt:off
+            workflow.connect([
+                (referencenode, estim_select, [
+                    ("dwi_file", "keys"),
+                    ("metadata", "metadata"),
+                    ("dwi_reference", "dwi_reference"),
+                    ("gradients_rasb", "gradients_rasb")]),
+            ])
+            # fmt:on
+
+        raise RuntimeError(
+            f"Unknown fieldmap estimation strategy <{estimator}>."
+        )
 
     return workflow
