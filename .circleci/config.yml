@@ -314,7 +314,7 @@ jobs:
                 -v /tmp/ds000206/work:/work \
                 --user $(id -u):$(id -g) \
                 nipreps/dmriprep:latest /data /out participant -vv $eddy \
-                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy \
+                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy --use-syn-sdc \
                 --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - store_artifacts:
           path: /tmp/ds000206/derivatives/dmriprep
