@@ -310,7 +310,10 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         from sdcflows.workflows.base import init_fmap_preproc_wf
 
         # SDC Step 1: Run basic heuristics to identify available data for fieldmap estimation
-        fmap_estimators = find_estimators(config.execution.layout)
+        fmap_estimators = find_estimators(
+            layout=config.execution.layout,
+            subject=subject_id,
+        )
 
         # Add fieldmap-less estimators
         if not fmap_estimators and config.workflow.use_syn:
