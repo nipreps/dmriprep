@@ -313,6 +313,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         fmap_estimators = find_estimators(
             layout=config.execution.layout,
             subject=subject_id,
+            fmapless=False,
         )
 
         # Add fieldmap-less estimators
