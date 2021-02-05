@@ -74,6 +74,13 @@ sections:
     description: The reportlet shows a <em>b=0</em> reference <em>before</em> and <em>after</em> distortion correction.
     static: false
     subtitle: Unwarping of susceptibility distortions
+  - bids: {datatype: figures, desc: eddy, suffix: dwi}
+    caption: Head-motion and eddy current corrected diffusion data
+    description: Eddy current-induced geometric distortions and head-motion
+      realignment parameters were estimated with the joint modeling of
+      <code>eddy_openmp</code>, included in FSL.
+    static: false
+    subtitle: Eddy corrected diffusion data
   - bids: {datatype: figures, desc: coreg, suffix: dwi}
     caption: Diffusion-weighted data and anatomical data (EPI-space and T1w-space)
       were aligned with <code>mri_coreg</code> (FreeSurfer).
@@ -91,13 +98,6 @@ sections:
       the final images are resampled using cubic B-Spline interpolation.
     static: false
     subtitle: Alignment of diffusion and anatomical MRI data (surface driven)
-  - bids: {datatype: figures, desc: eddy, suffix: dwi}
-    caption: Head-motion and eddy current corrected diffusion data
-    description: Geometrical distortions derived from the so-called Eddy-currents, 
-      and head-motion realignment parameters were estimated with the joint modeling 
-      of <code>eddy_openmp</code>, included in FSL.
-    static: false
-    subtitle: Eddy corrected diffusion data
 - name: About
   reportlets:
   - bids: {datatype: figures, desc: about, suffix: T1w}
