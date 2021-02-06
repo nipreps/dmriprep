@@ -1,3 +1,40 @@
+0.5.0 (TBD)
+===========
+A new minor release going forward with some of the items of our roadmap.
+The most salient features are the integration of FSL Eddy and the adoption of the new *SDCFlows 2.0*
+API.
+
+  * FIX: Change in _svgutils_ API (0.3.2) breaks our reportlet generation (#151)
+  * FIX: Correctly check *SDCFlows*' registry of ``IntendedFor`` files (#141)
+  * FIX: Honor ``--nprocs`` flag (#142)
+  * ENH: Temporary integration of FSL Eddy (#144)
+  * ENH: Connect fieldmap estimation to preprocessing pipeline of individual DWI runs (#140)
+  * ENH: Refactor workflow for simplicity - explicit iteration over DWIs (#138)
+  * ENH: Run fieldmap estimation using *SDCFlows* 2.0 (#137)
+  * FIX/MAINT: Drop Python 3.6 + Revise Python environment (versions pinned) in Dockerfile (#146)
+  * MAINT: Update *SDCFlows* pinning to the latest 2.0.0 release (#152)
+  * DOC: Revise *dMRIPrep*'s road-map (#147)
+  * DOC: Add FSL ``topup`` reference in citation boilerplate (#148)
+  * DOC: change "functional" to "diffusion" (#143)
+
+0.4.0 (December 10, 2020)
+=========================
+A minor release including T1w-DWI registration with FreeSurfer's ``bbregister``.
+This minor release also includes some documentation improvements and a fair
+amount of maintenance tasks, the most salient of which is migrating our test
+data to a DataLad + GiHub + OSF infrastructure that will allow more flexibly
+update test datasets.
+
+  * ENH: Use ``bbregister`` upstreamed to *NiWorkflows*, with sloppy mode (#131)
+  * ENH: Port ``bbregister`` T1w-DWI registration from *fMRIPrep* (#125)
+  * DOC: Link NeuroHackademy session's video. (#120)
+  * DOC: Update readme and delete contributing guidelines in favour of nipreps website (#127)
+  * DOC: Add base SVG file for the "figure1" (aka the workflow) flowchart (#124)
+  * MAINT: Move test data to a full-datalad settings (#134)
+  * MAINT: Move packaging tests from TravisCI to GitHub Actions (#135)
+  * STY/MAINT: Preparing the first large overhaul of *dMRIPrep* (#130)
+  * MAINT: Adding J. Veraart and E. Dickie to the contributors list (#126, #133)
+
 0.3.0 (October 13, 2020)
 ========================
 A long overdue minor release initiating the 0.3.x series and including the milestones set for the 0.3.0 version in our roadmap.
