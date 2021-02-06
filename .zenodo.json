@@ -30,6 +30,11 @@
       "orcid": "0000-0002-0068-230X"
     },
     {
+      "affiliation": "The Centre for Addiction and Mental Health",
+      "name": "Mansour, Salim",
+      "orcid": "0000-0002-1092-1650"
+    },
+    {
       "affiliation": "Department of Psychology, University of Texas at Austin, TX, USA",
       "name": "Pisner, Derek",
       "orcid": "0000-0002-1228-0201"
@@ -40,7 +45,7 @@
       "orcid": "0000-0001-9276-9084"
     },
     {
-      "affiliation": "Department of Psychology, Stanford University, CA, USA",
+      "affiliation": "Basque Center on Cognition, Brain and Language (BCBL)",
       "name": "Lerma-Usabiaga, Garikoitz",
       "orcid": "0000-0001-9800-4816"
     },
@@ -50,12 +55,17 @@
       "orcid": "0000-0003-3554-043X"
     },
     {
+      "affiliation": "Krembil Centre for Neuroinformatics, The Centre for Addiction and Mental Health, Dept. of Psychiatry, University of Toronto",
+      "name": "Dickie, Erin W.",
+      "orcid": "0000-0003-3028-9864"
+    },
+    {
       "affiliation": "The University of Washington eScience Institute",
       "name": "Rokem, Ariel",
       "orcid": "0000-0003-0679-1985"
     },
     {
-      "affiliation": "Dep. of Radiology, Lausanne University Hospital and University of Lausanne",
+      "affiliation": "Dept. of Radiology, Lausanne University Hospital and University of Lausanne",
       "name": "Esteban, Oscar",
       "orcid": "0000-0001-8435-6191"
     }
@@ -71,6 +81,12 @@
       "affiliation": "Perelman School of Medicine, University of Pennsylvania, PA, USA",
       "name": "Cieslak, Matthew",
       "orcid": "0000-0002-1931-4734",
+      "type": "Researcher"
+    },
+    {
+      "affiliation": "School of Medicine, New York University",
+      "name": "Veraart, Jelle",
+      "orcid": "0000-0003-0781-0420",
       "type": "Researcher"
     },
     {
