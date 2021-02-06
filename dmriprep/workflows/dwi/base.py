@@ -69,8 +69,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
     """
     from ...interfaces.vectors import CheckGradientTable
+    from niworkflows.interfaces import SimpleBeforeAfter
     from .util import init_dwi_reference_wf
     from .outputs import init_reportlets_wf
+    from .eddy import init_eddy_wf
 
     layout = config.execution.layout
 
@@ -200,6 +202,44 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                 (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
         ])
         # fmt: on
+
+    if "eddy" not in config.workflow.ignore:
+        # Eddy distortion correction
+        eddy_wf = init_eddy_wf(debug=config.execution.debug)
+        eddy_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
+
+        ds_report_eddy = pe.Node(
+            DerivativesDataSink(
+                base_directory=str(config.execution.output_dir),
+                desc="eddy",
+                datatype="figures",
+            ),
+            name="ds_report_eddy",
+            run_without_submitting=True,
+        )
+
+        eddy_report = pe.Node(
+            SimpleBeforeAfter(before_label="Distorted", after_label="Eddy Corrected",),
+            name="eddy_report",
+            mem_gb=0.1,
+        )
+
+        # fmt:off
+        workflow.connect([
+            (dwi_reference_wf, eddy_wf, [
+                ("outputnode.dwi_file", "inputnode.dwi_file"),
+                ("outputnode.dwi_mask", "inputnode.dwi_mask"),
+            ]),
+            (inputnode, eddy_wf, [
+                ("in_bvec", "inputnode.in_bvec"),
+                ("in_bval", "inputnode.in_bval")
+            ]),
+            (dwi_reference_wf, eddy_report, [("outputnode.ref_image", "before")]),
+            (eddy_wf, eddy_report, [('outputnode.eddy_ref_image', 'after')]),
+            (dwi_reference_wf, ds_report_eddy, [("outputnode.dwi_file", "source_file")]),
+            (eddy_report, ds_report_eddy, [("out_report", "in_file")]),
+        ])
+        # fmt:on
 
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(

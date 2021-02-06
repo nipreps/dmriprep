@@ -298,8 +298,12 @@ jobs:
             - /tmp/ds000206/work
       - run:
           name: Run full diffusion workflow on ds000206
-          no_output_timeout: 2h
+          no_output_timeout: 4h
           command: |
+            eddy="--ignore eddy"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[run[ _]?eddy\]' )" != "" ]]; then
+              eddy=""
+            fi
             mkdir -p /tmp/ds000206/work /tmp/ds000206/derivatives
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
                 -v /tmp/data/ds000206:/data \
@@ -309,7 +313,7 @@ jobs:
                 -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
                 -v /tmp/ds000206/work:/work \
                 --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant -vv \
+                nipreps/dmriprep:latest /data /out participant -vv $eddy \
                 --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy \
                 --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
       - store_artifacts:
@@ -379,8 +383,12 @@ jobs:
             docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
       - run:
           name: Run full diffusion workflow on ds001771
-          no_output_timeout: 2h
+          no_output_timeout: 4h
           command: |
+            eddy="--ignore eddy"
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[run[ _]?eddy\]' )" != "" ]]; then
+              eddy=""
+            fi
             mkdir -p /tmp/ds001771/work /tmp/ds001771/derivatives
             docker run -e FS_LICENSE=$FS_LICENSE --rm \
                 -v /tmp/data/ds001771:/data \
@@ -390,7 +398,7 @@ jobs:
                 -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
                 -v /tmp/ds001771/work:/work \
                 --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant -vv \
+                nipreps/dmriprep:latest /data /out participant -vv $eddy \
                 -w /work --omp-nthreads 2 --nprocs 2 \
                 --notrack --skip-bids-validation --sloppy \
                 --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 \
