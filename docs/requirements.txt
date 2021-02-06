@@ -6,10 +6,10 @@ niworkflows >=1.4.0rc0,<1.5
 packaging
 pydot>=1.2.3
 pydotplus
-smriprep >= 0.7.0
-sdcflows >= 2.0.0rc2
-sphinx-argparse
+sdcflows ~= 2.0.0
+smriprep >= 0.8.0rc0
 sphinx >=2.1.2,<3.0
+sphinx-argparse
 sphinx_rtd_theme
 sphinxcontrib-apidoc ~= 0.3.0
 templateflow
