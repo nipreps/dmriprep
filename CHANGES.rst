@@ -4,6 +4,30 @@ A new minor release going forward with some of the items of our roadmap.
 The most salient features are the integration of FSL Eddy and the adoption of the new *SDCFlows 2.0*
 API.
 
+.. admonition:: Author list for papers based on *dMRIPrep* 0.5.x series
+
+    As described in the `Contributor Guidelines
+    <https://www.nipreps.org/community/CONTRIBUTING/#recognizing-contributions>`__,
+    anyone listed as developer or contributor may write and submit manuscripts
+    about *dMRIPrep*.
+    To do so, please move the author(s) name(s) to the front of the following list:
+
+    Joseph, Michael \ :sup:`1`\ ; Mansour, Salim \ :sup:`1`\ ; Pisner, Derek \ :sup:`2`\ ; Richie-Halford, Adam \ :sup:`3`\ ; Lerma-Usabiaga, Garikoitz \ :sup:`4, 5`\ ; Keshavan, Anisha \ :sup:`3`\ ; Kent, James D. \ :sup:`6`\ ; Dickie, Erin W. \ :sup:`7`\ ; Cieslak, Matthew \ :sup:`8`\ ; Poldrack, Russell A. \ :sup:`5`\ ; Veraart, Jelle \ :sup:`9`\ ; Rokem, Ariel \ :sup:`10`\ ; Esteban, Oscar \ :sup:`11`\ .
+
+    Affiliations:
+
+      1. The Centre for Addiction and Mental Health
+      2. Department of Psychology, University of Texas at Austin, TX, USA
+      3. The University of Washington, eScience Institute
+      4. Basque Center on Cognition, Brain and Language (BCBL)
+      5. Department of Psychology, Stanford University
+      6. Neuroscience Program, University of Iowa
+      7. Krembil Centre for Neuroinformatics, The Centre for Addiction and Mental Health, Dept. of Psychiatry, University of Toronto
+      8. Perelman School of Medicine, University of Pennsylvania, PA, USA
+      9. School of Medicine, New York University
+      10. The University of Washington eScience Institute
+      11. Dept. of Radiology, Lausanne University Hospital and University of Lausanne
+
   * FIX: Change in _svgutils_ API (0.3.2) breaks our reportlet generation (#151)
   * FIX: Correctly check *SDCFlows*' registry of ``IntendedFor`` files (#141)
   * FIX: Honor ``--nprocs`` flag (#142)
