@@ -1,0 +1,32 @@
+strict digraph  {
+"inputnode (utility)";
+"gradient_table (vectors)";
+dwi_reference_wf;
+bbreg_wf;
+"t1w_brain (nibabel)";
+ds_report_reg;
+eddy_wf;
+reportlets_wf;
+"outputnode (utility)";
+"eddy_report (registration)";
+ds_report_eddy;
+"inputnode (utility)" -> "gradient_table (vectors)";
+"inputnode (utility)" -> dwi_reference_wf;
+"inputnode (utility)" -> bbreg_wf;
+"inputnode (utility)" -> "t1w_brain (nibabel)";
+"inputnode (utility)" -> ds_report_reg;
+"inputnode (utility)" -> eddy_wf;
+"inputnode (utility)" -> reportlets_wf;
+"gradient_table (vectors)" -> dwi_reference_wf;
+"gradient_table (vectors)" -> "outputnode (utility)";
+dwi_reference_wf -> bbreg_wf;
+dwi_reference_wf -> eddy_wf;
+dwi_reference_wf -> "eddy_report (registration)";
+dwi_reference_wf -> ds_report_eddy;
+dwi_reference_wf -> reportlets_wf;
+dwi_reference_wf -> "outputnode (utility)";
+bbreg_wf -> ds_report_reg;
+eddy_wf -> "eddy_report (registration)";
+"outputnode (utility)" -> reportlets_wf;
+"eddy_report (registration)" -> ds_report_eddy;
+}

@@ -1,0 +1,7 @@
+dmriprep.interfaces.reports module
+==================================
+
+.. automodule:: dmriprep.interfaces.reports
+   :members:
+   :undoc-members:
+   :show-inheritance:

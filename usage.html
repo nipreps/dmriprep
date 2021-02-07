@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Usage &mdash; dmriprep 0.3.0 documentation</title>
+  <title>Usage &mdash; dmriprep 0.5.0rc0 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.3.0
+                0.5.0rc0
               </div>
             
           
@@ -186,9 +186,12 @@
   
 
 
+    
+    
 
 
 
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="master/usage.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
 <div class="section" id="usage">
 <span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="execution-and-the-bids-format">
@@ -208,7 +211,7 @@ Example:</p>
 </div>
 <div class="section" id="command-line-arguments">
 <h2>Command-Line Arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline">¶</a></h2>
-<p><p>dMRIPrep: dMRI PREProcessing workflows v0.3.0+126.g88333fff</p>
+<p><p>dMRIPrep: dMRI PREProcessing workflows v0.5.0rc0</p>
 </p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dmriprep</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">bids</span><span class="o">-</span><span class="n">validation</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">participant</span><span class="o">-</span><span class="n">label</span> <span class="n">PARTICIPANT_LABEL</span> <span class="p">[</span><span class="n">PARTICIPANT_LABEL</span> <span class="o">...</span><span class="p">]]</span>
@@ -314,7 +317,7 @@ Example:</p>
 <dd><p>treat dataset as longitudinal - may increase runtime</p>
 </dd>
 <dt><kbd>--output-spaces</kbd></dt>
-<dd><p>Standard and non-standard spaces to resample anatomical and diffusion images to. Standard spaces may be specified by the form <code class="docutils literal notranslate"><span class="pre">&lt;SPACE&gt;[:cohort-&lt;label&gt;][:res-&lt;resolution&gt;][...]</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;SPACE&gt;</span></code> is a keyword designating a spatial reference, and may be followed by optional, colon-separated parameters. Non-standard spaces imply specific orientations and sampling grids. The default value of this flag (meaning, if the argument is not include in the command line) is <code class="docutils literal notranslate"><span class="pre">--output-spaces</span> <span class="pre">run</span></code> - the original space and sampling grid of the original DWI run. Important to note, the <code class="docutils literal notranslate"><span class="pre">res-*</span></code> modifier does not define the resolution used for the spatial normalization. To generate no DWI outputs (if that is intended for some reason), use this option without specifying any spatial references. For further details, please check out <a class="reference external" href="https://www.nipreps.org/dmriprep/en/0.3.0/spaces.html">https://www.nipreps.org/dmriprep/en/0.3.0/spaces.html</a></p>
+<dd><p>Standard and non-standard spaces to resample anatomical and diffusion images to. Standard spaces may be specified by the form <code class="docutils literal notranslate"><span class="pre">&lt;SPACE&gt;[:cohort-&lt;label&gt;][:res-&lt;resolution&gt;][...]</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;SPACE&gt;</span></code> is a keyword designating a spatial reference, and may be followed by optional, colon-separated parameters. Non-standard spaces imply specific orientations and sampling grids. The default value of this flag (meaning, if the argument is not include in the command line) is <code class="docutils literal notranslate"><span class="pre">--output-spaces</span> <span class="pre">run</span></code> - the original space and sampling grid of the original DWI run. Important to note, the <code class="docutils literal notranslate"><span class="pre">res-*</span></code> modifier does not define the resolution used for the spatial normalization. To generate no DWI outputs (if that is intended for some reason), use this option without specifying any spatial references. For further details, please check out <a class="reference external" href="https://www.nipreps.org/dmriprep/en/latest/spaces.html">https://www.nipreps.org/dmriprep/en/latest/spaces.html</a></p>
 </dd>
 <dt><kbd>--dwi2t1w-init</kbd></dt>
 <dd><p>Possible choices: register, header</p>
@@ -494,7 +497,7 @@ which the CLI was called, such as the operating system.</p>
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
     <span class="rst-current-version" data-toggle="rst-current-version">
         <span class="fa fa-book"> Other Versions</span>
-        v: master
+        v: 0.5.0rc0
         <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions">
@@ -504,6 +507,7 @@ which the CLI was called, such as the operating system.</p>
             <dd><a href="0.2.2/usage.html">0.2.2</a></dd>
             <dd><a href="0.3.0/usage.html">0.3.0</a></dd>
             <dd><a href="0.4.0/usage.html">0.4.0</a></dd>
+            <dd><a href="0.5.0rc0/usage.html">0.5.0rc0</a></dd>
         </dl>
         <dl>
             <dt>Branches</dt>
