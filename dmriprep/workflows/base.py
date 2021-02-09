@@ -424,28 +424,33 @@ Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
             )
 
         if estimator.method == fm.EstimatorType.ANAT:
+            from niworkflows.utils.connections import pop_file as _pop
             from sdcflows.interfaces.brainmask import BrainExtraction
             from sdcflows.workflows.fit.syn import init_syn_preprocessing_wf
-            from ...interfaces.vectors import CheckGradientTable
+            from ..interfaces.vectors import CheckGradientTable
 
-            sources = [str(s.path) for s in estimator.sources]
+            sources = [
+                str(s.path) for s in estimator.sources
+                if s.suffix in ("dwi",)
+            ]
             layout = config.execution.layout
             syn_preprocessing_wf = init_syn_preprocessing_wf(
                 omp_nthreads=config.nipype.omp_nthreads,
                 auto_bold_nss=False,
+                t1w_inversion=True,
+                name=f"syn_preprocessing_{estimator.bids_id}",
             )
-            syn_preprocessing_wf.inputs.in_epis = sources
-            syn_preprocessing_wf.inputs.in_meta = [
+            syn_preprocessing_wf.inputs.inputnode.in_epis = sources
+            syn_preprocessing_wf.inputs.inputnode.in_meta = [
                 layout.get_metadata(s) for s in sources
             ]
-
-            b0_masks = pe.MapNode(CheckGradientTable(), name="b0_masks",
+            b0_masks = pe.MapNode(CheckGradientTable(), name=f"b0_masks_{estimator.bids_id}",
                                   iterfield=("dwi_file", "in_bvec", "in_bval"))
             b0_masks.inputs.dwi_file = sources
             b0_masks.inputs.in_bvec = [str(layout.get_bvec(s)) for s in sources]
             b0_masks.inputs.in_bval = [str(layout.get_bval(s)) for s in sources]
 
-            epi_brain = pe.Node(BrainExtraction(), name="epi_brain")
+            epi_brain = pe.Node(BrainExtraction(), name=f"epi_brain_{estimator.bids_id}")
 
             # fmt:off
             workflow.connect([
@@ -455,21 +460,17 @@ Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
                 ]),
                 (b0_masks, syn_preprocessing_wf, [("b0_mask", "inputnode.t_masks")]),
                 (syn_preprocessing_wf, fmap_wf, [
-                    ("outputnode.epi_ref", "inputnode.epi_ref"),
-                    ("outputnode.anat_ref", "inputnode.anat_ref"),
-                    ("outputnode.anat_mask", "inputnode.anat_mask"),
-                    ("outputnode.anat2epi_xfm", "inputnode.anat2epi_xfm"),
+                    ("outputnode.epi_ref", f"in_{estimator.bids_id}.epi_ref"),
+                    ("outputnode.anat_ref", f"in_{estimator.bids_id}.anat_ref"),
+                    ("outputnode.anat2epi_xfm", f"in_{estimator.bids_id}.anat2epi_xfm"),
                 ]),
-                (syn_preprocessing_wf, epi_brain, [("outputnode.epi_ref", "in_file")]),
+                (syn_preprocessing_wf, epi_brain, [
+                    (("outputnode.epi_ref", _pop), "in_file")]),
                 (anat_preproc_wf, fmap_wf, [
-                    ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
+                    ("outputnode.std2anat_xfm", f"in_{estimator.bids_id}.std2anat_xfm"),
                 ]),
-                (epi_brain, fmap_wf, [("out_mask", "inputnode.epi_mask")]),
+                (epi_brain, fmap_wf, [("out_mask", f"in_{estimator.bids_id}.epi_mask")]),
             ])
             # fmt:on
-
-        raise RuntimeError(
-            f"Unknown fieldmap estimation strategy <{estimator}>."
-        )
 
     return workflow
