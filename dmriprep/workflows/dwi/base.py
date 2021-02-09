@@ -165,7 +165,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                      ("in_bvec", "in_bvec"),
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
-        (gradient_table, summary, [("shells_dist", "shells_dist")]),
+        (gradient_table, summary, [("shell_dist", "shell_dist")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
