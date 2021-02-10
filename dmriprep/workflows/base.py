@@ -368,7 +368,7 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
 
     # SDC Step 2: Manually add further estimators (e.g., fieldmap-less)
     fmap_wf = init_fmap_preproc_wf(
-        debug=config.execution.debug,
+        debug=config.execution.debug is True,
         estimators=fmap_estimators,
         omp_nthreads=config.nipype.omp_nthreads,
         output_dir=str(output_dir),
@@ -424,8 +424,6 @@ Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
             )
 
         if estimator.method == fm.EstimatorType.ANAT:
-            from niworkflows.utils.connections import pop_file as _pop
-            from sdcflows.interfaces.brainmask import BrainExtraction
             from sdcflows.workflows.fit.syn import init_syn_preprocessing_wf
             from ..interfaces.vectors import CheckGradientTable
 
@@ -436,6 +434,7 @@ Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
             layout = config.execution.layout
             syn_preprocessing_wf = init_syn_preprocessing_wf(
                 omp_nthreads=config.nipype.omp_nthreads,
+                debug=config.execution.debug is True,
                 auto_bold_nss=False,
                 t1w_inversion=True,
                 name=f"syn_preprocessing_{estimator.bids_id}",
@@ -450,26 +449,21 @@ Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
             b0_masks.inputs.in_bvec = [str(layout.get_bvec(s)) for s in sources]
             b0_masks.inputs.in_bval = [str(layout.get_bval(s)) for s in sources]
 
-            epi_brain = pe.Node(BrainExtraction(), name=f"epi_brain_{estimator.bids_id}")
-
             # fmt:off
             workflow.connect([
                 (anat_preproc_wf, syn_preprocessing_wf, [
                     ("outputnode.t1w_preproc", "inputnode.in_anat"),
                     ("outputnode.t1w_mask", "inputnode.mask_anat"),
+                    ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
                 ]),
                 (b0_masks, syn_preprocessing_wf, [("b0_mask", "inputnode.t_masks")]),
                 (syn_preprocessing_wf, fmap_wf, [
                     ("outputnode.epi_ref", f"in_{estimator.bids_id}.epi_ref"),
+                    ("outputnode.epi_mask", f"in_{estimator.bids_id}.epi_mask"),
                     ("outputnode.anat_ref", f"in_{estimator.bids_id}.anat_ref"),
-                    ("outputnode.anat2epi_xfm", f"in_{estimator.bids_id}.anat2epi_xfm"),
+                    ("outputnode.anat_mask", f"in_{estimator.bids_id}.anat_mask"),
+                    ("outputnode.sd_prior", f"in_{estimator.bids_id}.sd_prior"),
                 ]),
-                (syn_preprocessing_wf, epi_brain, [
-                    (("outputnode.epi_ref", _pop), "in_file")]),
-                (anat_preproc_wf, fmap_wf, [
-                    ("outputnode.std2anat_xfm", f"in_{estimator.bids_id}.std2anat_xfm"),
-                ]),
-                (epi_brain, fmap_wf, [("out_mask", f"in_{estimator.bids_id}.epi_mask")]),
             ])
             # fmt:on
 
