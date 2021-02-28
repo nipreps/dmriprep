@@ -122,8 +122,68 @@ def main():
             )
         errno = 0
     finally:
-        from niworkflows.reports import generate_reports
         from pkg_resources import resource_filename as pkgrf
+        from shutil import copyfile
+        from subprocess import check_call, CalledProcessError, TimeoutExpired
+        from niworkflows.reports import generate_reports
+
+        citation_files = {
+            ext: output_dir / "dmriprep" / "logs" / ("CITATION.%s" % ext)
+            for ext in ("bib", "tex", "md", "html")
+        }
+
+        if not config.execution.md_only_boilerplate and citation_files["md"].exists():
+            # Generate HTML file resolving citations
+            cmd = [
+                "pandoc",
+                "-s",
+                "--bibliography",
+                pkgrf("dmriprep", "data/boilerplate.bib"),
+                "--citeproc",
+                "--metadata",
+                'pagetitle="dMRIPrep citation boilerplate"',
+                str(citation_files["md"]),
+                "-o",
+                str(citation_files["html"]),
+            ]
+
+            logger.info("Generating an HTML version of the citation boilerplate...")
+            try:
+                check_call(cmd, timeout=10)
+            except (FileNotFoundError, CalledProcessError, TimeoutExpired):
+                logger.warning(
+                    "Could not generate CITATION.html file:\n%s", " ".join(cmd)
+                )
+
+            # Generate LaTex file resolving citations
+            cmd = [
+                "pandoc",
+                "-s",
+                "--bibliography",
+                pkgrf("dmriprep", "data/boilerplate.bib"),
+                "--natbib",
+                str(citation_files["md"]),
+                "-o",
+                str(citation_files["tex"]),
+            ]
+            logger.info("Generating a LaTeX version of the citation boilerplate...")
+            try:
+                check_call(cmd, timeout=10)
+            except (FileNotFoundError, CalledProcessError, TimeoutExpired):
+                logger.warning(
+                    "Could not generate CITATION.tex file:\n%s", " ".join(cmd)
+                )
+            else:
+                copyfile(
+                    pkgrf("dmriprep", "data/boilerplate.bib"), citation_files["bib"]
+                )
+        else:
+            logger.warning(
+                "dMRIPrep could not find the markdown version of "
+                "the citation boilerplate (%s). HTML and LaTeX versions"
+                " of it will not be available",
+                citation_files["md"],
+            )
 
         # Generate reports phase
         failed_reports = generate_reports(
