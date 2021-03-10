@@ -1,31 +1,21 @@
 # Use Ubuntu 16.04 LTS
-FROM ubuntu:xenial-20191010
-
-# Pre-cache neurodebian key
-COPY .docker/neurodebian.gpg /usr/local/etc/neurodebian.gpg
+FROM ubuntu:xenial-20201030
 
 # Prepare environment
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-                    curl \
+                    autoconf \
+                    build-essential \
                     bzip2 \
                     ca-certificates \
-                    xvfb \
+                    curl \
                     cython3 \
-                    build-essential \
-                    autoconf \
+                    git \
                     libtool \
+                    lsb-release \
                     pkg-config \
-                    git && \
-    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get install -y --no-install-recommends \
-                    nodejs && \
+                    xvfb && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install latest pandoc
-RUN curl -o pandoc-2.2.2.1-1-amd64.deb -sSL "https://github.com/jgm/pandoc/releases/download/2.2.2.1/pandoc-2.2.2.1-1-amd64.deb" && \
-    dpkg -i pandoc-2.2.2.1-1-amd64.deb && \
-    rm pandoc-2.2.2.1-1-amd64.deb
 
 # Installing freesurfer
 RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz | tar zxv --no-same-owner -C /opt \
@@ -65,6 +55,8 @@ ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     MNI_PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
     PATH="$FREESURFER_HOME/bin:$FSFAST_HOME/bin:$FREESURFER_HOME/tktools:$MINC_BIN_DIR:$PATH"
 
+# Pre-cache neurodebian key
+COPY .docker/neurodebian.gpg /usr/local/etc/neurodebian.gpg
 # Installing Neurodebian packages (FSL, AFNI, git)
 RUN curl -sSL "http://neuro.debian.net/lists/$( lsb_release -c | cut -f2 ).us-ca.full" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
     apt-key add /usr/local/etc/neurodebian.gpg && \
@@ -75,8 +67,7 @@ RUN apt-get update && \
                     fsl-core=5.0.9-5~nd16.04+1 \
                     fsl-mni152-templates=5.0.7-2 \
                     afni=16.2.07~dfsg.1-5~nd16.04+1 \
-                    convert3d \
-                    git-annex-standalone && \
+                    convert3d && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV FSLDIR="/usr/share/fsl/5.0" \
@@ -110,14 +101,6 @@ RUN useradd -m -s /bin/bash -G users dmriprep
 WORKDIR /home/dmriprep
 ENV HOME="/home/dmriprep"
 
-# Installing SVGO
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g svgo
-
-# Installing bids-validator
-RUN npm install -g bids-validator@1.2.3
-
 # Installing and setting up miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh && \
     bash Miniconda3-4.5.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
@@ -131,18 +114,22 @@ ENV PATH="/usr/local/miniconda/bin:$PATH" \
     PYTHONNOUSERSITE=1
 
 # Installing precomputed python packages
-RUN conda install -y python=3.7 \
+RUN conda install -y -c anaconda -c conda-forge \
+                     python=3.7.1 \
                      graphviz=2.40 \
+                     git-annex \
                      libxml2=2.9.8 \
                      libxslt=1.1.32 \
                      matplotlib=2.2 \
                      mkl \
                      mkl-service \
-                     numpy=1.19 \
+                     nodejs \
+                     numpy=1.20 \
+                     pandoc=2.11 \
                      pip=20.3 \
-                     setuptools \
                      scikit-learn=0.19 \
                      scipy=1.5 \
+                     setuptools=51.1 \
                      traits=4.6.0 \
                      zlib; sync && \
     chmod -R a+rX /usr/local/miniconda; sync && \
@@ -159,17 +146,18 @@ ENV MKL_NUM_THREADS=1 \
 RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
-# Precaching atlases
-COPY setup.cfg dmriprep-setup.cfg
-RUN pip install --no-cache-dir "$( grep templateflow dmriprep-setup.cfg | xargs )" && \
-    python -c "from templateflow import api as tfapi; \
-               tfapi.get('MNI152NLin6Asym', atlas=None, resolution=[1, 2], extension=['.nii', '.nii.gz']); \
-               tfapi.get('MNI152NLin2009cAsym', atlas=None, extension=['.nii', '.nii.gz']); \
-               tfapi.get('OASIS30ANTs', extension=['.nii', '.nii.gz']);" && \
-    find $HOME/.cache/templateflow -type d -exec chmod go=u {} + && \
-    find $HOME/.cache/templateflow -type f -exec chmod go=u {} +
+# Installing SVGO
+RUN npm install -g svgo
 
-# Installing DMRIPREP
+# Installing bids-validator
+RUN npm install -g bids-validator@1.4.0
+
+# Refresh linked libraries
+RUN ldconfig
+
+WORKDIR /src
+
+# Installing dMRIPrep
 COPY . /src/dmriprep
 ARG VERSION
 # Force static versioning within container
@@ -181,7 +169,6 @@ RUN echo "${VERSION}" > /src/dmriprep/dmriprep/VERSION && \
 RUN find $HOME -type d -exec chmod go=u {} + && \
     find $HOME -type f -exec chmod go=u {} +
 
-RUN ldconfig
 WORKDIR /tmp/
 ENTRYPOINT ["/usr/local/miniconda/bin/dmriprep"]
 
