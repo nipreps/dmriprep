@@ -68,8 +68,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     * :py:func:`~dmriprep.workflows.dwi.outputs.init_reportlets_wf`
 
     """
+    from niworkflows.interfaces.reportlets.registration import (
+        SimpleBeforeAfterRPT as SimpleBeforeAfter,
+    )
     from ...interfaces.vectors import CheckGradientTable
-    from niworkflows.interfaces import SimpleBeforeAfter
     from .util import init_dwi_reference_wf
     from .outputs import init_reportlets_wf
     from .eddy import init_eddy_wf
@@ -219,7 +221,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         )
 
         eddy_report = pe.Node(
-            SimpleBeforeAfter(before_label="Distorted", after_label="Eddy Corrected",),
+            SimpleBeforeAfter(
+                before_label="Distorted",
+                after_label="Eddy Corrected",
+            ),
             name="eddy_report",
             mem_gb=0.1,
         )
@@ -268,7 +273,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
         return workflow
 
-    from niworkflows.interfaces import SimpleBeforeAfter
     from niworkflows.interfaces.utility import KeySelect
     from sdcflows.workflows.apply.registration import init_coeff2epi_wf
     from sdcflows.workflows.apply.correction import init_unwarp_wf
@@ -279,8 +283,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         write_coeff=True,
     )
     unwarp_wf = init_unwarp_wf(
-        debug=config.execution.debug,
-        omp_nthreads=config.nipype.omp_nthreads
+        debug=config.execution.debug, omp_nthreads=config.nipype.omp_nthreads
     )
     unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
 
@@ -297,7 +300,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         )
 
     sdc_report = pe.Node(
-        SimpleBeforeAfter(before_label="Distorted", after_label="Corrected",),
+        SimpleBeforeAfter(
+            before_label="Distorted",
+            after_label="Corrected",
+        ),
         name="sdc_report",
         mem_gb=0.1,
     )

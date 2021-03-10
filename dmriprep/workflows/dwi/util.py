@@ -1,17 +1,7 @@
 """Utility workflows for :abbr:`DWI (diffusion weighted imaging)` data."""
-
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
-
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-from niworkflows.interfaces.images import ValidateImage
-from niworkflows.interfaces.fixes import (
-    FixN4BiasFieldCorrection as N4BiasFieldCorrection,
-)
-from niworkflows.interfaces.nibabel import ApplyMask
-from niworkflows.interfaces.utils import CopyXForm
-
-from ...interfaces.images import ExtractB0, RescaleB0
 
 
 def init_dwi_reference_wf(mem_gb, omp_nthreads, name="dwi_reference_wf"):
@@ -68,6 +58,10 @@ def init_dwi_reference_wf(mem_gb, omp_nthreads, name="dwi_reference_wf"):
     * :py:func:`~dmriprep.workflows.dwi.util.init_enhance_and_skullstrip_wf`
 
     """
+    from niworkflows.interfaces.header import ValidateImage
+
+    from ...interfaces.images import ExtractB0, RescaleB0
+
     workflow = Workflow(name=name)
 
     inputnode = pe.Node(
@@ -185,6 +179,12 @@ def init_enhance_and_skullstrip_dwi_wf(
         reportlet for the skull-stripping
 
     """
+    from niworkflows.interfaces.header import CopyXForm
+    from niworkflows.interfaces.fixes import (
+        FixN4BiasFieldCorrection as N4BiasFieldCorrection,
+    )
+    from niworkflows.interfaces.nibabel import ApplyMask
+
     workflow = Workflow(name=name)
     inputnode = pe.Node(
         niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
