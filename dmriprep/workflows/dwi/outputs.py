@@ -7,13 +7,19 @@ from ...interfaces import DerivativesDataSink
 
 def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
     """Set up a battery of datasinks to store reports in the right location."""
-    from niworkflows.interfaces.masks import SimpleShowMaskRPT
+    from niworkflows.interfaces.reportlets.masks import SimpleShowMaskRPT
 
     workflow = Workflow(name=name)
 
     inputnode = pe.Node(
         niu.IdentityInterface(
-            fields=["source_file", "dwi_ref", "dwi_mask", "validation_report", "sdc_report"]
+            fields=[
+                "source_file",
+                "dwi_ref",
+                "dwi_mask",
+                "validation_report",
+                "sdc_report",
+            ]
         ),
         name="inputnode",
     )
