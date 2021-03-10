@@ -27,29 +27,29 @@
 <path fill="none" stroke="#000000" d="M446.299,-794.0209C416.5632,-783.2078 377.1104,-768.8614 345.5747,-757.3938"/>
 <polygon fill="#000000" stroke="#000000" points="346.6555,-754.0627 336.0614,-753.9345 344.2632,-760.6412 346.6555,-754.0627"/>
 </g>
-<!-- fixhdr_unifize (utils) -->
+<!-- fixhdr_unifize (header) -->
 <g id="node3" class="node">
-<title>fixhdr_unifize (utils)</title>
-<ellipse fill="none" stroke="#000000" cx="347.2416" cy="-378" rx="104.7816" ry="18"/>
-<text text-anchor="middle" x="347.2416" y="-374.3" font-family="Times,serif" font-size="14.00" fill="#000000">fixhdr_unifize (utils)</text>
+<title>fixhdr_unifize (header)</title>
+<ellipse fill="none" stroke="#000000" cx="347.2416" cy="-378" rx="116.1796" ry="18"/>
+<text text-anchor="middle" x="347.2416" y="-374.3" font-family="Times,serif" font-size="14.00" fill="#000000">fixhdr_unifize (header)</text>
 </g>
-<!-- inputnode (utility)&#45;&gt;fixhdr_unifize (utils) -->
+<!-- inputnode (utility)&#45;&gt;fixhdr_unifize (header) -->
 <g id="edge2" class="edge">
-<title>inputnode (utility)&#45;&gt;fixhdr_unifize (utils)</title>
-<path fill="none" stroke="#000000" d="M490.2416,-791.8146C490.2416,-764.4983 490.2416,-711.25 490.2416,-666 490.2416,-666 490.2416,-666 490.2416,-522 490.2416,-465.7063 434.5383,-423.5885 392.6635,-399.8798"/>
-<polygon fill="#000000" stroke="#000000" points="394.1473,-396.7017 383.6966,-394.9599 390.7801,-402.8387 394.1473,-396.7017"/>
+<title>inputnode (utility)&#45;&gt;fixhdr_unifize (header)</title>
+<path fill="none" stroke="#000000" d="M490.2416,-791.8146C490.2416,-764.4983 490.2416,-711.25 490.2416,-666 490.2416,-666 490.2416,-666 490.2416,-522 490.2416,-465.8704 434.8626,-423.8342 393.0301,-400.0876"/>
+<polygon fill="#000000" stroke="#000000" points="394.5165,-396.9107 384.0677,-395.1575 391.1426,-403.044 394.5165,-396.9107"/>
 </g>
-<!-- fixhdr_skullstrip2 (utils) -->
+<!-- fixhdr_skullstrip2 (header) -->
 <g id="node4" class="node">
-<title>fixhdr_skullstrip2 (utils)</title>
-<ellipse fill="none" stroke="#000000" cx="347.2416" cy="-234" rx="124.2781" ry="18"/>
-<text text-anchor="middle" x="347.2416" y="-230.3" font-family="Times,serif" font-size="14.00" fill="#000000">fixhdr_skullstrip2 (utils)</text>
+<title>fixhdr_skullstrip2 (header)</title>
+<ellipse fill="none" stroke="#000000" cx="347.2416" cy="-234" rx="135.6761" ry="18"/>
+<text text-anchor="middle" x="347.2416" y="-230.3" font-family="Times,serif" font-size="14.00" fill="#000000">fixhdr_skullstrip2 (header)</text>
 </g>
-<!-- inputnode (utility)&#45;&gt;fixhdr_skullstrip2 (utils) -->
+<!-- inputnode (utility)&#45;&gt;fixhdr_skullstrip2 (header) -->
 <g id="edge3" class="edge">
-<title>inputnode (utility)&#45;&gt;fixhdr_skullstrip2 (utils)</title>
-<path fill="none" stroke="#000000" d="M498.3005,-791.7668C509.455,-764.8248 528.2416,-712.5405 528.2416,-666 528.2416,-666 528.2416,-666 528.2416,-378 528.2416,-336.3643 530.8769,-318.225 502.2416,-288 485.6075,-270.4424 462.9655,-258.5913 440.1279,-250.5927"/>
-<polygon fill="#000000" stroke="#000000" points="440.9378,-247.1753 430.3452,-247.3952 438.763,-253.8289 440.9378,-247.1753"/>
+<title>inputnode (utility)&#45;&gt;fixhdr_skullstrip2 (header)</title>
+<path fill="none" stroke="#000000" d="M498.3005,-791.7668C509.455,-764.8248 528.2416,-712.5405 528.2416,-666 528.2416,-666 528.2416,-666 528.2416,-378 528.2416,-336.3643 530.8769,-318.225 502.2416,-288 486.122,-270.9854 464.3603,-259.3298 442.2461,-251.3459"/>
+<polygon fill="#000000" stroke="#000000" points="443.3566,-248.0268 432.7624,-248.1442 441.1174,-254.6591 443.3566,-248.0268"/>
 </g>
 <!-- skullstrip_first_pass (fsl) -->
 <g id="node5" class="node">
@@ -81,9 +81,9 @@
 <ellipse fill="none" stroke="#000000" cx="347.2416" cy="-306" rx="145.6742" ry="18"/>
 <text text-anchor="middle" x="347.2416" y="-302.3" font-family="Times,serif" font-size="14.00" fill="#000000">skullstrip_second_pass (afni)</text>
 </g>
-<!-- fixhdr_unifize (utils)&#45;&gt;skullstrip_second_pass (afni) -->
+<!-- fixhdr_unifize (header)&#45;&gt;skullstrip_second_pass (afni) -->
 <g id="edge6" class="edge">
-<title>fixhdr_unifize (utils)&#45;&gt;skullstrip_second_pass (afni)</title>
+<title>fixhdr_unifize (header)&#45;&gt;skullstrip_second_pass (afni)</title>
 <path fill="none" stroke="#000000" d="M347.2416,-359.8314C347.2416,-352.131 347.2416,-342.9743 347.2416,-334.4166"/>
 <polygon fill="#000000" stroke="#000000" points="350.7417,-334.4132 347.2416,-324.4133 343.7417,-334.4133 350.7417,-334.4132"/>
 </g>
@@ -93,9 +93,9 @@
 <ellipse fill="none" stroke="#000000" cx="333.2416" cy="-162" rx="105.8812" ry="18"/>
 <text text-anchor="middle" x="333.2416" y="-158.3" font-family="Times,serif" font-size="14.00" fill="#000000">combine_masks (fsl)</text>
 </g>
-<!-- fixhdr_skullstrip2 (utils)&#45;&gt;combine_masks (fsl) -->
+<!-- fixhdr_skullstrip2 (header)&#45;&gt;combine_masks (fsl) -->
 <g id="edge7" class="edge">
-<title>fixhdr_skullstrip2 (utils)&#45;&gt;combine_masks (fsl)</title>
+<title>fixhdr_skullstrip2 (header)&#45;&gt;combine_masks (fsl)</title>
 <path fill="none" stroke="#000000" d="M343.7088,-215.8314C342.2115,-208.131 340.4311,-198.9743 338.7671,-190.4166"/>
 <polygon fill="#000000" stroke="#000000" points="342.1664,-189.5614 336.822,-180.4133 335.2951,-190.8975 342.1664,-189.5614"/>
 </g>
@@ -153,9 +153,9 @@
 <path fill="none" stroke="#000000" d="M88.8639,-143.8297C84.2655,-124.4182 80.3618,-93.5404 94.2416,-72 104.9155,-55.435 122.0455,-43.8943 140.0219,-35.8755"/>
 <polygon fill="#000000" stroke="#000000" points="141.5493,-39.0319 149.4698,-31.9952 138.8899,-32.5568 141.5493,-39.0319"/>
 </g>
-<!-- skullstrip_second_pass (afni)&#45;&gt;fixhdr_skullstrip2 (utils) -->
+<!-- skullstrip_second_pass (afni)&#45;&gt;fixhdr_skullstrip2 (header) -->
 <g id="edge13" class="edge">
-<title>skullstrip_second_pass (afni)&#45;&gt;fixhdr_skullstrip2 (utils)</title>
+<title>skullstrip_second_pass (afni)&#45;&gt;fixhdr_skullstrip2 (header)</title>
 <path fill="none" stroke="#000000" d="M347.2416,-287.8314C347.2416,-280.131 347.2416,-270.9743 347.2416,-262.4166"/>
 <polygon fill="#000000" stroke="#000000" points="350.7417,-262.4132 347.2416,-252.4133 343.7417,-262.4133 350.7417,-262.4132"/>
 </g>
@@ -189,9 +189,9 @@
 <path fill="none" stroke="#000000" d="M333.7557,-503.8314C334.3974,-496.131 335.1604,-486.9743 335.8736,-478.4166"/>
 <polygon fill="#000000" stroke="#000000" points="339.3646,-478.6694 336.7072,-468.4133 332.3887,-478.088 339.3646,-478.6694"/>
 </g>
-<!-- unifize (afni)&#45;&gt;fixhdr_unifize (utils) -->
+<!-- unifize (afni)&#45;&gt;fixhdr_unifize (header) -->
 <g id="edge18" class="edge">
-<title>unifize (afni)&#45;&gt;fixhdr_unifize (utils)</title>
+<title>unifize (afni)&#45;&gt;fixhdr_unifize (header)</title>
 <path fill="none" stroke="#000000" d="M340.5127,-431.8314C341.4753,-424.131 342.6198,-414.9743 343.6896,-406.4166"/>
 <polygon fill="#000000" stroke="#000000" points="347.1725,-406.7702 344.94,-396.4133 340.2266,-405.9019 347.1725,-406.7702"/>
 </g>

@@ -1,16 +1,16 @@
 strict digraph  {
 "inputnode (utility)";
-"validate (images)";
+"validate (header)";
 "extract_b0 (images)";
 "outputnode (utility)";
 "reg_b0 (fsl)";
 "pre_mask (afni)";
 "rescale_b0 (images)";
 enhance_and_skullstrip_dwi_wf;
-"inputnode (utility)" -> "validate (images)";
+"inputnode (utility)" -> "validate (header)";
 "inputnode (utility)" -> "extract_b0 (images)";
-"validate (images)" -> "extract_b0 (images)";
-"validate (images)" -> "outputnode (utility)";
+"validate (header)" -> "extract_b0 (images)";
+"validate (header)" -> "outputnode (utility)";
 "extract_b0 (images)" -> "reg_b0 (fsl)";
 "reg_b0 (fsl)" -> "pre_mask (afni)";
 "reg_b0 (fsl)" -> "rescale_b0 (images)";

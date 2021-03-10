@@ -1,8 +1,8 @@
 strict digraph  {
 "inputnode (utility)";
 "n4_correct (fixes)";
-"fixhdr_unifize (utils)";
-"fixhdr_skullstrip2 (utils)";
+"fixhdr_unifize (header)";
+"fixhdr_skullstrip2 (header)";
 "skullstrip_first_pass (fsl)";
 "normalize (utility)";
 "skullstrip_second_pass (afni)";
@@ -13,22 +13,22 @@ strict digraph  {
 "apply_mask (nibabel)";
 "outputnode (utility)";
 "inputnode (utility)" -> "n4_correct (fixes)";
-"inputnode (utility)" -> "fixhdr_unifize (utils)";
-"inputnode (utility)" -> "fixhdr_skullstrip2 (utils)";
+"inputnode (utility)" -> "fixhdr_unifize (header)";
+"inputnode (utility)" -> "fixhdr_skullstrip2 (header)";
 "n4_correct (fixes)" -> "skullstrip_first_pass (fsl)";
 "n4_correct (fixes)" -> "normalize (utility)";
-"fixhdr_unifize (utils)" -> "skullstrip_second_pass (afni)";
-"fixhdr_skullstrip2 (utils)" -> "combine_masks (fsl)";
+"fixhdr_unifize (header)" -> "skullstrip_second_pass (afni)";
+"fixhdr_skullstrip2 (header)" -> "combine_masks (fsl)";
 "skullstrip_first_pass (fsl)" -> "skullstrip_first_dilate (fsl)";
 "skullstrip_first_pass (fsl)" -> "skullstrip_first_mask (fsl)";
 "skullstrip_first_pass (fsl)" -> "combine_masks (fsl)";
 "normalize (utility)" -> "apply_mask (nibabel)";
 "normalize (utility)" -> "outputnode (utility)";
-"skullstrip_second_pass (afni)" -> "fixhdr_skullstrip2 (utils)";
+"skullstrip_second_pass (afni)" -> "fixhdr_skullstrip2 (header)";
 "combine_masks (fsl)" -> "apply_mask (nibabel)";
 "combine_masks (fsl)" -> "outputnode (utility)";
 "skullstrip_first_dilate (fsl)" -> "skullstrip_first_mask (fsl)";
 "skullstrip_first_mask (fsl)" -> "unifize (afni)";
-"unifize (afni)" -> "fixhdr_unifize (utils)";
+"unifize (afni)" -> "fixhdr_unifize (header)";
 "apply_mask (nibabel)" -> "outputnode (utility)";
 }

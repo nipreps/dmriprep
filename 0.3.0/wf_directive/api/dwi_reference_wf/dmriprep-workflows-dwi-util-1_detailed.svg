@@ -37,7 +37,7 @@
 <polyline fill="none" stroke="#000000" points="929.1078,-751.5 929.1078,-820.5 "/>
 <text text-anchor="middle" x="966.1078" y="-805.3" font-family="Times,serif" font-size="14.00" fill="#000000">validate</text>
 <polyline fill="none" stroke="#000000" points="929.1078,-797.5 1003.1078,-797.5 "/>
-<text text-anchor="middle" x="966.1078" y="-782.3" font-family="Times,serif" font-size="14.00" fill="#000000">images</text>
+<text text-anchor="middle" x="966.1078" y="-782.3" font-family="Times,serif" font-size="14.00" fill="#000000">header</text>
 <polyline fill="none" stroke="#000000" points="929.1078,-774.5 1003.1078,-774.5 "/>
 <text text-anchor="middle" x="966.1078" y="-759.3" font-family="Times,serif" font-size="14.00" fill="#000000"> </text>
 <polyline fill="none" stroke="#000000" points="1003.1078,-751.5 1003.1078,-820.5 "/>

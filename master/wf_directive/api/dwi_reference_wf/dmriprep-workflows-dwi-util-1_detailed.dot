@@ -1,7 +1,7 @@
 digraph structs {
 node [shape=record];
 dwi_reference_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outb0ixs> b0_ixs|<outdwifile> dwi_file}"];
-dwi_reference_wfvalidate [label="{IN|<ininfile> in_file}|{ validate | images |  }|{OUT|<outoutfile> out_file|<outoutreport> out_report}"];
+dwi_reference_wfvalidate [label="{IN|<ininfile> in_file}|{ validate | header |  }|{OUT|<outoutfile> out_file|<outoutreport> out_report}"];
 dwi_reference_wfextract_b0 [label="{IN|<inb0ixs> b0_ixs|<ininfile> in_file}|{ extract_b0 | images |  }|{OUT|<outoutfile> out_file}"];
 dwi_reference_wfreg_b0 [label="{IN|<ininfile> in_file}|{ reg_b0 | fsl |  }|{OUT|<outoutfile> out_file}"];
 dwi_reference_wfpre_mask [label="{IN|<ininfile> in_file}|{ pre_mask | afni |  }|{OUT|<outoutfile> out_file}"];
