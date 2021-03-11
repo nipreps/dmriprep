@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dmriprep.utils.vectors module &mdash; dmriprep 0.5.0rc0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmriprep.workflows package" href="dmriprep.workflows.html" />
+    <link rel="prev" title="dmriprep.utils.misc module" href="dmriprep.utils.misc.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> dmriprep
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.0rc0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.config.html">dmriprep.config package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.interfaces.html">dmriprep.interfaces package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dmriprep.utils.html">dmriprep.utils package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="dmriprep.utils.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.utils.bids.html">dmriprep.utils.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.utils.images.html">dmriprep.utils.images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.utils.misc.html">dmriprep.utils.misc module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dmriprep.utils.vectors module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.workflows.html">dmriprep.workflows package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Development road-map</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">dmriprep</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+        
+          <li><a href="dmriprep.utils.html">dmriprep.utils package</a> &raquo;</li>
+        
+      <li>dmriprep.utils.vectors module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/dmriprep.utils.vectors.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/dmriprep.utils.vectors.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
+<div class="section" id="module-dmriprep.utils.vectors">
+<span id="dmriprep-utils-vectors-module"></span><h1>dmriprep.utils.vectors module<a class="headerlink" href="#module-dmriprep.utils.vectors" title="Permalink to this headline">¶</a></h1>
+<p>Utilities to operate on diffusion gradients.</p>
+<dl class="class">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable">
+<em class="property">class </em><code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">DiffusionGradientTable</code><span class="sig-paren">(</span><em class="sig-param">b0_threshold=50</em>, <em class="sig-param">b_scale=True</em>, <em class="sig-param">bvals=None</em>, <em class="sig-param">bvec_norm_epsilon=0.1</em>, <em class="sig-param">bvecs=None</em>, <em class="sig-param">dwi_file=None</em>, <em class="sig-param">raise_inconsistent=False</em>, <em class="sig-param">rasb_file=None</em>, <em class="sig-param">transforms=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Data structure for DWI gradients.</p>
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.affine">
+<em class="property">property </em><code class="sig-name descname">affine</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.affine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the affine for RAS+/image-coordinates conversions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.b0mask">
+<em class="property">property </em><code class="sig-name descname">b0mask</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.b0mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a mask of low-b frames.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.bvals">
+<em class="property">property </em><code class="sig-name descname">bvals</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.bvals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the N b-values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.bvecs">
+<em class="property">property </em><code class="sig-name descname">bvecs</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.bvecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the N x 3 list of bvecs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.generate_rasb">
+<code class="sig-name descname">generate_rasb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.generate_rasb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose RAS+B gradient table.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.generate_vecval">
+<code class="sig-name descname">generate_vecval</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.generate_vecval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose a bvec/bval pair in image coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.gradients">
+<em class="property">property </em><code class="sig-name descname">gradients</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.gradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get gradient table (rasb).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.normalize">
+<code class="sig-name descname">normalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize (l2-norm) b-vectors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.normalized">
+<em class="property">property </em><code class="sig-name descname">normalized</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.normalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether b-vecs have been normalized.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.pole">
+<em class="property">property </em><code class="sig-name descname">pole</code><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.pole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the b-vectors cover a full or just half a shell.</p>
+<p>If pole is all-zeros then the b-vectors cover a full sphere.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.reorient_rasb">
+<code class="sig-name descname">reorient_rasb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.reorient_rasb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorient the vectors based o a list of affine transforms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dmriprep.utils.vectors.DiffusionGradientTable.to_filename">
+<code class="sig-name descname">to_filename</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">filetype='rasb'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.DiffusionGradientTable.to_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write files (RASB, bvecs/bvals) to a given path.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.utils.vectors.b0mask_from_data">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">b0mask_from_data</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em>, <em class="sig-param">mask_file</em>, <em class="sig-param">z_thres=3.0</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.b0mask_from_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate B0 locations relative to mean signal variation.</p>
+<p>Standardizes (z-score) the average DWI signal within mask and threshold.
+This is a data-driven way of estimating which volumes in the DWI dataset are
+really encoding <em>low-b</em> acquisitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwi_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – File path to the diffusion-weighted image series.</p></li>
+<li><p><strong>mask_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – File path to a mask corresponding to the DWI file.</p></li>
+<li><p><strong>z_thres</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>) – The z-value to consider a volume as a <em>low-b</em> orientation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.utils.vectors.bvecs2ras">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">bvecs2ras</code><span class="sig-paren">(</span><em class="sig-param">affine</em>, <em class="sig-param">bvecs</em>, <em class="sig-param">norm=True</em>, <em class="sig-param">bvec_norm_epsilon=0.2</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.bvecs2ras" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert b-vectors given in image coordinates to RAS+.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs2ras</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[[1.0, 0.0, 0.0], [-1.0, 0.0, 0.0]]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">affine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">affine</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>  <span class="c1"># Make it LAS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs2ras</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[[-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">affine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">affine</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>  <span class="c1"># Make it LPS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs2ras</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[[-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">affine</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]]</span>  <span class="c1"># Make it ARS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs2ras</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[[0.0, 1.0, 0.0], [0.0, -1.0, 0.0]]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs2ras</span><span class="p">(</span><span class="n">affine</span><span class="p">,</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[[0.0, 0.0, 0.0]]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs2ras</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)],</span>
+<span class="gp">... </span>          <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[[2.0, 0.0, 0.0], [-2.0, 0.0, 0.0]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.utils.vectors.calculate_pole">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">calculate_pole</code><span class="sig-paren">(</span><em class="sig-param">bvecs</em>, <em class="sig-param">bvec_norm_epsilon=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.calculate_pole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the b-vecs cover a hemisphere, and if so, calculate the pole.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bvecs</strong> (<em>numpy.ndarray</em>) – 2D numpy array with shape (N, 3) where N is the number of points.
+All points must lie on the unit sphere.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>pole</strong> – A zero-vector if <code class="docutils literal notranslate"><span class="pre">bvecs</span></code> covers the full sphere, and the unit vector
+locating the hemisphere pole othewise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<span class="gp">... </span>         <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<span class="gp">... </span>         <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)]</span>  <span class="c1"># Just half a sphere</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calculate_pole</span><span class="p">(</span><span class="n">bvecs</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[0.0, 0.0, 1.0]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs</span> <span class="o">+=</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)]</span>  <span class="c1"># Make it a full-sphere</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calculate_pole</span><span class="p">(</span><span class="n">bvecs</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[0.0, 0.0, 0.0]</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<p><a class="reference external" href="https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html">https://rstudio-pubs-static.s3.amazonaws.com/27121_a22e51b47c544980bad594d5e0bb2d04.html</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.utils.vectors.normalize_gradients">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">normalize_gradients</code><span class="sig-paren">(</span><em class="sig-param">bvecs</em>, <em class="sig-param">bvals</em>, <em class="sig-param">b0_threshold=50</em>, <em class="sig-param">bvec_norm_epsilon=0.1</em>, <em class="sig-param">b_scale=True</em>, <em class="sig-param">raise_error=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.normalize_gradients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize b-vectors and b-values.</p>
+<p>The resulting b-vectors will be of unit length for the non-zero b-values.
+The resultinb b-values will be normalized by the square of the
+corresponding vector amplitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bvecs</strong> (<em>m x n 2d array</em>) – Raw b-vectors array.</p></li>
+<li><p><strong>bvals</strong> (<em>1d array</em>) – Raw b-values float array.</p></li>
+<li><p><strong>b0_threshold</strong> (<em>float</em>) – Gradient threshold below which volumes and vectors are considered B0’s.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>bvecs</strong> (<em>m x n 2d array</em>) – Unit-normed b-vectors array.</p></li>
+<li><p><strong>bvals</strong> (<em>1d int array</em>) – Vector amplitude square normed b-values array.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="o">-</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1000</span><span class="p">]</span> <span class="o">*</span> <span class="n">bvecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalize_gradients</span><span class="p">(</span><span class="n">bvecs</span><span class="p">,</span> <span class="n">bvals</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">ValueError</span>:
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bvals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vecs</span><span class="p">,</span> <span class="n">norm_vals</span> <span class="o">=</span> <span class="n">normalize_gradients</span><span class="p">(</span><span class="n">bvecs</span><span class="p">,</span> <span class="n">bvals</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">norm_vecs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vecs</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[1.0, 0.0, 0.0]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">4000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">600</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">3000</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vecs</span><span class="p">,</span> <span class="n">norm_vals</span> <span class="o">=</span> <span class="n">normalize_gradients</span><span class="p">(</span><span class="n">bvecs</span><span class="p">,</span> <span class="n">bvals</span><span class="p">,</span> <span class="n">b_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">norm_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dmriprep.utils.vectors.rasb_dwi_length_check">
+<code class="sig-prename descclassname">dmriprep.utils.vectors.</code><code class="sig-name descname">rasb_dwi_length_check</code><span class="sig-paren">(</span><em class="sig-param">dwi_file</em>, <em class="sig-param">rasb_file</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.vectors.rasb_dwi_length_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the number of encoding vectors and number of orientations in the DWI file.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="dmriprep.workflows.html" class="btn btn-neutral float-right" title="dmriprep.workflows package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dmriprep.utils.misc.html" class="btn btn-neutral float-left" title="dmriprep.utils.misc module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2019, The dMRIPrep developers.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 0.5.0
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../0.2.1/api/dmriprep.utils.vectors.html">0.2.1</a></dd>
+            <dd><a href="../../0.2.2/api/dmriprep.utils.vectors.html">0.2.2</a></dd>
+            <dd><a href="../../0.3.0/api/dmriprep.utils.vectors.html">0.3.0</a></dd>
+            <dd><a href="../../0.4.0/api/dmriprep.utils.vectors.html">0.4.0</a></dd>
+            <dd><a href="dmriprep.utils.vectors.html">0.5.0</a></dd>
+            <dd><a href="../../0.5.0rc0/api/dmriprep.utils.vectors.html">0.5.0rc0</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../master/api/dmriprep.utils.vectors.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

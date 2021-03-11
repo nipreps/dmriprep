@@ -1,0 +1,26 @@
+digraph structs {
+node [shape=record];
+dwi_reference_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outb0ixs> b0_ixs|<outdwifile> dwi_file}"];
+dwi_reference_wfvalidate [label="{IN|<ininfile> in_file}|{ validate | header |  }|{OUT|<outoutfile> out_file|<outoutreport> out_report}"];
+dwi_reference_wfextract_b0 [label="{IN|<inb0ixs> b0_ixs|<ininfile> in_file}|{ extract_b0 | images |  }|{OUT|<outoutfile> out_file}"];
+dwi_reference_wfreg_b0 [label="{IN|<ininfile> in_file}|{ reg_b0 | fsl |  }|{OUT|<outoutfile> out_file}"];
+dwi_reference_wfpre_mask [label="{IN|<ininfile> in_file}|{ pre_mask | afni |  }|{OUT|<outoutfile> out_file}"];
+dwi_reference_wfrescale_b0 [label="{IN|<ininfile> in_file|<inmaskfile> mask_file}|{ rescale_b0 | images |  }|{OUT|<outoutref> out_ref}"];
+dwi_reference_wfenhance_and_skullstrip_dwi_wf [label="{IN|<ininputnodeinfile> inputnode.in_file|<ininputnodepremask> inputnode.pre_mask}|{ enhance_and_skullstrip_dwi_wf |  |  }|{OUT|<outoutputnodebiascorrectedfile> outputnode.bias_corrected_file|<outoutputnodemaskfile> outputnode.mask_file|<outoutputnodeskullstrippedfile> outputnode.skull_stripped_file}"];
+dwi_reference_wfoutputnode [label="{IN|<indwifile> dwi_file|<indwimask> dwi_mask|<inrawrefimage> raw_ref_image|<inrefimage> ref_image|<inrefimagebrain> ref_image_brain|<invalidationreport> validation_report}|{ outputnode | utility |  }|{OUT}"];
+dwi_reference_wfenhance_and_skullstrip_dwi_wf:outoutputnodebiascorrectedfile:e -> dwi_reference_wfoutputnode:inrefimage:w;
+dwi_reference_wfenhance_and_skullstrip_dwi_wf:outoutputnodemaskfile:e -> dwi_reference_wfoutputnode:indwimask:w;
+dwi_reference_wfenhance_and_skullstrip_dwi_wf:outoutputnodeskullstrippedfile:e -> dwi_reference_wfoutputnode:inrefimagebrain:w;
+dwi_reference_wfextract_b0:outoutfile:e -> dwi_reference_wfreg_b0:ininfile:w;
+dwi_reference_wfinputnode:outb0ixs:e -> dwi_reference_wfextract_b0:inb0ixs:w;
+dwi_reference_wfinputnode:outdwifile:e -> dwi_reference_wfvalidate:ininfile:w;
+dwi_reference_wfpre_mask:outoutfile:e -> dwi_reference_wfenhance_and_skullstrip_dwi_wf:ininputnodepremask:w;
+dwi_reference_wfpre_mask:outoutfile:e -> dwi_reference_wfrescale_b0:inmaskfile:w;
+dwi_reference_wfreg_b0:outoutfile:e -> dwi_reference_wfpre_mask:ininfile:w;
+dwi_reference_wfreg_b0:outoutfile:e -> dwi_reference_wfrescale_b0:ininfile:w;
+dwi_reference_wfrescale_b0:outoutref:e -> dwi_reference_wfenhance_and_skullstrip_dwi_wf:ininputnodeinfile:w;
+dwi_reference_wfrescale_b0:outoutref:e -> dwi_reference_wfoutputnode:inrawrefimage:w;
+dwi_reference_wfvalidate:outoutfile:e -> dwi_reference_wfextract_b0:ininfile:w;
+dwi_reference_wfvalidate:outoutfile:e -> dwi_reference_wfoutputnode:indwifile:w;
+dwi_reference_wfvalidate:outoutreport:e -> dwi_reference_wfoutputnode:invalidationreport:w;
+}
