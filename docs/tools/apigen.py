@@ -29,7 +29,7 @@ DEBUG = True
 
 
 class ApiDocWriter(object):
-    """ Class for automatic detection and parsing of API docs
+    """Class for automatic detection and parsing of API docs
     to Sphinx-parsable reST format"""
 
     # only separating first two levels
@@ -43,7 +43,7 @@ class ApiDocWriter(object):
         module_skip_patterns=None,
         other_defines=True,
     ):
-        """ Initialize package for parsing
+        """Initialize package for parsing
 
         Parameters
         ----------
@@ -86,7 +86,7 @@ class ApiDocWriter(object):
         return self._package_name
 
     def set_package_name(self, package_name):
-        """ Set package_name
+        """Set package_name
 
         >>> docwriter = ApiDocWriter('sphinx')
         >>> import sphinx
@@ -116,7 +116,7 @@ class ApiDocWriter(object):
         return mod
 
     def _get_object_name(self, line):
-        """ Get second token in line
+        """Get second token in line
         >>> docwriter = ApiDocWriter('sphinx')
         >>> docwriter._get_object_name("  def func():  ")
         'func'
@@ -131,7 +131,7 @@ class ApiDocWriter(object):
         return name.rstrip(":")
 
     def _uri2path(self, uri):
-        """ Convert uri to absolute filepath
+        """Convert uri to absolute filepath
 
         Parameters
         ----------
@@ -329,7 +329,7 @@ class ApiDocWriter(object):
         return head, body
 
     def _survives_exclude(self, matchstr, match_type):
-        """ Returns True if *matchstr* does not match patterns
+        """Returns True if *matchstr* does not match patterns
 
         ``self.package_name`` removed from front of string if present
 
@@ -370,7 +370,7 @@ class ApiDocWriter(object):
         return True
 
     def discover_modules(self):
-        """ Return module sequence discovered from ``self.package_name``
+        """Return module sequence discovered from ``self.package_name``
 
 
         Parameters

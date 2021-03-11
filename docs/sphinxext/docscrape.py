@@ -13,9 +13,7 @@ import sys
 
 
 class Reader(object):
-    """A line-based string reader.
-
-    """
+    """A line-based string reader."""
 
     def __init__(self, data):
         """

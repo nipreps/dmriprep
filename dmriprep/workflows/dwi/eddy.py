@@ -36,7 +36,11 @@ def gen_eddy_textfiles(in_file, in_meta):
     from nipype.utils.filemanip import fname_presuffix
 
     # Generate output file name
-    out_acqparams = fname_presuffix(in_file, suffix="_acqparams.txt", use_ext=False,)
+    out_acqparams = fname_presuffix(
+        in_file,
+        suffix="_acqparams.txt",
+        use_ext=False,
+    )
 
     pe_dir = in_meta["PhaseEncodingDirection"]
     fsl_pe = ["0"] * 3
@@ -48,11 +52,13 @@ def gen_eddy_textfiles(in_file, in_meta):
             f"{' '.join(fsl_pe)} {get_trt(in_meta, in_file=in_file):0.7f}"
         )
     except ValueError:
-        Path(out_acqparams).write_text(
-            f"{' '.join(fsl_pe)} {0.05}"
-        )
+        Path(out_acqparams).write_text(f"{' '.join(fsl_pe)} {0.05}")
 
-    out_index = fname_presuffix(in_file, suffix="_index.txt", use_ext=False,)
+    out_index = fname_presuffix(
+        in_file,
+        suffix="_index.txt",
+        use_ext=False,
+    )
     Path(out_index).write_text(f"{' '.join(['1'] * nb.load(in_file).shape[3])}")
     return out_acqparams, out_index
 
@@ -81,24 +87,14 @@ def init_eddy_wf(debug=False, name="eddy_wf"):
 
     inputnode = pe.Node(
         niu.IdentityInterface(
-            fields=[
-                "dwi_file",
-                "metadata",
-                "dwi_mask",
-                "in_bvec",
-                "in_bval"
-            ]
+            fields=["dwi_file", "metadata", "dwi_mask", "in_bvec", "in_bval"]
         ),
         name="inputnode",
     )
 
     outputnode = pe.Node(
         niu.IdentityInterface(
-            fields=[
-                "out_rotated_bvecs",
-                "eddy_ref_image",
-                "out_eddy"
-            ]
+            fields=["out_rotated_bvecs", "eddy_ref_image", "out_eddy"]
         ),
         name="outputnode",
     )
