@@ -313,13 +313,19 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         fmap_estimators = find_estimators(
             layout=config.execution.layout,
             subject=subject_id,
-            fmapless=False,
+            fmapless=config.workflow.use_syn,
+            force_fmapless=config.workflow.force_syn,
         )
 
-        # Add fieldmap-less estimators
-        if not fmap_estimators and config.workflow.use_syn:
-            # estimators = [fm.FieldmapEstimation()]
-            raise NotImplementedError
+        if (
+            any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
+            and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))
+        ):
+            # Although this check would go better within parser, allow datasets with fieldmaps
+            # not to require spatial standardization of the T1w.
+            raise RuntimeError("""\
+Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
+Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
 
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
@@ -354,11 +360,15 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         dwi_preproc_list.append(dwi_preproc_wf)
 
     if not fmap_estimators:
+        config.loggers.workflow.warning(
+            "Data for fieldmap estimation not present. Please note that these data "
+            "will not be corrected for susceptibility distortions."
+        )
         return workflow
 
     # SDC Step 2: Manually add further estimators (e.g., fieldmap-less)
     fmap_wf = init_fmap_preproc_wf(
-        debug=config.execution.debug,
+        debug=config.execution.debug is True,
         estimators=fmap_estimators,
         omp_nthreads=config.nipype.omp_nthreads,
         output_dir=str(output_dir),
@@ -371,7 +381,6 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
 BIDS structure for this particular subject.
 """
 
-    # TODO: Requires nipreps/sdcflows#147
     for dwi_preproc_wf in dwi_preproc_list:
         # fmt: off
         workflow.connect([
@@ -392,38 +401,70 @@ BIDS structure for this particular subject.
 
     # Step 3: Manually connect PEPOLAR
     for estimator in fmap_estimators:
-        if estimator.method != fm.EstimatorType.PEPOLAR:
+        config.loggers.workflow.info(f"""\
+Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
+<{', '.join(s.path.name for s in estimator.sources)}>""")
+        if estimator.method in (fm.EstimatorType.MAPPED, fm.EstimatorType.PHASEDIFF):
             continue
 
         suffices = set(s.suffix for s in estimator.sources)
 
-        if sorted(suffices) == ["epi"]:
+        if estimator.method == fm.EstimatorType.PEPOLAR and sorted(suffices) == ["epi"]:
             getattr(fmap_wf.inputs, f"in_{estimator.bids_id}").in_data = [
                 str(s.path) for s in estimator.sources
             ]
             getattr(fmap_wf.inputs, f"in_{estimator.bids_id}").metadata = [
                 s.metadata for s in estimator.sources
             ]
-        else:
-            raise NotImplementedError
-            # from niworkflows.interfaces.utility import KeySelect
-            # est_id = estimator.bids_id
-            # estim_select = pe.MapNode(
-            #     KeySelect(fields=["metadata", "dwi_reference", "dwi_mask", "gradients_rasb",]),
-            #     name=f"fmap_select_{est_id}",
-            #     run_without_submitting=True,
-            #     iterfields=["key"]
-            # )
-            # estim_select.inputs.key = [
-            #     str(s.path) for s in estimator.sources if s.suffix in ("epi", "dwi", "sbref")
-            # ]
-            # # fmt:off
-            # workflow.connect([
-            #     (referencenode, estim_select, [("dwi_file", "keys"),
-            #                                   ("metadata", "metadata"),
-            #                                   ("dwi_reference", "dwi_reference"),
-            #                                   ("gradients_rasb", "gradients_rasb")]),
-            # ])
-            # # fmt:on
+            continue
+
+        if estimator.method == fm.EstimatorType.PEPOLAR:
+            raise NotImplementedError(
+                "Sophisticated PEPOLAR schemes (e.g., using DWI+EPI) are unsupported."
+            )
+
+        if estimator.method == fm.EstimatorType.ANAT:
+            from sdcflows.workflows.fit.syn import init_syn_preprocessing_wf
+            from ..interfaces.vectors import CheckGradientTable
+
+            sources = [
+                str(s.path) for s in estimator.sources
+                if s.suffix in ("dwi",)
+            ]
+            layout = config.execution.layout
+            syn_preprocessing_wf = init_syn_preprocessing_wf(
+                omp_nthreads=config.nipype.omp_nthreads,
+                debug=config.execution.debug is True,
+                auto_bold_nss=False,
+                t1w_inversion=True,
+                name=f"syn_preprocessing_{estimator.bids_id}",
+            )
+            syn_preprocessing_wf.inputs.inputnode.in_epis = sources
+            syn_preprocessing_wf.inputs.inputnode.in_meta = [
+                layout.get_metadata(s) for s in sources
+            ]
+            b0_masks = pe.MapNode(CheckGradientTable(), name=f"b0_masks_{estimator.bids_id}",
+                                  iterfield=("dwi_file", "in_bvec", "in_bval"))
+            b0_masks.inputs.dwi_file = sources
+            b0_masks.inputs.in_bvec = [str(layout.get_bvec(s)) for s in sources]
+            b0_masks.inputs.in_bval = [str(layout.get_bval(s)) for s in sources]
+
+            # fmt:off
+            workflow.connect([
+                (anat_preproc_wf, syn_preprocessing_wf, [
+                    ("outputnode.t1w_preproc", "inputnode.in_anat"),
+                    ("outputnode.t1w_mask", "inputnode.mask_anat"),
+                    ("outputnode.std2anat_xfm", "inputnode.std2anat_xfm"),
+                ]),
+                (b0_masks, syn_preprocessing_wf, [("b0_mask", "inputnode.t_masks")]),
+                (syn_preprocessing_wf, fmap_wf, [
+                    ("outputnode.epi_ref", f"in_{estimator.bids_id}.epi_ref"),
+                    ("outputnode.epi_mask", f"in_{estimator.bids_id}.epi_mask"),
+                    ("outputnode.anat_ref", f"in_{estimator.bids_id}.anat_ref"),
+                    ("outputnode.anat_mask", f"in_{estimator.bids_id}.anat_mask"),
+                    ("outputnode.sd_prior", f"in_{estimator.bids_id}.sd_prior"),
+                ]),
+            ])
+            # fmt:on
 
     return workflow

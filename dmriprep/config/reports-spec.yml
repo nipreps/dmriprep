@@ -26,7 +26,7 @@ sections:
     caption: Surfaces (white and pial) reconstructed with FreeSurfer (<code>recon-all</code>)
       overlaid on the participant's T1w template.
     subtitle: Surface reconstruction
-- name: Fieldmaps
+- name: <em>B<sub>0</sub></em> field mapping
   ordering: session,run,fmapid
   reportlets:
   - bids: {datatype: figures, desc: mapped, suffix: fieldmap}
@@ -38,7 +38,7 @@ sections:
     description: Hover over the panels with the mouse pointer to also visualize the intensity of the
       field inhomogeneity in Hertz.
     static: false
-    subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
+    subtitle: "Preprocessed <em>B<sub>0</sub></em> mapping acquisition"
   - bids: {datatype: figures, desc: phasediff, suffix: fieldmap}
     caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
       along the phase-encoding direction of the image. A Gradient-Recalled Echo (GRE) scheme for the 
@@ -48,7 +48,7 @@ sections:
     description: Hover over the panels with the mouse pointer to also visualize the intensity of the
       field inhomogeneity in Hertz.
     static: false
-    subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
+    subtitle: "Preprocessed mapping of phase-difference acquisition"
   - bids: {datatype: figures, desc: pepolar, suffix: fieldmap}
     caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
       along the phase-encoding direction of the image. Utilizing two or more images with different
@@ -58,7 +58,17 @@ sections:
     description: Hover on the panels with the mouse pointer to also visualize the intensity of the
       inhomogeneity of the field in Hertz.
     static: false
-    subtitle: "Susceptibility-derived Distortion Correction (SDC): field inhomogeneity estimation"
+    subtitle: "Preprocessed estimation with varying Phase-Endocing (PE) blips"
+  - bids: {datatype: figures, desc: anat, suffix: fieldmap}
+    caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
+      along the phase-encoding direction of the image. Utilizing an <em>anatomically-correct</em> acquisition
+      (for instance, T1w or T2w), it is possible to estimate the inhomogeneity of the field by means of nonlinear
+      registration. The plot below shows a reference EPI (echo-planar imaging) volume generated
+      using two or more EPI images with the same PE encoding, after alignment to the anatomical scan.
+    description: Hover on the panels with the mouse pointer to also visualize the intensity of the
+      inhomogeneity of the field in Hertz.
+    static: false
+    subtitle: "Preprocessed estimation by nonlinear registration to an anatomical scan (&ldquo;<em>fieldmap-less</em>&rdquo;)"
 - name: Diffusion
   ordering: session,acquisition,run
   reportlets:

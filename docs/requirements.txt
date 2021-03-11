@@ -6,7 +6,7 @@ niworkflows >=1.4.0rc5,<1.5
 packaging
 pydot>=1.2.3
 pydotplus
-sdcflows ~= 2.0.0
+sdcflows ~= 2.0.1
 smriprep >= 0.8.0rc2
 sphinx >=2.1.2,<3.0
 sphinx-argparse

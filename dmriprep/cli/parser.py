@@ -225,7 +225,7 @@ https://www.nipreps.org/dmriprep/en/%s/spaces.html"""
         default="register",
         choices=["register", "header"],
         help='Either "register" (the default) to initialize volumes at center or "header"'
-        " to use the header information when coregistering DWI to T1w images.",
+        " to use the header information when co-registering DWI to T1w images.",
     )
 
     #  ANTs options
@@ -243,35 +243,27 @@ https://www.nipreps.org/dmriprep/en/%s/spaces.html"""
         "run-to-run replicability when used with --omp-nthreads 1",
     )
 
-    # Fieldmap options
-    g_fmap = parser.add_argument_group("Specific options for handling fieldmaps")
-    g_fmap.add_argument(
-        "--fmap-bspline",
-        action="store_true",
-        default=False,
-        help="fit a B-Spline field using least-squares (experimental)",
-    )
-    g_fmap.add_argument(
-        "--fmap-no-demean",
-        action="store_false",
-        default=True,
-        help="do not remove median (within mask) from fieldmap",
-    )
-
     # SyN-unwarp options
     g_syn = parser.add_argument_group("Specific options for SyN distortion correction")
     g_syn.add_argument(
         "--use-syn-sdc",
         action="store_true",
+        dest="use_syn",
         default=False,
-        help="EXPERIMENTAL: Use fieldmap-free distortion correction",
+        help="""\
+Attempt to set-up fieldmap-less estimation of fieldmaps via nonlinear registration with ANTs \
+if no other fieldmap estimation method is available. Fieldmap-less estimation will not be used \
+when sufficient fieldmap information (B0 mapping with SEI or GRE, or PEPOLAR estimation with \
+EPIs) is retrieved from the BIDS structure for a given subject.
+""",
     )
     g_syn.add_argument(
         "--force-syn",
         action="store_true",
         default=False,
-        help="EXPERIMENTAL/TEMPORARY: Use SyN correction in addition to "
-        "fieldmap correction, if available",
+        help="""\
+Force estimation of fieldmaps with the fieldmap-less approach. The use of this feature \
+is discouraged.""",
     )
 
     # FreeSurfer options
@@ -334,7 +326,7 @@ https://www.nipreps.org/dmriprep/en/%s/spaces.html"""
         action="store_true",
         default=False,
         help="only generate reports, don't run workflows. This will only rerun report "
-        "aggregation, not reportlet generation for specific nodes.",
+        "aggregation, not 'reportlet' generation for specific nodes.",
     )
     g_other.add_argument(
         "--run-uuid",

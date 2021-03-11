@@ -30,6 +30,7 @@ class _CheckGradientTableOutputSpec(TraitedSpec):
     full_sphere = traits.Bool()
     pole = traits.Tuple(traits.Float, traits.Float, traits.Float)
     b0_ixs = traits.List(traits.Int)
+    b0_mask = traits.List(traits.Bool)
 
 
 class CheckGradientTable(SimpleInterface):
@@ -81,6 +82,7 @@ class CheckGradientTable(SimpleInterface):
         pole = table.pole
         self._results["pole"] = tuple(pole)
         self._results["full_sphere"] = np.all(pole == 0.0)
+        self._results["b0_mask"] = table.b0mask.tolist()
         self._results["b0_ixs"] = np.where(table.b0mask)[0].tolist()
 
         cwd = Path(runtime.cwd).absolute()
