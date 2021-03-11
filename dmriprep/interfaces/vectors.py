@@ -20,7 +20,7 @@ class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
     in_rasb = File(exists=True, xor=["in_bval", "in_bvec"])
     b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
     bvec_norm_epsilon = traits.Float(BVEC_NORM_EPSILON, usedefault=True)
-    b_mag = traits.Int(None, usedefault=True)
+    b_mag = traits.Either(None, traits.Int, usedefault=True)
     b_scale = traits.Bool(True, usedefault=True)
 
 

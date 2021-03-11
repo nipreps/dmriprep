@@ -143,7 +143,7 @@ class DiffusionSummary(SummaryInterface):
         pe_direction = self.inputs.pe_direction
         shell_dist = self.inputs.shell_dist
         shell_dist_text = ", ".join(
-            f"{shell_dist[key]} directions at b={key} s/mm\u00B2"
+            f"{shell_dist[key]} directions at b={key} s/mm<sup>2</sup>"
             for key in shell_dist
         )
 
