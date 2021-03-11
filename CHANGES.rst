@@ -1,5 +1,5 @@
-0.5.0 (TBD)
-===========
+Latest release - 0.5.0 (March 11, 2021)
+=======================================
 A new minor release going forward with some of the items of our roadmap.
 The most salient features are the integration of FSL Eddy and the adoption of the new *SDCFlows 2.0*
 API.
@@ -28,21 +28,27 @@ API.
       10. The University of Washington eScience Institute
       11. Dept. of Radiology, Lausanne University Hospital and University of Lausanne
 
+  * FIX: PEPOLAR & mapped fieldmaps not showing up in reports (#158)
+  * FIX: Update to new *NiWorkflows* API (#156)
   * FIX: Change in _svgutils_ API (0.3.2) breaks our reportlet generation (#151)
   * FIX: Correctly check *SDCFlows*' registry of ``IntendedFor`` files (#141)
   * FIX: Honor ``--nprocs`` flag (#142)
+  * ENH: *fieldmap-less* integration from *SDCFlows* 2.0 (#153)
   * ENH: Temporary integration of FSL Eddy (#144)
   * ENH: Connect fieldmap estimation to preprocessing pipeline of individual DWI runs (#140)
   * ENH: Refactor workflow for simplicity - explicit iteration over DWIs (#138)
   * ENH: Run fieldmap estimation using *SDCFlows* 2.0 (#137)
   * FIX/MAINT: Drop Python 3.6 + Revise Python environment (versions pinned) in Dockerfile (#146)
+  * MAINT: Refactor Dockerfile with better use of miniconda (#155)
   * MAINT: Update *SDCFlows* pinning to the latest 2.0.0 release (#152)
   * DOC: Revise *dMRIPrep*'s road-map (#147)
   * DOC: Add FSL ``topup`` reference in citation boilerplate (#148)
   * DOC: change "functional" to "diffusion" (#143)
 
+Previous releases
+=================
 0.4.0 (December 10, 2020)
-=========================
+-------------------------
 A minor release including T1w-DWI registration with FreeSurfer's ``bbregister``.
 This minor release also includes some documentation improvements and a fair
 amount of maintenance tasks, the most salient of which is migrating our test
@@ -60,7 +66,7 @@ update test datasets.
   * MAINT: Adding J. Veraart and E. Dickie to the contributors list (#126, #133)
 
 0.3.0 (October 13, 2020)
-========================
+------------------------
 A long overdue minor release initiating the 0.3.x series and including the milestones set for the 0.3.0 version in our roadmap.
 
 A full list of changes can be found below.
@@ -110,8 +116,10 @@ A full list of changes can be found below.
       8. The University of Washington eScience Institute
       9. Dep. of Radiology, Lausanne University Hospital and University of Lausanne
 
+0.2.x series
+------------
 0.2.2 (January 15, 2020)
-========================
+........................
 A release to show the deployment process on the Sprint.
 
 * ENH: b0 reference and skullstrip workflow (#50)
@@ -122,7 +130,7 @@ A release to show the deployment process on the Sprint.
 * MAINT: Use a local docker registry instead of load/save (#46)
 
 0.2.1 (December 12, 2019)
-=========================
+.........................
 A bugfix release to test that versioned documentation is working.
 
 * FIX: Remove count of DWI scans according to ``task_id`` (#10)
@@ -139,20 +147,22 @@ A bugfix release to test that versioned documentation is working.
 * MAINT: Add TravisCI for code linting with ``flake8`` (#18)
 
 0.2.0 (September 06, 2019)
-==========================
+..........................
 A first attempt to roll out a release capable of running sMRIPrep for the anatomical processing.
 This release will also serve to exercise the continuous deployment set-up.
 
+0.1.x series
+------------
 0.1.1a0 (September 05, 2019)
-============================
+............................
 Testing Zenodo integration.
 
 0.1.1 (September 05, 2019)
-==========================
+..........................
 Tag to mark the start of a big refactor to adhere to fMRIPrep's principles.
 dMRIPrep will bring the contents of this branch back in as a plugin.
 
 0.1.0 (November 21, 2018)
-=========================
+.........................
 First release on GitHub.
 
