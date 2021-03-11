@@ -20,7 +20,7 @@ if __name__ == "__main__":
     devs = json.loads(Path(".maint/developers.json").read_text())
     contribs = json.loads(Path(".maint/contributors.json").read_text())
 
-    author_matches, unmatched = sort_contributors(
+    hits, misses = sort_contributors(
         devs + contribs,
         get_git_lines(),
         exclude=json.loads(Path(".maint/former.json").read_text()),
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     )
     # Remove position
     affiliations = []
-    for item in author_matches:
+    for item in hits:
         del item["position"]
         for a in _aslist(item.get("affiliation", "Unaffiliated")):
             if a not in affiliations:
@@ -41,22 +41,23 @@ if __name__ == "__main__":
                 for a in _aslist(author.get("affiliation", "Unaffiliated"))
             ]
         )
-        for author in author_matches
+        for author in hits
     ]
 
-    print(
-        "Some people made commits, but are missing in .maint/ "
-        "files: %s." % ", ".join(unmatched),
-        file=sys.stderr,
-    )
+    if misses:
+        print(
+            "Some people made commits, but are missing in .maint/ "
+            f"files: {', '.join(misses)}",
+            file=sys.stderr,
+        )
 
-    print("Authors (%d):" % len(author_matches))
+    print("Authors (%d):" % len(hits))
     print(
         "%s."
         % "; ".join(
             [
                 "%s \\ :sup:`%s`\\ " % (i["name"], idx)
-                for i, idx in zip(author_matches, aff_indexes)
+                for i, idx in zip(hits, aff_indexes)
             ]
         )
     )

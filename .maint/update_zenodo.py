@@ -114,11 +114,13 @@ if __name__ == "__main__":
     zenodo["creators"] = zen_creators
     zenodo["contributors"] = zen_contributors
 
-    print(
-        "Some people made commits, but are missing in .maint/ "
-        "files: %s." % ", ".join(set(miss_creators).intersection(miss_contributors)),
-        file=sys.stderr,
-    )
+    misses = set(miss_creators).intersection(miss_contributors)
+    if misses:
+        print(
+            "Some people made commits, but are missing in .maint/ "
+            f"files: {', '.join(misses)}",
+            file=sys.stderr,
+        )
 
     # Remove position
     for creator in zenodo["creators"]:
