@@ -102,7 +102,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#Options to handle performance">Options to handle performance</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Workflow configuration">Workflow configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Specific options for ANTs registrations">Specific options for ANTs registrations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Specific options for handling fieldmaps">Specific options for handling fieldmaps</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Specific options for SyN distortion correction">Specific options for SyN distortion correction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Specific options for FreeSurfer preprocessing">Specific options for FreeSurfer preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Surface preprocessing options">Surface preprocessing options</a></li>
@@ -211,7 +210,7 @@ Example:</p>
 </div>
 <div class="section" id="command-line-arguments">
 <h2>Command-Line Arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline">¶</a></h2>
-<p><p>dMRIPrep: dMRI PREProcessing workflows v0.5.0rc0+7.g25d9723a</p>
+<p><p>dMRIPrep: dMRI PREProcessing workflows v0.5.0rc0+11.g38746eec</p>
 </p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">dmriprep</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">bids</span><span class="o">-</span><span class="n">validation</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">participant</span><span class="o">-</span><span class="n">label</span> <span class="n">PARTICIPANT_LABEL</span> <span class="p">[</span><span class="n">PARTICIPANT_LABEL</span> <span class="o">...</span><span class="p">]]</span>
@@ -225,12 +224,12 @@ Example:</p>
                 <span class="p">[</span><span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="n">spaces</span> <span class="p">[</span><span class="n">OUTPUT_SPACES</span> <span class="p">[</span><span class="n">OUTPUT_SPACES</span> <span class="o">...</span><span class="p">]]]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">dwi2t1w</span><span class="o">-</span><span class="n">init</span> <span class="p">{</span><span class="n">register</span><span class="p">,</span><span class="n">header</span><span class="p">}]</span>
                 <span class="p">[</span><span class="o">--</span><span class="n">skull</span><span class="o">-</span><span class="n">strip</span><span class="o">-</span><span class="n">template</span> <span class="n">SKULL_STRIP_TEMPLATE</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">skull</span><span class="o">-</span><span class="n">strip</span><span class="o">-</span><span class="n">fixed</span><span class="o">-</span><span class="n">seed</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fmap</span><span class="o">-</span><span class="n">bspline</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fmap</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">demean</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">syn</span><span class="o">-</span><span class="n">sdc</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">syn</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">license</span><span class="o">-</span><span class="n">file</span> <span class="n">PATH</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">subjects</span><span class="o">-</span><span class="nb">dir</span> <span class="n">PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">submm</span><span class="o">-</span><span class="n">recon</span> <span class="o">|</span> <span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">reconall</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORK_DIR</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">clean</span><span class="o">-</span><span class="n">workdir</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">resource</span><span class="o">-</span><span class="n">monitor</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">reports</span><span class="o">-</span><span class="n">only</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">uuid</span> <span class="n">RUN_UUID</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">write</span><span class="o">-</span><span class="n">graph</span><span class="p">]</span>
-                <span class="p">[</span><span class="o">--</span><span class="n">stop</span><span class="o">-</span><span class="n">on</span><span class="o">-</span><span class="n">first</span><span class="o">-</span><span class="n">crash</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">notrack</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">sloppy</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">skull</span><span class="o">-</span><span class="n">strip</span><span class="o">-</span><span class="n">fixed</span><span class="o">-</span><span class="n">seed</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">syn</span><span class="o">-</span><span class="n">sdc</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">syn</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">license</span><span class="o">-</span><span class="n">file</span> <span class="n">PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">subjects</span><span class="o">-</span><span class="nb">dir</span> <span class="n">PATH</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">submm</span><span class="o">-</span><span class="n">recon</span> <span class="o">|</span> <span class="o">--</span><span class="n">fs</span><span class="o">-</span><span class="n">no</span><span class="o">-</span><span class="n">reconall</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORK_DIR</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">clean</span><span class="o">-</span><span class="n">workdir</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">resource</span><span class="o">-</span><span class="n">monitor</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">reports</span><span class="o">-</span><span class="n">only</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">uuid</span> <span class="n">RUN_UUID</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">write</span><span class="o">-</span><span class="n">graph</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">stop</span><span class="o">-</span><span class="n">on</span><span class="o">-</span><span class="n">first</span><span class="o">-</span><span class="n">crash</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">--</span><span class="n">notrack</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">sloppy</span><span class="p">]</span>
                 <span class="n">bids_dir</span> <span class="n">output_dir</span> <span class="p">{</span><span class="n">participant</span><span class="p">}</span>
 </pre></div>
 </div>
@@ -321,7 +320,7 @@ Example:</p>
 </dd>
 <dt><kbd>--dwi2t1w-init</kbd></dt>
 <dd><p>Possible choices: register, header</p>
-<p>Either “register” (the default) to initialize volumes at center or “header” to use the header information when coregistering DWI to T1w images.</p>
+<p>Either “register” (the default) to initialize volumes at center or “header” to use the header information when co-registering DWI to T1w images.</p>
 </dd>
 </dl>
 </div>
@@ -336,25 +335,14 @@ Example:</p>
 </dd>
 </dl>
 </div>
-<div class="section" id="Specific options for handling fieldmaps">
-<h3>Specific options for handling fieldmaps<a class="headerlink" href="#Specific options for handling fieldmaps" title="Permalink to this headline">¶</a></h3>
-<dl class="option-list">
-<dt><kbd>--fmap-bspline</kbd></dt>
-<dd><p>fit a B-Spline field using least-squares (experimental)</p>
-</dd>
-<dt><kbd>--fmap-no-demean</kbd></dt>
-<dd><p>do not remove median (within mask) from fieldmap</p>
-</dd>
-</dl>
-</div>
 <div class="section" id="Specific options for SyN distortion correction">
 <h3>Specific options for SyN distortion correction<a class="headerlink" href="#Specific options for SyN distortion correction" title="Permalink to this headline">¶</a></h3>
 <dl class="option-list">
 <dt><kbd>--use-syn-sdc</kbd></dt>
-<dd><p>EXPERIMENTAL: Use fieldmap-free distortion correction</p>
+<dd><p>Attempt to set-up fieldmap-less estimation of fieldmaps via nonlinear registration with ANTs if no other fieldmap estimation method is available. Fieldmap-less estimation will not be used when sufficient fieldmap information (B0 mapping with SEI or GRE, or PEPOLAR estimation with EPIs) is retrieved from the BIDS structure for a given subject.</p>
 </dd>
 <dt><kbd>--force-syn</kbd></dt>
-<dd><p>EXPERIMENTAL/TEMPORARY: Use SyN correction in addition to fieldmap correction, if available</p>
+<dd><p>Force estimation of fieldmaps with the fieldmap-less approach. The use of this feature is discouraged.</p>
 </dd>
 </dl>
 </div>
@@ -393,7 +381,7 @@ Example:</p>
 <dd><p>enable Nipype’s resource monitoring to keep track of memory and CPU usage</p>
 </dd>
 <dt><kbd>--reports-only</kbd></dt>
-<dd><p>only generate reports, don’t run workflows. This will only rerun report aggregation, not reportlet generation for specific nodes.</p>
+<dd><p>only generate reports, don’t run workflows. This will only rerun report aggregation, not ‘reportlet’ generation for specific nodes.</p>
 </dd>
 <dt><kbd>--run-uuid</kbd></dt>
 <dd><p>Specify UUID of previous run, to include error logs in report. No effect without –reports-only.</p>
