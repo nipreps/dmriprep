@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>dmriprep.config package &mdash; dmriprep 0.5.0 documentation</title>
@@ -187,7 +188,7 @@
 
 
     <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/dmriprep.config.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
-<div class="section" id="module-dmriprep.config">
+<section id="module-dmriprep.config">
 <span id="dmriprep-config-package"></span><h1>dmriprep.config package<a class="headerlink" href="#module-dmriprep.config" title="Permalink to this headline">¶</a></h1>
 <p>A Python module to maintain unique, run-wide <em>dMRIPrep</em> settings.</p>
 <p>This module implements the memory structures to keep a consistent, singleton config.
@@ -260,7 +261,7 @@ the settings to hard disk in <em>ToML</em> format, which looks like:</p>
 </div>
 <p>This config file is used to pass the settings across processes,
 using the <a class="reference internal" href="#dmriprep.config.load" title="dmriprep.config.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> function.</p>
-<div class="section" id="configuration-sections">
+<section id="configuration-sections">
 <h2>Configuration sections<a class="headerlink" href="#configuration-sections" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dmriprep.config.environment">
@@ -323,7 +324,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt id="dmriprep.config.environment.version">
-<code class="sig-name descname">version</code><em class="property"> = '0.5.0'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.5.0+1.g9887827a'</em><a class="headerlink" href="#dmriprep.config.environment.version" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -450,7 +451,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt id="dmriprep.config.execution.run_uuid">
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20210311-161904_3c881fd6-60bb-4f22-abbe-a937f57122b0'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20210407-154852_a07124bd-4d10-4949-8bd3-8185c948d06c'</em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -640,8 +641,8 @@ parameterizations over 32 characters will be replaced by their hash.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="usage">
+</section>
+<section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>A config file is used to pass settings and collect information as the execution
 graph is built across processes.</p>
@@ -660,8 +661,8 @@ graph is built across processes.</p>
 <span class="n">value</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">setting</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="logging">
+</section>
+<section id="logging">
 <h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dmriprep.config.loggers">
@@ -712,8 +713,8 @@ graph is built across processes.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="other-responsibilities">
+</section>
+<section id="other-responsibilities">
 <h2>Other responsibilities<a class="headerlink" href="#other-responsibilities" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code> is responsible for other convenience actions.</p>
 <blockquote>
@@ -793,7 +794,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">version</code><em class="property"> = '0.5.0'</em></dt>
+<code class="sig-name descname">version</code><em class="property"> = '0.5.0+1.g9887827a'</em></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -921,7 +922,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="attribute">
 <dt>
-<code class="sig-name descname">run_uuid</code><em class="property"> = '20210311-161904_3c881fd6-60bb-4f22-abbe-a937f57122b0'</em></dt>
+<code class="sig-name descname">run_uuid</code><em class="property"> = '20210407-154852_a07124bd-4d10-4949-8bd3-8185c948d06c'</em></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -1199,8 +1200,8 @@ in the absence of any alternatives.</p>
 
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

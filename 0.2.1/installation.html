@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Installation &mdash; dmriprep 0.5.0 documentation</title>
@@ -182,7 +183,7 @@
 
 
     <p class="scv-banner scv-sphinx_rtd_theme"><a href="../master/installation.html"><b>Warning:</b> This document is for an old version of dmriprep. The main version is master.</a></p>
-<div class="section" id="id1">
+<section id="id1">
 <h1>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <p>There are two ways of getting <em>dMRIPrep</em> installed:</p>
 <ul class="simple">
@@ -214,12 +215,12 @@ The command-line structure above is then modified as follows:</p>
 <p>Therefore, once specified, the container options and the image to be run
 from the command line is the same as for the <em>bare-metal</em> installation but dropping
 the <code class="docutils literal notranslate"><span class="pre">dmriprep</span></code> executable name.</p>
-<div class="section" id="container-technologies-docker-and-singularity">
+<section id="container-technologies-docker-and-singularity">
 <h2>Container technologies: Docker and Singularity<a class="headerlink" href="#container-technologies-docker-and-singularity" title="Permalink to this headline">¶</a></h2>
 <p>Container technologies are operating-system-level virtualization methods to run Linux systems
 using the host’s Linux kernel.
 This is a lightweight approach to virtualization, as compares to virtual machines.</p>
-<div class="section" id="docker-recommended-for-pc-laptop-and-commercial-cloud">
+<section id="docker-recommended-for-pc-laptop-and-commercial-cloud">
 <span id="installation-docker"></span><h3>Docker (recommended for PC/laptop and commercial Cloud)<a class="headerlink" href="#docker-recommended-for-pc-laptop-and-commercial-cloud" title="Permalink to this headline">¶</a></h3>
 <p>Probably, the most popular framework to execute containers is Docker.
 If you are to run <em>dMRIPrep</em> on your PC/laptop, this is the RECOMMENDED way of execution.
@@ -256,17 +257,17 @@ and <a class="reference external" href="https://fmriprep.readthedocs.io/en/stabl
 to run the <em>dMRIPrep</em> image.
 The list of Docker images ready to use is found at the <a class="reference external" href="https://hub.docker.com/r/nipreps/dmriprep/tags">Docker Hub</a>,
 under the <code class="docutils literal notranslate"><span class="pre">nipreps/dmriprep</span></code> identifier.</p>
-</div>
-<div class="section" id="singularity-recommended-for-hpc">
+</section>
+<section id="singularity-recommended-for-hpc">
 <h3>Singularity (recommended for HPC)<a class="headerlink" href="#singularity-recommended-for-hpc" title="Permalink to this headline">¶</a></h3>
 <p>For security reasons, many <abbr title="High-Performance Computing">HPCs</abbr> (e.g., <a class="reference external" href="https://www.tacc.utexas.edu/">TACC</a>)
 do not allow Docker containers, but do allow <a class="reference external" href="https://github.com/singularityware/singularity">Singularity</a> containers.
 The improved security for multi-tenant systems comes at the price of some limitations
 and extra steps necessary for execution.
 Please make sure you <a class="reference external" href="singularity.html">follow our tips and tricks to run dMRIPrep’s Singularity images</a>.</p>
-</div>
-</div>
-<div class="section" id="manually-prepared-environment-python-3-5">
+</section>
+</section>
+<section id="manually-prepared-environment-python-3-5">
 <h2>Manually Prepared Environment (Python 3.5+)<a class="headerlink" href="#manually-prepared-environment-python-3-5" title="Permalink to this headline">¶</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -289,7 +290,7 @@ As an additional installation setting, FreeSurfer requires a license file (see <
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ dmriprep --version
 </pre></div>
 </div>
-<div class="section" id="external-dependencies">
+<section id="external-dependencies">
 <h3>External Dependencies<a class="headerlink" href="#external-dependencies" title="Permalink to this headline">¶</a></h3>
 <p><em>dMRIPrep</em> is written using Python 3.5 (or above), and is based on
 <a class="reference external" href="http://nipype.readthedocs.io/en/latest/">nipype</a>.</p>
@@ -304,9 +305,9 @@ the <code class="docutils literal notranslate"><span class="pre">dmriprep</span>
 <li><p><a class="reference external" href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer</a> (version 6.0.1)</p></li>
 <li><p><a class="reference external" href="https://github.com/bids-standard/bids-validator">bids-validator</a> (version 1.2.3)</p></li>
 </ul>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
