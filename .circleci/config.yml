@@ -180,10 +180,10 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-
-            - data-ds000206-v1-{{ .Branch }}-
-            - data-ds000206-v1-master-
-            - data-ds000206-v1-
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v2-{{ .Branch }}-
+            - data-ds000206-v2-master-
+            - data-ds000206-v2-
       - run:
           name: Install ds000206
           command: |
@@ -193,7 +193,7 @@ jobs:
             datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/*
 
       - save_cache:
-          key: data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - /tmp/data/ds000206
 
