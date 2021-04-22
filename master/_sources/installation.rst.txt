@@ -108,7 +108,7 @@ A relatively interpretable description of how your environment can be set-up
 is found in the `Dockerfile <https://github.com/nipreps/dmriprep/blob/master/Dockerfile>`_.
 As an additional installation setting, FreeSurfer requires a license file (see :ref:`fs_license`).
 
-On a functional Python 3.5 (or above) environment with ``pip`` installed,
+On a functional Python 3.7 (or above) environment with ``pip`` installed,
 *dMRIPrep* can be installed using the habitual command ::
 
     $ python -m pip install dmriprep
@@ -120,16 +120,15 @@ Check your installation with the ``--version`` argument ::
 
 External Dependencies
 ---------------------
-*dMRIPrep* is written using Python 3.5 (or above), and is based on
-nipype_.
+*dMRIPrep* is written using Python 3.7 (or above), and is based on
+Nipype_.
 
 *dMRIPrep* requires some other neuroimaging software tools that are
 not handled by the Python's packaging system (Pypi) used to deploy
 the ``dmriprep`` package:
 
 - FSL_ (version 5.0.9)
-- ANTs_ (version 2.2.0 - NeuroDocker build)
+- ANTs_ (version 2.3.3 - NeuroDocker build)
 - AFNI_ (version Debian-16.2.07)
-- `C3D <https://sourceforge.net/projects/c3d/>`_ (version 1.0.0)
 - FreeSurfer_ (version 6.0.1)
-- `bids-validator <https://github.com/bids-standard/bids-validator>`_ (version 1.2.3)
+- `bids-validator <https://github.com/bids-standard/bids-validator>`_ (version 1.4.0)

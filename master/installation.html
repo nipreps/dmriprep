@@ -280,7 +280,7 @@ system’s <code class="docutils literal notranslate"><span class="pre">$PATH</s
 A relatively interpretable description of how your environment can be set-up
 is found in the <a class="reference external" href="https://github.com/nipreps/dmriprep/blob/master/Dockerfile">Dockerfile</a>.
 As an additional installation setting, FreeSurfer requires a license file (see <a class="reference internal" href="usage.html#fs-license"><span class="std std-ref">The FreeSurfer license</span></a>).</p>
-<p>On a functional Python 3.5 (or above) environment with <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed,
+<p>On a functional Python 3.7 (or above) environment with <code class="docutils literal notranslate"><span class="pre">pip</span></code> installed,
 <em>dMRIPrep</em> can be installed using the habitual command</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -m pip install dmriprep
 </pre></div>
@@ -291,18 +291,17 @@ As an additional installation setting, FreeSurfer requires a license file (see <
 </div>
 <section id="external-dependencies">
 <h3>External Dependencies<a class="headerlink" href="#external-dependencies" title="Permalink to this headline">¶</a></h3>
-<p><em>dMRIPrep</em> is written using Python 3.5 (or above), and is based on
-<a class="reference external" href="http://nipype.readthedocs.io/en/latest/">nipype</a>.</p>
+<p><em>dMRIPrep</em> is written using Python 3.7 (or above), and is based on
+<a class="reference external" href="http://nipype.readthedocs.io/en/latest/">Nipype</a>.</p>
 <p><em>dMRIPrep</em> requires some other neuroimaging software tools that are
 not handled by the Python’s packaging system (Pypi) used to deploy
 the <code class="docutils literal notranslate"><span class="pre">dmriprep</span></code> package:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/">FSL</a> (version 5.0.9)</p></li>
-<li><p><a class="reference external" href="https://stnava.github.io/ANTs/">ANTs</a> (version 2.2.0 - NeuroDocker build)</p></li>
+<li><p><a class="reference external" href="https://stnava.github.io/ANTs/">ANTs</a> (version 2.3.3 - NeuroDocker build)</p></li>
 <li><p><a class="reference external" href="https://afni.nimh.nih.gov/">AFNI</a> (version Debian-16.2.07)</p></li>
-<li><p><a class="reference external" href="https://sourceforge.net/projects/c3d/">C3D</a> (version 1.0.0)</p></li>
 <li><p><a class="reference external" href="https://surfer.nmr.mgh.harvard.edu/">FreeSurfer</a> (version 6.0.1)</p></li>
-<li><p><a class="reference external" href="https://github.com/bids-standard/bids-validator">bids-validator</a> (version 1.2.3)</p></li>
+<li><p><a class="reference external" href="https://github.com/bids-standard/bids-validator">bids-validator</a> (version 1.4.0)</p></li>
 </ul>
 </section>
 </section>
