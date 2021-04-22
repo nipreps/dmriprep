@@ -15,6 +15,7 @@ def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
         niu.IdentityInterface(
             fields=[
                 "source_file",
+                "summary_report",
                 "dwi_ref",
                 "dwi_mask",
                 "validation_report",
@@ -23,6 +24,15 @@ def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
         ),
         name="inputnode",
     )
+
+    ds_report_summary = pe.Node(
+        DerivativesDataSink(
+            base_directory=output_dir, desc="summary", datatype="figures"
+        ),
+        name="ds_report_summary",
+        run_without_submitting=True,
+    )
+
     mask_reportlet = pe.Node(SimpleShowMaskRPT(), name="mask_reportlet")
 
     ds_report_mask = pe.Node(
@@ -42,11 +52,13 @@ def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
 
     # fmt:off
     workflow.connect([
+        (inputnode, ds_report_summary, [("source_file", "source_file"),
+                                        ("summary_report", "in_file")]),
         (inputnode, mask_reportlet, [("dwi_ref", "background_file"),
                                      ("dwi_mask", "mask_file")]),
-        (inputnode, ds_report_validation, [("source_file", "source_file")]),
+        (inputnode, ds_report_validation, [("source_file", "source_file"),
+                                           ("validation_report", "in_file")]),
         (inputnode, ds_report_mask, [("source_file", "source_file")]),
-        (inputnode, ds_report_validation, [("validation_report", "in_file")]),
         (mask_reportlet, ds_report_mask, [("out_report", "in_file")]),
     ])
     # fmt:on

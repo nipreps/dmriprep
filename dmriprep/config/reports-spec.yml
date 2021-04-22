@@ -72,6 +72,7 @@ sections:
 - name: Diffusion
   ordering: session,acquisition,run
   reportlets:
+  - bids: {datatype: figures, desc: summary, suffix: dwi}
   - bids: {datatype: figures, desc: validation, suffix: dwi}
   - bids: {datatype: figures, desc: brain, suffix: mask}
     caption: Average <em>b=0</em> that serves for reference in early preprocessing steps.

@@ -6,6 +6,7 @@ from nipype.interfaces import utility as niu
 
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 from ...interfaces import DerivativesDataSink
+from ...interfaces.reports import DiffusionSummary
 
 
 def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
@@ -41,6 +42,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         File path of the b-vectors
     in_bval
         File path of the b-values
+    metadata
+        dwi metadata
     fmap
         File path of the fieldmap
     fmap_ref
@@ -82,6 +85,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     config.loggers.workflow.debug(
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
+    metadata = layout.get_metadata(str(dwi_file))
 
     if has_fieldmap:
         import re
@@ -107,6 +111,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                 "dwi_file",
                 "in_bvec",
                 "in_bval",
+                "metadata",
                 # From SDCFlows
                 "fmap",
                 "fmap_ref",
@@ -134,10 +139,17 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
     inputnode.inputs.in_bvec = str(layout.get_bvec(dwi_file))
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
+    inputnode.metadata = metadata
 
     outputnode = pe.Node(
         niu.IdentityInterface(fields=["dwi_reference", "dwi_mask", "gradients_rasb"]),
         name="outputnode",
+    )
+
+    summary = pe.Node(
+        DiffusionSummary(pe_direction=metadata.get("PhaseEncodingDirection")),
+        name="dwi_summary",
+        run_without_submitting=True,
     )
 
     gradient_table = pe.Node(CheckGradientTable(), name="gradient_table")
@@ -153,6 +165,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                      ("in_bvec", "in_bvec"),
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
+        (gradient_table, summary, [("shell_dist", "shell_dist")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
@@ -254,6 +267,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     # fmt: off
     workflow.connect([
         (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
+        (summary, reportlets_wf, [("out_report", "inputnode.summary_report")]),
         (dwi_reference_wf, reportlets_wf, [
             ("outputnode.validation_report", "inputnode.validation_report"),
         ]),
@@ -285,7 +299,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     unwarp_wf = init_unwarp_wf(
         debug=config.execution.debug, omp_nthreads=config.nipype.omp_nthreads
     )
-    unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
 
     output_select = pe.Node(
         KeySelect(fields=["fmap", "fmap_ref", "fmap_coeff", "fmap_mask"]),
@@ -322,6 +335,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         (dwi_reference_wf, coeff2epi_wf, [
             ("outputnode.ref_image", "inputnode.target_ref"),
             ("outputnode.dwi_mask", "inputnode.target_mask")]),
+        (inputnode, unwarp_wf, [("metadata", "inputnode.metadata")]),
         (dwi_reference_wf, unwarp_wf, [("outputnode.ref_image", "inputnode.distorted")]),
         (coeff2epi_wf, unwarp_wf, [
             ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),

@@ -20,6 +20,7 @@ class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
     in_rasb = File(exists=True, xor=["in_bval", "in_bvec"])
     b0_threshold = traits.Float(B0_THRESHOLD, usedefault=True)
     bvec_norm_epsilon = traits.Float(BVEC_NORM_EPSILON, usedefault=True)
+    b_mag = traits.Either(None, traits.Int, usedefault=True)
     b_scale = traits.Bool(True, usedefault=True)
 
 
@@ -29,6 +30,8 @@ class _CheckGradientTableOutputSpec(TraitedSpec):
     out_bvec = File(exists=True)
     full_sphere = traits.Bool()
     pole = traits.Tuple(traits.Float, traits.Float, traits.Float)
+    num_shells = traits.Int
+    shell_dist = traits.Dict
     b0_ixs = traits.List(traits.Int)
     b0_mask = traits.List(traits.Bool)
 
@@ -48,6 +51,10 @@ class CheckGradientTable(SimpleInterface):
     (0.0, 0.0, 0.0)
     >>> check.outputs.full_sphere
     True
+    >>> check.outputs.num_shells
+    3
+    >>> check.outputs.shell_dist
+    {0.0: 12, 1200.0: 32, 2500.0: 61}
 
     >>> check = CheckGradientTable(
     ...     dwi_file=str(data_dir / 'dwi.nii.gz'),
@@ -57,6 +64,10 @@ class CheckGradientTable(SimpleInterface):
     (0.0, 0.0, 0.0)
     >>> check.outputs.full_sphere
     True
+    >>> check.outputs.num_shells
+    3
+    >>> check.outputs.shell_dist
+    {0: 12, 1200: 32, 2500: 61}
     >>> newrasb = np.loadtxt(check.outputs.out_rasb, skiprows=1)
     >>> oldrasb = np.loadtxt(str(data_dir / 'dwi.tsv'), skiprows=1)
     >>> np.allclose(newrasb, oldrasb, rtol=1.e-3)
@@ -75,6 +86,7 @@ class CheckGradientTable(SimpleInterface):
             bvecs=_undefined(self.inputs, "in_bvec"),
             bvals=_undefined(self.inputs, "in_bval"),
             rasb_file=rasb_file,
+            b_mag=self.inputs.b_mag,
             b_scale=self.inputs.b_scale,
             bvec_norm_epsilon=self.inputs.bvec_norm_epsilon,
             b0_threshold=self.inputs.b0_threshold,
@@ -82,7 +94,8 @@ class CheckGradientTable(SimpleInterface):
         pole = table.pole
         self._results["pole"] = tuple(pole)
         self._results["full_sphere"] = np.all(pole == 0.0)
-        self._results["b0_mask"] = table.b0mask.tolist()
+        self._results["num_shells"] = len(table.count_shells)
+        self._results["shell_dist"] = table.count_shells
         self._results["b0_ixs"] = np.where(table.b0mask)[0].tolist()
 
         cwd = Path(runtime.cwd).absolute()
