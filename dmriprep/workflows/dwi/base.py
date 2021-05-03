@@ -65,6 +65,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     See Also
     --------
     * :py:func:`~dmriprep.workflows.dwi.util.init_dwi_reference_wf`
+    * :py:func:`~dmriprep.workflows.dwi.outputs.init_dwi_derivatives_wf`
     * :py:func:`~dmriprep.workflows.dwi.outputs.init_reportlets_wf`
 
     """
@@ -73,7 +74,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     )
     from ...interfaces.vectors import CheckGradientTable
     from .util import init_dwi_reference_wf
-    from .outputs import init_reportlets_wf
+    from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
     from .eddy import init_eddy_wf
 
     layout = config.execution.layout
@@ -146,6 +147,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         mem_gb=config.DEFAULT_MEMORY_MIN_GB, omp_nthreads=config.nipype.omp_nthreads
     )
 
+    dwi_derivatives_wf = init_dwi_derivatives_wf(output_dir=str(config.execution.output_dir))
+
     # MAIN WORKFLOW STRUCTURE
     # fmt: off
     workflow.connect([
@@ -153,8 +156,13 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                      ("in_bvec", "in_bvec"),
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [("dwi_file", "inputnode.dwi_file")]),
+        (inputnode, dwi_derivatives_wf, [("dwi_file", "inputnode.source_file")]),
         (gradient_table, dwi_reference_wf, [("b0_ixs", "inputnode.b0_ixs")]),
         (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
+        (outputnode, dwi_derivatives_wf, [
+            ("dwi_reference", "inputnode.dwi_ref"),
+            ("dwi_mask", "inputnode.dwi_mask"),
+        ]),
     ])
     # fmt: on
 

@@ -65,3 +65,65 @@ def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
         ])
         # fmt:on
     return workflow
+
+
+def init_dwi_derivatives_wf(output_dir, name="dwi_derivatives_wf"):
+    """
+    Set up a battery of datasinks to store dwi derivatives in the right location.
+
+    Parameters
+    ----------
+    output_dir : :obj:`str`
+        Directory in which to save derivatives.
+    name : :obj:`str`
+        Workflow name (default: ``"dwi_derivatives_wf"``).
+
+    Inputs
+    ------
+    source_file
+        One dwi file that will serve as a file naming reference.
+    dwi_ref
+        The b0 reference.
+    dwi_mask
+        The brain mask for the dwi file.
+
+    """
+    workflow = pe.Workflow(name=name)
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["source_file", "dwi_ref", "dwi_mask"]),
+        name="inputnode",
+    )
+
+    ds_reference = pe.Node(
+        DerivativesDataSink(
+            base_directory=output_dir,
+            compress=True,
+            space="dwi",
+            suffix="epiref",
+            datatype="dwi",
+        ),
+        name="ds_reference",
+    )
+
+    ds_mask = pe.Node(
+        DerivativesDataSink(
+            base_directory=output_dir,
+            compress=True,
+            space="dwi",
+            desc="brain",
+            suffix="mask",
+            datatype="dwi",
+        ),
+        name="ds_mask",
+    )
+
+    # fmt:off
+    workflow.connect([
+        (inputnode, ds_reference, [("source_file", "source_file"),
+                                   ("dwi_ref", "in_file")]),
+        (inputnode, ds_mask, [("source_file", "source_file"),
+                              ("dwi_mask", "in_file")]),
+    ])
+    # fmt:on
+
+    return workflow
