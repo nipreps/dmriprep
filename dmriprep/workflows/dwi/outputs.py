@@ -98,7 +98,6 @@ def init_dwi_derivatives_wf(output_dir, name="dwi_derivatives_wf"):
         DerivativesDataSink(
             base_directory=output_dir,
             compress=True,
-            space="dwi",
             suffix="epiref",
             datatype="dwi",
         ),
@@ -109,7 +108,6 @@ def init_dwi_derivatives_wf(output_dir, name="dwi_derivatives_wf"):
         DerivativesDataSink(
             base_directory=output_dir,
             compress=True,
-            space="dwi",
             desc="brain",
             suffix="mask",
             datatype="dwi",
