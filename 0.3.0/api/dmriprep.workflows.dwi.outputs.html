@@ -198,6 +198,27 @@
 <span id="dmriprep-workflows-dwi-outputs-module"></span><h1>dmriprep.workflows.dwi.outputs module<a class="headerlink" href="#module-dmriprep.workflows.dwi.outputs" title="Permalink to this headline">¶</a></h1>
 <p>Write outputs (derivatives and reportlets).</p>
 <dl class="function">
+<dt id="dmriprep.workflows.dwi.outputs.init_dwi_derivatives_wf">
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.outputs.</code><code class="sig-name descname">init_dwi_derivatives_wf</code><span class="sig-paren">(</span><em class="sig-param">output_dir</em>, <em class="sig-param">name='dwi_derivatives_wf'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.outputs.init_dwi_derivatives_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a battery of datasinks to store dwi derivatives in the right location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Directory in which to save derivatives.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Workflow name (default: <code class="docutils literal notranslate"><span class="pre">&quot;dwi_derivatives_wf&quot;</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>source_file</strong> – One dwi file that will serve as a file naming reference.</p></li>
+<li><p><strong>dwi_ref</strong> – The b0 reference.</p></li>
+<li><p><strong>dwi_mask</strong> – The brain mask for the dwi file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="dmriprep.workflows.dwi.outputs.init_reportlets_wf">
 <code class="sig-prename descclassname">dmriprep.workflows.dwi.outputs.</code><code class="sig-name descname">init_reportlets_wf</code><span class="sig-paren">(</span><em class="sig-param">output_dir</em>, <em class="sig-param">sdc_report=False</em>, <em class="sig-param">name='reportlets_wf'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.outputs.init_reportlets_wf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up a battery of datasinks to store reports in the right location.</p>

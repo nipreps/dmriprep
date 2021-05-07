@@ -6,6 +6,7 @@ dwi_preproc_wfgradient_table [label="{IN|<indwifile> dwi_file|<ininbval> in_bval
 dwi_preproc_wfdwi_reference_wf [label="{IN|<ininputnodeb0ixs> inputnode.b0_ixs|<ininputnodedwifile> inputnode.dwi_file}|{ dwi_reference_wf |  |  }|{OUT|<outoutputnodedwifile> outputnode.dwi_file|<outoutputnodedwimask> outputnode.dwi_mask|<outoutputnoderefimage> outputnode.ref_image|<outoutputnodevalidationreport> outputnode.validation_report}"];
 dwi_preproc_wfoutputnode [label="{IN|<indwimask> dwi_mask|<indwireference> dwi_reference|<ingradientsrasb> gradients_rasb}|{ outputnode | utility |  }|{OUT|<outdwimask> dwi_mask|<outdwireference> dwi_reference}"];
 dwi_preproc_wfreportlets_wf [label="{IN|<ininputnodedwimask> inputnode.dwi_mask|<ininputnodedwiref> inputnode.dwi_ref|<ininputnodesourcefile> inputnode.source_file|<ininputnodevalidationreport> inputnode.validation_report}|{ reportlets_wf |  |  }|{OUT}"];
+dwi_preproc_wfdwi_derivatives_wf [label="{IN|<ininputnodedwimask> inputnode.dwi_mask|<ininputnodedwiref> inputnode.dwi_ref|<ininputnodesourcefile> inputnode.source_file}|{ dwi_derivatives_wf |  |  }|{OUT}"];
 dwi_preproc_wfeddy_wf [label="{IN|<ininputnodedwifile> inputnode.dwi_file|<ininputnodedwimask> inputnode.dwi_mask|<ininputnodeinbval> inputnode.in_bval|<ininputnodeinbvec> inputnode.in_bvec}|{ eddy_wf |  |  }|{OUT|<outoutputnodeeddyrefimage> outputnode.eddy_ref_image}"];
 dwi_preproc_wfeddy_report [label="{IN|<inafter> after|<inbefore> before}|{ eddy_report | reportlets |  }|{OUT|<outoutreport> out_report}"];
 dwi_preproc_wfds_report_eddy [label="{IN|<ininfile> in_file|<insourcefile> source_file}|{ ds_report_eddy |  |  }|{OUT}"];
@@ -26,6 +27,7 @@ dwi_preproc_wfeddy_wf:outoutputnodeeddyrefimage:e -> dwi_preproc_wfeddy_report:i
 dwi_preproc_wfgradient_table:outb0ixs:e -> dwi_preproc_wfdwi_reference_wf:ininputnodeb0ixs:w;
 dwi_preproc_wfgradient_table:outoutrasb:e -> dwi_preproc_wfoutputnode:ingradientsrasb:w;
 dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfds_report_reg:insourcefile:w;
+dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfdwi_derivatives_wf:ininputnodesourcefile:w;
 dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfdwi_reference_wf:ininputnodedwifile:w;
 dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfgradient_table:indwifile:w;
 dwi_preproc_wfinputnode:outdwifile:e -> dwi_preproc_wfreportlets_wf:ininputnodesourcefile:w;
@@ -38,6 +40,8 @@ dwi_preproc_wfinputnode:outsubjectid:e -> dwi_preproc_wfbbreg_wf:ininputnodesubj
 dwi_preproc_wfinputnode:outsubjectsdir:e -> dwi_preproc_wfbbreg_wf:ininputnodesubjectsdir:w;
 dwi_preproc_wfinputnode:outt1wmask:e -> dwi_preproc_wft1w_brain:ininmask:w;
 dwi_preproc_wfinputnode:outt1wpreproc:e -> dwi_preproc_wft1w_brain:ininfile:w;
+dwi_preproc_wfoutputnode:outdwimask:e -> dwi_preproc_wfdwi_derivatives_wf:ininputnodedwimask:w;
 dwi_preproc_wfoutputnode:outdwimask:e -> dwi_preproc_wfreportlets_wf:ininputnodedwimask:w;
+dwi_preproc_wfoutputnode:outdwireference:e -> dwi_preproc_wfdwi_derivatives_wf:ininputnodedwiref:w;
 dwi_preproc_wfoutputnode:outdwireference:e -> dwi_preproc_wfreportlets_wf:ininputnodedwiref:w;
 }
