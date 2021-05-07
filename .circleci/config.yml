@@ -242,11 +242,11 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
-            - data-ds000206-v1-{{ .Branch }}-{{ .Revision }}-
-            - data-ds000206-v1-{{ .Branch }}-
-            - data-ds000206-v1-master-
-            - data-ds000206-v1-
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v2-{{ .Branch }}-
+            - data-ds000206-v2-master-
+            - data-ds000206-v2-
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
