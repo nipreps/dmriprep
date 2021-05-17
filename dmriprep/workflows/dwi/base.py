@@ -215,6 +215,11 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         # fmt: on
 
     if "eddy" not in config.workflow.ignore:
+        from sdcflows.workflows.ancillary import init_brainextraction_wf
+
+        # Brain extraction not run just yet
+        brainextraction_wf = init_brainextraction_wf()
+
         # Eddy distortion correction
         eddy_wf = init_eddy_wf(debug=config.execution.debug)
         eddy_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
@@ -240,17 +245,17 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
         # fmt:off
         workflow.connect([
-            (dwi_reference_wf, eddy_wf, [
-                ("outputnode.dwi_file", "inputnode.dwi_file"),
-                ("outputnode.dwi_mask", "inputnode.dwi_mask"),
+            (inputnode, eddy_wf, [("dwi_file", "inputnode.dwi_file"),
+                                  ("in_bvec", "inputnode.in_bvec"),
+                                  ("in_bval", "inputnode.in_bval")]),
+            (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
+            (dwi_reference_wf, brainextraction_wf, [
+                ("outputnode.epi_ref_file", "inputnode.in_file")]),
+            (brainextraction_wf, eddy_wf, [
+                ("outputnode.out_mask", "inputnode.dwi_mask"),
             ]),
-            (inputnode, eddy_wf, [
-                ("in_bvec", "inputnode.in_bvec"),
-                ("in_bval", "inputnode.in_bval")
-            ]),
-            (dwi_reference_wf, eddy_report, [("outputnode.epi_ref_file", "before")]),
+            (brainextraction_wf, eddy_report, [("outputnode.out_file", "before")]),
             (eddy_wf, eddy_report, [('outputnode.eddy_ref_image', 'after')]),
-            (dwi_reference_wf, ds_report_eddy, [("outputnode.dwi_file", "source_file")]),
             (eddy_report, ds_report_eddy, [("out_report", "in_file")]),
         ])
         # fmt:on
