@@ -72,6 +72,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         SimpleBeforeAfterRPT as SimpleBeforeAfter,
     )
     from niworkflows.workflows.epi.refmap import init_epi_reference_wf
+    from sdcflows.workflows.ancillary import init_brainextraction_wf
 
     from ...interfaces.vectors import CheckGradientTable
     from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
@@ -148,7 +149,16 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         name="dwi_reference_wf",
     )
 
-    dwi_derivatives_wf = init_dwi_derivatives_wf(output_dir=str(config.execution.output_dir))
+    brainextraction_wf = init_brainextraction_wf()
+    dwi_derivatives_wf = init_dwi_derivatives_wf(
+        output_dir=str(config.execution.output_dir)
+    )
+
+    # If has_fieldmaps this will hold the corrected reference, original otherwise
+    buffernode = pe.Node(
+        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask"]),
+        name="buffernode",
+    )
 
     # MAIN WORKFLOW STRUCTURE
     # fmt: off
@@ -158,12 +168,16 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                      ("in_bvec", "in_bvec"),
                                      ("in_bval", "in_bval")]),
         (inputnode, dwi_reference_wf, [(("dwi_file", _aslist), "inputnode.in_files")]),
+        (dwi_reference_wf, brainextraction_wf, [
+            ("outputnode.epi_ref_file", "inputnode.in_file")]),
         (gradient_table, dwi_reference_wf, [(("b0_mask", _aslist), "inputnode.t_masks")]),
-        (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
-        (outputnode, dwi_derivatives_wf, [
+        (buffernode, dwi_derivatives_wf, [
             ("dwi_reference", "inputnode.dwi_ref"),
             ("dwi_mask", "inputnode.dwi_mask"),
         ]),
+        (buffernode, outputnode, [("dwi_reference", "dwi_reference"),
+                                  ("dwi_mask", "dwi_mask")]),
+        (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
     ])
     # fmt: on
 
@@ -205,21 +219,14 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                     ("t1w_mask", "in_mask")]),
             (inputnode, ds_report_reg, [("dwi_file", "source_file")]),
             # BBRegister
-            (dwi_reference_wf, bbr_wf, [
-                ("outputnode.epi_ref_file", "inputnode.in_file")
-            ]),
+            (buffernode, bbr_wf, [("dwi_reference", "inputnode.in_file")]),
             (bbr_wf, ds_report_reg, [
-                ('outputnode.out_report', 'in_file'),
-                (('outputnode.fallback', _bold_reg_suffix), 'desc')]),
+                ("outputnode.out_report", "in_file"),
+                (("outputnode.fallback", _bold_reg_suffix), "desc")]),
         ])
         # fmt: on
 
     if "eddy" not in config.workflow.ignore:
-        from sdcflows.workflows.ancillary import init_brainextraction_wf
-
-        # Brain extraction not run just yet
-        brainextraction_wf = init_brainextraction_wf()
-
         # Eddy distortion correction
         eddy_wf = init_eddy_wf(debug=config.execution.debug)
         eddy_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
@@ -249,13 +256,9 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                                   ("in_bvec", "inputnode.in_bvec"),
                                   ("in_bval", "inputnode.in_bval")]),
             (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
-            (dwi_reference_wf, brainextraction_wf, [
-                ("outputnode.epi_ref_file", "inputnode.in_file")]),
-            (brainextraction_wf, eddy_wf, [
-                ("outputnode.out_mask", "inputnode.dwi_mask"),
-            ]),
+            (brainextraction_wf, eddy_wf, [("outputnode.out_mask", "inputnode.dwi_mask")]),
             (brainextraction_wf, eddy_report, [("outputnode.out_file", "before")]),
-            (eddy_wf, eddy_report, [('outputnode.eddy_ref_image', 'after')]),
+            (eddy_wf, eddy_report, [("outputnode.eddy_ref_image", "after")]),
             (eddy_report, ds_report_eddy, [("out_report", "in_file")]),
         ])
         # fmt:on
@@ -281,7 +284,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     if not has_fieldmap:
         # fmt: off
         workflow.connect([
-            (dwi_reference_wf, outputnode, [("outputnode.epi_ref_file", "dwi_reference")]),
+            (brainextraction_wf, buffernode, [
+                ("outputnode.out_file", "dwi_reference"),
+                ("outputnode.out_mask", "dwi_mask"),
+            ]),
         ])
         # fmt: on
         return workflow
@@ -337,11 +343,11 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         (dwi_reference_wf, unwarp_wf, [("outputnode.epi_ref_file", "inputnode.distorted")]),
         (coeff2epi_wf, unwarp_wf, [
             ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
-        (dwi_reference_wf, sdc_report, [("outputnode.epi_ref_file", "before")]),
+        (brainextraction_wf, sdc_report, [("outputnode.out_file", "before")]),
         (unwarp_wf, sdc_report, [("outputnode.corrected", "after"),
                                  ("outputnode.corrected_mask", "wm_seg")]),
         (sdc_report, reportlets_wf, [("out_report", "inputnode.sdc_report")]),
-        (unwarp_wf, outputnode, [("outputnode.corrected", "dwi_reference"),
+        (unwarp_wf, buffernode, [("outputnode.corrected", "dwi_reference"),
                                  ("outputnode.corrected_mask", "dwi_mask")]),
     ])
     # fmt: on
@@ -355,10 +361,10 @@ def _get_wf_name(filename):
 
     Examples
     --------
-    >>> _get_wf_name('/completely/made/up/path/sub-01_dir-AP_acq-64grad_dwi.nii.gz')
+    >>> _get_wf_name("/completely/made/up/path/sub-01_dir-AP_acq-64grad_dwi.nii.gz")
     'dwi_preproc_dir_AP_acq_64grad_wf'
 
-    >>> _get_wf_name('/completely/made/up/path/sub-01_dir-RL_run-01_echo-1_dwi.nii.gz')
+    >>> _get_wf_name("/completely/made/up/path/sub-01_dir-RL_run-01_echo-1_dwi.nii.gz")
     'dwi_preproc_dir_RL_run_01_echo_1_wf'
 
     """
