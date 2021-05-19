@@ -1,7 +1,0 @@
-dmriprep.config package
-=======================
-
-.. automodule:: dmriprep.config
-   :members:
-   :undoc-members:
-   :show-inheritance:

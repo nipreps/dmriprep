@@ -1,7 +1,0 @@
-dmriprep.workflows.dwi.base module
-==================================
-
-.. automodule:: dmriprep.workflows.dwi.base
-   :members:
-   :undoc-members:
-   :show-inheritance:

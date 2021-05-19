@@ -1,7 +1,0 @@
-dmriprep.utils.bids module
-==========================
-
-.. automodule:: dmriprep.utils.bids
-   :members:
-   :undoc-members:
-   :show-inheritance:

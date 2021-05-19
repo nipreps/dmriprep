@@ -1,7 +1,0 @@
-dmriprep.workflows.dwi.outputs module
-=====================================
-
-.. automodule:: dmriprep.workflows.dwi.outputs
-   :members:
-   :undoc-members:
-   :show-inheritance:

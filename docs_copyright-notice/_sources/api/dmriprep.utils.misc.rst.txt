@@ -1,7 +1,0 @@
-dmriprep.utils.misc module
-==========================
-
-.. automodule:: dmriprep.utils.misc
-   :members:
-   :undoc-members:
-   :show-inheritance:

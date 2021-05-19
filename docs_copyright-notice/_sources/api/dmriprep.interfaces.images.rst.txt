@@ -1,7 +1,0 @@
-dmriprep.interfaces.images module
-=================================
-
-.. automodule:: dmriprep.interfaces.images
-   :members:
-   :undoc-members:
-   :show-inheritance:
