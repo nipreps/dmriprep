@@ -1,0 +1,7 @@
+dmriprep.workflows.dwi.eddy module
+==================================
+
+.. automodule:: dmriprep.workflows.dwi.eddy
+   :members:
+   :undoc-members:
+   :show-inheritance:

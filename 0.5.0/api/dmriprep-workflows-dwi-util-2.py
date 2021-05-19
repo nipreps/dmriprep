@@ -1,2 +1,0 @@
-from dmriprep.workflows.dwi.util import init_enhance_and_skullstrip_dwi_wf
-wf = init_enhance_and_skullstrip_dwi_wf(omp_nthreads=1)

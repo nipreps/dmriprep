@@ -14,4 +14,3 @@ Submodules
    dmriprep.workflows.dwi.base
    dmriprep.workflows.dwi.eddy
    dmriprep.workflows.dwi.outputs
-   dmriprep.workflows.dwi.util
