@@ -35,7 +35,7 @@ from nipype.interfaces import utility as niu
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 
 
-def gen_eddy_textfiles(in_file, in_meta):
+def gen_eddy_textfiles(in_file, in_meta, newpath=None):
     """
     Generate the acquisition-parameters and index files for FSL ``eddy_openmp``.
 
@@ -58,10 +58,12 @@ def gen_eddy_textfiles(in_file, in_meta):
     from nipype.utils.filemanip import fname_presuffix
 
     # Generate output file name
+    newpath = Path(newpath or ".")
     out_acqparams = fname_presuffix(
         in_file,
         suffix="_acqparams.txt",
         use_ext=False,
+        newpath=str(newpath.absolute()),
     )
 
     pe_dir = in_meta["PhaseEncodingDirection"]
@@ -80,6 +82,7 @@ def gen_eddy_textfiles(in_file, in_meta):
         in_file,
         suffix="_index.txt",
         use_ext=False,
+        newpath=str(newpath.absolute()),
     )
     Path(out_index).write_text(f"{' '.join(['1'] * nb.load(in_file).shape[3])}")
     return out_acqparams, out_index
@@ -102,7 +105,7 @@ def init_eddy_wf(debug=False, name="eddy_wf"):
     Outputs
     -------
     out_eddy
-        The eddy corrected diffusion image..
+        The eddy corrected diffusion image
 
     """
     from nipype.interfaces.fsl import Eddy, ExtractROI
