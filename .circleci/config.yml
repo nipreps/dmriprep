@@ -46,7 +46,8 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
@@ -121,7 +122,7 @@ jobs:
             docker exec -it registry /bin/registry garbage-collect --delete-untagged \
                 /etc/docker/registry/config.yml
       - save_cache:
-         key: build-v1-{{ .Branch }}-{{ epoch }}
+         key: build-v1-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/docker
       - persist_to_workspace:
@@ -165,7 +166,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
+            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}
+            - data-ds001771-v3--{{ .Revision }}
             - data-ds001771-v3-{{ .Branch }}-
             - data-ds001771-v3-master-
             - data-ds001771-v3-
@@ -185,13 +187,14 @@ jobs:
                                                          ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.thickness
 
       - save_cache:
-          key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds001771
 
       - restore_cache:
           keys:
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
+            - data-ds000206-v2--{{ .Revision }}-
             - data-ds000206-v2-{{ .Branch }}-
             - data-ds000206-v2-master-
             - data-ds000206-v2-
@@ -204,7 +207,7 @@ jobs:
             datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/*
 
       - save_cache:
-          key: data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds000206
 
@@ -255,16 +258,15 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
             - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v2--{{ .Revision }}-
             - data-ds000206-v2-{{ .Branch }}-
             - data-ds000206-v2-master-
             - data-ds000206-v2-
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
       - run:
@@ -306,7 +308,7 @@ jobs:
             rm -rf /tmp/ds000206/work/reportlets
           when: on_success
       - save_cache:
-         key: ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         key: ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/ds000206/work
       - run:
@@ -375,15 +377,15 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
             - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
+            - data-ds001771-v3--{{ .Revision }}-
             - data-ds001771-v3-{{ .Branch }}-
             - data-ds001771-v3-master-
             - data-ds001771-v3-
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-
           paths:
             - /tmp/docker
@@ -464,9 +466,7 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
       - docker/install-docker-credential-helper
@@ -519,9 +519,7 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
       - docker/install-docker-credential-helper
@@ -665,6 +663,7 @@ jobs:
       - restore_cache:
           keys:
             - docs-v1-{{ .Branch }}-{{ .Revision }}
+            - docs-v1--{{ .Revision }}
             - docs-v1-{{ .Branch }}-
             - docs-v1-master
             - docs-v1-
