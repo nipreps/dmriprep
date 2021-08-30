@@ -533,6 +533,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install libhdf5
+          command: |
+            sudo apt-get install pkg-config libhdf5-103 libhdf5-dev
+      - run:
           name: Start virtual environment
           command: |
             python -m venv /tmp/sdist
