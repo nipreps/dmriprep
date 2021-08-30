@@ -761,9 +761,9 @@ workflows:
       - test_deploy_pypi:
           filters:
             branches:
-              ignore:
-                - /docs\/.*/
-                - /docker\/.*/
+              only:
+                - /rel\/.*/
+                - /maint\/.*/
             tags:
               only: /.*/
 
