@@ -21,9 +21,11 @@ docs_deploy: &docs
         name: Deploy docs to gh-pages branch
         command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
 
-version: 2
-jobs:
+version: 2.1
+orbs:
+  docker: circleci/docker@1.6.0
 
+jobs:
   build:
     machine:
       image: circleci/classic:201711-01
@@ -48,6 +50,13 @@ jobs:
             - build-v1-
           paths:
             - /tmp/docker
+      - docker/install-docker-credential-helper
+      - run:
+          name: Login into Docker Hub
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+            fi
       - run:
           name: Set-up a Docker registry
           command: |
@@ -452,6 +461,13 @@ jobs:
             - build-v1-
           paths:
             - /tmp/docker
+      - docker/install-docker-credential-helper
+      - run:
+          name: Login into Docker Hub
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+            fi
       - run:
           name: Set-up a Docker registry
           command: |
@@ -466,11 +482,8 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag nipreps/dmriprep nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
-              docker push nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
-            fi
+            docker tag nipreps/dmriprep nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
+            docker push nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
 
   deploy_docker:
     machine:
@@ -501,6 +514,13 @@ jobs:
             - build-v1-
           paths:
             - /tmp/docker
+      - docker/install-docker-credential-helper
+      - run:
+          name: Login into Docker Hub
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+            fi
       - run:
           name: Set-up a Docker registry
           command: |
@@ -515,15 +535,12 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag nipreps/dmriprep nipreps/dmriprep:unstable
-              docker push nipreps/dmriprep:unstable
-              if [[ -n "$CIRCLE_TAG" ]]; then
-                docker push nipreps/dmriprep:latest
-                docker tag nipreps/dmriprep nipreps/dmriprep:$CIRCLE_TAG
-                docker push nipreps/dmriprep:$CIRCLE_TAG
-              fi
+            docker tag nipreps/dmriprep nipreps/dmriprep:unstable
+            docker push nipreps/dmriprep:unstable
+            if [[ -n "$CIRCLE_TAG" ]]; then
+              docker push nipreps/dmriprep:latest
+              docker tag nipreps/dmriprep nipreps/dmriprep:$CIRCLE_TAG
+              docker push nipreps/dmriprep:$CIRCLE_TAG
             fi
 
   test_deploy_pypi:
