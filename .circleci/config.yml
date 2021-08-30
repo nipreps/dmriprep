@@ -21,12 +21,16 @@ docs_deploy: &docs
         name: Deploy docs to gh-pages branch
         command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
 
-version: 2
-jobs:
+version: 2.1
+orbs:
+  docker: circleci/docker@1.6.0
 
+jobs:
   build:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/dmriprep
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -42,12 +46,20 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
           paths:
             - /tmp/docker
+      - docker/install-docker-credential-helper
+      - run:
+          name: Login into Docker Hub
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+            fi
       - run:
           name: Set-up a Docker registry
           command: |
@@ -110,7 +122,7 @@ jobs:
             docker exec -it registry /bin/registry garbage-collect --delete-untagged \
                 /etc/docker/registry/config.yml
       - save_cache:
-         key: build-v1-{{ .Branch }}-{{ epoch }}
+         key: build-v1-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/docker
       - persist_to_workspace:
@@ -154,7 +166,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
+            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}
+            - data-ds001771-v3--{{ .Revision }}
             - data-ds001771-v3-{{ .Branch }}-
             - data-ds001771-v3-master-
             - data-ds001771-v3-
@@ -174,13 +187,14 @@ jobs:
                                                          ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.thickness
 
       - save_cache:
-          key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds001771
 
       - restore_cache:
           keys:
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
+            - data-ds000206-v2--{{ .Revision }}-
             - data-ds000206-v2-{{ .Branch }}-
             - data-ds000206-v2-master-
             - data-ds000206-v2-
@@ -193,7 +207,7 @@ jobs:
             datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/*
 
       - save_cache:
-          key: data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/data/ds000206
 
@@ -219,7 +233,9 @@ jobs:
 
   ds000206:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/ds000206
     environment:
       - FS_LICENSE: /tmp/fslicense/license.txt
@@ -242,16 +258,15 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
             - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
+            - data-ds000206-v2--{{ .Revision }}-
             - data-ds000206-v2-{{ .Branch }}-
             - data-ds000206-v2-master-
             - data-ds000206-v2-
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
       - run:
@@ -293,7 +308,7 @@ jobs:
             rm -rf /tmp/ds000206/work/reportlets
           when: on_success
       - save_cache:
-         key: ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+         key: ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}
          paths:
             - /tmp/ds000206/work
       - run:
@@ -337,7 +352,9 @@ jobs:
 
   ds001771:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/ds001771
     environment:
       - FS_LICENSE: /tmp/fslicense/license.txt
@@ -360,15 +377,15 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
             - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
+            - data-ds001771-v3--{{ .Revision }}-
             - data-ds001771-v3-{{ .Branch }}-
             - data-ds001771-v3-master-
             - data-ds001771-v3-
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-
           paths:
             - /tmp/docker
@@ -425,7 +442,9 @@ jobs:
 
   deploy_docker_patches:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/dmriprep
     steps:
       - run:
@@ -447,11 +466,16 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
+      - docker/install-docker-credential-helper
+      - run:
+          name: Login into Docker Hub
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+            fi
       - run:
           name: Set-up a Docker registry
           command: |
@@ -466,15 +490,14 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag nipreps/dmriprep nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
-              docker push nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
-            fi
+            docker tag nipreps/dmriprep nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
+            docker push nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
 
   deploy_docker:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/dmriprep
     steps:
       - run:
@@ -496,11 +519,16 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-
+            - build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
+      - docker/install-docker-credential-helper
+      - run:
+          name: Login into Docker Hub
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+            fi
       - run:
           name: Set-up a Docker registry
           command: |
@@ -515,15 +543,12 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag nipreps/dmriprep nipreps/dmriprep:unstable
-              docker push nipreps/dmriprep:unstable
-              if [[ -n "$CIRCLE_TAG" ]]; then
-                docker push nipreps/dmriprep:latest
-                docker tag nipreps/dmriprep nipreps/dmriprep:$CIRCLE_TAG
-                docker push nipreps/dmriprep:$CIRCLE_TAG
-              fi
+            docker tag nipreps/dmriprep nipreps/dmriprep:unstable
+            docker push nipreps/dmriprep:unstable
+            if [[ -n "$CIRCLE_TAG" ]]; then
+              docker push nipreps/dmriprep:latest
+              docker tag nipreps/dmriprep nipreps/dmriprep:$CIRCLE_TAG
+              docker push nipreps/dmriprep:$CIRCLE_TAG
             fi
 
   test_deploy_pypi:
@@ -638,6 +663,7 @@ jobs:
       - restore_cache:
           keys:
             - docs-v1-{{ .Branch }}-{{ .Revision }}
+            - docs-v1--{{ .Revision }}
             - docs-v1-{{ .Branch }}-
             - docs-v1-master
             - docs-v1-
@@ -735,9 +761,9 @@ workflows:
       - test_deploy_pypi:
           filters:
             branches:
-              ignore:
-                - /docs\/.*/
-                - /docker\/.*/
+              only:
+                - /rel\/.*/
+                - /maint\/.*/
             tags:
               only: /.*/
 
