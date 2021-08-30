@@ -14,9 +14,12 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8]
-        pip: ["pip~=18.1", "pip>=20.3"]
-        
+        pip: ["pip~=20.3", "pip~=21.0"]
+
     steps:
+    - name: Install hdf5 libraries
+      run: |
+        sudo apt-get install pkg-config libhdf5-103 libhdf5-dev
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
