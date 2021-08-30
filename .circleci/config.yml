@@ -28,7 +28,9 @@ orbs:
 jobs:
   build:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/dmriprep
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -228,7 +230,9 @@ jobs:
 
   ds000206:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/ds000206
     environment:
       - FS_LICENSE: /tmp/fslicense/license.txt
@@ -346,7 +350,9 @@ jobs:
 
   ds001771:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/ds001771
     environment:
       - FS_LICENSE: /tmp/fslicense/license.txt
@@ -434,7 +440,9 @@ jobs:
 
   deploy_docker_patches:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/dmriprep
     steps:
       - run:
@@ -487,7 +495,9 @@ jobs:
 
   deploy_docker:
     machine:
-      image: circleci/classic:201711-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/dmriprep
     steps:
       - run:
