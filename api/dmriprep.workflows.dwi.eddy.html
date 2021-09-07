@@ -195,7 +195,7 @@
 <p>Eddy-currents and head-motion estimation/correction.</p>
 <dl class="function">
 <dt id="dmriprep.workflows.dwi.eddy.gen_eddy_textfiles">
-<code class="sig-prename descclassname">dmriprep.workflows.dwi.eddy.</code><code class="sig-name descname">gen_eddy_textfiles</code><span class="sig-paren">(</span><em class="sig-param">in_file</em>, <em class="sig-param">in_meta</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.eddy.gen_eddy_textfiles" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">dmriprep.workflows.dwi.eddy.</code><code class="sig-name descname">gen_eddy_textfiles</code><span class="sig-paren">(</span><em class="sig-param">in_file</em>, <em class="sig-param">in_meta</em>, <em class="sig-param">newpath=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.workflows.dwi.eddy.gen_eddy_textfiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate the acquisition-parameters and index files for FSL <code class="docutils literal notranslate"><span class="pre">eddy_openmp</span></code>.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out_acqparams</span><span class="p">,</span> <span class="n">out_index</span> <span class="o">=</span> <span class="n">gen_eddy_textfiles</span><span class="p">(</span>
@@ -224,7 +224,7 @@
 <dd class="field-even"><p><strong>dwi_file</strong> – dwi NIfTI file</p>
 </dd>
 <dt class="field-odd">Outputs</dt>
-<dd class="field-odd"><p><strong>out_eddy</strong> – The eddy corrected diffusion image..</p>
+<dd class="field-odd"><p><strong>out_eddy</strong> – The eddy corrected diffusion image</p>
 </dd>
 </dl>
 </dd></dl>
