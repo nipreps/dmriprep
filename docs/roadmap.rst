@@ -38,6 +38,33 @@ Version 0.5 (January, 2021)
     - Cover more complex fieldmap specifications
     - Automatically set up "*fieldmap-less*" estimations
 
+#. First draft of ISBI 2021 tutorial:
+
+    - Accept the design for our ISBI 2021 tutorial and document it on the notebooks repo.
+    - First draft
+    - Start development
+    - Plan for supporting Derek and Ariel in taking the head-motion correction to the finish line.
+
+# Finalize the development of ISBI 2021 tutorial (April 2021)
+
+Version 0.6 (December, 2021)
+----------------------------
+#. Head motion correction.
+
+    A SHOREline-based approach, ported from QSIPREP. In cases where the data are
+    "shelled", 3dSHORE will be used as the diffusion model. If the data are
+    single-shell, we will use SFM as the diffusion model.
+    Development is undergoing at the `eddymotion project
+    <https://github.com/nipreps/eddymotion>__`.
+    
+      - Integrate B\ :sub:`0` field maps `#42 <https://github.com/nipreps/eddymotion/issues/42>`__.
+      - Add base integration and unit tests `#40 <https://github.com/nipreps/eddymotion/issues/40>`__.
+      - Implementation of a Gaussian Process `#53 <https://github.com/nipreps/eddymotion/issues/53>`__.
+      - FiberFox tests (head-motion) `#46 <https://github.com/nipreps/eddymotion/issues/46>`__.
+      - FiberFox tests (eddy) `#47 <https://github.com/nipreps/eddymotion/issues/47>`__.
+      - FiberFox tests (both) `#48 <https://github.com/nipreps/eddymotion/issues/48>`__.
+      - ISMRM'22 abstract (10 November 2021 at 03:59 UTC)
+    
 #. Framewise-displacement (or equivalent) calculation
 
     We will identify volumes that are outliers in terms of head-motion, or other
@@ -53,21 +80,6 @@ Version 0.5 (January, 2021)
     - `#73 <https://github.com/nipreps/dmriprep/pull/73>`__
     - `#129 <https://github.com/nipreps/dmriprep/pull/129>`__
 
-#. First draft of ISBI 2021 tutorial:
-
-    - Accept the design for our ISBI 2021 tutorial and document it on the notebooks repo.
-    - First draft
-    - Start development
-    - Plan for supporting Derek and Ariel in taking the head-motion correction to the finish line.
-
-Version 0.6 (February, 2021)
-----------------------------
-#. Head motion correction.
-
-    A SHOREline-based approach, ported from QSIPREP. In cases where the data are
-    "shelled", 3dSHORE will be used as the diffusion model. If the data are
-    single-shell, we will use SFM as the diffusion model.
-
 #. :math:`B_1` inhomogeneity correction
 
     - Decide whether it can be brought around from estimation on T1w images
@@ -80,9 +92,7 @@ Version 0.6 (February, 2021)
     - Document Phase I testing and reporting protocols
     - Start execution
 
-# Continue with the development of ISBI 2021 tutorial
-
-Version 0.7 (March, 2021)
+Version 0.7 (January, 2022)
 -------------------------
 The *noisy month*. This is not a musical event, but a development cycle where we will
 focus on the implementation of steps addressing noise in DWI:
@@ -102,14 +112,12 @@ focus on the implementation of steps addressing noise in DWI:
 
 #. Testing Phase I execution
 
-#. Final release of the ISBI 2021 tutorial
-
-Version 0.8 (April, 2021)
+Version 0.8 (April, 2022)
 -------------------------
 This release will only address bugfixes conducive to finishing evaluation Phase I,
 which should conform a pretty solid ensemble ready for premiere in ISMRM 2021.
 
-Version 0.9 (May, 2021)
+Version 0.9 (May, 2022)
 -----------------------
 #. First official presentation at ISMRM 2021 (should the abstract be accepted)
 #. Evaluation Phase II starts.
@@ -118,7 +126,7 @@ Version 0.9 (May, 2021)
   - Plan for benchmarking experiments (`#121 <https://github.com/nipreps/dmriprep/issues/121>`__)
   - Start with addressing issues as they are reported
 
-Version 1.0 (Targetted for September 2021)
+Version 1.0 (Targetted for September 2022)
 ------------------------------------------
 Wrap-up evaluation Phase II with the first stable release of *dMRIPrep*.
 
