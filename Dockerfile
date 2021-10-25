@@ -291,7 +291,7 @@ RUN find $HOME -type d -exec chmod go=u {} + && \
 RUN ldconfig
 
 WORKDIR /tmp/
-ENTRYPOINT ["/usr/local/miniconda/bin/dmriprep"]
+ENTRYPOINT ["/opt/conda/bin/dmriprep"]
 
 ARG BUILD_DATE
 ARG VCS_REF
