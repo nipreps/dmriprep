@@ -283,9 +283,11 @@ RUN echo "${VERSION}" > /src/dmriprep/dmriprep/VERSION && \
     echo "include dmriprep/VERSION" >> /src/dmriprep/MANIFEST.in && \
     /opt/conda/bin/python -m pip install --no-cache-dir "/src/dmriprep[all]"
 
-RUN find $HOME -type d -exec chmod go=u {} + && \
-    find $HOME -type f -exec chmod go=u {} + && \
-    rm -rf $HOME/.npm $HOME/.conda $HOME/.empty
+RUN rm -rf $HOME/.npm $HOME/.conda $HOME/.empty && \
+    mkdir -p $HOME/.cache/dmriprep && \
+    mkdir -p $HOME/.nipype && \
+    find $HOME -type d -exec chmod go=u {} + && \
+    find $HOME -type f -exec chmod go=u {} +
 
 # Refresh linked libraries
 RUN ldconfig
