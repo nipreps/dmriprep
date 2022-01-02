@@ -21,15 +21,40 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Utilities to handle BIDS inputs."""
+import json
 import os
 import sys
-import json
 from pathlib import Path
+
 from bids import BIDSLayout
 
 
-def collect_data(bids_dir, participant_label, bids_validate=True):
-    """Replacement for niworkflows' version."""
+def collect_data(
+    bids_dir,
+    participant_label,
+    bids_validate=True,
+    bids_filters=None,
+):
+    """
+    Uses pybids to retrieve the input data for a given participant
+
+    Examples
+    --------
+    >>> subject_data, bids_root = collect_data(str(datadir / 'BIDS_dataset'), '68',
+    ...                             bids_validate=True,bids_filter={"fmap":{"direction":"REV","acquisition":"dwi"},"dwi":{"direction":"FWD"},"t1w":{"ceagent":"corrected"},"t2w":{"ceagent":"corrected"}})
+    >>> bids_root['fmap']  # doctest: +ELLIPSIS
+    ['.../BIDS_dataset/sub-68/ses-202103221236/fmap/sub-68_ses-202103221236_acq-dwi_dir-REV_epi.nii.gz'', \
+'.../BIDS_dataset/sub-68/ses-202105270937/fmap/sub-68_ses-202105270937_acq-dwi_dir-REV_epi.nii.gz']
+    >>> bids_root['bold']  # doctest: +ELLIPSIS
+    ['.../BIDS_dataset/sub-68/ses-202103221236/dwi/sub-68_ses-202103221236_dir-FWD_dwi.nii.gz', \
+'.../BIDS_dataset/sub-68/ses-202105270937/dwi/sub-68_ses-202105270937_dir-FWD_dwi.nii.gz']
+    >>> bids_root['t1w']  # doctest: +ELLIPSIS
+    ['.../BIDS_dataset/sub-68/ses-202103221236/anat/sub-68_ses-202103221236_ce-corrected_T1w.nii.gz', \
+'.../BIDS_dataset/sub-68/ses-202105270937/anat/sub-68_ses-202105270937_ce-corrected_T1w.nii.gz']
+    >>> bids_root['t2w']  # doctest: +ELLIPSIS
+    ['.../BIDS_dataset/sub-68/ses-202103221236/anat/sub-68_ses-202103221236_ce-corrected_T2w.nii.gz', \
+'.../BIDS_dataset/sub-68/ses-202105270937/anat/sub-68_ses-202105270937_ce-corrected_T2w.nii.gz']
+    """
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
@@ -43,6 +68,9 @@ def collect_data(bids_dir, participant_label, bids_validate=True):
         "t1w": {"datatype": "anat", "suffix": "T1w"},
         "roi": {"datatype": "anat", "suffix": "roi"},
     }
+    bids_filters = bids_filters or {}
+    for acq, entities in bids_filters.items():
+        queries[acq].update(entities)
 
     subj_data = {
         dtype: sorted(
@@ -50,17 +78,16 @@ def collect_data(bids_dir, participant_label, bids_validate=True):
                 return_type="file",
                 subject=participant_label,
                 extension=["nii", "nii.gz"],
-                **query
+                **query,
             )
         )
         for dtype, query in queries.items()
     }
-
     return subj_data, layout
 
 
 def write_derivative_description(bids_dir, deriv_dir):
-    from ..__about__ import __version__, __url__, DOWNLOAD_URL
+    from ..__about__ import DOWNLOAD_URL, __url__, __version__
 
     bids_dir = Path(bids_dir)
     deriv_dir = Path(deriv_dir)
@@ -85,7 +112,9 @@ def write_derivative_description(bids_dir, deriv_dir):
 
         singularity_md5 = _get_shub_version(singularity_url)
         if singularity_md5 and singularity_md5 is not NotImplemented:
-            desc["SingularityContainerMD5"] = _get_shub_version(singularity_url)
+            desc["SingularityContainerMD5"] = _get_shub_version(
+                singularity_url
+            )
 
     # Keys deriving from source dataset
     orig_desc = {}
@@ -107,8 +136,8 @@ def write_derivative_description(bids_dir, deriv_dir):
 
 def validate_input_dir(exec_env, bids_dir, participant_label):
     # Ignore issues and warnings that should not influence dMRIPrep
-    import tempfile
     import subprocess
+    import tempfile
 
     validator_config_dict = {
         "ignore": [
@@ -183,14 +212,21 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
         ignored_subs = all_subs.difference(selected_subs)
         if ignored_subs:
             for sub in ignored_subs:
-                validator_config_dict["ignoredFiles"].append("/sub-%s/**" % sub)
+                validator_config_dict["ignoredFiles"].append(
+                    "/sub-%s/**" % sub
+                )
     with tempfile.NamedTemporaryFile("w+") as temp:
         temp.write(json.dumps(validator_config_dict))
         temp.flush()
         try:
-            subprocess.check_call(["bids-validator", bids_dir, "-c", temp.name])
+            subprocess.check_call(
+                ["bids-validator", bids_dir, "-c", temp.name]
+            )
         except FileNotFoundError:
-            print("bids-validator does not appear to be installed", file=sys.stderr)
+            print(
+                "bids-validator does not appear to be installed",
+                file=sys.stderr,
+            )
 
 
 def _get_shub_version(singularity_url):
