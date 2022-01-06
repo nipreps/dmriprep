@@ -25,6 +25,10 @@ import os
 import sys
 from copy import deepcopy
 
+from dmriprep import config
+from dmriprep.interfaces import BIDSDataGrabber, DerivativesDataSink
+from dmriprep.interfaces.reports import AboutSummary, SubjectSummary
+from dmriprep.utils.bids import collect_data
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
@@ -32,11 +36,6 @@ from niworkflows.interfaces.bids import BIDSFreeSurferDir, BIDSInfo
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
 from smriprep.workflows.anatomical import init_anat_preproc_wf
-
-from .. import config
-from ..interfaces import BIDSDataGrabber, DerivativesDataSink
-from ..interfaces.reports import AboutSummary, SubjectSummary
-from ..utils.bids import collect_data
 
 
 def init_dmriprep_wf():
@@ -152,7 +151,11 @@ def init_single_subject_wf(subject_id):
     from ..utils.misc import sub_prefix as _prefix
 
     name = f"single_subject_{subject_id}_wf"
-    subject_data = collect_data(config.execution.layout, subject_id)[0]
+    subject_data = collect_data(
+        config.execution.layout,
+        subject_id,
+        bids_filters=config.execution.bids_filters,
+    )[0]
 
     if "flair" in config.workflow.ignore:
         subject_data["flair"] = []
@@ -316,7 +319,7 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
 
-    from .dwi.base import init_dwi_preproc_wf
+    from dmriprep.workflows.dwi_mrtrix.base import init_dwi_preproc_wf
 
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
@@ -334,6 +337,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
     # SDC Step 0: Determine whether fieldmaps can/should be estimated
     fmap_estimators = None
     if "fieldmap" not in config.workflow.ignore:
+        from dmriprep.workflows.dwi_mrtrix.utils.bids import comply_to_filters
         from sdcflows import fieldmaps as fm
         from sdcflows.utils.wrangler import find_estimators
         from sdcflows.workflows.base import init_fmap_preproc_wf
@@ -345,7 +349,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             fmapless=config.workflow.use_syn,
             force_fmapless=config.workflow.force_syn,
         )
-
+        fmap_estimators = comply_to_filters(fmap_estimators,config.execution.bids_filters.get("fmap"))
         if (
             any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
             and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))

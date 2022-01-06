@@ -23,12 +23,11 @@
 """Orchestrating the dMRI-preprocessing workflow."""
 from pathlib import Path
 
+from dmriprep import config
+from dmriprep.interfaces import DerivativesDataSink
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-
-from ... import config
-from ...interfaces import DerivativesDataSink
 
 
 def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
@@ -160,7 +159,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
     inputnode.inputs.in_bvec = str(layout.get_bvec(dwi_file))
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
-    
+
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=["dwi_reference", "dwi_mask", "gradients_rasb"]
