@@ -9,7 +9,7 @@ templateflow_version = "0.4.2"
 version = "0.2.2"
 
 [execution]
-bids_dir = "THP002/"
+bids_dir = "/home/groot/Projects/dmriprep/dmriprep/data/tests/THP/"
 bids_description_hash = "b07ee615a588acf67967d70f5b2402ffbe477b99a316433fa7fdaff4f9dad5c1"
 boilerplate_only = false
 debug = false

@@ -107,3 +107,9 @@ ENV/
 
 #kubernetes stuff
 kubernetes/jobs/
+
+# Trials
+*.ipynb
+
+# local tests 
+dmriprep/data/tests/local
