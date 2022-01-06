@@ -41,19 +41,30 @@ def collect_data(
     Examples
     --------
     >>> subject_data, bids_root = collect_data(str(datadir / 'BIDS_dataset'), '68',
-    ...                             bids_validate=True,bids_filter={"fmap":{"direction":"REV","acquisition":"dwi"},"dwi":{"direction":"FWD"},"t1w":{"ceagent":"corrected"},"t2w":{"ceagent":"corrected"}})
+    ... bids_validate=True,\
+        bids_filter={"fmap":{"direction":"REV","acquisition":"dwi"},\
+        "dwi":{"direction":"FWD"},"t1w":{"ceagent":"corrected"},\
+        "t2w":{"ceagent":"corrected"}}) \
     >>> bids_root['fmap']  # doctest: +ELLIPSIS
-    ['.../BIDS_dataset/sub-68/ses-202103221236/fmap/sub-68_ses-202103221236_acq-dwi_dir-REV_epi.nii.gz'', \
-'.../BIDS_dataset/sub-68/ses-202105270937/fmap/sub-68_ses-202105270937_acq-dwi_dir-REV_epi.nii.gz']
+    ['.../BIDS_dataset/sub-68/ses-202103221236/fmap/\
+    sub-68_ses-202103221236_acq-dwi_dir-REV_epi.nii.gz'', \
+    '.../BIDS_dataset/sub-68/ses-202105270937/fmap\
+    /sub-68_ses-202105270937_acq-dwi_dir-REV_epi.nii.gz']
     >>> bids_root['bold']  # doctest: +ELLIPSIS
-    ['.../BIDS_dataset/sub-68/ses-202103221236/dwi/sub-68_ses-202103221236_dir-FWD_dwi.nii.gz', \
-'.../BIDS_dataset/sub-68/ses-202105270937/dwi/sub-68_ses-202105270937_dir-FWD_dwi.nii.gz']
+    ['.../BIDS_dataset/sub-68/ses-202103221236/dwi\
+    /sub-68_ses-202103221236_dir-FWD_dwi.nii.gz', \
+    '.../BIDS_dataset/sub-68/ses-202105270937/dwi\
+    /sub-68_ses-202105270937_dir-FWD_dwi.nii.gz']
     >>> bids_root['t1w']  # doctest: +ELLIPSIS
-    ['.../BIDS_dataset/sub-68/ses-202103221236/anat/sub-68_ses-202103221236_ce-corrected_T1w.nii.gz', \
-'.../BIDS_dataset/sub-68/ses-202105270937/anat/sub-68_ses-202105270937_ce-corrected_T1w.nii.gz']
+    ['.../BIDS_dataset/sub-68/ses-202103221236/anat\
+    /sub-68_ses-202103221236_ce-corrected_T1w.nii.gz', \
+    '.../BIDS_dataset/sub-68/ses-202105270937/anat\
+    /sub-68_ses-202105270937_ce-corrected_T1w.nii.gz']
     >>> bids_root['t2w']  # doctest: +ELLIPSIS
-    ['.../BIDS_dataset/sub-68/ses-202103221236/anat/sub-68_ses-202103221236_ce-corrected_T2w.nii.gz', \
-'.../BIDS_dataset/sub-68/ses-202105270937/anat/sub-68_ses-202105270937_ce-corrected_T2w.nii.gz']
+    ['.../BIDS_dataset/sub-68/ses-202103221236/anat\
+    /sub-68_ses-202103221236_ce-corrected_T2w.nii.gz', \
+    '.../BIDS_dataset/sub-68/ses-202105270937/anat\
+    /sub-68_ses-202105270937_ce-corrected_T2w.nii.gz']
     """
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
