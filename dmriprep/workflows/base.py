@@ -329,7 +329,7 @@ Diffusion data preprocessing
  (across all sessions), the gradient table was vetted and converted into the *RASb*
 format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled b-values),
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
-"""
+""" #TODO: Update docstrings to Mrtrix3-based pipeline.
 
     # SDC Step 0: Determine whether fieldmaps can/should be estimated
     fmap_estimators = None
@@ -363,7 +363,7 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
             dwi_file,
             has_fieldmap=bool(fmap_estimators),
         )
-
+        
         # fmt: off
         workflow.connect([
             (anat_preproc_wf, dwi_preproc_wf, [

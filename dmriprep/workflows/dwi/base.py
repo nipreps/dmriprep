@@ -21,12 +21,13 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Orchestrating the dMRI-preprocessing workflow."""
-from ... import config
 from pathlib import Path
-from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
 
+from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+
+from ... import config
 from ...interfaces import DerivativesDataSink
 
 
@@ -97,8 +98,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from sdcflows.workflows.ancillary import init_brainextraction_wf
 
     from ...interfaces.vectors import CheckGradientTable
-    from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
     from .eddy import init_eddy_wf
+    from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
 
     layout = config.execution.layout
 
@@ -109,6 +110,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
 
     if has_fieldmap:
         import re
+
         from sdcflows.fieldmaps import get_identifier
 
         dwi_rel = re.sub(
@@ -158,9 +160,11 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
     inputnode.inputs.in_bvec = str(layout.get_bvec(dwi_file))
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
-
+    
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask", "gradients_rasb"]),
+        niu.IdentityInterface(
+            fields=["dwi_reference", "dwi_mask", "gradients_rasb"]
+        ),
         name="outputnode",
     )
 
@@ -204,8 +208,9 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     # fmt: on
 
     if config.workflow.run_reconall:
-        from niworkflows.interfaces.nibabel import ApplyMask
         from niworkflows.anat.coregistration import init_bbreg_wf
+        from niworkflows.interfaces.nibabel import ApplyMask
+
         from ...utils.misc import sub_prefix as _prefix
 
         # Mask the T1w
@@ -315,8 +320,8 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         return workflow
 
     from niworkflows.interfaces.utility import KeySelect
-    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
     from sdcflows.workflows.apply.correction import init_unwarp_wf
+    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
 
     coeff2epi_wf = init_coeff2epi_wf(
         debug=config.execution.debug,
