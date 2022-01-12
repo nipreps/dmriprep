@@ -25,12 +25,13 @@ from pathlib import Path
 
 from dmriprep import config
 from dmriprep.interfaces import DerivativesDataSink
+from dmriprep.workflows.dwi_mrtrix.utils.bids import locate_corresponding_json
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 
 
-def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
+def init_dwi_preproc_wf(dwi_file, has_fieldmap: bool):
     """
     Build a preprocessing workflow for one DWI run.
 
@@ -101,25 +102,19 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
 
     layout = config.execution.layout
-
     dwi_file = Path(dwi_file)
     config.loggers.workflow.debug(
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
 
     if has_fieldmap:
-        import re
-
-        from sdcflows.fieldmaps import get_identifier
-
-        dwi_rel = re.sub(
-            r"^sub-[a-zA-Z0-9]*/", "", str(dwi_file.relative_to(layout.root))
+        corresponding_fieldmaps = layout.get_fieldmap(
+            dwi_file, return_list=True
         )
-        estimator_key = get_identifier(dwi_rel)
-        if not estimator_key:
+        if not corresponding_fieldmaps:
             has_fieldmap = False
             config.loggers.workflow.critical(
-                f"None of the available B0 fieldmaps are associated to <{dwi_rel}>"
+                f"None of the available fieldmaps are associated to <{dwi_file.name}>"
             )
 
     # Build workflow
@@ -159,7 +154,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
     inputnode.inputs.in_bvec = str(layout.get_bvec(dwi_file))
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
-
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=["dwi_reference", "dwi_mask", "gradients_rasb"]

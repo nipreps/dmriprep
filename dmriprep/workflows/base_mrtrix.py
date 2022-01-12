@@ -363,6 +363,7 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
+        
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
             has_fieldmap=bool(fmap_estimators),
