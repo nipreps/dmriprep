@@ -23,15 +23,15 @@
 """Orchestrating the dMRI-preprocessing workflow."""
 from pathlib import Path
 
+from dmriprep import config
+from dmriprep.interfaces import DerivativesDataSink
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
+from nipype.pipeline.engine import workflows
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 
-from ... import config
-from ...interfaces import DerivativesDataSink
 
-
-def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
+def init_dwi_preproc_wf(dwi_file):
     """
     Build a preprocessing workflow for one DWI run.
 
@@ -53,8 +53,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     ----------
     dwi_file : :obj:`os.PathLike`
         One diffusion MRI dataset to be processed.
-    has_fieldmap : :obj:`bool`
-        Build the workflow with a path to register a fieldmap to the DWI.
 
     Inputs
     ------
@@ -91,6 +89,10 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     * :py:func:`~dmriprep.workflows.dwi.outputs.init_reportlets_wf`
 
     """
+    from dmriprep.workflows.dwi_mrtrix.pipelines.conversions import (
+        init_conversion_wf,
+    )
+    from dmriprep.workflows.dwi_mrtrix.utils.bids import locate_associated_file
     from niworkflows.interfaces.reportlets.registration import (
         SimpleBeforeAfterRPT as SimpleBeforeAfter,
     )
@@ -102,26 +104,25 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
 
     layout = config.execution.layout
-
     dwi_file = Path(dwi_file)
     config.loggers.workflow.debug(
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
-
-    if has_fieldmap:
-        import re
-
-        from sdcflows.fieldmaps import get_identifier
-
-        dwi_rel = re.sub(
-            r"^sub-[a-zA-Z0-9]*/", "", str(dwi_file.relative_to(layout.root))
+    corresponding_fieldmaps = layout.get_fieldmap(dwi_file, return_list=True)
+    if not corresponding_fieldmaps:
+        has_fieldmap = False
+        config.loggers.workflow.critical(
+            f"None of the available fieldmaps are associated to <{dwi_file.name}>"
         )
-        estimator_key = get_identifier(dwi_rel)
-        if not estimator_key:
-            has_fieldmap = False
+    else:
+        #: TODO: Make more robust! currently only matches PEPOLAR scheme.
+        has_fieldmap = True
+        if len(corresponding_fieldmaps) > 1:
             config.loggers.workflow.critical(
-                f"None of the available B0 fieldmaps are associated to <{dwi_rel}>"
+                f"""More than one available fieldmaps are associated to <{dwi_file.name}>.
+            Only PEPOLAR scheme is currently supported: using first available fieldmap."""
             )
+        fmap = Path(corresponding_fieldmaps[0].get("epi"))
 
     # Build workflow
     workflow = Workflow(name=_get_wf_name(dwi_file.name))
@@ -133,12 +134,11 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                 "dwi_file",
                 "in_bvec",
                 "in_bval",
-                # From SDCFlows
-                "fmap",
-                "fmap_ref",
-                "fmap_coeff",
-                "fmap_mask",
-                "fmap_id",
+                "dwi_json",
+                # Fieldmap -
+                #: TODO: Make more robust! currently only matches PEPOLAR scheme.
+                "fmap_file",
+                "fmap_json",
                 # From anatomical
                 "t1w_preproc",
                 "t1w_mask",
@@ -160,7 +160,13 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
     inputnode.inputs.in_bvec = str(layout.get_bvec(dwi_file))
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
-    
+    inputnode.inputs.dwi_json = str(
+        locate_associated_file(layout, dwi_file.absolute())
+    )
+    inputnode.inputs.fmap_file = fmap
+    inputnode.inputs.fmap_json = str(
+        locate_associated_file(layout, fmap.absolute())
+    )
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=["dwi_reference", "dwi_mask", "gradients_rasb"]
@@ -169,7 +175,24 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     )
 
     gradient_table = pe.Node(CheckGradientTable(), name="gradient_table")
-
+    mif_conversion_wf = init_conversion_wf()
+    workflow.connect(
+        [
+            (
+                inputnode,
+                mif_conversion_wf,
+                [
+                    ("dwi_file", "inputnode.dwi_file"),
+                    ("in_bvec", "inputnode.in_bvec"),
+                    ("in_bval", "inputnode.in_bval"),
+                    ("dwi_json", "inputnode.dwi_json"),
+                    ("fmap_file", "inputnode.fmap_file"),
+                    ("fmap_json", "inputnode.fmap_json"),
+                ],
+            )
+        ]
+    )
+    return workflow
     dwi_reference_wf = init_epi_reference_wf(
         omp_nthreads=config.nipype.omp_nthreads,
         name="dwi_reference_wf",
