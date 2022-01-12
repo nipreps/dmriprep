@@ -334,39 +334,12 @@ format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """ #TODO: Update docstrings to Mrtrix3-based pipeline.
 
-    # SDC Step 0: Determine whether fieldmaps can/should be estimated
-    fmap_estimators = None
-    if "fieldmap" not in config.workflow.ignore:
-        from dmriprep.workflows.dwi_mrtrix.utils.bids import comply_to_filters
-        from sdcflows import fieldmaps as fm
-        from sdcflows.utils.wrangler import find_estimators
-        from sdcflows.workflows.base import init_fmap_preproc_wf
-
-        # SDC Step 1: Run basic heuristics to identify available data for fieldmap estimation
-        fmap_estimators = find_estimators(
-            layout=config.execution.layout,
-            subject=subject_id,
-            fmapless=config.workflow.use_syn,
-            force_fmapless=config.workflow.force_syn,
-        )
-        fmap_estimators = comply_to_filters(fmap_estimators,config.execution.bids_filters.get("fmap"))
-        if (
-            any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
-            and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))
-        ):
-            # Although this check would go better within parser, allow datasets with fieldmaps
-            # not to require spatial standardization of the T1w.
-            raise RuntimeError("""\
-Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
-Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
-
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
         
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
-            has_fieldmap=bool(fmap_estimators),
         )
         
         # fmt: off

@@ -11,17 +11,11 @@ MIF_INPUT_TO_DWI_CONVERSION_EDGES = [
 ]
 MIF_DWI_CONVERSION_TO_OUTPUT_EDGES = [("out_file", "dwi_file")]
 
-MIF_INPUT_TO_FMAP_AP_CONVERSION_EDGES = [
-    ("fmap_ap", "in_file"),
-    ("fmap_ap_json", "json_import"),
+MIF_INPUT_TO_FMAP_CONVERSION_EDGES = [
+    ("fmap_file", "in_file"),
+    ("fmap_json", "json_import"),
 ]
-MIF_FMAP_AP_CONVERSION_TO_OUTPUT_EDGES = [("out_file", "fmap_ap")]
-
-MIF_INPUT_TO_FMAP_PA_CONVERSION_EDGES = [
-    ("fmap_pa", "in_file"),
-    ("fmap_pa_json", "json_import"),
-]
-MIF_FMAP_PA_CONVERSION_TO_OUTPUT_EDGES = [("out_file", "fmap_pa")]
+MIF_FMAP_CONVERSION_TO_OUTPUT_EDGES = [("out_file", "fmap")]
 
 #: Conversion to MIfTI
 NII_INPUT_TO_PREPROC_DWI_CONVERSION_EDGES = [

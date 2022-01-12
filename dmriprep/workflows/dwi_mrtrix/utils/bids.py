@@ -73,7 +73,9 @@ def locate_corresponding_fieldmap(
     return corresponding_fmaps
 
 
-def locate_corresponding_json(layout: BIDSLayout, image_file: Path) -> str:
+def locate_associated_file(
+    layout: BIDSLayout, image_file: Path, extension: str = "json"
+) -> str:
     """
     Locates json metadata file corresponding to *image_file*.
 
@@ -90,5 +92,9 @@ def locate_corresponding_json(layout: BIDSLayout, image_file: Path) -> str:
         Path to json metadata file corresponding to *image_file*.
     """
     entities = layout.parse_file_entities(image_file)
-    entities["extension"] = "json"
-    return layout.get(**entities)[0].path
+    entities["extension"] = extension
+    entities.pop("fmap", None)
+    try:
+        return layout.get(**entities)[0].path
+    except IndexError:
+        return
