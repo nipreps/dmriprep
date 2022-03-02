@@ -315,6 +315,7 @@ It is released under the [CC0]\
 
     if anat_only:
         return workflow
+
     from .dwi.base import init_dwi_preproc_wf
 
     # Append the dMRI section to the existing anatomical excerpt
@@ -360,8 +361,8 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
     for dwi_file in subject_data["dwi"]:
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
+            has_fieldmap=bool(fmap_estimators),
         )
-    
         
         # fmt: off
         workflow.connect([
@@ -383,7 +384,7 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
             (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
         ])
         # fmt: on
-        return workflow
+
         # Keep a handle to each workflow
         dwi_preproc_list.append(dwi_preproc_wf)
 
