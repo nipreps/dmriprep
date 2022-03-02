@@ -25,6 +25,12 @@ from pathlib import Path
 
 from dmriprep import config
 from dmriprep.interfaces import DerivativesDataSink
+from dmriprep.workflows.dwi_mrtrix.pipelines.fmap_prep.fmap_prep import (
+    init_phasediff_wf,
+)
+from dmriprep.workflows.dwi_mrtrix.pipelines.preprocess.preprocess import (
+    init_preprocess_wf,
+)
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from nipype.pipeline.engine import workflows
@@ -274,13 +280,24 @@ def init_dwi_preproc_wf(dwi_file):
                 (("outputnode.fallback", _bold_reg_suffix), "desc")]),
         ])
         # fmt: on
-    return workflow
 
     if "eddy" not in config.workflow.ignore:
         # Eddy distortion correction
-        eddy_wf = init_eddy_wf(debug=config.execution.debug)
-        eddy_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
-
+        pre_eddy_wf = init_phasediff_wf()
+        workflow.connect(
+            [
+                (
+                    mif_conversion_wf,
+                    pre_eddy_wf,
+                    [
+                        ("outputnode.dwi_file", "inputnode.dwi_file"),
+                        ("outputnode.fmap", "inputnode.fmap"),
+                    ],
+                )
+            ]
+        )
+        return workflow
+        preprocess_wf = init_preprocess_wf()
         ds_report_eddy = pe.Node(
             DerivativesDataSink(
                 base_directory=str(config.execution.output_dir),
@@ -302,7 +319,7 @@ def init_dwi_preproc_wf(dwi_file):
 
         # fmt:off
         workflow.connect([
-            (inputnode, eddy_wf, [("dwi_file", "inputnode.dwi_file"),
+            (inputnode, preprocess_wf, [("dwi_file", "inputnode.dwi_file"),
                                   ("in_bvec", "inputnode.in_bvec"),
                                   ("in_bval", "inputnode.in_bval")]),
             (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
@@ -313,6 +330,7 @@ def init_dwi_preproc_wf(dwi_file):
         ])
         # fmt:on
     return workflow
+    # return workflow
 
     # REPORTING ############################################################
     reportlets_wf = init_reportlets_wf(

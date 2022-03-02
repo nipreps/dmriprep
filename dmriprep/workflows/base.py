@@ -315,7 +315,7 @@ It is released under the [CC0]\
 
     if anat_only:
         return workflow
-    from .dwi.base import init_dwi_preproc_wf
+    from .dwi_mrtrix.base import init_dwi_preproc_wf
 
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
@@ -330,34 +330,36 @@ format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """ #TODO: Update docstrings to Mrtrix3-based pipeline.
 
-    # SDC Step 0: Determine whether fieldmaps can/should be estimated
-    fmap_estimators = None
-    if "fieldmap" not in config.workflow.ignore:
-        from sdcflows import fieldmaps as fm
-        from sdcflows.utils.wrangler import find_estimators
-        from sdcflows.workflows.base import init_fmap_preproc_wf
+#     # SDC Step 0: Determine whether fieldmaps can/should be estimated
+#     fmap_estimators = None
+#     if "fieldmap" not in config.workflow.ignore:
+#         from sdcflows import fieldmaps as fm
+#         from sdcflows.utils.wrangler import find_estimators
+#         from sdcflows.workflows.base import init_fmap_preproc_wf
 
-        # SDC Step 1: Run basic heuristics to identify available data for fieldmap estimation
-        fmap_estimators = find_estimators(
-            layout=config.execution.layout,
-            subject=subject_id,
-            fmapless=config.workflow.use_syn,
-            force_fmapless=config.workflow.force_syn,
-        )
+#         # SDC Step 1: Run basic heuristics to identify available data for fieldmap estimation
+#         fmap_estimators = find_estimators(
+#             layout=config.execution.layout,
+#             subject=subject_id,
+#             fmapless=config.workflow.use_syn,
+#             force_fmapless=config.workflow.force_syn,
+#         )
 
-        if (
-            any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
-            and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))
-        ):
-            # Although this check would go better within parser, allow datasets with fieldmaps
-            # not to require spatial standardization of the T1w.
-            raise RuntimeError("""\
-Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
-Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
+#         if (
+#             any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
+#             and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))
+#         ):
+#             # Although this check would go better within parser, allow datasets with fieldmaps
+#             # not to require spatial standardization of the T1w.
+#             raise RuntimeError("""\
+# Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
+# Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
 
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
+        if "REV" in dwi_file:
+            continue
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
         )
@@ -383,17 +385,18 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
             (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
         ])
         # fmt: on
-        return workflow
         # Keep a handle to each workflow
         dwi_preproc_list.append(dwi_preproc_wf)
 
-    if not fmap_estimators:
-        config.loggers.workflow.warning(
-            "Data for fieldmap estimation not present. Please note that these data "
-            "will not be corrected for susceptibility distortions."
-        )
-        return workflow
+    # if not fmap_estimators:
+    #     config.loggers.workflow.warning(
+    #         "Data for fieldmap estimation not present. Please note that these data "
+    #         "will not be corrected for susceptibility distortions."
+    #     )
+    #     return workflow
+    return workflow
 
+        
     # SDC Step 2: Manually add further estimators (e.g., fieldmap-less)
     fmap_wf = init_fmap_preproc_wf(
         debug=config.execution.debug is True,
