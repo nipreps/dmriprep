@@ -172,6 +172,7 @@ def init_dwi_preproc_wf(dwi_file):
     inputnode.inputs.fmap_json = str(
         locate_associated_file(layout, fmap.absolute())
     )
+
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=["dwi_reference", "dwi_mask", "gradients_rasb"]
