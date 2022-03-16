@@ -1,5 +1,5 @@
 """
-Connections configurations for *fmap_prep* pipelines.
+Connections configurations for *pre_sdc* pipelines.
 """
 
 #: fieldmap preperation

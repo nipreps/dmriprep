@@ -1,5 +1,5 @@
 import nipype.pipeline.engine as pe
-from dmriprep.workflows.dwi_mrtrix.pipelines.fmap_prep.edges import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.edges import (
     DWIEXTRACT_TO_MRMATH_EDGES,
     INPUT_TO_DWIEXTRACT_EDGES,
     INPUT_TO_MERGE_EDGES,
@@ -7,7 +7,7 @@ from dmriprep.workflows.dwi_mrtrix.pipelines.fmap_prep.edges import (
     MRCAT_TO_OUTPUT_EDGES,
     MRMATH_TO_MERGE_EDGES,
 )
-from dmriprep.workflows.dwi_mrtrix.pipelines.fmap_prep.nodes import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.nodes import (
     DWIEXTRACT_NODE,
     INPUT_NODE,
     MERGE_NODE,

@@ -2,7 +2,7 @@
 Nodes' configurations for *fmap_prep* pipelines.
 """
 import nipype.pipeline.engine as pe
-from dmriprep.workflows.dwi_mrtrix.pipelines.fmap_prep.configurations import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.configurations import (
     DWIEXTRACT_KWARGS,
     INPUT_NODE_FIELDS,
     MERGE_KWARGS,

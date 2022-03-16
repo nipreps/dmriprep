@@ -1,5 +1,5 @@
 """
-Configurations for *fmap_prep* pipeline.
+Configurations for *pre_sdc* pipeline.
 """
 #: i/o
 INPUT_NODE_FIELDS = ["dwi_file", "fmap"]

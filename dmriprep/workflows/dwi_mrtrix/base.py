@@ -25,7 +25,7 @@ from pathlib import Path
 
 from dmriprep import config
 from dmriprep.interfaces import DerivativesDataSink
-from dmriprep.workflows.dwi_mrtrix.pipelines.fmap_prep.fmap_prep import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.pre_sdc import (
     init_phasediff_wf,
 )
 from dmriprep.workflows.dwi_mrtrix.pipelines.preprocess.preprocess import (
@@ -33,7 +33,6 @@ from dmriprep.workflows.dwi_mrtrix.pipelines.preprocess.preprocess import (
 )
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
-from nipype.pipeline.engine import workflows
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
 
 

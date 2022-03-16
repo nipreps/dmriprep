@@ -152,7 +152,11 @@ def init_single_subject_wf(subject_id):
     from ..utils.misc import sub_prefix as _prefix
 
     name = f"single_subject_{subject_id}_wf"
-    subject_data = collect_data(config.execution.layout, subject_id)[0]
+    subject_data = collect_data(
+        config.execution.layout,
+        subject_id,
+        bids_filters=config.execution.bids_filters,
+    )[0]
 
     if "flair" in config.workflow.ignore:
         subject_data["flair"] = []
@@ -358,8 +362,6 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
-        if "REV" in dwi_file:
-            continue
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
         )
