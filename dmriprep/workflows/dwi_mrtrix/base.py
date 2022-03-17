@@ -179,8 +179,6 @@ def init_dwi_preproc_wf(dwi_file):
         ),
         name="outputnode",
     )
-
-    gradient_table = pe.Node(CheckGradientTable(), name="gradient_table")
     mif_conversion_wf = init_conversion_wf()
     workflow.connect(
         [
@@ -198,43 +196,7 @@ def init_dwi_preproc_wf(dwi_file):
             )
         ]
     )
-    dwi_reference_wf = init_epi_reference_wf(
-        omp_nthreads=config.nipype.omp_nthreads,
-        name="dwi_reference_wf",
-    )
-
-    brainextraction_wf = init_brainextraction_wf()
-    dwi_derivatives_wf = init_dwi_derivatives_wf(
-        output_dir=str(config.execution.output_dir)
-    )
-
-    # If has_fieldmaps this will hold the corrected reference, original otherwise
-    buffernode = pe.Node(
-        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask"]),
-        name="buffernode",
-    )
-
     # MAIN WORKFLOW STRUCTURE
-    # fmt: off
-    workflow.connect([
-        (inputnode, dwi_derivatives_wf, [("dwi_file", "inputnode.source_file")]),
-        (inputnode, gradient_table, [("dwi_file", "dwi_file"),
-                                     ("in_bvec", "in_bvec"),
-                                     ("in_bval", "in_bval")]),
-        (inputnode, dwi_reference_wf, [(("dwi_file", _aslist), "inputnode.in_files")]),
-        (dwi_reference_wf, brainextraction_wf, [
-            ("outputnode.epi_ref_file", "inputnode.in_file")]),
-        (gradient_table, dwi_reference_wf, [(("b0_mask", _aslist), "inputnode.t_masks")]),
-        (buffernode, dwi_derivatives_wf, [
-            ("dwi_reference", "inputnode.dwi_ref"),
-            ("dwi_mask", "inputnode.dwi_mask"),
-        ]),
-        (buffernode, outputnode, [("dwi_reference", "dwi_reference"),
-                                  ("dwi_mask", "dwi_mask")]),
-        (gradient_table, outputnode, [("out_rasb", "gradients_rasb")]),
-    ])
-    # fmt: on
-
     if config.workflow.run_reconall:
         from niworkflows.anat.coregistration import init_bbreg_wf
         from niworkflows.interfaces.nibabel import ApplyMask
@@ -271,19 +233,42 @@ def init_dwi_preproc_wf(dwi_file):
             ]),
             # T1w Mask
             (inputnode, t1w_brain, [("t1w_preproc", "in_file"),
-                                    ("t1w_mask", "in_mask")]),
-            (inputnode, ds_report_reg, [("dwi_file", "source_file")]),
+                                    ("t1w_mask", "in_mask")])]
+            # (inputnode, ds_report_reg, [("dwi_file", "source_file")]),
             # BBRegister
-            (buffernode, bbr_wf, [("dwi_reference", "inputnode.in_file")]),
-            (bbr_wf, ds_report_reg, [
-                ("outputnode.out_report", "in_file"),
-                (("outputnode.fallback", _bold_reg_suffix), "desc")]),
-        ])
+            # (buffernode, bbr_wf, [("dwi_reference", "inputnode.in_file")])]
+        #     (bbr_wf, ds_report_reg, [
+        #         ("outputnode.out_report", "in_file"),
+        #         (("outputnode.fallback", _bold_reg_suffix), "desc")]),
+        # ]
+        )
         # fmt: on
 
     if "eddy" not in config.workflow.ignore:
         # Eddy distortion correction
         pre_eddy_wf = init_phasediff_wf()
+        # workflow.connect([])
+        preprocess_wf = init_preprocess_wf()
+        # ds_report_eddy = pe.Node(
+        #     DerivativesDataSink(
+        #         base_directory=str(config.execution.output_dir),
+        #         desc="eddy",
+        #         datatype="figures",
+        #     ),
+        #     name="ds_report_eddy",
+        #     run_without_submitting=True,
+        # )
+
+        # eddy_report = pe.Node(
+        #     SimpleBeforeAfter(
+        #         before_label="Distorted",
+        #         after_label="Eddy Corrected",
+        #     ),
+        #     name="eddy_report",
+        #     mem_gb=0.1,
+        # )
+
+        # fmt:on
         workflow.connect(
             [
                 (
@@ -293,132 +278,75 @@ def init_dwi_preproc_wf(dwi_file):
                         ("outputnode.dwi_file", "inputnode.dwi_file"),
                         ("outputnode.fmap", "inputnode.fmap"),
                     ],
-                )
+                ),
+                (
+                    pre_eddy_wf,
+                    preprocess_wf,
+                    [
+                        (
+                            "outputnode.merged_phasediff",
+                            "inputnode.merged_phasediff",
+                        )
+                    ],
+                ),
+                (
+                    mif_conversion_wf,
+                    preprocess_wf,
+                    [("outputnode.dwi_file", "inputnode.dwi_file")],
+                ),
             ]
         )
-        return workflow
-        preprocess_wf = init_preprocess_wf()
-        ds_report_eddy = pe.Node(
-            DerivativesDataSink(
-                base_directory=str(config.execution.output_dir),
-                desc="eddy",
-                datatype="figures",
-            ),
-            name="ds_report_eddy",
-            run_without_submitting=True,
-        )
+        # (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
+        # (brainextraction_wf, preprocess_wf, [("outputnode.out_mask", "inputnode.dwi_mask")]),
+        # (brainextraction_wf, eddy_report, [("outputnode.out_file", "before")]),
+        # (eddy_report, ds_report_eddy, [("out_report", "in_file")]),
 
-        eddy_report = pe.Node(
-            SimpleBeforeAfter(
-                before_label="Distorted",
-                after_label="Eddy Corrected",
-            ),
-            name="eddy_report",
-            mem_gb=0.1,
-        )
-
-        # fmt:off
-        workflow.connect([
-            (inputnode, preprocess_wf, [("dwi_file", "inputnode.dwi_file"),
-                                  ("in_bvec", "inputnode.in_bvec"),
-                                  ("in_bval", "inputnode.in_bval")]),
-            (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
-            (brainextraction_wf, eddy_wf, [("outputnode.out_mask", "inputnode.dwi_mask")]),
-            (brainextraction_wf, eddy_report, [("outputnode.out_file", "before")]),
-            (eddy_wf, eddy_report, [("outputnode.eddy_ref_image", "after")]),
-            (eddy_report, ds_report_eddy, [("out_report", "in_file")]),
-        ])
         # fmt:on
-    return workflow
     # return workflow
 
     # REPORTING ############################################################
-    reportlets_wf = init_reportlets_wf(
-        str(config.execution.output_dir),
-        sdc_report=has_fieldmap,
-    )
-    # fmt: off
-    workflow.connect([
-        (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
-        (dwi_reference_wf, reportlets_wf, [
-            ("outputnode.validation_report", "inputnode.validation_report"),
-        ]),
-        (outputnode, reportlets_wf, [
-            ("dwi_reference", "inputnode.dwi_ref"),
-            ("dwi_mask", "inputnode.dwi_mask"),
-        ]),
-    ])
+    # reportlets_wf = init_reportlets_wf(
+    #     str(config.execution.output_dir),
+    #     sdc_report=has_fieldmap,
+    # )
+    # # fmt: off
+    # workflow.connect([
+    #     (inputnode, reportlets_wf, [("dwi_file", "inputnode.source_file")]),
+    #     # (dwi_reference_wf, reportlets_wf, [
+    #     #     ("outputnode.validation_report", "inputnode.validation_report"),
+    #     # ]),
+    #     (outputnode, reportlets_wf, [
+    #         ("dwi_reference", "inputnode.dwi_ref"),
+    #         ("dwi_mask", "inputnode.dwi_mask"),
+    #     ]),
+    # ])
     # fmt: on
 
-    if not has_fieldmap:
-        # fmt: off
-        workflow.connect([
-            (brainextraction_wf, buffernode, [
-                ("outputnode.out_file", "dwi_reference"),
-                ("outputnode.out_mask", "dwi_mask"),
-            ]),
-        ])
-        # fmt: on
-        return workflow
+    # if not has_fieldmap:
+    #     # fmt: off
+    #     workflow.connect([
+    #         (brainextraction_wf, buffernode, [
+    #             ("outputnode.out_file", "dwi_reference"),
+    #             ("outputnode.out_mask", "dwi_mask"),
+    #         ]),
+    #     ])
+    #     # fmt: on
+    #     return workflow
 
-    from niworkflows.interfaces.utility import KeySelect
-    from sdcflows.workflows.apply.correction import init_unwarp_wf
-    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
+    # sdc_report = pe.Node(
+    #     SimpleBeforeAfter(
+    #         before_label="Distorted",
+    #         after_label="Corrected",
+    #     ),
+    #     name="sdc_report",
+    #     mem_gb=0.1,
+    # )
 
-    coeff2epi_wf = init_coeff2epi_wf(
-        debug=config.execution.debug,
-        omp_nthreads=config.nipype.omp_nthreads,
-        write_coeff=True,
-    )
-    unwarp_wf = init_unwarp_wf(
-        debug=config.execution.debug, omp_nthreads=config.nipype.omp_nthreads
-    )
-    unwarp_wf.inputs.inputnode.metadata = layout.get_metadata(str(dwi_file))
-
-    output_select = pe.Node(
-        KeySelect(fields=["fmap", "fmap_ref", "fmap_coeff", "fmap_mask"]),
-        name="output_select",
-        run_without_submitting=True,
-    )
-    output_select.inputs.key = estimator_key[0]
-    if len(estimator_key) > 1:
-        config.loggers.workflow.warning(
-            f"Several fieldmaps <{', '.join(estimator_key)}> are "
-            f"'IntendedFor' <{dwi_file}>, using {estimator_key[0]}"
-        )
-
-    sdc_report = pe.Node(
-        SimpleBeforeAfter(
-            before_label="Distorted",
-            after_label="Corrected",
-        ),
-        name="sdc_report",
-        mem_gb=0.1,
-    )
-
-    # fmt: off
-    workflow.connect([
-        (inputnode, output_select, [("fmap", "fmap"),
-                                    ("fmap_ref", "fmap_ref"),
-                                    ("fmap_coeff", "fmap_coeff"),
-                                    ("fmap_mask", "fmap_mask"),
-                                    ("fmap_id", "keys")]),
-        (output_select, coeff2epi_wf, [
-            ("fmap_ref", "inputnode.fmap_ref"),
-            ("fmap_coeff", "inputnode.fmap_coeff"),
-            ("fmap_mask", "inputnode.fmap_mask")]),
-        (dwi_reference_wf, coeff2epi_wf, [
-            ("outputnode.epi_ref_file", "inputnode.target_ref")]),
-        (dwi_reference_wf, unwarp_wf, [("outputnode.epi_ref_file", "inputnode.distorted")]),
-        (coeff2epi_wf, unwarp_wf, [
-            ("outputnode.fmap_coeff", "inputnode.fmap_coeff")]),
-        (brainextraction_wf, sdc_report, [("outputnode.out_file", "before")]),
-        (unwarp_wf, sdc_report, [("outputnode.corrected", "after"),
-                                 ("outputnode.corrected_mask", "wm_seg")]),
-        (sdc_report, reportlets_wf, [("out_report", "inputnode.sdc_report")]),
-        (unwarp_wf, buffernode, [("outputnode.corrected", "dwi_reference"),
-                                 ("outputnode.corrected_mask", "dwi_mask")]),
-    ])
+    # # fmt: off
+    # workflow.connect([
+    #     # (brainextraction_wf, sdc_report, [("outputnode.out_file", "before")]),
+    #     (sdc_report, reportlets_wf, [("out_report", "inputnode.sdc_report")]),
+    # ])
     # fmt: on
 
     return workflow
