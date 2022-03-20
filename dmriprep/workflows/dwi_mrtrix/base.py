@@ -28,6 +28,9 @@ from dmriprep.interfaces import DerivativesDataSink
 from dmriprep.workflows.dwi_mrtrix.pipelines.apply_transform.apply_transform import (
     init_apply_transform,
 )
+from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.nii_conversions.conversion import (
+    init_nii_conversion_wf,
+)
 from dmriprep.workflows.dwi_mrtrix.pipelines.epi_ref.epi_ref import (
     init_epi_ref_wf,
 )
@@ -190,6 +193,7 @@ def init_dwi_preproc_wf(dwi_file):
         name="outputnode",
     )
     mif_conversion_wf = init_mif_conversion_wf()
+    nii_conversion_wf = init_nii_conversion_wf()
     workflow.connect(
         [
             (
@@ -338,6 +342,21 @@ def init_dwi_preproc_wf(dwi_file):
                     apply_transform_wf,
                     [("outputnode.dwi_preproc", "inputnode.dwi_file")],
                 ),
+                (
+                    preprocess_wf,
+                    nii_conversion_wf,
+                    [
+                        (
+                            "outputnode.dwi_preproc",
+                            "inputnode.native_preproc_dwi",
+                        )
+                    ],
+                ),
+                (
+                    apply_transform_wf,
+                    nii_conversion_wf,
+                    [("outputnode.dwi_file", "inputnode.coreg_preproc_dwi")],
+                ),
             ]
         )
     else:
@@ -352,6 +371,16 @@ def init_dwi_preproc_wf(dwi_file):
                     mif_conversion_wf,
                     apply_transform_wf,
                     [("outputnode.dwi_file", "inputnode.dwi_file")],
+                ),
+                (
+                    mif_conversion_wf,
+                    nii_conversion_wf,
+                    [("outputnode.dwi_file", "inputnode.native_preproc_dwi")],
+                ),
+                (
+                    apply_transform_wf,
+                    nii_conversion_wf,
+                    [("outputnode.dwi_file", "inputnode.coreg_preproc_dwi")],
                 ),
             ]
         )
@@ -368,6 +397,16 @@ def init_dwi_preproc_wf(dwi_file):
                 [("outputnode.dwi_reference", "inputnode.dwi_reference")],
             ),
             (
+                epi_ref_wf,
+                nii_conversion_wf,
+                [
+                    (
+                        "outputnode.dwi_reference",
+                        "inputnode.native_dwi_reference",
+                    )
+                ],
+            ),
+            (
                 bbr_wf,
                 apply_transform_wf,
                 [("outputnode.epi_to_t1w_aff", "inputnode.epi_to_t1w_aff")],
@@ -376,6 +415,26 @@ def init_dwi_preproc_wf(dwi_file):
                 t1w_brain,
                 apply_transform_wf,
                 [("out_file", "inputnode.t1w_brain")],
+            ),
+        ]
+    )
+    coreg_epi_ref_wf = epi_ref_wf.clone("coreg_dwi_reference_wf")
+    workflow.connect(
+        [
+            (
+                apply_transform_wf,
+                coreg_epi_ref_wf,
+                [("outputnode.dwi_file", "inputnode.dwi_file")],
+            ),
+            (
+                coreg_epi_ref_wf,
+                nii_conversion_wf,
+                [
+                    (
+                        "outputnode.dwi_reference",
+                        "inputnode.coreg_dwi_reference",
+                    )
+                ],
             ),
         ]
     )
