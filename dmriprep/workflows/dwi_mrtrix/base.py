@@ -25,12 +25,12 @@ from pathlib import Path
 
 from dmriprep import config
 from dmriprep.interfaces import DerivativesDataSink
-from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.pre_sdc import (
-    init_phasediff_wf,
-)
-from dmriprep.workflows.dwi_mrtrix.pipelines.preprocess.preprocess import (
-    init_preprocess_wf,
-)
+from dmriprep.workflows.dwi_mrtrix.pipelines.epi_ref.epi_ref import \
+    init_epi_ref_wf
+from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.pre_sdc import \
+    init_phasediff_wf
+from dmriprep.workflows.dwi_mrtrix.pipelines.preprocess.preprocess import \
+    init_preprocess_wf
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from niworkflows.engine.workflows import LiterateWorkflow as Workflow
@@ -94,13 +94,11 @@ def init_dwi_preproc_wf(dwi_file):
     * :py:func:`~dmriprep.workflows.dwi.outputs.init_reportlets_wf`
 
     """
-    from dmriprep.workflows.dwi_mrtrix.pipelines.conversions import (
-        init_conversion_wf,
-    )
+    from dmriprep.workflows.dwi_mrtrix.pipelines.conversions import \
+        init_conversion_wf
     from dmriprep.workflows.dwi_mrtrix.utils.bids import locate_associated_file
-    from niworkflows.interfaces.reportlets.registration import (
-        SimpleBeforeAfterRPT as SimpleBeforeAfter,
-    )
+    from niworkflows.interfaces.reportlets.registration import \
+        SimpleBeforeAfterRPT as SimpleBeforeAfter
     from niworkflows.workflows.epi.refmap import init_epi_reference_wf
     from sdcflows.workflows.ancillary import init_brainextraction_wf
 
@@ -196,6 +194,8 @@ def init_dwi_preproc_wf(dwi_file):
             )
         ]
     )
+    epi_ref_wf = init_epi_ref_wf()
+    
     # MAIN WORKFLOW STRUCTURE
     if config.workflow.run_reconall:
         from niworkflows.anat.coregistration import init_bbreg_wf
@@ -242,6 +242,8 @@ def init_dwi_preproc_wf(dwi_file):
         #         (("outputnode.fallback", _bold_reg_suffix), "desc")]),
         # ]
         )
+    # else:
+
         # fmt: on
 
     if "eddy" not in config.workflow.ignore:
@@ -294,6 +296,7 @@ def init_dwi_preproc_wf(dwi_file):
                     preprocess_wf,
                     [("outputnode.dwi_file", "inputnode.dwi_file")],
                 ),
+                (preprocess_wf,epi_ref_wf,[("dwi_preproc","dwi_file")])
             ]
         )
         # (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),

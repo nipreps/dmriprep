@@ -123,9 +123,7 @@ def write_derivative_description(bids_dir, deriv_dir):
 
         singularity_md5 = _get_shub_version(singularity_url)
         if singularity_md5 and singularity_md5 is not NotImplemented:
-            desc["SingularityContainerMD5"] = _get_shub_version(
-                singularity_url
-            )
+            desc["SingularityContainerMD5"] = _get_shub_version(singularity_url)
 
     # Keys deriving from source dataset
     orig_desc = {}
@@ -223,16 +221,12 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
         ignored_subs = all_subs.difference(selected_subs)
         if ignored_subs:
             for sub in ignored_subs:
-                validator_config_dict["ignoredFiles"].append(
-                    "/sub-%s/**" % sub
-                )
+                validator_config_dict["ignoredFiles"].append("/sub-%s/**" % sub)
     with tempfile.NamedTemporaryFile("w+") as temp:
         temp.write(json.dumps(validator_config_dict))
         temp.flush()
         try:
-            subprocess.check_call(
-                ["bids-validator", bids_dir, "-c", temp.name]
-            )
+            subprocess.check_call(["bids-validator", bids_dir, "-c", temp.name])
         except FileNotFoundError:
             print(
                 "bids-validator does not appear to be installed",

@@ -1,4 +1,4 @@
-[build-system]
+[build - system]
 # setuptools can be configured with setup.cfg when >=30.3
 # Most bugfixes regarding setup.cfg are included before 38.3
 requires = ["setuptools >= 40.8.0", "wheel"]

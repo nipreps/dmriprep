@@ -108,7 +108,7 @@ class ApiDocWriter(object):
     )
 
     def _import(self, name):
-        """ Import namespace package """
+        """Import namespace package"""
         mod = __import__(name)
         components = name.split(".")
         for comp in components[1:]:
@@ -173,7 +173,7 @@ class ApiDocWriter(object):
         return path
 
     def _path2uri(self, dirpath):
-        """ Convert directory path to uri """
+        """Convert directory path to uri"""
         package_dir = self.package_name.replace(".", os.path.sep)
         relpath = dirpath.replace(self.root_path, package_dir)
         if relpath.startswith(os.path.sep):
@@ -181,7 +181,7 @@ class ApiDocWriter(object):
         return relpath.replace(os.path.sep, ".")
 
     def _parse_module(self, uri):
-        """ Parse module defined in *uri* """
+        """Parse module defined in *uri*"""
         filename = self._uri2path(uri)
         if filename is None:
             print(filename, "erk")
@@ -239,7 +239,7 @@ class ApiDocWriter(object):
         return functions, classes
 
     def _parse_lines(self, linesource):
-        """ Parse lines of text for functions and classes """
+        """Parse lines of text for functions and classes"""
         functions = []
         classes = []
         for line in linesource:

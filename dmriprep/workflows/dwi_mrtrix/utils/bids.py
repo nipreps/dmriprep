@@ -30,9 +30,7 @@ def comply_to_filters(
         for filename in fmap.paths():
             entities = config.execution.layout.parse_file_entities(filename)
             for key, value in bids_filters.items():
-                if (entities.get(key) != value) and (
-                    fmap in complied_estimators
-                ):
+                if (entities.get(key) != value) and (fmap in complied_estimators):
                     complied_estimators.remove(fmap)
     return complied_estimators
 
@@ -57,12 +55,8 @@ def locate_corresponding_fieldmap(
     List[Path]
         List of paths to fieldmaps related to *dwi_file*
     """
-    subject = config.execution.layout.parse_file_entities(dwi_file).get(
-        "subject"
-    )
-    target = str(
-        dwi_file.relative_to(config.execution.bids_dir / f"sub-{subject}")
-    )
+    subject = config.execution.layout.parse_file_entities(dwi_file).get("subject")
+    target = str(dwi_file.relative_to(config.execution.bids_dir / f"sub-{subject}"))
     corresponding_fmaps = fmap_estimators.copy()
     for fmap in fmap_estimators:
         for source in fmap.sources:

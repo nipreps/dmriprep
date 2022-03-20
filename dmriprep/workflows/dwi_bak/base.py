@@ -160,11 +160,9 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
     inputnode.inputs.in_bvec = str(layout.get_bvec(dwi_file))
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
-    
+
     outputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=["dwi_reference", "dwi_mask", "gradients_rasb"]
-        ),
+        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask", "gradients_rasb"]),
         name="outputnode",
     )
 
