@@ -24,7 +24,9 @@ OUTPUT_NODE = pe.Node(
 )
 
 #: Building blocks
-DWIEXTRACT_NODE = pe.Node(mrt.DWIExtract(**DWIEXTRACT_KWARGS), name="extract_b0")
+DWIEXTRACT_NODE = pe.Node(
+    mrt.DWIExtract(**DWIEXTRACT_KWARGS), name="extract_b0"
+)
 MRMATH_NODE = pe.Node(mrt.MRMath(**MRMATH_KWARGS), name="average_b0s")
 MERGE_NODE = pe.Node(niu.Merge(**MERGE_KWARGS), name="merge_files")
 

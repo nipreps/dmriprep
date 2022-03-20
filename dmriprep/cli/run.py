@@ -77,7 +77,9 @@ def main():
         sys.exit(int(retcode > 0))
 
     if dmriprep_wf and config.execution.write_graph:
-        dmriprep_wf.write_graph(graph2use="colored", format="svg", simple_form=True)
+        dmriprep_wf.write_graph(
+            graph2use="colored", format="svg", simple_form=True
+        )
 
     retcode = retcode or (dmriprep_wf is None) * os.EX_SOFTWARE
     if retcode != 0:
@@ -87,7 +89,9 @@ def main():
     with Manager() as mgr:
         from .workflow import build_boilerplate
 
-        p = Process(target=build_boilerplate, args=(str(config_file), dmriprep_wf))
+        p = Process(
+            target=build_boilerplate, args=(str(config_file), dmriprep_wf)
+        )
         p.start()
         p.join()
 
@@ -103,7 +107,8 @@ def main():
     config.loggers.workflow.log(
         15,
         "\n".join(
-            ["dMRIPrep config:"] + ["\t\t%s" % s for s in config.dumps().splitlines()]
+            ["dMRIPrep config:"]
+            + ["\t\t%s" % s for s in config.dumps().splitlines()]
         ),
     )
     config.loggers.workflow.log(25, "dMRIPrep started!")
@@ -119,7 +124,9 @@ def main():
         config.loggers.workflow.log(25, "dMRIPrep finished successfully!")
 
         # Bother users with the boilerplate only iff the workflow went okay.
-        if (config.execution.output_dir / "dmriprep" / "logs" / "CITATION.md").exists():
+        if (
+            config.execution.output_dir / "dmriprep" / "logs" / "CITATION.md"
+        ).exists():
             config.loggers.workflow.log(
                 25,
                 "Works derived from this dMRIPrep execution should "
@@ -131,15 +138,23 @@ def main():
             from templateflow import api
             from niworkflows.utils.misc import _copy_any
 
-            dseg_tsv = str(api.get("fsaverage", suffix="dseg", extension=[".tsv"]))
-            _copy_any(
-                dseg_tsv,
-                str(config.execution.output_dir / "dmriprep" / "desc-aseg_dseg.tsv"),
+            dseg_tsv = str(
+                api.get("fsaverage", suffix="dseg", extension=[".tsv"])
             )
             _copy_any(
                 dseg_tsv,
                 str(
-                    config.execution.output_dir / "dmriprep" / "desc-aparcaseg_dseg.tsv"
+                    config.execution.output_dir
+                    / "dmriprep"
+                    / "desc-aseg_dseg.tsv"
+                ),
+            )
+            _copy_any(
+                dseg_tsv,
+                str(
+                    config.execution.output_dir
+                    / "dmriprep"
+                    / "desc-aparcaseg_dseg.tsv"
                 ),
             )
         errno = 0

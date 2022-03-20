@@ -75,8 +75,12 @@ warnings.filterwarnings("ignore", "cmp not installed")
 warnings.filterwarnings(
     "ignore", "This has not been fully tested. Please report any failures."
 )
-warnings.filterwarnings("ignore", "sklearn.externals.joblib is deprecated in 0.21")
-warnings.filterwarnings("ignore", "can't resolve package from __spec__ or __package__")
+warnings.filterwarnings(
+    "ignore", "sklearn.externals.joblib is deprecated in 0.21"
+)
+warnings.filterwarnings(
+    "ignore", "can't resolve package from __spec__ or __package__"
+)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=ResourceWarning)
@@ -96,13 +100,18 @@ finally:
     from uuid import uuid4
     from pathlib import Path
     from time import strftime
-    from niworkflows.utils.spaces import SpatialReferences as _SRs, Reference as _Ref
+    from niworkflows.utils.spaces import (
+        SpatialReferences as _SRs,
+        Reference as _Ref,
+    )
     from nipype import logging as nlogging, __version__ as _nipype_ver
     from templateflow import __version__ as _tf_ver
     from .. import __version__
 
 
-def redirect_warnings(message, category, filename, lineno, file=None, line=None):
+def redirect_warnings(
+    message, category, filename, lineno, file=None, line=None
+):
     """Redirect other warnings."""
     logger = logging.getLogger()
     logger.debug("Captured warning (%s): %s", category, message)
@@ -110,7 +119,9 @@ def redirect_warnings(message, category, filename, lineno, file=None, line=None)
 
 warnings.showwarning = redirect_warnings
 
-logging.addLevelName(25, "IMPORTANT")  # Add a new level between INFO and WARNING
+logging.addLevelName(
+    25, "IMPORTANT"
+)  # Add a new level between INFO and WARNING
 logging.addLevelName(15, "VERBOSE")  # Add a new level between INFO and DEBUG
 
 DEFAULT_MEMORY_MIN_GB = 0.01
@@ -133,7 +144,8 @@ if _fs_license is None and os.getenv("FREESURFER_HOME"):
 
 _templateflow_home = Path(
     os.getenv(
-        "TEMPLATEFLOW_HOME", os.path.join(os.getenv("HOME"), ".cache", "templateflow")
+        "TEMPLATEFLOW_HOME",
+        os.path.join(os.getenv("HOME"), ".cache", "templateflow"),
     )
 )
 
@@ -462,7 +474,9 @@ class workflow(_Config):
 class loggers:
     """Keep loggers easily accessible (see :py:func:`init`)."""
 
-    _fmt = "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"
+    _fmt = (
+        "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"
+    )
     _datefmt = "%y%m%d-%H:%M:%S"
 
     default = logging.getLogger()
@@ -489,7 +503,9 @@ class loggers:
         from nipype import config as ncfg
 
         _handler = logging.StreamHandler(stream=sys.stdout)
-        _handler.setFormatter(logging.Formatter(fmt=cls._fmt, datefmt=cls._datefmt))
+        _handler.setFormatter(
+            logging.Formatter(fmt=cls._fmt, datefmt=cls._datefmt)
+        )
         cls.cli.addHandler(_handler)
         cls.default.setLevel(execution.log_level)
         cls.cli.setLevel(execution.log_level)
@@ -497,7 +513,12 @@ class loggers:
         cls.workflow.setLevel(execution.log_level)
         cls.utils.setLevel(execution.log_level)
         ncfg.update_config(
-            {"logging": {"log_directory": str(execution.log_dir), "log_to_file": True}}
+            {
+                "logging": {
+                    "log_directory": str(execution.log_dir),
+                    "log_to_file": True,
+                }
+            }
         )
 
 
@@ -560,7 +581,11 @@ def init_spaces(checkpoint=True):
     spaces = execution.output_spaces or SpatialReferences()
     if not isinstance(spaces, SpatialReferences):
         spaces = SpatialReferences(
-            [ref for s in spaces.split(" ") for ref in Reference.from_string(s)]
+            [
+                ref
+                for s in spaces.split(" ")
+                for ref in Reference.from_string(s)
+            ]
         )
 
     if checkpoint and not spaces.is_cached():

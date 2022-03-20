@@ -52,7 +52,9 @@ OUTPUT_NODE = pe.Node(
 
 #: Building blocks
 INFER_PE_NODE = pe.Node(
-    niu.Function(**INFER_PE_KWARGS, function=infer_phase_encoding_direction_mif),
+    niu.Function(
+        **INFER_PE_KWARGS, function=infer_phase_encoding_direction_mif
+    ),
     name="infer_pe",
 )
 
@@ -61,6 +63,10 @@ DENOISE_NODE = pe.Node(
     name="denoise",
 )
 
-DWIPREPROC_NODE = pe.Node(mrt.DWIPreproc(**DWIFSLPREPROC_KWARGS), name="dwipreproc")
+DWIPREPROC_NODE = pe.Node(
+    mrt.DWIPreproc(**DWIFSLPREPROC_KWARGS), name="dwipreproc"
+)
 
-BIASCORRECT_NODE = pe.Node(mrt.DWIBiasCorrect(**BIASCORRECT_KWARGS), name="biascorrect")
+BIASCORRECT_NODE = pe.Node(
+    mrt.DWIBiasCorrect(**BIASCORRECT_KWARGS), name="biascorrect"
+)

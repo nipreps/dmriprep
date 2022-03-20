@@ -32,7 +32,11 @@ from nipype.interfaces.base import (
     traits,
     isdefined,
 )
-from ..utils.vectors import DiffusionGradientTable, B0_THRESHOLD, BVEC_NORM_EPSILON
+from ..utils.vectors import (
+    DiffusionGradientTable,
+    B0_THRESHOLD,
+    BVEC_NORM_EPSILON,
+)
 
 
 class _CheckGradientTableInputSpec(BaseInterfaceInputSpec):
@@ -110,7 +114,10 @@ class CheckGradientTable(SimpleInterface):
         cwd = Path(runtime.cwd).absolute()
         if rasb_file is None:
             rasb_file = fname_presuffix(
-                self.inputs.dwi_file, use_ext=False, suffix=".tsv", newpath=str(cwd)
+                self.inputs.dwi_file,
+                use_ext=False,
+                suffix=".tsv",
+                newpath=str(cwd),
             )
             table.to_filename(rasb_file)
         self._results["out_rasb"] = rasb_file

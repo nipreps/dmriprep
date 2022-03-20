@@ -17,7 +17,9 @@ from packaging.version import Version
 
 from dmriprep import __version__, __copyright__, __packagename__
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "sphinxext")))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "sphinxext"))
+)
 from github_link import make_linkcode_resolve
 
 # -- Project information -----------------------------------------------------

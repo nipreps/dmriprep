@@ -37,7 +37,9 @@ else:
     sixu = lambda s: unicode(s, "unicode_escape")
 
 
-def mangle_docstrings(app, what, name, obj, options, lines, reference_offset=[0]):
+def mangle_docstrings(
+    app, what, name, obj, options, lines, reference_offset=[0]
+):
 
     cfg = {
         "use_plots": app.config.numpydoc_use_plots,
@@ -60,14 +62,19 @@ def mangle_docstrings(app, what, name, obj, options, lines, reference_offset=[0]
             doc = unicode(doc)
         lines[:] = doc.split(u_NL)
 
-    if app.config.numpydoc_edit_link and hasattr(obj, "__name__") and obj.__name__:
+    if (
+        app.config.numpydoc_edit_link
+        and hasattr(obj, "__name__")
+        and obj.__name__
+    ):
         if hasattr(obj, "__module__"):
             v = dict(full_name=sixu("%s.%s") % (obj.__module__, obj.__name__))
         else:
             v = dict(full_name=obj.__name__)
         lines += [sixu(""), sixu(".. htmlonly::"), sixu("")]
         lines += [
-            sixu("    %s") % x for x in (app.config.numpydoc_edit_link % v).split("\n")
+            sixu("    %s") % x
+            for x in (app.config.numpydoc_edit_link % v).split("\n")
         ]
 
     # replace reference numbers so that there are no duplicates
@@ -87,7 +94,9 @@ def mangle_docstrings(app, what, name, obj, options, lines, reference_offset=[0]
                     new_r = sixu("R%d") % (reference_offset[0] + int(r))
                 else:
                     new_r = sixu("%s%d") % (r, reference_offset[0])
-                lines[i] = lines[i].replace(sixu("[%s]_") % r, sixu("[%s]_") % new_r)
+                lines[i] = lines[i].replace(
+                    sixu("[%s]_") % r, sixu("[%s]_") % new_r
+                )
                 lines[i] = lines[i].replace(
                     sixu(".. [%s]") % r, sixu(".. [%s]") % new_r
                 )
@@ -104,7 +113,8 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
         return "", ""
 
     if not (
-        isinstance(obj, collections.Callable) or hasattr(obj, "__argspec_is_invalid_")
+        isinstance(obj, collections.Callable)
+        or hasattr(obj, "__argspec_is_invalid_")
     ):
         return
 

@@ -23,7 +23,9 @@ OUTPUT_NODE = pe.Node(
 )
 
 #: Building blocks
-DWIEXTRACT_NODE = pe.Node(mrt.DWIExtract(**DWIEXTRACT_KWARGS), name="dwiextract")
+DWIEXTRACT_NODE = pe.Node(
+    mrt.DWIExtract(**DWIEXTRACT_KWARGS), name="dwiextract"
+)
 
 MRMATH_NODE = pe.Node(
     mrt.MRMath(**MRMATH_KWARGS),

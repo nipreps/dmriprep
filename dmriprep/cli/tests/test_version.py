@@ -34,7 +34,12 @@ class MockResponse:
 
     status_code = 200
     _json = {
-        "releases": {"1.0.0": None, "1.0.1": None, "1.1.0": None, "1.1.1rc1": None}
+        "releases": {
+            "1.0.0": None,
+            "1.0.1": None,
+            "1.1.0": None,
+            "1.1.1rc1": None,
+        }
     }
 
     def __init__(self, code=200, json=None):
@@ -74,7 +79,9 @@ def test_check_latest1(tmpdir, monkeypatch):
     ]
 
     # Second check - test the cache file is read
-    cachefile.write_text("|".join(("1.0.0", cachefile.read_text().split("|")[1])))
+    cachefile.write_text(
+        "|".join(("1.0.0", cachefile.read_text().split("|")[1]))
+    )
     v = check_latest()
     assert isinstance(v, Version)
     assert v == Version("1.0.0")
@@ -91,7 +98,9 @@ def test_check_latest1(tmpdir, monkeypatch):
 
     monkeypatch.setattr(requests, "get", mock_get)
 
-    cachefile.write_text("|".join(("1.0.0", cachefile.read_text().split("|")[1])))
+    cachefile.write_text(
+        "|".join(("1.0.0", cachefile.read_text().split("|")[1]))
+    )
     v = check_latest()
     assert isinstance(v, Version)
     assert v == Version("1.0.0")

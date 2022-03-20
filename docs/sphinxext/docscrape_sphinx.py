@@ -40,7 +40,9 @@ class SphinxDocString(NumpyDocString):
             out += self._str_field_list(name)
             out += [""]
             for param, param_type, desc in self[name]:
-                out += self._str_indent(["**%s** : %s" % (param.strip(), param_type)])
+                out += self._str_indent(
+                    ["**%s** : %s" % (param.strip(), param_type)]
+                )
                 out += [""]
                 out += self._str_indent(desc, 8)
                 out += [""]
@@ -229,7 +231,9 @@ def get_doc_object(obj, what=None, doc=None, config={}):
         else:
             what = "object"
     if what == "class":
-        return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc, config=config)
+        return SphinxClassDoc(
+            obj, func_doc=SphinxFunctionDoc, doc=doc, config=config
+        )
     elif what in ("function", "method"):
         return SphinxFunctionDoc(obj, doc=doc, config=config)
     else:

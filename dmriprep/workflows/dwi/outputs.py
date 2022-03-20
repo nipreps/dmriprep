@@ -49,7 +49,10 @@ def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
 
     ds_report_mask = pe.Node(
         DerivativesDataSink(
-            base_directory=output_dir, desc="brain", suffix="mask", datatype="figures"
+            base_directory=output_dir,
+            desc="brain",
+            suffix="mask",
+            datatype="figures",
         ),
         name="ds_report_mask",
         run_without_submitting=True,
@@ -75,7 +78,10 @@ def init_reportlets_wf(output_dir, sdc_report=False, name="reportlets_wf"):
     if sdc_report:
         ds_report_sdc = pe.Node(
             DerivativesDataSink(
-                base_directory=output_dir, desc="sdc", suffix="dwi", datatype="figures"
+                base_directory=output_dir,
+                desc="sdc",
+                suffix="dwi",
+                datatype="figures",
             ),
             name="ds_report_sdc",
             run_without_submitting=True,

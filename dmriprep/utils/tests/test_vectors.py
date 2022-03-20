@@ -45,10 +45,14 @@ def test_corruption(tmpdir, dipy_test_data, monkeypatch):
     dgt = v.DiffusionGradientTable(rasb_file="dwi.tsv")
     assert dgt.normalized is False
     with pytest.raises(TypeError):
-        dgt.to_filename("dwi", filetype="fsl")  # You can do this iff the affine is set.
+        dgt.to_filename(
+            "dwi", filetype="fsl"
+        )  # You can do this iff the affine is set.
 
     # check accessing obj.affine
-    dgt = v.DiffusionGradientTable(dwi_file=namedtuple("Affine", ["affine"])(affine))
+    dgt = v.DiffusionGradientTable(
+        dwi_file=namedtuple("Affine", ["affine"])(affine)
+    )
     assert np.all(dgt.affine == affine)
     dgt = v.DiffusionGradientTable(dwi_file=affine)
     assert np.all(dgt.affine == affine)
@@ -134,9 +138,9 @@ def test_b0mask_from_data(tmp_path):
     # Test 1: no lowb
     dwi_file = tmp_path / "only_highb.nii.gz"
     nb.Nifti1Image(highb.astype(float), np.eye(4), None).to_filename(dwi_file)
-    nb.Nifti1Image(np.ones((40, 40, 40), dtype=np.uint8), np.eye(4), None).to_filename(
-        mask_file
-    )
+    nb.Nifti1Image(
+        np.ones((40, 40, 40), dtype=np.uint8), np.eye(4), None
+    ).to_filename(mask_file)
 
     assert v.b0mask_from_data(dwi_file, mask_file).sum() == 0
 

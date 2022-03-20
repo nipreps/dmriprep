@@ -41,7 +41,9 @@ def writeapi(package, outdir, source_version, other_defines=True):
     if source_version != installed_version:
         abort("Installed version does not match source version")
 
-    docwriter = ApiDocWriter(package, rst_extension=".rst", other_defines=other_defines)
+    docwriter = ApiDocWriter(
+        package, rst_extension=".rst", other_defines=other_defines
+    )
 
     docwriter.package_skip_patterns += [
         r"\.%s$" % package,

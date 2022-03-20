@@ -39,10 +39,14 @@ def infer_metric(in_file: str) -> str:
     return suffix, in_file
 
 
-INPUT_NODE = pe.Node(niu.IdentityInterface(fields=INPUT_NODE_FIELDS), name="inputnode")
+INPUT_NODE = pe.Node(
+    niu.IdentityInterface(fields=INPUT_NODE_FIELDS), name="inputnode"
+)
 
 #: phasediff
-PHASEDIFF_LIST_NODE = pe.Node(niu.Merge(numinputs=2), name="list_phasediff_inputs")
+PHASEDIFF_LIST_NODE = pe.Node(
+    niu.Merge(numinputs=2), name="list_phasediff_inputs"
+)
 PHASEDIFF_DDS_NODE = pe.MapNode(
     DerivativesDataSink(**PHASEDIFF_KWARGS),
     name="ds_phasediff",
@@ -50,14 +54,18 @@ PHASEDIFF_DDS_NODE = pe.MapNode(
 )
 
 #: DWI
-NATIVE_DWI_LIST_NODE = pe.Node(niu.Merge(numinputs=4), name="list_native_dwi_inputs")
+NATIVE_DWI_LIST_NODE = pe.Node(
+    niu.Merge(numinputs=4), name="list_native_dwi_inputs"
+)
 NATIVE_DWI_DDS_NODE = pe.MapNode(
     DerivativesDataSink(**NATIVE_DWI_PREPROC_KWARGS),
     name="ds_native_dwi",
     iterfield=["in_file"],
 )
 
-COREG_DWI_LIST_NODE = pe.Node(niu.Merge(numinputs=4), name="list_coreg_dwi_inputs")
+COREG_DWI_LIST_NODE = pe.Node(
+    niu.Merge(numinputs=4), name="list_coreg_dwi_inputs"
+)
 COREG_DWI_DDS_NODE = pe.MapNode(
     DerivativesDataSink(**COREG_DWI_PREPROC_KWARGS),
     name="ds_coreg_dwi",

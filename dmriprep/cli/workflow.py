@@ -34,7 +34,10 @@ a hard-limited memory-scope.
 
 def build_workflow(config_file, retval):
     """Create the Nipype Workflow that supports the whole execution graph."""
-    from niworkflows.utils.bids import collect_participants, check_pipeline_version
+    from niworkflows.utils.bids import (
+        collect_participants,
+        check_pipeline_version,
+    )
     from niworkflows.reports import generate_reports
     from .. import config
     from ..utils.misc import check_deps
@@ -62,11 +65,14 @@ def build_workflow(config_file, retval):
         from hashlib import sha256
 
         desc_content = dset_desc_path.read_bytes()
-        config.execution.bids_description_hash = sha256(desc_content).hexdigest()
+        config.execution.bids_description_hash = sha256(
+            desc_content
+        ).hexdigest()
 
     # First check that bids_dir looks like a BIDS folder
     subject_list = collect_participants(
-        config.execution.layout, participant_label=config.execution.participant_label
+        config.execution.layout,
+        participant_label=config.execution.participant_label,
     )
 
     # Called with reports only
@@ -74,7 +80,9 @@ def build_workflow(config_file, retval):
         from pkg_resources import resource_filename as pkgrf
 
         build_log.log(
-            25, "Running --reports-only on participants %s", ", ".join(subject_list)
+            25,
+            "Running --reports-only on participants %s",
+            ", ".join(subject_list),
         )
         retval["return_code"] = generate_reports(
             subject_list,
@@ -112,7 +120,10 @@ def build_workflow(config_file, retval):
         build_log.critical(
             "Cannot run dMRIPrep. Missing dependencies:%s",
             "\n\t* %s".join(
-                ["{} (Interface: {})".format(cmd, iface) for iface, cmd in missing]
+                [
+                    "{} (Interface: {})".format(cmd, iface)
+                    for iface, cmd in missing
+                ]
             ),
         )
         retval["return_code"] = 127  # 127 == command not found.
@@ -135,7 +146,8 @@ def build_boilerplate(config_file, workflow):
     logs_path = config.execution.output_dir / "dmriprep" / "logs"
     boilerplate = workflow.visit_desc()
     citation_files = {
-        ext: logs_path / ("CITATION.%s" % ext) for ext in ("bib", "tex", "md", "html")
+        ext: logs_path / ("CITATION.%s" % ext)
+        for ext in ("bib", "tex", "md", "html")
     }
 
     if boilerplate:
@@ -150,7 +162,10 @@ def build_boilerplate(config_file, workflow):
 
     citation_files["md"].write_text(boilerplate)
 
-    if not config.execution.md_only_boilerplate and citation_files["md"].exists():
+    if (
+        not config.execution.md_only_boilerplate
+        and citation_files["md"].exists()
+    ):
         from subprocess import check_call, CalledProcessError, TimeoutExpired
         from pkg_resources import resource_filename as pkgrf
         from shutil import copyfile
@@ -200,4 +215,7 @@ def build_boilerplate(config_file, workflow):
                 "Could not generate CITATION.tex file:\n%s", " ".join(cmd)
             )
         else:
-            copyfile(pkgrf("dmriprep", "data/boilerplate.bib"), citation_files["bib"])
+            copyfile(
+                pkgrf("dmriprep", "data/boilerplate.bib"),
+                citation_files["bib"],
+            )

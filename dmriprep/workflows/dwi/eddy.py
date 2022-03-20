@@ -84,7 +84,9 @@ def gen_eddy_textfiles(in_file, in_meta, newpath=None):
         use_ext=False,
         newpath=str(newpath.absolute()),
     )
-    Path(out_index).write_text(f"{' '.join(['1'] * nb.load(in_file).shape[3])}")
+    Path(out_index).write_text(
+        f"{' '.join(['1'] * nb.load(in_file).shape[3])}"
+    )
     return out_acqparams, out_index
 
 

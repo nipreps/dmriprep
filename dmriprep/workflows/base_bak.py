@@ -73,7 +73,9 @@ def init_dmriprep_wf():
             run_without_submitting=True,
         )
         if config.execution.fs_subjects_dir is not None:
-            fsdir.inputs.subjects_dir = str(config.execution.fs_subjects_dir.absolute())
+            fsdir.inputs.subjects_dir = str(
+                config.execution.fs_subjects_dir.absolute()
+            )
 
     for subject_id in config.execution.participant_label:
         single_subject_wf = init_single_subject_wf(subject_id)
@@ -227,7 +229,9 @@ It is released under the [CC0]\
     )
 
     about = pe.Node(
-        AboutSummary(version=config.environment.version, command=" ".join(sys.argv)),
+        AboutSummary(
+            version=config.environment.version, command=" ".join(sys.argv)
+        ),
         name="about",
         run_without_submitting=True,
     )

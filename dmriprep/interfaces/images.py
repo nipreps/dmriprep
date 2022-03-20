@@ -86,7 +86,9 @@ class _RescaleB0InputSpec(BaseInterfaceInputSpec):
 class _RescaleB0OutputSpec(TraitedSpec):
     out_ref = File(exists=True, desc="One average b0 file")
     out_b0s = File(exists=True, desc="series of rescaled b0 volumes")
-    signal_drift = traits.List(traits.Float, desc="estimated signal drift factors")
+    signal_drift = traits.List(
+        traits.Float, desc="estimated signal drift factors"
+    )
 
 
 class RescaleB0(SimpleInterface):
@@ -123,5 +125,7 @@ class RescaleB0(SimpleInterface):
         self._results["out_b0s"], self._results["signal_drift"] = rescale_b0(
             self.inputs.in_file, self.inputs.mask_file, out_b0s
         )
-        self._results["out_ref"] = median(self._results["out_b0s"], out_path=out_ref)
+        self._results["out_ref"] = median(
+            self._results["out_b0s"], out_path=out_ref
+        )
         return runtime
