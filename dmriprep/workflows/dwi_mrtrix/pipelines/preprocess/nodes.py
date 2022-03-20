@@ -70,3 +70,12 @@ DWIPREPROC_NODE = pe.Node(
 BIASCORRECT_NODE = pe.Node(
     mrt.DWIBiasCorrect(**BIASCORRECT_KWARGS), name="biascorrect"
 )
+NII_CONVERSION_NODE = pe.Node(
+    mrt.MRConvert(
+        out_file="dwi.nii.gz",
+        out_bvec="dwi.bvec",
+        out_bval="dwi.bval",
+        json_export="dwi.json",
+    ),
+    name="native_dwi_conversion",
+)
