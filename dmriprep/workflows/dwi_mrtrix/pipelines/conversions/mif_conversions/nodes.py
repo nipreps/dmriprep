@@ -2,7 +2,7 @@
 Nodes' configurations for *conversions* pipelines.
 """
 import nipype.pipeline.engine as pe
-from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.configurations import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.mif_conversions.configurations import (
     COREG_INPUTNODE_FIELDS,
     COREG_OUTNODE_FIELDS,
     MIF_INPUTNODE_FIELDS,

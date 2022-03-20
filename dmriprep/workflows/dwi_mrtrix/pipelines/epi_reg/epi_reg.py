@@ -1,18 +1,18 @@
-from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import fsl
-from dwiprep.workflows.coreg.pipelines.epi_reg.nodes import (
-    INPUT_NODE,
-    OUTPUT_NODE,
-    EPIREG_NODE,
-    CONVERTXFM_NODE,
-)
-from dwiprep.workflows.coreg.pipelines.epi_reg.edges import (
-    INPUT_TO_EPIREG_EDGES,
+from dmriprep.workflows.dwi_mrtrix.pipelines.epi_reg.edges import (
+    CONVERTXFM_TO_OUTPUT_EDGES,
     EPIREG_TO_CONVERTXFM_EDGES,
     EPIREG_TO_OUTPUT_EDGES,
-    CONVERTXFM_TO_OUTPUT_EDGES,
+    INPUT_TO_EPIREG_EDGES,
 )
+from dmriprep.workflows.dwi_mrtrix.pipelines.epi_reg.nodes import (
+    CONVERTXFM_NODE,
+    EPIREG_NODE,
+    INPUT_NODE,
+    OUTPUT_NODE,
+)
+from nipype.interfaces import fsl
+from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 
 EPI_REG = [
     (INPUT_NODE, EPIREG_NODE, INPUT_TO_EPIREG_EDGES),

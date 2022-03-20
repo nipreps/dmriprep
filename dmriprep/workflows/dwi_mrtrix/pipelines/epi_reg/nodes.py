@@ -2,15 +2,14 @@
 Nodes' configurations for *epi_eg* pipelines.
 """
 import nipype.pipeline.engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import fsl
-
-from dwiprep.workflows.coreg.pipelines.epi_reg.configurations import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.epi_reg.configurations import (
+    CONVERTXFM_KWARGS,
+    EPIREG_KWARGS,
     INPUT_NODE_FIELDS,
     OUTPUT_NODE_FIELDS,
-    EPIREG_KWARGS,
-    CONVERTXFM_KWARGS,
 )
+from nipype.interfaces import fsl
+from nipype.interfaces import utility as niu
 
 #: i/o
 INPUT_NODE = pe.Node(

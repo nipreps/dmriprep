@@ -113,3 +113,4 @@ kubernetes/jobs/
 
 # local tests 
 dmriprep/data/tests/local
+trials.py

@@ -1,8 +1,4 @@
-from nipype.interfaces import fsl
-from nipype.interfaces import utility as niu
-from nipype.pipeline import engine as pe
-
-from dwiprep.workflows.coreg.pipelines.apply_transform.edges import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.apply_transform.edges import (
     DWI_XFM_TO_OUTPUT_EDGES,
     INPUT_TO_DWI_XFM_EDGES,
     INPUT_TO_TENSOR_XFM_EDGES,
@@ -10,13 +6,16 @@ from dwiprep.workflows.coreg.pipelines.apply_transform.edges import (
     TENSOR_XFM_TO_OUTPUT_EDGES,
     TRANSFORM_CONVERT_TO_DWI_XFM_EDGES,
 )
-from dwiprep.workflows.coreg.pipelines.apply_transform.nodes import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.apply_transform.nodes import (
     APPLY_XFM_DWI_NODE,
     APPLY_XFM_TENSOR_NODE,
     INPUT_NODE,
     OUTPUT_NODE,
     TRANSFORM_FSL_AFF_TO_MRTRIX,
 )
+from nipype.interfaces import fsl
+from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 
 APPLY_TRANSFORMS = [
     (

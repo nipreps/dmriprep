@@ -1,3 +1,3 @@
-from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.conversions import (
-    init_conversion_wf,
+from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.mif_conversions.conversions import (
+    init_mif_conversion_wf,
 )

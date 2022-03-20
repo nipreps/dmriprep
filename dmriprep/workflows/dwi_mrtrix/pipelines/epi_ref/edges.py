@@ -7,4 +7,4 @@ INPUT_TO_DWIEXTRACT_EDGES = [
 ]
 DWIEXTRACT_TO_MRMATH_EDGES = [("out_file", "in_file")]
 
-MRMATH_TO_OUTPUT_EDGES = [("out_file", "epi_ref_file")]
+MRMATH_TO_OUTPUT_EDGES = [("out_file", "dwi_reference")]

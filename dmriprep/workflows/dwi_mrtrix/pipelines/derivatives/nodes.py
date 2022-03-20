@@ -1,8 +1,7 @@
 import nipype.pipeline.engine as pe
-from nipype.interfaces import utility as niu
 
-from dwiprep.interfaces.dds import DerivativesDataSink
-from dwiprep.workflows.dmri.pipelines.derivatives.configurations import (
+# from dwiprep.interfaces.dds import DerivativesDataSink
+from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.configurations import (
     COREG_DWI_PREPROC_KWARGS,
     COREG_SBREF_PREPROC_KWARGS,
     COREG_TENSOR_KWARGS,
@@ -14,6 +13,7 @@ from dwiprep.workflows.dmri.pipelines.derivatives.configurations import (
     PHASEDIFF_KWARGS,
     T1_to_EPI_AFF_KWARGS,
 )
+from nipype.interfaces import utility as niu
 
 
 def infer_metric(in_file: str) -> str:

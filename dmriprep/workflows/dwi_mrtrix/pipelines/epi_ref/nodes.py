@@ -2,15 +2,14 @@
 Nodes' configurations for *epi_ref* pipelines.
 """
 import nipype.pipeline.engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import mrtrix3 as mrt
-
-from dwiprep.workflows.dmri.pipelines.epi_ref.configurations import (
-    INPUT_NODE_FIELDS,
-    OUTPUT_NODE_FIELDS,
+from dmriprep.workflows.dwi_mrtrix.pipelines.epi_ref.configurations import (
     DWIEXTRACT_KWARGS,
+    INPUT_NODE_FIELDS,
     MRMATH_KWARGS,
+    OUTPUT_NODE_FIELDS,
 )
+from nipype.interfaces import mrtrix3 as mrt
+from nipype.interfaces import utility as niu
 
 #: i/o
 INPUT_NODE = pe.Node(

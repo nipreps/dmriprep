@@ -8,7 +8,6 @@ INPUT_TO_TENSOR_XFM_EDGES = [
 ]
 INPUT_TO_DWI_XFM_EDGES = [
     ("dwi_file", "in_files"),
-    # ("t1w_brain", "reference_image"),
 ]
 INPUT_TO_TRANSFORM_CONVERT_EDGES = [
     ("epiref", "in_file"),

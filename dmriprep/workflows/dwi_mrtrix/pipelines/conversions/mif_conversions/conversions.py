@@ -1,11 +1,11 @@
 import nipype.pipeline.engine as pe
-from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.edges import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.mif_conversions.edges import (
     MIF_DWI_CONVERSION_TO_OUTPUT_EDGES,
     MIF_FMAP_CONVERSION_TO_OUTPUT_EDGES,
     MIF_INPUT_TO_DWI_CONVERSION_EDGES,
     MIF_INPUT_TO_FMAP_CONVERSION_EDGES,
 )
-from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.nodes import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.mif_conversions.nodes import (
     MIF_DWI_CONVERSION_NODE,
     MIF_FMAP_CONVERSION_NODE,
     MIF_INPUT_NODE,
@@ -38,7 +38,7 @@ MIF_DWI_CONVERSION = [
 ]
 
 
-def init_conversion_wf(name: str = "mif_conversion_wf") -> pe.Workflow:
+def init_mif_conversion_wf(name: str = "mif_conversion_wf") -> pe.Workflow:
     """
     Initiate a workflow to convert input files to mif format for better compatability with *mrtrix3* functions
 

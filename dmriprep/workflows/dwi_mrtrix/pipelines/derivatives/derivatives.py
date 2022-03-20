@@ -1,6 +1,6 @@
 import nipype.pipeline.engine as pe
 
-from dwiprep.workflows.dmri.pipelines.derivatives.edges import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.edges import (
     COREG_DWI_LIST_TO_DDS_EDGES,
     INPUT_TO_COREG_DWI_DDS_EDGES,
     INPUT_TO_COREG_DWI_LIST_EDGES,
@@ -19,7 +19,7 @@ from dwiprep.workflows.dmri.pipelines.derivatives.edges import (
     NATIVE_SBREF_LIST_TO_DDS_EDGES,
     PHASEDIFF_LIST_TO_DDS_EDGES,
 )
-from dwiprep.workflows.dmri.pipelines.derivatives.nodes import (
+from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.nodes import (
     COREG_DWI_DDS_NODE,
     COREG_DWI_LIST_NODE,
     COREG_SBREF_DDS_NODE,
