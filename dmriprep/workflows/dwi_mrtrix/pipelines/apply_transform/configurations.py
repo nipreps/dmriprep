@@ -4,7 +4,7 @@ Configurations for *apply_transform* pipelines
 
 INPUT_NODE_FIELDS = [
     "dwi_file",
-    "epiref",
+    "dwi_reference",
     "epi_to_t1w_aff",
     "t1w_brain",
 ]

@@ -25,6 +25,9 @@ from pathlib import Path
 
 from dmriprep import config
 from dmriprep.interfaces import DerivativesDataSink
+from dmriprep.workflows.dwi_mrtrix.pipelines.apply_transform.apply_transform import (
+    init_apply_transform,
+)
 from dmriprep.workflows.dwi_mrtrix.pipelines.epi_ref.epi_ref import (
     init_epi_ref_wf,
 )
@@ -204,6 +207,7 @@ def init_dwi_preproc_wf(dwi_file):
         ]
     )
     epi_ref_wf = init_epi_ref_wf()
+    apply_transform_wf = init_apply_transform()
     # Mask the T1w
     t1w_brain = pe.Node(ApplyMask(), name="t1w_brain")
     workflow.connect(
@@ -329,6 +333,11 @@ def init_dwi_preproc_wf(dwi_file):
                     epi_ref_wf,
                     [("outputnode.dwi_preproc", "inputnode.dwi_file")],
                 ),
+                (
+                    preprocess_wf,
+                    apply_transform_wf,
+                    [("outputnode.dwi_preproc", "inputnode.dwi_file")],
+                ),
             ]
         )
     else:
@@ -338,7 +347,12 @@ def init_dwi_preproc_wf(dwi_file):
                     mif_conversion_wf,
                     epi_ref_wf,
                     [("outputnode.dwi_file", "inputnode.dwi_file")],
-                )
+                ),
+                (
+                    mif_conversion_wf,
+                    apply_transform_wf,
+                    [("outputnode.dwi_file", "inputnode.dwi_file")],
+                ),
             ]
         )
     workflow.connect(
@@ -347,6 +361,21 @@ def init_dwi_preproc_wf(dwi_file):
                 epi_ref_wf,
                 bbr_wf,
                 [("outputnode.dwi_reference", "inputnode.in_file")],
+            ),
+            (
+                epi_ref_wf,
+                apply_transform_wf,
+                [("outputnode.dwi_reference", "inputnode.dwi_reference")],
+            ),
+            (
+                bbr_wf,
+                apply_transform_wf,
+                [("outputnode.epi_to_t1w_aff", "inputnode.epi_to_t1w_aff")],
+            ),
+            (
+                t1w_brain,
+                apply_transform_wf,
+                [("out_file", "inputnode.t1w_brain")],
             ),
         ]
     )
