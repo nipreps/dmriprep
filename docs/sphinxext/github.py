@@ -89,7 +89,8 @@ def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         category = "issues"
     else:
         msg = inliner.reporter.error(
-            'GitHub roles include "ghpull" and "ghissue", ' '"%s" is invalid.' % name,
+            'GitHub roles include "ghpull" and "ghissue", '
+            '"%s" is invalid.' % name,
             line=lineno,
         )
         prb = inliner.problematic(rawtext, rawtext, msg)
@@ -120,7 +121,9 @@ def ghuser_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     return [node], []
 
 
-def ghcommit_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+def ghcommit_role(
+    name, rawtext, text, lineno, inliner, options={}, content=[]
+):
     """Link to a GitHub commit.
 
     Returns 2 part tuple containing list of nodes to insert into the

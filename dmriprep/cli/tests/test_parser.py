@@ -57,7 +57,9 @@ def test_parser_valid(tmp_path, args):
     if "--fs-license-file" in args:
         _fs_file = tmp_path / "license.txt"
         _fs_file.write_text("")
-        args.insert(args.index("--fs-license-file") + 1, str(_fs_file.absolute()))
+        args.insert(
+            args.index("--fs-license-file") + 1, str(_fs_file.absolute())
+        )
 
     opts = _build_parser().parse_args(args)
 
@@ -95,7 +97,9 @@ def test_memory_arg(tmp_path, argval, gb):
     assert opts.memory_gb == gb
 
 
-@pytest.mark.parametrize("current,latest", [("1.0.0", "1.3.2"), ("1.3.2", "1.3.2")])
+@pytest.mark.parametrize(
+    "current,latest", [("1.0.0", "1.3.2"), ("1.3.2", "1.3.2")]
+)
 def test_get_parser_update(monkeypatch, capsys, current, latest):
     """Make sure the out-of-date banner is shown."""
     expectation = Version(current) < Version(latest)

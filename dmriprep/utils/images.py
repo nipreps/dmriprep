@@ -60,7 +60,9 @@ def rescale_b0(in_file, mask_file, out_path=None):
     signal_drift = median_signal[0] / median_signal
     data /= signal_drift
 
-    nb.Nifti1Image(data.astype(dtype), img.affine, img.header).to_filename(out_path)
+    nb.Nifti1Image(data.astype(dtype), img.affine, img.header).to_filename(
+        out_path
+    )
     return out_path, signal_drift.tolist()
 
 
@@ -79,7 +81,7 @@ def median(in_file, out_path=None):
     dtype = img.get_data_dtype()
     median_data = np.median(img.get_fdata(), axis=-1)
 
-    nb.Nifti1Image(median_data.astype(dtype), img.affine, img.header).to_filename(
-        out_path
-    )
+    nb.Nifti1Image(
+        median_data.astype(dtype), img.affine, img.header
+    ).to_filename(out_path)
     return out_path

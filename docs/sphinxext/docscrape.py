@@ -508,7 +508,10 @@ class FunctionDoc(NumpyDocString):
         if self._role:
             if self._role not in roles:
                 print("Warning: invalid role %s" % self._role)
-            out += ".. %s:: %s\n    \n\n" % (roles.get(self._role, ""), func_name)
+            out += ".. %s:: %s\n    \n\n" % (
+                roles.get(self._role, ""),
+                func_name,
+            )
 
         out += super(FunctionDoc, self).__str__(func_role=self._role)
         return out
@@ -518,12 +521,16 @@ class ClassDoc(NumpyDocString):
 
     extra_public_methods = ["__call__"]
 
-    def __init__(self, cls, doc=None, modulename="", func_doc=FunctionDoc, config={}):
+    def __init__(
+        self, cls, doc=None, modulename="", func_doc=FunctionDoc, config={}
+    ):
         if not inspect.isclass(cls) and cls is not None:
             raise ValueError("Expected a class or None, but got %r" % cls)
         self._cls = cls
 
-        self.show_inherited_members = config.get("show_inherited_class_members", True)
+        self.show_inherited_members = config.get(
+            "show_inherited_class_members", True
+        )
 
         if modulename and not modulename.endswith("."):
             modulename += "."

@@ -185,7 +185,9 @@ class DiffusionGradientTable:
         # Correct any b0's in bvecs misstated as 10's.
         value[np.any(abs(value) >= 10, axis=1)] = np.zeros(3)
         if self.bvals is not None and value.shape[0] != self.bvals.shape[0]:
-            raise ValueError("The number of b-vectors and b-values do not match")
+            raise ValueError(
+                "The number of b-vectors and b-values do not match"
+            )
         self._bvecs = value
 
     @bvals.setter
@@ -193,7 +195,9 @@ class DiffusionGradientTable:
         if isinstance(value, (str, Path)):
             value = np.loadtxt(str(value)).flatten()
         if self.bvecs is not None and value.shape[0] != self.bvecs.shape[0]:
-            raise ValueError("The number of b-vectors and b-values do not match")
+            raise ValueError(
+                "The number of b-vectors and b-values do not match"
+            )
         self._bvals = np.array(value)
 
     @property
@@ -225,7 +229,10 @@ class DiffusionGradientTable:
 
     def reorient_rasb(self):
         """Reorient the vectors based o a list of affine transforms."""
-        from dipy.core.gradients import gradient_table_from_bvals_bvecs, reorient_bvecs
+        from dipy.core.gradients import (
+            gradient_table_from_bvals_bvecs,
+            reorient_bvecs,
+        )
 
         affines = self._transforms.copy()
         bvals = self._bvals
@@ -249,7 +256,9 @@ class DiffusionGradientTable:
                 )
 
         # Build gradient table object
-        gt = gradient_table_from_bvals_bvecs(bvals, bvecs, b0_threshold=self._b0_thres)
+        gt = gradient_table_from_bvals_bvecs(
+            bvals, bvecs, b0_threshold=self._b0_thres
+        )
 
         # Reorient table
         new_gt = reorient_bvecs(gt, [np.load(aff) for aff in affines])
@@ -509,7 +518,9 @@ def bvecs2ras(affine, bvecs, norm=True, bvec_norm_epsilon=0.2):
 
 def rasb_dwi_length_check(dwi_file, rasb_file):
     """Check the number of encoding vectors and number of orientations in the DWI file."""
-    return nb.load(dwi_file).shape[-1] == len(np.loadtxt(rasb_file, skiprows=1))
+    return nb.load(dwi_file).shape[-1] == len(
+        np.loadtxt(rasb_file, skiprows=1)
+    )
 
 
 def b0mask_from_data(dwi_file, mask_file, z_thres=3.0):

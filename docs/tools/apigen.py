@@ -108,7 +108,7 @@ class ApiDocWriter(object):
     )
 
     def _import(self, name):
-        """ Import namespace package """
+        """Import namespace package"""
         mod = __import__(name)
         components = name.split(".")
         for comp in components[1:]:
@@ -173,7 +173,7 @@ class ApiDocWriter(object):
         return path
 
     def _path2uri(self, dirpath):
-        """ Convert directory path to uri """
+        """Convert directory path to uri"""
         package_dir = self.package_name.replace(".", os.path.sep)
         relpath = dirpath.replace(self.root_path, package_dir)
         if relpath.startswith(os.path.sep):
@@ -181,7 +181,7 @@ class ApiDocWriter(object):
         return relpath.replace(os.path.sep, ".")
 
     def _parse_module(self, uri):
-        """ Parse module defined in *uri* """
+        """Parse module defined in *uri*"""
         filename = self._uri2path(uri)
         if filename is None:
             print(filename, "erk")
@@ -239,7 +239,7 @@ class ApiDocWriter(object):
         return functions, classes
 
     def _parse_lines(self, linesource):
-        """ Parse lines of text for functions and classes """
+        """Parse lines of text for functions and classes"""
         functions = []
         classes = []
         for line in linesource:
@@ -413,7 +413,9 @@ class ApiDocWriter(object):
             for subpkg_name in dirnames + filenames:
                 package_uri = ".".join((root_uri, subpkg_name))
                 package_path = self._uri2path(package_uri)
-                if package_path and self._survives_exclude(package_uri, "package"):
+                if package_path and self._survives_exclude(
+                    package_uri, "package"
+                ):
                     modules.append(package_uri)
 
         return sorted(modules)
@@ -422,7 +424,9 @@ class ApiDocWriter(object):
         # upper-level modules
         main_module = modules[0].split(".")[0]
         ulms = [
-            ".".join(m.split(".")[:2]) if m.count(".") >= 1 else m.split(".")[0]
+            ".".join(m.split(".")[:2])
+            if m.count(".") >= 1
+            else m.split(".")[0]
             for m in modules
         ]
 
@@ -507,7 +511,9 @@ class ApiDocWriter(object):
         path = os.path.join(outdir, froot + self.rst_extension)
         # Path written into index is relative to rootpath
         if relative_to is not None:
-            relpath = (outdir + os.path.sep).replace(relative_to + os.path.sep, "")
+            relpath = (outdir + os.path.sep).replace(
+                relative_to + os.path.sep, ""
+            )
         else:
             relpath = outdir
         idx = open(path, "wt")

@@ -49,7 +49,9 @@ def mock_config():
     config.init_spaces()
 
     config.execution.work_dir = Path(mkdtemp())
-    config.execution.bids_dir = Path(pkgrf("dmriprep", "data/tests/THP")).absolute()
+    config.execution.bids_dir = Path(
+        pkgrf("dmriprep", "data/tests/THP")
+    ).absolute()
     config.execution.init()
 
     yield
