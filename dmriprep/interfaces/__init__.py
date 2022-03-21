@@ -2,11 +2,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Custom Nipype interfaces for dMRIPrep."""
 from nipype.interfaces.base import OutputMultiObject, SimpleInterface
+from niworkflows.interfaces.bids import LOGGER as _LOGGER
+from niworkflows.interfaces.bids import DerivativesDataSink as _DDS
 from niworkflows.interfaces.bids import (
-    DerivativesDataSink as _DDS,
-    _BIDSDataGrabberOutputSpec,
     _BIDSDataGrabberInputSpec,
-    LOGGER as _LOGGER,
+    _BIDSDataGrabberOutputSpec,
 )
 
 

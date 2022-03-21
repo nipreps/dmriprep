@@ -1,9 +1,11 @@
 import nipype.pipeline.engine as pe
 from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.edges import (
     COREG_DWI_LIST_TO_DDS_EDGES,
+    COREG_SBREF_LIST_TO_DDS_EDGES,
     INPUT_TO_COREG_DWI_DDS_EDGES,
     INPUT_TO_COREG_DWI_LIST_EDGES,
     INPUT_TO_COREG_SBREF_DDS_EDGES,
+    INPUT_TO_COREG_SBREF_LIST_EDGES,
     INPUT_TO_EPI_TO_T1_EDGES,
     INPUT_TO_NATIVE_DWI_DDS_EDGES,
     INPUT_TO_NATIVE_DWI_LIST_EDGES,
@@ -12,12 +14,12 @@ from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.edges import (
     INPUT_TO_T1_TO_EPI_EDGES,
     NATIVE_DWI_LIST_TO_DDS_EDGES,
     NATIVE_SBREF_LIST_TO_DDS_EDGES,
-    PHASEDIFF_LIST_TO_DDS_EDGES,
 )
 from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.nodes import (
     COREG_DWI_DDS_NODE,
     COREG_DWI_LIST_NODE,
     COREG_SBREF_DDS_NODE,
+    COREG_SBREF_LIST_NODE,
     EPI_TO_T1_NODE,
     INPUT_NODE,
     NATIVE_DWI_DDS_NODE,
@@ -45,7 +47,9 @@ DERIVATIVES_DS = [
         NATIVE_SBREF_LIST_TO_DDS_EDGES,
     ),
     #: Coreg EPI reference
+    (INPUT_NODE, COREG_SBREF_LIST_NODE, INPUT_TO_COREG_SBREF_LIST_EDGES),
     (INPUT_NODE, COREG_SBREF_DDS_NODE, INPUT_TO_COREG_SBREF_DDS_EDGES),
+    (COREG_SBREF_LIST_NODE, COREG_SBREF_DDS_NODE, COREG_DWI_LIST_TO_DDS_EDGES),
     #: Transformations
     (INPUT_NODE, EPI_TO_T1_NODE, INPUT_TO_EPI_TO_T1_EDGES),
     (INPUT_NODE, T1_TO_EPI_NODE, INPUT_TO_T1_TO_EPI_EDGES),

@@ -47,12 +47,15 @@ INPUT_TO_NATIVE_SBREF_DDS_EDGES = [
 NATIVE_SBREF_LIST_TO_DDS_EDGES = [("out", "in_file")]
 
 #: EPI reference - coreg
+INPUT_TO_COREG_SBREF_LIST_EDGES = [
+    ("coreg_epi_ref_file", "in1"),
+    ("coreg_epi_ref_json", "in2"),
+]
 INPUT_TO_COREG_SBREF_DDS_EDGES = [
-    ("coreg_epi_ref_file", "in_file"),
     ("source_file", "source_file"),
     ("base_directory", "base_directory"),
 ]
-
+COREG_SBREF_LIST_TO_DDS_EDGES = [("out", "in_file")]
 #: Transformations
 INPUT_TO_EPI_TO_T1_EDGES = [
     ("epi_to_t1w_aff", "in_file"),

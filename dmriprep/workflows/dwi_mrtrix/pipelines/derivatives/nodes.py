@@ -70,7 +70,9 @@ NATIVE_SBREF_DDS_NODE = pe.MapNode(
     name="ds_native_sbref",
     iterfield=["in_file"],
 )
-
+COREG_SBREF_LIST_NODE = pe.Node(
+    niu.Merge(numinputs=2), name="list_coreg_sbref_inputs"
+)
 COREG_SBREF_DDS_NODE = pe.MapNode(
     DerivativesDataSink(**COREG_SBREF_KWARGS),
     name="ds_coreg_sbref",

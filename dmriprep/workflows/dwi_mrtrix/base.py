@@ -498,6 +498,14 @@ def init_dwi_preproc_wf(dwi_file):
                     ),
                 ],
             ),
+            (
+                bbr_wf,
+                ds_preproc_dwi,
+                [
+                    ("outputnode.epi_to_t1w_aff", "inputnode.epi_to_t1w_aff"),
+                    ("outputnode.t1w_to_epi_aff", "inputnode.t1w_to_epi_aff"),
+                ],
+            ),
         ]
     ),
     # (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
