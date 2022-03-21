@@ -3,7 +3,11 @@ Configurations for *epi_ref* pipeline.
 """
 #: i/o
 INPUT_NODE_FIELDS = ["dwi_file"]
-OUTPUT_NODE_FIELDS = ["dwi_reference_mif", "dwi_reference_nii"]
+OUTPUT_NODE_FIELDS = [
+    "dwi_reference_mif",
+    "dwi_reference_nii",
+    "dwi_reference_json",
+]
 
 #: Keyword arguments
 DWIEXTRACT_KWARGS = dict(bzero=True, out_file="b0.mif")

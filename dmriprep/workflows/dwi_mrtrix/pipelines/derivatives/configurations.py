@@ -1,44 +1,44 @@
 INPUT_NODE_FIELDS = [
     "source_file",
     "base_directory",
-    "native_dwi_preproc_file",
-    "native_dwi_preproc_json",
-    "native_dwi_preproc_bvec",
-    "native_dwi_preproc_bval",
+    "native_dwi_file",
+    "native_dwi_json",
+    "native_dwi_bvec",
+    "native_dwi_bval",
     "native_epi_ref_file",
     "native_epi_ref_json",
     "epi_to_t1w_aff",
     "t1w_to_epi_aff",
-    "coreg_dwi_preproc_file",
-    "coreg_dwi_preproc_bvec",
-    "coreg_dwi_preproc_bval",
-    "coreg_dwi_preproc_json",
+    "coreg_dwi_file",
+    "coreg_dwi_bvec",
+    "coreg_dwi_bval",
+    "coreg_dwi_json",
     "coreg_epi_ref_file",
     "coreg_epi_ref_json",
 ]
 
-NATIVE_DWI_PREPROC_KWARGS = dict(
+NATIVE_DWI_KWARGS = dict(
     datatype="dwi",
     space="dwi",
     desc="preproc",
     suffix="dwi",
     compress=None,
 )
-COREG_DWI_PREPROC_KWARGS = dict(
+COREG_DWI_KWARGS = dict(
     datatype="dwi",
     space="T1w",
     desc="preproc",
     suffix="dwi",
     compress=None,
 )
-NATIVE_SBREF_PREPROC_KWARGS = dict(
+NATIVE_SBREF_KWARGS = dict(
     datatype="dwi",
     space="dwi",
     desc="preproc",
     suffix="epiref",
     compress=None,
 )
-COREG_SBREF_PREPROC_KWARGS = dict(
+COREG_SBREF_KWARGS = dict(
     datatype="dwi",
     space="T1w",
     desc="preproc",

@@ -1,7 +1,6 @@
 import nipype.pipeline.engine as pe
 from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.nii_conversions.configurations import (
     COREG_DWI_CONVERSION_KWARGS,
-    COREG_REFERENCE_CONVERSION_KWARGS,
     INPUTNODE_FIELDS,
     NATIVE_DWI_CONVERSION_KWARGS,
     OUTPUTNODE_FIELDS,
@@ -24,8 +23,4 @@ NATIVE_DWI_CONVERSION_NODE = pe.Node(
 COREG_DWI_CONVERSION_NODE = pe.Node(
     mrt.MRConvert(**COREG_DWI_CONVERSION_KWARGS),
     name="coreg_dwi_conversion",
-)
-COREG_REFERENCE_CONVERSION_NODE = pe.Node(
-    mrt.MRConvert(**COREG_REFERENCE_CONVERSION_KWARGS),
-    name="coreg_reference_conversion",
 )

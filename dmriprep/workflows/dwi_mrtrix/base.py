@@ -31,6 +31,9 @@ from dmriprep.workflows.dwi_mrtrix.pipelines.apply_transform.apply_transform imp
 from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.nii_conversions.conversion import (
     init_nii_conversion_wf,
 )
+from dmriprep.workflows.dwi_mrtrix.pipelines.derivatives.derivatives import (
+    init_derivatives_wf,
+)
 from dmriprep.workflows.dwi_mrtrix.pipelines.epi_ref.epi_ref import (
     init_epi_ref_wf,
 )
@@ -389,22 +392,12 @@ def init_dwi_preproc_wf(dwi_file):
             (
                 epi_ref_wf,
                 bbr_wf,
-                [("outputnode.dwi_reference", "inputnode.in_file")],
+                [("outputnode.dwi_reference_nii", "inputnode.in_file")],
             ),
             (
                 epi_ref_wf,
                 apply_transform_wf,
-                [("outputnode.dwi_reference", "inputnode.dwi_reference")],
-            ),
-            (
-                epi_ref_wf,
-                nii_conversion_wf,
-                [
-                    (
-                        "outputnode.dwi_reference",
-                        "inputnode.native_dwi_reference",
-                    )
-                ],
+                [("outputnode.dwi_reference_nii", "inputnode.dwi_reference")],
             ),
             (
                 bbr_wf,
@@ -419,7 +412,6 @@ def init_dwi_preproc_wf(dwi_file):
         ]
     )
     coreg_epi_ref_wf = epi_ref_wf.clone("coreg_dwi_reference_wf")
-    coreg_epi_ref_wf.inputs.mrmath.set(out_file="mean_b0.mif")
     workflow.connect(
         [
             (
@@ -427,18 +419,87 @@ def init_dwi_preproc_wf(dwi_file):
                 coreg_epi_ref_wf,
                 [("outputnode.dwi_file", "inputnode.dwi_file")],
             ),
+        ]
+    )
+    ds_preproc_dwi = init_derivatives_wf()
+    ds_preproc_dwi.inputs.inputnode.set(
+        base_directory=config.execution.output_dir
+    )
+    workflow.connect(
+        [
             (
-                coreg_epi_ref_wf,
+                inputnode,
+                ds_preproc_dwi,
+                [("dwi_file", "inputnode.source_file")],
+            ),
+            (
                 nii_conversion_wf,
+                ds_preproc_dwi,
                 [
                     (
-                        "outputnode.dwi_reference",
-                        "inputnode.coreg_dwi_reference",
-                    )
+                        "outputnode.native_dwi_file",
+                        "inputnode.native_dwi_file",
+                    ),
+                    (
+                        "outputnode.native_dwi_json",
+                        "inputnode.native_dwi_json",
+                    ),
+                    (
+                        "outputnode.native_dwi_bvec",
+                        "inputnode.native_dwi_bvec",
+                    ),
+                    (
+                        "outputnode.native_dwi_bval",
+                        "inputnode.native_dwi_bval",
+                    ),
+                    (
+                        "outputnode.coreg_dwi_file",
+                        "inputnode.coreg_dwi_file",
+                    ),
+                    (
+                        "outputnode.coreg_dwi_json",
+                        "inputnode.coreg_dwi_json",
+                    ),
+                    (
+                        "outputnode.coreg_dwi_bvec",
+                        "inputnode.coreg_dwi_bvec",
+                    ),
+                    (
+                        "outputnode.coreg_dwi_bval",
+                        "inputnode.coreg_dwi_bval",
+                    ),
+                ],
+            ),
+            (
+                epi_ref_wf,
+                ds_preproc_dwi,
+                [
+                    (
+                        "outputnode.dwi_reference_nii",
+                        "inputnode.native_epi_ref_file",
+                    ),
+                    (
+                        "outputnode.dwi_reference_json",
+                        "inputnode.native_epi_ref_json",
+                    ),
+                ],
+            ),
+            (
+                coreg_epi_ref_wf,
+                ds_preproc_dwi,
+                [
+                    (
+                        "outputnode.dwi_reference_nii",
+                        "inputnode.coreg_epi_ref_file",
+                    ),
+                    (
+                        "outputnode.dwi_reference_json",
+                        "inputnode.coreg_epi_ref_json",
+                    ),
                 ],
             ),
         ]
-    )
+    ),
     # (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
     # (brainextraction_wf, preprocess_wf, [("outputnode.out_mask", "inputnode.dwi_mask")]),
     # (brainextraction_wf, eddy_report, [("outputnode.out_file", "before")]),

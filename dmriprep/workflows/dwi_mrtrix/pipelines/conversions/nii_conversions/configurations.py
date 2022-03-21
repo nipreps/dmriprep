@@ -3,8 +3,6 @@ INPUTNODE_FIELDS = [
     "native_preproc_dwi",
     # Coreg DWI
     "coreg_preproc_dwi",
-    # Coreg reference
-    "coreg_dwi_reference",
 ]
 OUTPUTNODE_FIELDS = [
     "native_dwi_file",
@@ -15,8 +13,6 @@ OUTPUTNODE_FIELDS = [
     "coreg_dwi_bvec",
     "coreg_dwi_bval",
     "coreg_dwi_json",
-    "coreg_reference_file",
-    "coreg_reference_json",
 ]
 
 NATIVE_DWI_CONVERSION_KWARGS = dict(
@@ -31,7 +27,4 @@ COREG_DWI_CONVERSION_KWARGS = dict(
     out_bvec="dwi.bvec",
     out_bval="dwi.bval",
     json_export="dwi.json",
-)
-COREG_REFERENCE_CONVERSION_KWARGS = dict(
-    out_file="dwiref.nii.gz", json_export="dwiref.json"
 )
