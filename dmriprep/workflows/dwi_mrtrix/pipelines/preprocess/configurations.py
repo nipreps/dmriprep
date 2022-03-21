@@ -5,10 +5,6 @@ Configurations for *preprocessing* pipeline.
 INPUT_NODE_FIELDS = ["dwi_file", "merged_phasediff"]
 OUTPUT_NODE_FIELDS = [
     "dwi_preproc",
-    "preproc_dwi_file",
-    "preproc_dwi_bvec",
-    "preproc_dwi_bval",
-    "preproc_dwi_json",
 ]
 
 #: Keyword arguments
@@ -20,4 +16,3 @@ DWIFSLPREPROC_KWARGS = dict(
     eddy_options=" --slm=linear",
 )
 BIASCORRECT_KWARGS = dict(use_ants=True)
-NII_CONVERSION_KWARGS = dict()

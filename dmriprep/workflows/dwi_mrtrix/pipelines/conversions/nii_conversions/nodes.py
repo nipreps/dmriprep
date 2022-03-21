@@ -1,6 +1,9 @@
 import nipype.pipeline.engine as pe
 from dmriprep.workflows.dwi_mrtrix.pipelines.conversions.nii_conversions.configurations import (
+    COREG_DWI_CONVERSION_KWARGS,
+    COREG_REFERENCE_CONVERSION_KWARGS,
     INPUTNODE_FIELDS,
+    NATIVE_DWI_CONVERSION_KWARGS,
     OUTPUTNODE_FIELDS,
 )
 from nipype.interfaces import mrtrix3 as mrt
@@ -15,28 +18,14 @@ OUTPUT_NODE = pe.Node(
     name="outputnode",
 )
 NATIVE_DWI_CONVERSION_NODE = pe.Node(
-    mrt.MRConvert(
-        out_file="dwi.nii.gz",
-        out_bvec="dwi.bvec",
-        out_bval="dwi.bval",
-        json_export="dwi.json",
-    ),
+    mrt.MRConvert(**NATIVE_DWI_CONVERSION_KWARGS),
     name="native_dwi_conversion",
 )
 COREG_DWI_CONVERSION_NODE = pe.Node(
-    mrt.MRConvert(
-        out_file="dwi.nii.gz",
-        out_bvec="dwi.bvec",
-        out_bval="dwi.bval",
-        json_export="dwi.json",
-    ),
+    mrt.MRConvert(**COREG_DWI_CONVERSION_KWARGS),
     name="coreg_dwi_conversion",
 )
-NATIVE_REFERENCE_CONVERSION_NODE = pe.Node(
-    mrt.MRConvert(out_file="dwiref.nii.gz", json_export="dwiref.json"),
-    name="native_reference_conversion",
-)
 COREG_REFERENCE_CONVERSION_NODE = pe.Node(
-    mrt.MRConvert(out_file="dwiref.nii.gz", json_export="dwiref.json"),
+    mrt.MRConvert(**COREG_REFERENCE_CONVERSION_KWARGS),
     name="coreg_reference_conversion",
 )

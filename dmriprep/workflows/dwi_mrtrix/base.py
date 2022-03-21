@@ -419,6 +419,7 @@ def init_dwi_preproc_wf(dwi_file):
         ]
     )
     coreg_epi_ref_wf = epi_ref_wf.clone("coreg_dwi_reference_wf")
+    coreg_epi_ref_wf.inputs.mrmath.set(out_file="mean_b0.mif")
     workflow.connect(
         [
             (
