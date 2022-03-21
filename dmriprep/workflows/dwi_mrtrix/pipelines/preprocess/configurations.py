@@ -3,7 +3,9 @@ Configurations for *preprocessing* pipeline.
 """
 #: i/o
 INPUT_NODE_FIELDS = ["dwi_file", "merged_phasediff"]
-OUTPUT_NODE_FIELDS = ["dwi_preproc"]
+OUTPUT_NODE_FIELDS = [
+    "dwi_preproc",
+]
 
 #: Keyword arguments
 DWIDENOISE_KWARGS = dict()
