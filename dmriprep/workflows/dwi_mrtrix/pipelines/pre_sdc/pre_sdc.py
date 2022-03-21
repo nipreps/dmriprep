@@ -6,6 +6,7 @@ from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.edges import (
     MERGE_TO_MRCAT_EDGES,
     MRCAT_TO_OUTPUT_EDGES,
     MRMATH_TO_MERGE_EDGES,
+    MRMATH_TO_OUTPUT_EDGES,
 )
 from dmriprep.workflows.dwi_mrtrix.pipelines.pre_sdc.nodes import (
     DWIEXTRACT_NODE,
@@ -23,6 +24,7 @@ PHASEDIFF = [
     (MRMATH_NODE, MERGE_NODE, MRMATH_TO_MERGE_EDGES),
     (MERGE_NODE, MRCAT_NODE, MERGE_TO_MRCAT_EDGES),
     (MRCAT_NODE, OUTPUT_NODE, MRCAT_TO_OUTPUT_EDGES),
+    (MRMATH_NODE, OUTPUT_NODE, MRMATH_TO_OUTPUT_EDGES),
 ]
 
 
