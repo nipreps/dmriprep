@@ -2,7 +2,7 @@
 Configurations for *preprocessing* pipeline.
 """
 #: i/o
-INPUT_NODE_FIELDS = ["dwi_file", "merged_phasediff"]
+INPUT_NODE_FIELDS = ["dwi_file", "merged_phasediff", "dwi_mask"]
 OUTPUT_NODE_FIELDS = [
     "dwi_preproc",
 ]

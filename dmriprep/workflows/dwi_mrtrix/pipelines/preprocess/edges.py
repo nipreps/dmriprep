@@ -3,7 +3,7 @@ Connections configurations for *preprocess* pipelines.
 """
 
 #: fieldmap preperation
-INPUT_TO_DENOISE_EDGES = [("dwi_file", "in_file")]
+INPUT_TO_DENOISE_EDGES = [("dwi_file", "in_file"), ("dwi_mask", "mask")]
 INPUT_TO_DWIPREPROC_EDGES = [("merged_phasediff", "in_epi")]
 DENOISE_TO_INFER_PE_EDGES = [("out_file", "in_file")]
 DENOISE_TO_DWIPREPROC_EDGES = [("out_file", "in_file")]

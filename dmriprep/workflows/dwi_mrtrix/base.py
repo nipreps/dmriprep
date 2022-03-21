@@ -197,6 +197,7 @@ def init_dwi_preproc_wf(dwi_file):
     )
     mif_conversion_wf = init_mif_conversion_wf()
     nii_conversion_wf = init_nii_conversion_wf()
+    brainextraction_wf = init_brainextraction_wf()
     workflow.connect(
         [
             (
@@ -223,6 +224,11 @@ def init_dwi_preproc_wf(dwi_file):
                 inputnode,
                 t1w_brain,
                 [("t1w_preproc", "in_file"), ("t1w_mask", "in_mask")],
+            ),
+            (
+                epi_ref_wf,
+                brainextraction_wf,
+                [("outputnode.dwi_reference_nii", "inputnode.in_file")],
             ),
         ]
     )
