@@ -14,10 +14,10 @@ TENSOR_XFM_TO_OUTPUT_EDGES = [("out_file", "tensor_metrics")]
 DWI_XFM_TO_OUTPUT_EDGES = [("out_file", "dwi_file")]
 
 INPUT_TO_RESAMPLE_XFM_EDGES = [
-    ("t1w_mask", "source_img"),
-    ("dwi_reference", "target_img"),
+    ("t1w_mask", "input_image"),
+    ("dwi_reference", "reference_image"),
 ]
-RESAMPLE_MASK_TO_OUTPUT_EDGES = [("out_file", "coreg_dwi_mask")]
+RESAMPLE_MASK_TO_OUTPUT_EDGES = [("output_image", "coreg_dwi_mask")]
 
 INPUT_TO_APPLY_XFM_MASK_EDGES = [
     ("t1w_mask", "in_file"),

@@ -534,6 +534,17 @@ def init_dwi_preproc_wf(dwi_file):
                     ("outputnode.t1w_to_epi_aff", "inputnode.t1w_to_epi_aff"),
                 ],
             ),
+            (
+                apply_transform_wf,
+                ds_preproc_dwi,
+                [
+                    (
+                        "outputnode.native_dwi_mask",
+                        "inputnode.native_dwi_mask",
+                    ),
+                    ("outputnode.coreg_dwi_mask", "inputnode.coreg_dwi_mask"),
+                ],
+            ),
         ]
     ),
     # (inputnode, ds_report_eddy, [("dwi_file", "source_file")]),
