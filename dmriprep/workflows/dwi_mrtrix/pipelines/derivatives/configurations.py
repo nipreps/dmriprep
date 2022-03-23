@@ -15,6 +15,8 @@ INPUT_NODE_FIELDS = [
     "coreg_dwi_json",
     "coreg_epi_ref_file",
     "coreg_epi_ref_json",
+    "native_dwi_mask",
+    "coreg_dwi_mask",
 ]
 
 NATIVE_DWI_KWARGS = dict(
@@ -62,3 +64,18 @@ T1_to_EPI_AFF_KWARGS = dict(
     compress=False,
 )
 T1_to_EPI_AFF_KWARGS["from"] = "T1w"
+
+NATIVE_DWI_MASK_KWARGS = dict(
+    datatype="dwi",
+    suffix="mask",
+    desc="brain",
+    space="dwi",
+    dismiss_entities=["direction"],
+)
+COREG_DWI_MASK_KWARGS = dict(
+    datatype="dwi",
+    suffix="mask",
+    desc="brain",
+    space="T1w",
+    dismiss_entities=["direction"],
+)

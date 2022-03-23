@@ -358,15 +358,20 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
 #             raise RuntimeError("""\
 # Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
 # Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
-
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
         )
-    
-        
+        workflow.base_dir = f"{config.execution.work_dir}/dmriprep_wf"
+        workflow.config["execution"]["crashdump_dir"] = str(
+            config.execution.output_dir
+            / "dmriprep"
+            / f"sub-{subject_id}"
+            / "log"
+            / config.execution.run_uuid
+        )
         # fmt: off
         workflow.connect([
             (anat_preproc_wf, dwi_preproc_wf, [
@@ -388,7 +393,9 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
         ])
         # fmt: on
         # Keep a handle to each workflow
-        dwi_preproc_list.append(dwi_preproc_wf)
+        workflow.run()
+        # dwi_preproc_list.append(dwi_preproc_wf)
+        # del dwi_preproc_wf
 
     # if not fmap_estimators:
     #     config.loggers.workflow.warning(

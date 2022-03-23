@@ -67,3 +67,13 @@ INPUT_TO_T1_TO_EPI_EDGES = [
     ("source_file", "source_file"),
     ("base_directory", "base_directory"),
 ]
+INPUT_TO_NATIVE_DWI_MASK_EDGES = [
+    ("native_dwi_mask", "in_file"),
+    ("source_file", "source_file"),
+    ("base_directory", "base_directory"),
+]
+INPUT_TO_COREG_DWI_MASK_EDGES = [
+    ("coreg_dwi_mask", "in_file"),
+    ("source_file", "source_file"),
+    ("base_directory", "base_directory"),
+]

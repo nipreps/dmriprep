@@ -420,15 +420,25 @@ def init_dwi_preproc_wf(dwi_file):
             (
                 bbr_wf,
                 apply_transform_wf,
-                [("outputnode.epi_to_t1w_aff", "inputnode.epi_to_t1w_aff")],
+                [
+                    ("outputnode.epi_to_t1w_aff", "inputnode.epi_to_t1w_aff"),
+                    ("outputnode.t1w_to_epi_aff", "inputnode.t1w_to_epi_aff"),
+                ],
             ),
             (
                 t1w_brain,
                 apply_transform_wf,
                 [("out_file", "inputnode.t1w_brain")],
             ),
+            (
+                inputnode,
+                apply_transform_wf,
+                [("t1w_mask", "inputnode.t1w_mask")],
+            ),
         ]
     )
+    # coreg_epi_ref_wf = init_epi_ref_wf(name="coreg_dwi_reference_wf")
+    # coreg_epi_ref_wf.name = "coreg_dwi_reference_wf"
     coreg_epi_ref_wf = epi_ref_wf.clone("coreg_dwi_reference_wf")
     workflow.connect(
         [
