@@ -67,16 +67,20 @@ The :py:mod:`config` is responsible for other convenience actions.
     :py:class:`~bids.layout.BIDSLayout`, etc.)
 
 """
-from multiprocessing import set_start_method
 import warnings
+from multiprocessing import set_start_method
 
 # cmp is not used by dmriprep, so ignore nipype-generated warnings
 warnings.filterwarnings("ignore", "cmp not installed")
 warnings.filterwarnings(
     "ignore", "This has not been fully tested. Please report any failures."
 )
-warnings.filterwarnings("ignore", "sklearn.externals.joblib is deprecated in 0.21")
-warnings.filterwarnings("ignore", "can't resolve package from __spec__ or __package__")
+warnings.filterwarnings(
+    "ignore", "sklearn.externals.joblib is deprecated in 0.21"
+)
+warnings.filterwarnings(
+    "ignore", "can't resolve package from __spec__ or __package__"
+)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=ResourceWarning)
@@ -89,20 +93,25 @@ except RuntimeError:
 finally:
     # Defer all custom import for after initializing the forkserver and
     # ignoring the most annoying warnings
+    import logging
     import os
     import sys
-    import logging
-
-    from uuid import uuid4
     from pathlib import Path
     from time import strftime
-    from niworkflows.utils.spaces import SpatialReferences as _SRs, Reference as _Ref
-    from nipype import logging as nlogging, __version__ as _nipype_ver
+    from uuid import uuid4
+
+    from nipype import __version__ as _nipype_ver
+    from nipype import logging as nlogging
+    from niworkflows.utils.spaces import Reference as _Ref
+    from niworkflows.utils.spaces import SpatialReferences as _SRs
     from templateflow import __version__ as _tf_ver
+
     from .. import __version__
 
 
-def redirect_warnings(message, category, filename, lineno, file=None, line=None):
+def redirect_warnings(
+    message, category, filename, lineno, file=None, line=None
+):
     """Redirect other warnings."""
     logger = logging.getLogger()
     logger.debug("Captured warning (%s): %s", category, message)
@@ -110,7 +119,9 @@ def redirect_warnings(message, category, filename, lineno, file=None, line=None)
 
 warnings.showwarning = redirect_warnings
 
-logging.addLevelName(25, "IMPORTANT")  # Add a new level between INFO and WARNING
+logging.addLevelName(
+    25, "IMPORTANT"
+)  # Add a new level between INFO and WARNING
 logging.addLevelName(15, "VERBOSE")  # Add a new level between INFO and DEBUG
 
 DEFAULT_MEMORY_MIN_GB = 0.01
@@ -133,14 +144,15 @@ if _fs_license is None and os.getenv("FREESURFER_HOME"):
 
 _templateflow_home = Path(
     os.getenv(
-        "TEMPLATEFLOW_HOME", os.path.join(os.getenv("HOME"), ".cache", "templateflow")
+        "TEMPLATEFLOW_HOME",
+        os.path.join(os.getenv("HOME"), ".cache", "templateflow"),
     )
 )
 
 try:
     from psutil import virtual_memory
 
-    _free_mem_at_start = round(virtual_memory().free / 1024 ** 3, 1)
+    _free_mem_at_start = round(virtual_memory().free / 1024**3, 1)
 except Exception:
     _free_mem_at_start = None
 
@@ -341,6 +353,8 @@ class execution(_Config):
     """Only generate a boilerplate."""
     debug = False
     """Run in sloppy mode (meaning, suboptimal parameters that minimize run-time)."""
+    dmriprep_dir = None
+    """Root of dMRIPrep BIDS Derivatives dataset. Depends on output_layout."""
     fs_license_file = _fs_license
     """An existing file containing a FreeSurfer license."""
     fs_subjects_dir = None
@@ -359,6 +373,8 @@ class execution(_Config):
     """Do not monitor *dMRIPrep* using Google Analytics."""
     output_dir = None
     """Folder where derivatives will be stored."""
+    output_layout = "bids"
+    """Layout of derivatives within output_dir."""
     output_spaces = None
     """List of (non)standard spaces designated (with the ``--output-spaces`` flag of
     the command line) as spatial references for outputs."""
@@ -392,8 +408,11 @@ class execution(_Config):
     @classmethod
     def init(cls):
         """Create a new BIDS Layout accessible with :attr:`~execution.layout`."""
+        if cls.fs_license_file and Path(cls.fs_license_file).is_file():
+            os.environ["FS_LICENSE"] = str(cls.fs_license_file)
         if cls._layout is None:
             import re
+
             from bids.layout import BIDSLayout
 
             work_dir = cls.work_dir / "bids.db"
@@ -412,6 +431,20 @@ class execution(_Config):
                 ),
             )
         cls.layout = cls._layout
+        if cls.bids_filters:
+            from bids.layout import Query
+
+            # unserialize pybids Query enum values
+            for acq, filters in cls.bids_filters.items():
+                cls.bids_filters[acq] = {
+                    k: getattr(Query, v[7:-4])
+                    if not isinstance(v, Query) and "Query" in v
+                    else v
+                    for k, v in filters.items()
+                }
+
+        if "all" in cls.debug:
+            cls.debug = list(DEBUG_MODES)
 
 
 # These variables are not necessary anymore
@@ -462,7 +495,9 @@ class workflow(_Config):
 class loggers:
     """Keep loggers easily accessible (see :py:func:`init`)."""
 
-    _fmt = "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"
+    _fmt = (
+        "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"
+    )
     _datefmt = "%y%m%d-%H:%M:%S"
 
     default = logging.getLogger()
@@ -489,7 +524,9 @@ class loggers:
         from nipype import config as ncfg
 
         _handler = logging.StreamHandler(stream=sys.stdout)
-        _handler.setFormatter(logging.Formatter(fmt=cls._fmt, datefmt=cls._datefmt))
+        _handler.setFormatter(
+            logging.Formatter(fmt=cls._fmt, datefmt=cls._datefmt)
+        )
         cls.cli.addHandler(_handler)
         cls.default.setLevel(execution.log_level)
         cls.cli.setLevel(execution.log_level)
@@ -497,7 +534,12 @@ class loggers:
         cls.workflow.setLevel(execution.log_level)
         cls.utils.setLevel(execution.log_level)
         ncfg.update_config(
-            {"logging": {"log_directory": str(execution.log_dir), "log_to_file": True}}
+            {
+                "logging": {
+                    "log_directory": str(execution.log_dir),
+                    "log_to_file": True,
+                }
+            }
         )
 
 
@@ -560,7 +602,11 @@ def init_spaces(checkpoint=True):
     spaces = execution.output_spaces or SpatialReferences()
     if not isinstance(spaces, SpatialReferences):
         spaces = SpatialReferences(
-            [ref for s in spaces.split(" ") for ref in Reference.from_string(s)]
+            [
+                ref
+                for s in spaces.split(" ")
+                for ref in Reference.from_string(s)
+            ]
         )
 
     if checkpoint and not spaces.is_cached():

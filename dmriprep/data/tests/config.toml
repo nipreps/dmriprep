@@ -6,7 +6,7 @@ overcommit_policy = "heuristic"
 overcommit_limit = "50%"
 nipype_version = "1.4.2"
 templateflow_version = "0.4.2"
-version = "0.2.2"
+version = "0.4.0"
 
 [execution]
 bids_dir = "THP002/"
