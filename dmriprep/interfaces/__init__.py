@@ -2,11 +2,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Custom Nipype interfaces for dMRIPrep."""
 from nipype.interfaces.base import OutputMultiObject, SimpleInterface
+from niworkflows.interfaces.bids import LOGGER as _LOGGER
+from niworkflows.interfaces.bids import DerivativesDataSink as _DDS
 from niworkflows.interfaces.bids import (
-    DerivativesDataSink as _DDS,
-    _BIDSDataGrabberOutputSpec,
     _BIDSDataGrabberInputSpec,
-    LOGGER as _LOGGER,
+    _BIDSDataGrabberOutputSpec,
 )
 
 
@@ -39,7 +39,9 @@ class BIDSDataGrabber(SimpleInterface):
 
         if not bids_dict["t1w"]:
             raise FileNotFoundError(
-                "No T1w images found for subject sub-{}".format(self.inputs.subject_id)
+                "No T1w images found for subject sub-{}".format(
+                    self.inputs.subject_id
+                )
             )
 
         if self._require_dwis and not bids_dict["dwi"]:
@@ -52,7 +54,9 @@ class BIDSDataGrabber(SimpleInterface):
         for imtype in ["dwi", "t2w", "flair", "fmap", "roi"]:
             if not bids_dict[imtype]:
                 _LOGGER.warning(
-                    'No "%s" images found for sub-%s', imtype, self.inputs.subject_id
+                    'No "%s" images found for sub-%s',
+                    imtype,
+                    self.inputs.subject_id,
                 )
 
         return runtime
