@@ -68,6 +68,7 @@ DWI_TEMPLATE = """\
 \t\t\t<p>{confounds}.</p>
 \t\t</details>
 """
+
 ABOUT_TEMPLATE = """\t<ul>
 \t\t<li>dMRIPrep version: {version}</li>
 \t\t<li>dMRIPrep command: <code>{command}</code></li>
