@@ -20,24 +20,30 @@
 #
 #     https://www.nipreps.org/community/licensing/
 #
-"""dMRIPrep base processing workflows."""
-from .. import config
-import sys
+"""
+dMRIPrep base processing workflows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: init_dmriprep_wf
+.. autofunction:: init_single_subject_wf
+
+"""
 import os
+import sys
 from copy import deepcopy
 
-from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
-
-from niworkflows.engine.workflows import LiterateWorkflow as Workflow
-from niworkflows.interfaces.bids import BIDSInfo, BIDSFreeSurferDir
+from nipype.pipeline import engine as pe
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
+from packaging.version import Version
 from smriprep.workflows.anatomical import init_anat_preproc_wf
 
-from ..interfaces import DerivativesDataSink, BIDSDataGrabber
-from ..interfaces.reports import SubjectSummary, AboutSummary
+from .. import config
+from ..interfaces import BIDSDataGrabber, DerivativesDataSink
+from ..interfaces.reports import AboutSummary, SubjectSummary
 from ..utils.bids import collect_data
+from .dwi import init_dwi_preproc_wf
 
 
 def init_dmriprep_wf():
@@ -59,6 +65,9 @@ def init_dmriprep_wf():
                 wf = init_dmriprep_wf()
 
     """
+    from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+    from niworkflows.interfaces.bids import BIDSFreeSurferDir, BIDSInfo
+
     dmriprep_wf = Workflow(name="dmriprep_wf")
     dmriprep_wf.base_dir = config.execution.work_dir
 
@@ -74,7 +83,9 @@ def init_dmriprep_wf():
             run_without_submitting=True,
         )
         if config.execution.fs_subjects_dir is not None:
-            fsdir.inputs.subjects_dir = str(config.execution.fs_subjects_dir.absolute())
+            fsdir.inputs.subjects_dir = str(
+                config.execution.fs_subjects_dir.absolute()
+            )
 
     for subject_id in config.execution.participant_label:
         single_subject_wf = init_single_subject_wf(subject_id)
@@ -91,7 +102,10 @@ def init_dmriprep_wf():
             node.config = deepcopy(single_subject_wf.config)
         if freesurfer:
             dmriprep_wf.connect(
-                fsdir, "subjects_dir", single_subject_wf, "fsinputnode.subjects_dir"
+                fsdir,
+                "subjects_dir",
+                single_subject_wf,
+                "fsinputnode.subjects_dir",
             )
         else:
             dmriprep_wf.add_nodes([single_subject_wf])
@@ -206,7 +220,8 @@ It is released under the [CC0]\
     )
 
     bidssrc = pe.Node(
-        BIDSDataGrabber(subject_data=subject_data, anat_only=anat_only), name="bidssrc"
+        BIDSDataGrabber(subject_data=subject_data, anat_only=anat_only),
+        name="bidssrc",
     )
 
     bids_info = pe.Node(
@@ -224,7 +239,9 @@ It is released under the [CC0]\
     )
 
     about = pe.Node(
-        AboutSummary(version=config.environment.version, command=" ".join(sys.argv)),
+        AboutSummary(
+            version=config.environment.version, command=" ".join(sys.argv)
+        ),
         name="about",
         run_without_submitting=True,
     )
@@ -447,6 +464,7 @@ Setting-up fieldmap "{estimator.bids_id}" ({estimator.method}) with \
 
         if estimator.method == fm.EstimatorType.ANAT:
             from sdcflows.workflows.fit.syn import init_syn_preprocessing_wf
+
             from ..interfaces.vectors import CheckGradientTable
 
             sources = [
