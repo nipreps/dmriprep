@@ -11,13 +11,15 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
 import re
+import sys
+
+from dmriprep import __copyright__, __packagename__, __version__
 from packaging.version import Version
 
-from dmriprep import __version__, __copyright__, __packagename__
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "sphinxext")))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "sphinxext"))
+)
 from github_link import make_linkcode_resolve
 
 # -- Project information -----------------------------------------------------
