@@ -42,7 +42,6 @@ from packaging.version import Version
 from .. import config
 from ..interfaces.reports import AboutSummary, SubjectSummary
 from ..utils.bids import collect_data
-from .dwi import init_dwi_preproc_wf
 
 
 def init_dmriprep_wf():
@@ -435,8 +434,9 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
             dwi_file,
             has_fieldmap=True,
         )
-    #     break
-    # return dwi_preproc_wf
+        if dwi_preproc_wf is None:
+            continue
+        dwi_preproc_wf.__desc__ = dwi_pre_desc + (dwi_preproc_wf.__desc__ or "")
 
     # fmt: off
         workflow.connect([

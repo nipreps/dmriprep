@@ -103,13 +103,12 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
 
     # Have some options handy
-    omp_nthreads = config.nipype.omp_nthreads
-    freesurfer = config.workflow.run_reconall
-    spaces = config.workflow.spaces
-    dmriprep_dir = str(config.execution.dmriprep_dir)
-
-    # Extract BIDS entities and metadata from BOLD file(s)
-    entities = extract_entities(dwi_file)
+    # omp_nthreads = config.nipype.omp_nthreads
+    # freesurfer = config.workflow.run_reconall
+    # spaces = config.workflow.spaces
+    # dmriprep_dir = str(config.execution.dmriprep_dir)
+    # # Extract BIDS entities and metadata from BOLD file(s)
+    # entities = extract_entities(dwi_file)
     layout = config.execution.layout
     dwi_file = Path(dwi_file)
     config.loggers.workflow.debug(
@@ -130,7 +129,6 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
                 f"None of the available B0 fieldmaps are associated to <{dwi_rel}>"
             )
 
-    ######### TODO ##############
     # Build workflow
     workflow = Workflow(name=_get_wf_name(dwi_file.name))
 
