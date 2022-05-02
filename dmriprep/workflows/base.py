@@ -394,24 +394,17 @@ It is released under the [CC0]\
     if anat_only:
         return workflow
     # fmt:on
-    return workflow
-
     from .dwi.base import init_dwi_preproc_wf
 
     # Append the dMRI section to the existing anatomical excerpt
     # That way we do not need to stream down the number of DWI datasets
-    anat_preproc_wf.__postdesc__ = f"""\
-{anat_preproc_wf.__postdesc__ or ''}
-
+    dwi_pre_desc = f"""
 Diffusion data preprocessing
-
 : For each of the {len(subject_data["dwi"])} DWI scans found per subject
- (across all sessions), the gradient table was vetted and converted into the *RASb*
+(across all sessions), the gradient table was vetted and converted into the *RASb*
 format (i.e., given in RAS+ scanner coordinates, normalized b-vectors and scaled b-values),
 and a *b=0* average for reference to the subsequent steps of preprocessing was calculated.
 """
-
-    # SDC Step 0: Determine whether fieldmaps can/should be estimated
     fmap_estimators = None
     if "fieldmap" not in config.workflow.ignore:
         from sdcflows import fieldmaps as fm
@@ -426,28 +419,26 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
             force_fmapless=config.workflow.force_syn,
         )
 
-        if any(
-            f.method == fm.EstimatorType.ANAT for f in fmap_estimators
-        ) and "MNI152NLin2009cAsym" not in spaces.get_spaces(
-            nonstandard=False, dim=(3,)
+        if (
+            any(f.method == fm.EstimatorType.ANAT for f in fmap_estimators)
+            and "MNI152NLin2009cAsym" not in spaces.get_spaces(nonstandard=False, dim=(3,))
         ):
             # Although this check would go better within parser, allow datasets with fieldmaps
             # not to require spatial standardization of the T1w.
-            raise RuntimeError(
-                """\
+            raise RuntimeError("""\
 Argument '--use-sdc-syn' requires having 'MNI152NLin2009cAsym' as one output standard space. \
-Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument"""
-            )
-
+Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""")
     # Nuts and bolts: initialize individual run's pipeline
     dwi_preproc_list = []
     for dwi_file in subject_data["dwi"]:
         dwi_preproc_wf = init_dwi_preproc_wf(
             dwi_file,
-            has_fieldmap=bool(fmap_estimators),
+            has_fieldmap=True,
         )
+    #     break
+    # return dwi_preproc_wf
 
-        # fmt: off
+    # fmt: off
         workflow.connect([
             (anat_preproc_wf, dwi_preproc_wf, [
                 ("outputnode.t1w_preproc", "inputnode.t1w_preproc"),
@@ -466,9 +457,9 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
             ]),
             (bids_info, dwi_preproc_wf, [("subject", "inputnode.subject_id")]),
         ])
-        # fmt: on
+        # # fmt: on
 
-        # Keep a handle to each workflow
+        # # Keep a handle to each workflow
         dwi_preproc_list.append(dwi_preproc_wf)
 
     if not fmap_estimators:

@@ -490,6 +490,9 @@ class workflow(_Config):
     use_syn = None
     """Run *fieldmap-less* susceptibility-derived distortions estimation
     in the absence of any alternatives."""
+    use_syn_sdc = None
+    """Run *fieldmap-less* susceptibility-derived distortions estimation
+    in the absence of any alternatives."""
 
 
 class loggers:

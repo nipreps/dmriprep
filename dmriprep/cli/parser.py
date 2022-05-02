@@ -496,11 +496,11 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
             )
         elif output_layout == "legacy":
             config.execution.fs_subjects_dir = output_dir / "freesurfer"
-    if config.execution.fmriprep_dir is None:
+    if config.execution.dmriprep_dir is None:
         if output_layout == "bids":
-            config.execution.fmriprep_dir = output_dir
+            config.execution.dmriprep_dir = output_dir
         elif output_layout == "legacy":
-            config.execution.fmriprep_dir = output_dir / "dmriprep"
+            config.execution.dmriprep_dir = output_dir / "dmriprep"
     # Wipe out existing work_dir
     if opts.clean_workdir and work_dir.exists():
         from niworkflows.utils.misc import clean_directory

@@ -9,10 +9,10 @@ templateflow_version = "0.4.2"
 version = "0.4.0"
 
 [execution]
-bids_dir = "THP002/"
+bids_dir = "THP"
 bids_description_hash = "b07ee615a588acf67967d70f5b2402ffbe477b99a316433fa7fdaff4f9dad5c1"
 boilerplate_only = false
-debug = false
+debug = "false"
 fs_license_file = "/opt/freesurfer/license.txt"
 fs_subjects_dir = "opt/freesurfer/subjects"
 layout = "BIDS Layout: .../home/oesteban/Data/THP002 | Subjects: 1 | Sessions: 2 | Runs: 2"
@@ -22,6 +22,7 @@ low_mem = false
 md_only_boilerplate = false
 notrack = true
 output_dir = "/tmp"
+dmriprep_dir = "/tmp/dmriprep"
 output_spaces = "run"
 reports_only = false
 run_uuid = "20200311-121754_aa0b4fa9-6b60-4a11-af7d-02deb54a823f"
@@ -32,6 +33,7 @@ write_graph = false
 
 [workflow]
 anat_only = false
+bold2t1w_dof = 6
 fmap_bspline = false
 force_syn = false
 hires = true
@@ -40,11 +42,13 @@ longitudinal = false
 run_reconall = true
 skull_strip_fixed_seed = false
 skull_strip_template = "OASIS30ANTs"
-spaces = "run"
+t2s_coreg = false
+use_syn_sdc = false
 
 [nipype]
 crashfile_format = "txt"
 get_linked_libs = false
+memory_gb = 32
 nprocs = 8
 omp_nthreads = 8
 plugin = "MultiProc"
