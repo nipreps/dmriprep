@@ -474,7 +474,7 @@ Please add the 'MNI152NLin2009cAsym' keyword to the '--output-spaces' argument""
         debug=config.execution.debug is True,
         estimators=fmap_estimators,
         omp_nthreads=config.nipype.omp_nthreads,
-        output_dir=str(output_dir),
+        output_dir=dmriprep_dir,
         subject=subject_id,
     )
     fmap_wf.__desc__ = f"""

@@ -179,6 +179,8 @@ try:
 except Exception:
     pass
 
+DEBUG_MODES = ["fieldmaps"]
+
 
 class _Config:
     """An abstract class forbidding instantiation."""
