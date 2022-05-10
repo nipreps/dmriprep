@@ -5,7 +5,7 @@ from bids.layout import parse_file_entities
 from niworkflows.utils.connections import listify
 
 
-def _get_wf_name(filename):
+def _get_wf_name(filename, name="wf"):
     """
     Derive the workflow name for supplied DWI file.
 
@@ -18,7 +18,9 @@ def _get_wf_name(filename):
     'dwi_preproc_dir_RL_run_01_echo_1_wf'
 
     """
-    fname = Path(filename).name.rpartition(".nii")[0].replace("_dwi", "_wf")
+    fname = (
+        Path(filename).name.rpartition(".nii")[0].replace("_dwi", f"_{name}")
+    )
     fname_nosub = "_".join(fname.split("_")[1:])
     return f"dwi_preproc_{fname_nosub.replace('.', '_').replace(' ', '').replace('-', '_')}"
 

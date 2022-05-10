@@ -7,4 +7,3 @@ def init_nii_to_mif_wf(name="nii_to_mif_wf"):
     name : str, optional
         Name of workflow. Defaults to "nii_to_mif_wf".
     """
-    

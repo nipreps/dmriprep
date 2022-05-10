@@ -31,7 +31,6 @@ from dmriprep.workflows.dwi.utils import (
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 
-
 from ... import config
 from ...interfaces import DerivativesDataSink
 
