@@ -5,3 +5,4 @@ Configurations for the "fieldmap_query" workflow.
 OPPOSITE_PHASE_QUERY_KWARGS = dict(
     input_names=["dwi_file"], output_names=["fieldmap_file"]
 )
+
