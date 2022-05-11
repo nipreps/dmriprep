@@ -23,6 +23,7 @@
 """Orchestrating the dMRI-preprocessing workflow."""
 from pathlib import Path
 
+from dmriprep.workflows.dwi.fieldmap_query.nodes import OPPOSITE_PHASE_NODE
 from dmriprep.workflows.dwi.utils import (
     _aslist,
     _get_wf_name,
@@ -118,20 +119,6 @@ def init_dwi_preproc_wf(dwi_file):
     config.loggers.workflow.debug(
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
-    if has_fieldmap:
-        import re
-
-        from sdcflows.fieldmaps import get_identifier
-
-        dwi_rel = re.sub(
-            r"^sub-[a-zA-Z0-9]*/", "", str(dwi_file.relative_to(layout.root))
-        )
-        estimator_key = get_identifier(dwi_rel)
-        if not estimator_key:
-            has_fieldmap = False
-            config.loggers.workflow.critical(
-                f"None of the available B0 fieldmaps are associated to <{dwi_rel}>"
-            )
 
     # Build workflow
     workflow = Workflow(name=_get_wf_name(dwi_file.name))
@@ -160,7 +147,9 @@ def init_dwi_preproc_wf(dwi_file):
         name="inputnode",
     )
     inputnode.inputs.dwi_file = str(dwi_file.absolute())
-
+    fmap_query = OPPOSITE_PHASE_NODE
+    workflow.connect([(inputnode, fmap_query, [("dwi_file", "dwi_file")])])
+    return workflow
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=["dwi_reference", "dwi_mask", "gradients_rasb"]

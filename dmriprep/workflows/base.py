@@ -33,15 +33,14 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 
+from dmriprep.config import config
+from dmriprep.interfaces.reports import AboutSummary, SubjectSummary
+from dmriprep.utils.bids import collect_data
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from niworkflows.utils.misc import fix_multi_T1w_source_name
 from niworkflows.utils.spaces import Reference
 from packaging.version import Version
-
-from .. import config
-from ..interfaces.reports import AboutSummary, SubjectSummary
-from ..utils.bids import collect_data
 
 
 def init_dmriprep_wf():

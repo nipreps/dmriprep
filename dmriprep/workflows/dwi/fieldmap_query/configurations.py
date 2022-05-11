@@ -1,9 +1,7 @@
 """
 Configurations for the "fieldmap_query" workflow.
 """
-AVAILABLE_POLARITIES = {"FWD": "REV", "AP": "PA", "RL": "LR"}
-PHASE_POLARS = AVAILABLE_POLARITIES.copy()
-for key, val in AVAILABLE_POLARITIES.items():
-    PHASE_POLARS[val] = key
-
-INPUTNODE_FIELDS = ["dwi_file"]
+#: Keyword arguments
+OPPOSITE_PHASE_QUERY_KWARGS = dict(
+    input_names=["dwi_file"], output_names=["fieldmap_file"]
+)
