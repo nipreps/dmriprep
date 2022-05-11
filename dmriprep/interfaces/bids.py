@@ -72,7 +72,7 @@ class BIDSDataGrabber(SimpleInterface):
 
         if self._require_dwis and not bids_dict["dwi"]:
             raise FileNotFoundError(
-                "No functional images found for subject sub-{}".format(
+                "No DWI images found for subject sub-{}".format(
                     self.inputs.subject_id
                 )
             )
