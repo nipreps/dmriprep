@@ -11,5 +11,4 @@ If you are participating because of your affiliation with another organization (
 | --- | --- | --- | --- | --- | --- |
 | Dickie | Erin W. | @edickie | 0000-0003-3028-9864 | Krembil Centre for Neuroinformatics, The Centre for Addiction and Mental Health, Dept. of Psychiatry, University of Toronto |
 | Esteban | Oscar | @oesteban | 0000-0001-8435-6191 | Dept. of Radiology, Lausanne University Hospital and University of Lausanne |
-| Joseph | Michael | @josephmje | 0000-0002-0068-230X | The Centre for Addiction and Mental Health |
 | Rokem | Ariel | @arokem | 0000-0003-0679-1985 | The University of Washington eScience Institute |
