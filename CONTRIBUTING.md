@@ -1,2 +1,3 @@
-Please check the [contributing guidelines of the NiPreps organization](https://www.nipreps.org/community/CONTRIBUTING)
+# Contributing
 
+This Project belongs to the [*NiPreps* Community, which specifies the contributing guidelines](https://www.nipreps.org/community/CONTRIBUTING).
