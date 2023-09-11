@@ -326,7 +326,7 @@ and a *b=0* average for reference to the subsequent steps of preprocessing was c
 
     # SDC Step 0: Determine whether fieldmaps can/should be estimated
     fmap_estimators = None
-    if "fieldmap" not in config.workflow.ignore:
+    if "fieldmaps" not in config.workflow.ignore:
         from sdcflows import fieldmaps as fm
         from sdcflows.utils.wrangler import find_estimators
         from sdcflows.workflows.base import init_fmap_preproc_wf
