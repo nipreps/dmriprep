@@ -461,7 +461,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
         build_log.warning(
             "Per-process threads (--omp-nthreads=%d) exceed total "
             "threads (--nthreads/--n_cpus=%d)",
-            config.nipype.omp_nthread,
+            config.nipype.omp_nthreads,
             config.nipype.nprocs,
         )
 
