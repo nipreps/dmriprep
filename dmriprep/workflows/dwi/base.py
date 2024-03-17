@@ -21,12 +21,13 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Orchestrating the dMRI-preprocessing workflow."""
-from ... import config
 from pathlib import Path
-from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
 
-from niworkflows.engine.workflows import LiterateWorkflow as Workflow
+from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
+from niworkflows.utils.connections import listify
+
+from ... import config
 from ...interfaces import DerivativesDataSink
 
 
@@ -90,6 +91,7 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     * :py:func:`~dmriprep.workflows.dwi.outputs.init_reportlets_wf`
 
     """
+    from niworkflows.engine.workflows import LiterateWorkflow as Workflow
     from niworkflows.interfaces.reportlets.registration import (
         SimpleBeforeAfterRPT as SimpleBeforeAfter,
     )
@@ -97,18 +99,24 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     from sdcflows.workflows.ancillary import init_brainextraction_wf
 
     from ...interfaces.vectors import CheckGradientTable
-    from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
     from .eddy import init_eddy_wf
+    from .outputs import init_dwi_derivatives_wf, init_reportlets_wf
 
+    # Have some options handy
+    # omp_nthreads = config.nipype.omp_nthreads
+    # freesurfer = config.workflow.run_reconall
+    # spaces = config.workflow.spaces
+    # dmriprep_dir = str(config.execution.dmriprep_dir)
+    # # Extract BIDS entities and metadata from BOLD file(s)
+    # entities = extract_entities(dwi_file)
     layout = config.execution.layout
-
     dwi_file = Path(dwi_file)
     config.loggers.workflow.debug(
         f"Creating DWI preprocessing workflow for <{dwi_file.name}>"
     )
-
     if has_fieldmap:
         import re
+
         from sdcflows.fieldmaps import get_identifier
 
         dwi_rel = re.sub(
@@ -160,7 +168,9 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     inputnode.inputs.in_bval = str(layout.get_bval(dwi_file))
 
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["dwi_reference", "dwi_mask", "gradients_rasb"]),
+        niu.IdentityInterface(
+            fields=["dwi_reference", "dwi_mask", "gradients_rasb"]
+        ),
         name="outputnode",
     )
 
@@ -204,8 +214,9 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
     # fmt: on
 
     if config.workflow.run_reconall:
-        from niworkflows.interfaces.nibabel import ApplyMask
         from niworkflows.anat.coregistration import init_bbreg_wf
+        from niworkflows.interfaces.nibabel import ApplyMask
+
         from ...utils.misc import sub_prefix as _prefix
 
         # Mask the T1w
@@ -315,11 +326,11 @@ def init_dwi_preproc_wf(dwi_file, has_fieldmap=False):
         return workflow
 
     from niworkflows.interfaces.utility import KeySelect
-    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
     from sdcflows.workflows.apply.correction import init_unwarp_wf
+    from sdcflows.workflows.apply.registration import init_coeff2epi_wf
 
     coeff2epi_wf = init_coeff2epi_wf(
-        debug=config.execution.debug,
+        debug="fieldmaps" in config.execution.debug,
         omp_nthreads=config.nipype.omp_nthreads,
         write_coeff=True,
     )
@@ -399,3 +410,40 @@ def _get_wf_name(filename):
 
 def _aslist(value):
     return [value]
+
+
+def extract_entities(file_list):
+    """
+    Return a dictionary of common entities given a list of files.
+
+    Examples
+    --------
+    >>> extract_entities("sub-01/anat/sub-01_T1w.nii.gz")
+    {'subject': '01', 'suffix': 'T1w', 'datatype': 'anat', 'extension': '.nii.gz'}
+    >>> extract_entities(["sub-01/anat/sub-01_T1w.nii.gz"] * 2)
+    {'subject': '01', 'suffix': 'T1w', 'datatype': 'anat', 'extension': '.nii.gz'}
+    >>> extract_entities(["sub-01/anat/sub-01_run-1_T1w.nii.gz",
+    ...                   "sub-01/anat/sub-01_run-2_T1w.nii.gz"])
+    {'subject': '01', 'run': [1, 2], 'suffix': 'T1w', 'datatype': 'anat',
+     'extension': '.nii.gz'}
+
+    """
+    from collections import defaultdict
+
+    from bids.layout import parse_file_entities
+
+    entities = defaultdict(list)
+    for e, v in [
+        ev_pair
+        for f in listify(file_list)
+        for ev_pair in parse_file_entities(f).items()
+    ]:
+        entities[e].append(v)
+
+    def _unique(inlist):
+        inlist = sorted(set(inlist))
+        if len(inlist) == 1:
+            return inlist[0]
+        return inlist
+
+    return {k: _unique(v) for k, v in entities.items()}

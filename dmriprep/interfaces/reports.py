@@ -22,22 +22,25 @@
 #
 """Interfaces to generate reportlets."""
 
+import logging
 import os
+import re
 import time
 
-from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
-    BaseInterfaceInputSpec,
-    File,
-    Directory,
-    InputMultiObject,
-    Str,
-    isdefined,
-    SimpleInterface,
-)
 from nipype.interfaces import freesurfer as fs
+from nipype.interfaces.base import (
+    BaseInterfaceInputSpec,
+    Directory,
+    File,
+    InputMultiObject,
+    SimpleInterface,
+    Str,
+    TraitedSpec,
+    isdefined,
+    traits,
+)
 
+LOGGER = logging.getLogger("nipype.interface")
 
 SUBJECT_TEMPLATE = """\
 \t<ul class="elem-desc">
@@ -48,6 +51,22 @@ SUBJECT_TEMPLATE = """\
 \t\t<li>Non-standard output spaces: {nstd_spaces}</li>
 \t\t<li>FreeSurfer reconstruction: {freesurfer_status}</li>
 \t</ul>
+"""
+
+DWI_TEMPLATE = """\
+\t\t<details open>
+\t\t<summary>Summary</summary>
+\t\t<ul class="elem-desc">
+\t\t\t<li>Original orientation: {ornt}</li>
+\t\t\t<li>Phase-encoding (PE) direction: {pedir}</li>
+\t\t\t<li>Susceptibility distortion correction: {sdc}</li>
+\t\t\t<li>Registration: {registration}</li>
+\t\t</ul>
+\t\t</details>
+\t\t<details>
+\t\t\t<summary>Confounds collected</summary><br />
+\t\t\t<p>{confounds}.</p>
+\t\t</details>
 """
 
 ABOUT_TEMPLATE = """\t<ul>
@@ -139,6 +158,79 @@ class SubjectSummary(SummaryInterface):
         )
 
 
+class DwiSummaryInputSpec(BaseInterfaceInputSpec):
+    distortion_correction = traits.Str(
+        desc="Susceptibility distortion correction method", mandatory=True
+    )
+    pe_direction = traits.Enum(
+        None,
+        "i",
+        "i-",
+        "j",
+        "j-",
+        "k",
+        "k-",
+        mandatory=True,
+        desc="Phase-encoding direction detected",
+    )
+    registration = traits.Enum(
+        "FSL",
+        "FreeSurfer",
+        mandatory=True,
+        desc="Diffusion/anatomical registration method",
+    )
+    fallback = traits.Bool(desc="Boundary-based registration rejected")
+    registration_dof = traits.Enum(
+        6, 9, 12, desc="Registration degrees of freedom", mandatory=True
+    )
+    registration_init = traits.Enum(
+        "register",
+        "header",
+        mandatory=True,
+        desc='Whether to initialize registration with the "header"'
+        ' or by centering the volumes ("register")',
+    )
+    confounds_file = File(exists=True, desc="Confounds file")
+    orientation = traits.Str(
+        mandatory=True, desc="Orientation of the voxel axes"
+    )
+
+
+class FunctionalSummary(SummaryInterface):
+    input_spec = DwiSummaryInputSpec
+
+    def _generate_segment(self):
+        dof = self.inputs.registration_dof
+        reg = {
+            "FSL": [
+                "FSL <code>flirt</code> with boundary-based registration"
+                " (BBR) metric - %d dof" % dof,
+                "FSL <code>flirt</code> rigid registration - 6 dof",
+            ],
+            "FreeSurfer": [
+                "FreeSurfer <code>bbregister</code> "
+                "(boundary-based registration, BBR) - %d dof" % dof,
+                "FreeSurfer <code>mri_coreg</code> - %d dof" % dof,
+            ],
+        }[self.inputs.registration][self.inputs.fallback]
+
+        pedir = get_world_pedir(
+            self.inputs.orientation, self.inputs.pe_direction
+        )
+
+        if isdefined(self.inputs.confounds_file):
+            with open(self.inputs.confounds_file) as cfh:
+                conflist = cfh.readline().strip("\n").strip()
+
+        return DWI_TEMPLATE.format(
+            pedir=pedir,
+            sdc=self.inputs.distortion_correction,
+            registration=reg,
+            confounds=re.sub(r"[\t ]+", ", ", conflist),
+            ornt=self.inputs.orientation,
+        )
+
+
 class AboutSummaryInputSpec(BaseInterfaceInputSpec):
     version = Str(desc="dMRIPrep version")
     command = Str(desc="dMRIPrep command")
@@ -154,3 +246,27 @@ class AboutSummary(SummaryInterface):
             command=self.inputs.command,
             date=time.strftime("%Y-%m-%d %H:%M:%S %z"),
         )
+
+
+def get_world_pedir(ornt, pe_direction):
+    """Return world direction of phase encoding"""
+    axes = (
+        ("Right", "Left"),
+        ("Anterior", "Posterior"),
+        ("Superior", "Inferior"),
+    )
+    ax_idcs = {"i": 0, "j": 1, "k": 2}
+
+    if pe_direction is not None:
+        axcode = ornt[ax_idcs[pe_direction[0]]]
+        inv = pe_direction[1:] == "-"
+
+        for ax in axes:
+            for flip in (ax, ax[::-1]):
+                if flip[not inv].startswith(axcode):
+                    return "-".join(flip)
+    LOGGER.warning(
+        "Cannot determine world direction of phase encoding. "
+        f"Orientation: {ornt}; PE dir: {pe_direction}"
+    )
+    return "Could not be determined - assuming Anterior-Posterior"
