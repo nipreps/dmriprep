@@ -45,7 +45,10 @@ extensions = [
     "sphinxcontrib.apidoc",
     "nipype.sphinxext.plot_workflow",
     "nipype.sphinxext.apidoc",
+    "numpydoc",
 ]
+numpydoc_show_class_members = False
+autodoc_typehints = "none"
 
 autodoc_mock_imports = [
     "dipy",
@@ -67,11 +70,11 @@ autodoc_mock_imports = [
 # https://github.com/sphinx-contrib/napoleon/pull/10 is merged.
 napoleon_use_param = False
 napoleon_custom_sections = [
-    ("Inputs", "Parameters"),
-    ("Outputs", "Parameters"),
-    ("Attributes", "Parameters"),
-    ("Mandatory Inputs", "Parameters"),
-    ("Optional Inputs", "Parameters"),
+    ("Inputs", "params_style"),
+    ("Outputs", "returns_style"),
+    ("Attributes", "Attributes"),
+    ("Mandatory Inputs", "params_style"),
+    ("Optional Inputs", "params_style"),
 ]
 
 # Add any paths that contain templates here, relative to this directory.
