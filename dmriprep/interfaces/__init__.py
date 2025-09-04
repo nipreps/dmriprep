@@ -39,20 +39,18 @@ class BIDSDataGrabber(SimpleInterface):
 
         if not bids_dict["t1w"]:
             raise FileNotFoundError(
-                "No T1w images found for subject sub-{}".format(self.inputs.subject_id)
+                f"No T1w images found for subject sub-{self.inputs.subject_id}"
             )
 
         if self._require_dwis and not bids_dict["dwi"]:
             raise FileNotFoundError(
-                "No diffusion weighted images found for subject sub-{}".format(
-                    self.inputs.subject_id
-                )
+                f"No diffusion weighted images found for subject sub-{self.inputs.subject_id}"
             )
 
         for imtype in ["dwi", "t2w", "flair", "fmap", "roi"]:
             if not bids_dict[imtype]:
                 _LOGGER.warning(
-                    'No "%s" images found for sub-%s', imtype, self.inputs.subject_id
+                    f'No "{imtype}" images found for sub-{self.inputs.subject_id}'
                 )
 
         return runtime

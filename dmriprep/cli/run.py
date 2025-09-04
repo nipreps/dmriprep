@@ -103,7 +103,7 @@ def main():
     config.loggers.workflow.log(
         15,
         "\n".join(
-            ["dMRIPrep config:"] + ["\t\t%s" % s for s in config.dumps().splitlines()]
+            ["dMRIPrep config:"] + [f"\t\t{s}" for s in config.dumps().splitlines()]
         ),
     )
     config.loggers.workflow.log(25, "dMRIPrep started!")
@@ -113,7 +113,7 @@ def main():
     except Exception as e:
         if not config.execution.notrack:
             popylar.track_event(__ga_id__, "run", "error")
-        config.loggers.workflow.critical("dMRIPrep failed: %s", e)
+        config.loggers.workflow.critical(f"dMRIPrep failed: {e}")
         raise
     else:
         config.loggers.workflow.log(25, "dMRIPrep finished successfully!")

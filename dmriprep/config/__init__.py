@@ -105,7 +105,7 @@ finally:
 def redirect_warnings(message, category, filename, lineno, file=None, line=None):
     """Redirect other warnings."""
     logger = logging.getLogger()
-    logger.debug("Captured warning (%s): %s", category, message)
+    logger.debug(f"Captured warning ({category}): {message}")
 
 
 warnings.showwarning = redirect_warnings
@@ -161,9 +161,7 @@ try:
                 _oc_limit in ("0", "n/a")
                 and Path("/proc/sys/vm/overcommit_ratio").exists()
             ):
-                _oc_limit = "{}%".format(
-                    Path("/proc/sys/vm/overcommit_ratio").read_text().strip()
-                )
+                _oc_limit = f"{Path('/proc/sys/vm/overcommit_ratio').read_text().strip()}%"
 except Exception:
     pass
 
@@ -364,7 +362,7 @@ class execution(_Config):
     the command line) as spatial references for outputs."""
     reports_only = False
     """Only build the reports, based on the reportlets found in a cached working directory."""
-    run_uuid = "%s_%s" % (strftime("%Y%m%d-%H%M%S"), uuid4())
+    run_uuid = f'{strftime("%Y%m%d-%H%M%S")}_{uuid4()}'
     """Unique identifier of this particular run."""
     participant_label = None
     """List of participant identifiers that are to be preprocessed."""

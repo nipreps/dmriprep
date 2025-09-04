@@ -109,13 +109,10 @@ def test_get_parser_update(monkeypatch, capsys, current, latest):
     _build_parser()
     captured = capsys.readouterr().err
 
-    msg = """\
-You are using dMRIPrep-%s, and a newer version of dMRIPrep is available: %s.
+    msg = f"""\
+You are using dMRIPrep-{current}, and a newer version of dMRIPrep is available: {latest}.
 Please check out our documentation about how and when to upgrade:
-https://dmriprep.readthedocs.io/en/latest/faq.html#upgrading""" % (
-        current,
-        latest,
-    )
+https://dmriprep.readthedocs.io/en/latest/faq.html#upgrading"""
 
     assert (msg in captured) is expectation
 

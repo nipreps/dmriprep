@@ -34,8 +34,6 @@ __credits__ = (
 )
 __url__ = "https://github.com/nipreps/dmriprep"
 
-DOWNLOAD_URL = "https://github.com/nipreps/{name}/archive/{ver}.tar.gz".format(
-    name=__packagename__, ver=__version__
-)
+DOWNLOAD_URL = f"https://github.com/nipreps/{__packagename__}/archive/{__version__}.tar.gz"
 
 __ga_id__ = "UA-156165436-1"

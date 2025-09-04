@@ -114,7 +114,7 @@ class CheckGradientTable(SimpleInterface):
             )
             table.to_filename(rasb_file)
         self._results["out_rasb"] = rasb_file
-        table.to_filename("%s/dwi" % cwd, filetype="fsl")
+        table.to_filename(f"{cwd}/dwi", filetype="fsl")
         self._results["out_bval"] = str(cwd / "dwi.bval")
         self._results["out_bvec"] = str(cwd / "dwi.bvec")
         return runtime

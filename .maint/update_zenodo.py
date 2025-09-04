@@ -82,11 +82,11 @@ def get_git_lines(fname="line-contributors.txt"):
 
     if not lines:
         raise RuntimeError(
-            """\
-Could not find line-contributors from git repository.%s"""
-            % """ \
-git-line-summary not found, please install git-extras. """
-            * (git_line_summary_path is None)
+            f"""\
+Could not find line-contributors from git repository.{
+                ' git-line-summary not found, please install git-extras.'
+                * (git_line_summary_path is None)
+            }"""
         )
     return [" ".join(line.strip().split()[1:-1]) for line in lines if "%" in line]
 
@@ -114,11 +114,10 @@ if __name__ == "__main__":
     zenodo["creators"] = zen_creators
     zenodo["contributors"] = zen_contributors
 
-    misses = set(miss_creators).intersection(miss_contributors)
-    if misses:
+    missing = {*miss_creators} & {*miss_contributors}
+    if missing:
         print(
-            "Some people made commits, but are missing in .maint/ "
-            f"files: {', '.join(misses)}",
+            f'Some people made commits, but are missing in .maint/ files: {", ".join(sorted(missing))}.',
             file=sys.stderr,
         )
 
@@ -134,4 +133,4 @@ if __name__ == "__main__":
         if isinstance(creator["affiliation"], list):
             creator["affiliation"] = creator["affiliation"][0]
 
-    zenodo_file.write_text("%s\n" % json.dumps(zenodo, indent=2))
+    zenodo_file.write_text(f"{json.dumps(zenodo, indent=2)}\n")
