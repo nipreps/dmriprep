@@ -214,6 +214,7 @@ jobs:
             BUILT_VERSION=$( docker run --rm nipreps/dmriprep:latest --version )
             BUILT_VERSION=${BUILT_VERSION%$'\r'}
             BUILT_VERSION=${BUILT_VERSION#*"dMRIPrep v"}
+            BUILT_VERSION=${BUILT_VERSION%.d*}
             echo "VERSION: \"$THISVERSION\""
             echo "BUILT: \"$BUILT_VERSION\""
             set -e
