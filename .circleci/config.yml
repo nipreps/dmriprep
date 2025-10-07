@@ -1,3 +1,4 @@
+# reusable anchors
 docs_deploy: &docs
   docker:
     - image: node:8.10.0
@@ -21,118 +22,234 @@ docs_deploy: &docs
         name: Deploy docs to gh-pages branch
         command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
 
+_machine_defaults: &machine_defaults
+  environment:
+    TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    SCRATCH: "/scratch"
+  machine:
+    image: default
+    docker_layer_caching: true
+  working_directory: /tmp/src/dmriprep
+  resource_class: large
+
+_python_defaults: &python_defaults
+  docker:
+    - image: cimg/python:3.12
+  working_directory: /tmp/src/dmriprep
+
+_docker_auth: &docker_auth
+  name: Docker authentication
+  command: |
+    if [[ -n $DOCKER_PAT ]]; then
+      echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+    fi
+
+_setup_docker_registry: &setup_docker_registry
+  name: Set up Docker registry
+  command: |
+    if [[ -f /tmp/images/registry.tar.gz ]]; then
+      echo "Loading saved registry image"
+      docker load < /tmp/images/registry.tar.gz
+    else
+      echo "Pulling registry image from DockerHub"
+      docker pull registry:2
+    fi
+    docker run -d -p 5000:5000 --restart=always --name=registry \
+        -v /tmp/docker:/var/lib/registry registry:2
+
+_pull_from_registry: &pull_from_registry
+  name: Pull and tag image from local registry
+  command: |
+    docker pull localhost:5000/dmriprep
+    docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
+
+_pull_test_image_from_registry: &pull_test_image_from_registry
+  name: Pull and tag image from local registry
+  command: |
+    docker pull localhost:5000/dmriprep-test
+    docker tag localhost:5000/dmriprep-test nipreps/dmriprep:test
+
+_check_skip_job: &check_skip_job
+  name: Check commit message and determine if job should be skipped
+  command: |
+    set +e
+    cd /tmp/src/dmriprep
+    COMMIT_MSG="$(git show -s --format=%s)"
+    DOCBUILD="$(echo ${COMMIT_MSG} | grep -i -E '^docs?(\(\w+\))?:')"
+    SKIP_ALL="$(echo ${COMMIT_MSG} | grep -i -E '\[skipcircle\]')"
+    SKIP_PYTEST="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?tests\]')"
+    SKIP_DS005="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?ds005\]' )"
+    SKIP_DS054="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?ds054\]' )"
+    SKIP_DS210="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?ds210\]' )"
+    NO_FASTTRACK="$(echo ${COMMIT_MSG} | grep -i -E '\[no[ _-]?fasttrack\]' )"
+
+    # no skipping if tagged build
+    if [[ -n "$NO_FASTTRACK" ]]; then
+      touch /tmp/.nofasttrack
+      echo "Anatomical fasttrack reusing sMRIPrep's derivatives will not be used."
+    elif [[ -n "$CIRCLETAG" ]]; then
+      exit 0
+    elif [[ -n "$DOCSBUILD" ]]; then  # always try to skip docs builds
+      echo "Only docs build"
+      circleci step halt
+    elif [ -n "$SKIP_ALL" ]; then
+      echo "Skipping all!"
+      circleci step halt
+    elif [ -n "$CHECK_PYTEST" -a -n "$SKIP_PYTEST" ]; then
+      echo "Skipping pytest"
+      circleci step halt
+    elif [ -n "$CHECK_DS005" -a -n "$SKIP_DS005" ]; then
+      echo "Skipping DS005"
+      circleci step halt
+    elif [ -n "$CHECK_DS054" -a -n "$SKIP_DS054" ]; then
+      echo "Skipping DS054"
+      circleci step halt
+    elif [ -n "$CHECK_DS210" -a -n "$SKIP_DS210" ]; then
+      echo "Skipping DS210"
+      circleci step halt
+    fi
+    echo "No skip"
+
+_setup_dmriprep_docker: &setup_dmriprep_docker
+  name: Install dMRIPrep's docker wrapper
+  command: |
+    pyenv local 3
+    pip install --upgrade pip
+    pip install --upgrade /tmp/src/dmriprep/wrapper/
+
+_check_outputs: &check_outputs
+  name: Check outputs of dMRIPrep run
+  command: |
+    set +e -x
+    mkdir -p /tmp/${DATASET}/test
+    find /tmp/${DATASET}/${SUBDIR:-dmriprep} \
+      \( -path '*/figures' -o -path '*/log' -o -path '*/sourcedata' \) \
+      -prune -o -name "*" -print | cut -d/ -f 5- | sort > /tmp/${DATASET}/test/outputs.out
+
+    FASTTRACK_OUTPUTS="${DATASET}${VARIANT}_fasttrack_outputs.txt"
+    FULL_OUTPUTS="${DATASET}${VARIANT}_outputs.txt"
+    RET=1
+    if [ ! -f /tmp/.nofasttrack ]; then
+        echo "Checking fasttrack..."
+        sort /tmp/src/dmriprep/.circleci/${FASTTRACK_OUTPUTS} > /tmp/${DATASET}/test/fasttrack.out
+        diff /tmp/${DATASET}/test/{fasttrack,outputs}.out
+        RET=$?
+    fi
+    if [ $RET -ne 0 ]; then
+        echo "Checking full..."
+        sort /tmp/src/dmriprep/.circleci/${FULL_OUTPUTS} > /tmp/${DATASET}/test/full.out
+        diff /tmp/${DATASET}/test/{full,outputs}.out
+        RET=$?
+    fi
+    exit $RET
+
 version: 2.1
+aliases:
+  - &src "/tmp/src/dmriprep"
 orbs:
-  docker: circleci/docker@1.6.0
+  docker: circleci/docker@2.1.4
 
 jobs:
   build:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/src/dmriprep
+    <<: *machine_defaults
     environment:
-      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-      SCRATCH: "/scratch"
+      DOCKER_BUILDKIT: 1
     steps:
-      - checkout
-      - run:
-          name: Check whether build should be skipped
-          command: |
-            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
-              echo "Only docs build"
-              circleci step halt
-            fi
+      - checkout:
+          path: *src
+      - run: *check_skip_job
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+            - build-v2--{{ .Revision }}
+            - build-v2-{{ .Branch }}-
+            - build-v2-master-
+            - build-v2-
           paths:
             - /tmp/docker
+            - /tmp/images
       - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
       - run:
-          name: Login into Docker Hub
-          command: |
-            if [[ -n "$DOCKER_PAT" ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set-up a Docker registry
-          command: |
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images
-          command: |
-            set +e
-            docker pull localhost:5000/ubuntu
-            success=$?
-            set -e
-            if [[ "$success" = "0" ]]; then
-                echo "Pulling from local registry"
-                docker tag localhost:5000/ubuntu ubuntu:xenial-20201030
-                docker pull localhost:5000/dmriprep
-                docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
-                docker tag localhost:5000/dmriprep nipreps/dmriprep
-            else
-                echo "Pulling from Docker Hub"
-                docker pull ubuntu:xenial-20201030
-                docker tag ubuntu:xenial-20201030 localhost:5000/ubuntu
-                docker push localhost:5000/ubuntu
-                docker pull nipreps/dmriprep:latest
-            fi
-      - run:
-          name: Build Docker image
+          name: Build Docker image (production environment)
           no_output_timeout: 60m
           command: |
-            export PY3=$(pyenv versions | grep '3\.' |
-                         sed -e 's/.* 3\./3./' -e 's/ .*//')
-            pyenv local $PY3
+            pyenv local 3
+            pip install hatch
             # Get version, update files.
-            THISVERSION=$( python3 get_version.py )
-            if [[ ${THISVERSION:0:2} == "0+" ]] ; then
+            THISVERSION=$( hatch version )
+            if [[ ${THISVERSION:0:1} == "0" ]] ; then
               echo "WARNING: latest git tag could not be found"
               echo "Please, make sure you fetch all tags from upstream with"
               echo "the command ``git fetch --tags --verbose`` and push"
               echo "them to your fork with ``git push origin --tags``"
             fi
             # Build docker image
-            e=1 && for i in {1..5}; do
-              docker build --rm \
-                --cache-from=nipreps/dmriprep \
+            docker buildx build --load \
+                --cache-from localhost:5000/dmriprep \
+                --cache-from nipreps/dmriprep:latest \
                 -t nipreps/dmriprep:latest \
+                --platform linux/amd64 \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" .
+      - run:
+          name: Build Docker image (test environment)
+          no_output_timeout: 60m
+          command: |
+            docker buildx build --load \
+                --cache-from localhost:5000/dmriprep \
+                --cache-from nipreps/dmriprep:latest \
+                -t nipreps/dmriprep:test \
+                --platform linux/amd64 \
+                --target test .
+      - run:
+          command: docker images
+      - run:
+          name: Check Docker image (production)
+          command: |
+            # Get version, update files.
+            THISVERSION=$( hatch version )
+            BUILT_VERSION=$( docker run --rm nipreps/dmriprep:latest --version )
+            BUILT_VERSION=${BUILT_VERSION%$'\r'}
+            BUILT_VERSION=${BUILT_VERSION#*"dMRIPrep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "BUILT: \"$BUILT_VERSION\""
+            set -e
+            test "$BUILT_VERSION" = "$THISVERSION"
+      - run:
+          name: Check Docker image (test)
+          command: |
+            docker run --rm nipreps/dmriprep:test dmriprep --version
+            docker run --rm nipreps/dmriprep:test pytest --version
       - run:
           name: Docker push to local registry
           no_output_timeout: 40m
           command: |
             docker tag nipreps/dmriprep:latest localhost:5000/dmriprep
+            docker tag nipreps/dmriprep:test localhost:5000/dmriprep-test
             docker push localhost:5000/dmriprep
+            docker push localhost:5000/dmriprep-test
       - run:
           name: Docker registry garbage collection
           command: |
             docker exec -it registry /bin/registry garbage-collect --delete-untagged \
-                /etc/docker/registry/config.yml
-      - save_cache:
-         key: build-v1-{{ .Branch }}-{{ .Revision }}
-         paths:
-            - /tmp/docker
+              /etc/docker/registry/config.yml
+
       - persist_to_workspace:
           root: /tmp
           paths:
             - src/dmriprep
+      - save_cache:
+         key: build-v2-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /tmp/docker
+            - /tmp/images
 
   get_data:
     docker:
-      - image: continuumio/miniconda3:4.9.2-alpine
+      - image: continuumio/miniconda3:master-alpine
     working_directory: /tmp/data
     environment:
       - TEMPLATEFLOW_HOME: /tmp/templateflow
@@ -145,7 +262,7 @@ jobs:
       - run:
           name: Setup git-annex & DataLad
           command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad
+            conda install -y -c anaconda -c conda-forge git git-annex datalad
             python -m pip install --no-cache-dir -U datalad-osf
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
@@ -166,49 +283,36 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}
-            - data-ds001771-v3--{{ .Revision }}
-            - data-ds001771-v3-{{ .Branch }}-
-            - data-ds001771-v3-master-
-            - data-ds001771-v3-
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+            - data-v0--{{ .Revision }}
+            - data-v0-{{ .Branch }}-
+            - data-v0-master-
+            - data-v0-
       - run:
           name: Install ds001771
           command: |
-            datalad install -r https://github.com/nipreps-data/ds001771.git
-            datalad update -r --merge -d ds001771/
-            datalad get -J 2 -r -d ds001771/ ds001771/sub-36/anat/*
-            datalad get -J 2 -r -d ds001771/ ds001771/sub-36/dwi/*
-            datalad get -J 2 -r -d ds001771/ ds001771/sub-36/fmap/*
-            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/smriprep-0.6.0/*
-            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/mri/*
-            datalad get -J 2 -r -d ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white \
+            datalad install -r /tmp/data/ds001771 -s https://github.com/nipreps-data/ds001771.git
+            datalad update -r --merge -d /tmp/data/ds001771
+            datalad get -J 2 -r -d /tmp/data/ds001771 ds001771/sub-36/anat/*
+            datalad get -J 2 -r -d /tmp/data/ds001771 ds001771/sub-36/dwi/*
+            datalad get -J 2 -r -d /tmp/data/ds001771 ds001771/sub-36/fmap/*
+            datalad get -J 2 -r -d /tmp/data/ds001771/derivatives/ ds001771/derivatives/smriprep-0.6.0/*
+            datalad get -J 2 -r -d /tmp/data/ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/mri/*
+            datalad get -J 2 -r -d /tmp/data/ds001771/derivatives/ ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.white \
                                                          ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.white \
                                                          ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/lh.thickness \
                                                          ds001771/derivatives/freesurfer-6.0.1/sub-36/surf/rh.thickness
-
-      - save_cache:
-          key: data-ds001771-v3-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - /tmp/data/ds001771
-
-      - restore_cache:
-          keys:
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
-            - data-ds000206-v2--{{ .Revision }}-
-            - data-ds000206-v2-{{ .Branch }}-
-            - data-ds000206-v2-master-
-            - data-ds000206-v2-
       - run:
           name: Install ds000206
           command: |
-            datalad install -r https://github.com/nipreps-data/ds000206.git
-            datalad update -r --merge -d ds000206/
-            datalad get -J 2 -r -d ds000206/ ds000206/sub-05/*
-            datalad get -J 2 -r -d ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/*
-
+            datalad install -r /tmp/data/ds000206 -s https://github.com/nipreps-data/ds000206.git
+            datalad update -r --merge -d /tmp/data/ds000206
+            datalad get -J 2 -r -d /tmp/data/ds000206/ ds000206/sub-05/*
+            datalad get -J 2 -r -d /tmp/data/ds000206/derivatives/ ds000206/derivatives/freesurfer-6.0.1/sub-05/*
       - save_cache:
-          key: data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
+          key: data-v0-{{ .Branch }}-{{ .Revision }}
           paths:
+            - /tmp/data/ds001771
             - /tmp/data/ds000206
 
       - run:
@@ -224,438 +328,51 @@ jobs:
             printf "[execution]\nstop_on_first_crash = true\n" > /tmp/config/nipype.cfg
             echo "poll_sleep_duration = 0.01" >> /tmp/config/nipype.cfg
             echo "hash_method = content" >> /tmp/config/nipype.cfg
+
       - persist_to_workspace:
           root: /tmp
           paths:
-            - templateflow
             - fslicense
             - config/nipype.cfg
-
-  ds000206:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/ds000206
+  test_pytest:
+    <<: *machine_defaults
     environment:
-      - FS_LICENSE: /tmp/fslicense/license.txt
+      CHECK_PYTEST: true
     steps:
       - checkout:
-          path: /home/circleci/src/dmriprep
-      - run:
-          name: Check whether build should be skipped
-          command: |
-            cd /home/circleci/src/dmriprep
-            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
-              echo "Only docs build"
-              circleci step halt
-            fi
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds000206\]' )" != "" ]]; then
-              echo "Skipping ds000206 build"
-              circleci step halt
-            fi
+          path: *src
+      - run: *check_skip_job
       - attach_workspace:
           at: /tmp
       - restore_cache:
           keys:
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}
-            - data-ds000206-v2-{{ .Branch }}-{{ .Revision }}-
-            - data-ds000206-v2--{{ .Revision }}-
-            - data-ds000206-v2-{{ .Branch }}-
-            - data-ds000206-v2-master-
-            - data-ds000206-v2-
-      - restore_cache:
-          keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
-      - run:
-          name: Set-up a Docker registry
-          command: |
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from local registry
-          command: |
-            docker pull localhost:5000/dmriprep
-            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
+            - /tmp/images
       - restore_cache:
           keys:
-            - ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}
-            - ds000206-anat-v01-{{ .Branch }}
-            - ds000206-anat-v01-master
-            - ds000206-anat-v01-
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run: *pull_test_image_from_registry
       - run:
-          name: Run anatomical workflow on ds000206
+          name: Run dMRIPrep tests
           no_output_timeout: 2h
           command: |
-            mkdir -p /tmp/ds000206/work /tmp/ds000206/derivatives
-            docker run -e FS_LICENSE=$FS_LICENSE --rm \
-                -v /tmp/data/ds000206:/data \
-                -v /tmp/ds000206/derivatives:/out \
-                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
-                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
-                -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
-                -v /tmp/ds000206/work:/work \
-                --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant -vv \
-                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy --anat-only \
-                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
-      - run:
-          name: Clean-up after anatomical run
-          command: |
-            rm -rf /tmp/ds000206/work/dmriprep_wf/fsdir*
-            rm -rf /tmp/ds000206/work/reportlets
-          when: on_success
-      - save_cache:
-         key: ds000206-anat-v01-{{ .Branch }}-{{ .Revision }}
-         paths:
-            - /tmp/ds000206/work
-      - run:
-          name: Run full diffusion workflow on ds000206
-          no_output_timeout: 4h
-          command: |
-            eddy="--ignore eddy"
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[run[ _]?eddy\]' )" != "" ]]; then
-              eddy=""
-            fi
-            mkdir -p /tmp/ds000206/work /tmp/ds000206/derivatives
-            docker run -e FS_LICENSE=$FS_LICENSE --rm \
-                -v /tmp/data/ds000206:/data \
-                -v /tmp/ds000206/derivatives:/out \
-                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
-                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
-                -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
-                -v /tmp/ds000206/work:/work \
-                --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant -vv $eddy \
-                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 --sloppy \
-                --output-spaces MNI152NLin2009cAsym --use-syn-sdc \
-                --notrack --skip-bids-validation -w /work --omp-nthreads 2 --nprocs 2
-      - store_artifacts:
-          path: /tmp/ds000206/derivatives/dmriprep
-      - run:
-          name: Clean working directory
-          when: on_success
-          command: |
-            sudo rm -rf /tmp/ds000206/work
-      - run:
-          name: Clean working directory
-          when: on_fail
-          command: |
-            find /tmp/ds000206/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
-                -exec sh -c 'rm -f {}; touch {}' \;
-            find /tmp/ds000206/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
-                -exec sh -c 'rm -f {}; touch {}' \;
-      - store_artifacts:
-          path: /tmp/ds000206/work
+            docker run -ti --rm=false \
+              -e TEST_READONLY_FILESYSTEM=1 -v $HOME:/home/readonly:ro \
+              --entrypoint="pytest" nipreps/dmriprep:test \
+              --pyargs dmriprep -svx --doctest-modules
 
-  ds001771:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/ds001771
-    environment:
-      - FS_LICENSE: /tmp/fslicense/license.txt
-    steps:
-      - checkout:
-          path: /home/circleci/src/dmriprep
-      - run:
-          name: Check whether build should be skipped
-          command: |
-            cd /home/circleci/src/dmriprep
-            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
-              echo "Only docs build"
-              circleci step halt
-            fi
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds001771\]' )" != "" ]]; then
-              echo "Skipping ds001771 build"
-              circleci step halt
-            fi
-      - attach_workspace:
-          at: /tmp
-      - restore_cache:
-          keys:
-            - data-ds001771-v3-{{ .Branch }}-{{ .Revision }}-
-            - data-ds001771-v3--{{ .Revision }}-
-            - data-ds001771-v3-{{ .Branch }}-
-            - data-ds001771-v3-master-
-            - data-ds001771-v3-
-      - restore_cache:
-          keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-
-          paths:
-            - /tmp/docker
-      - run:
-          name: Set-up a Docker registry
-          command: |
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from local registry
-          command: |
-            docker pull localhost:5000/dmriprep
-            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
-      - run:
-          name: Run full diffusion workflow on ds001771
-          no_output_timeout: 4h
-          command: |
-            eddy="--ignore eddy"
-            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[run[ _]?eddy\]' )" != "" ]]; then
-              eddy=""
-            fi
-            mkdir -p /tmp/ds001771/work /tmp/ds001771/derivatives
-            docker run -e FS_LICENSE=$FS_LICENSE --rm \
-                -v /tmp/data/ds001771:/data \
-                -v /tmp/ds001771/derivatives:/out \
-                -v /tmp/fslicense/license.txt:/tmp/fslicense/license.txt:ro \
-                -v /tmp/templateflow:/home/dmriprep/.cache/templateflow \
-                -v /tmp/config/nipype.cfg:/home/dmriprep/.nipype/nipype.cfg \
-                -v /tmp/ds001771/work:/work \
-                --user $(id -u):$(id -g) \
-                nipreps/dmriprep:latest /data /out participant -vv $eddy \
-                -w /work --omp-nthreads 2 --nprocs 2 \
-                --notrack --skip-bids-validation --sloppy \
-                --fs-subjects-dir /data/derivatives/freesurfer-6.0.1 \
-                --anat-derivatives /data/derivatives/smriprep-0.6.0
       - store_artifacts:
-          path: /tmp/ds001771/derivatives/dmriprep
-      - run:
-          name: Clean working directory
-          when: on_success
-          command: |
-            sudo rm -rf /tmp/ds001771/work
-      - run:
-          name: Clean working directory
-          when: on_fail
-          command: |
-            sudo chown $(id -un):$(id -gn) -R /tmp/ds001771
-            find /tmp/ds001771/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
-                -exec sh -c 'rm -f {}; touch {}' \;
-            find /tmp/ds001771/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
-                -exec sh -c 'rm -f {}; touch {}' \;
-      - store_artifacts:
-          path: /tmp/ds001771/work
-
-  deploy_docker_patches:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/src/dmriprep
-    steps:
-      - run:
-          name: Check whether image should be deployed to Docker Hub
-          command: |
-            if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
-              echo "Nothing to deploy for $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME."
-              circleci step halt
-            fi
-      - checkout:
-          path: /home/circleci/src/dmriprep
-      - run:
-          name: Check whether build should be skipped
-          command: |
-            cd /home/circleci/src/dmriprep
-            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
-              echo "Only docs build"
-              circleci step halt
-            fi
-      - restore_cache:
-          keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - /tmp/docker
-      - docker/install-docker-credential-helper
-      - run:
-          name: Login into Docker Hub
-          command: |
-            if [[ -n "$DOCKER_PAT" ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set-up a Docker registry
-          command: |
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from local registry
-          command: |
-            docker pull localhost:5000/dmriprep
-            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
-      - run:
-          name: Deploy to Docker Hub
-          no_output_timeout: 40m
-          command: |
-            docker tag nipreps/dmriprep nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
-            docker push nipreps/dmriprep:${CIRCLE_BRANCH#docker/}
-
-  deploy_docker:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/src/dmriprep
-    steps:
-      - run:
-          name: Check whether image should be deployed to Docker Hub
-          command: |
-            if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
-              echo "Nothing to deploy for $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME."
-              circleci step halt
-            fi
-      - checkout:
-          path: /home/circleci/src/dmriprep
-      - run:
-          name: Check whether build should be skipped
-          command: |
-            cd /home/circleci/src/dmriprep
-            if [[ "$( git log --format='format:%s' -n 1 $CIRCLE_SHA1 | grep -i -E '^docs?(\(\w+\))?:' )" != "" ]]; then
-              echo "Only docs build"
-              circleci step halt
-            fi
-      - restore_cache:
-          keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - /tmp/docker
-      - docker/install-docker-credential-helper
-      - run:
-          name: Login into Docker Hub
-          command: |
-            if [[ -n "$DOCKER_PAT" ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set-up a Docker registry
-          command: |
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from local registry
-          command: |
-            docker pull localhost:5000/dmriprep
-            docker tag localhost:5000/dmriprep nipreps/dmriprep:latest
-      - run:
-          name: Deploy to Docker Hub
-          no_output_timeout: 40m
-          command: |
-            docker tag nipreps/dmriprep nipreps/dmriprep:unstable
-            docker push nipreps/dmriprep:unstable
-            if [[ -n "$CIRCLE_TAG" ]]; then
-              docker push nipreps/dmriprep:latest
-              docker tag nipreps/dmriprep nipreps/dmriprep:$CIRCLE_TAG
-              docker push nipreps/dmriprep:$CIRCLE_TAG
-            fi
-
-  test_deploy_pypi:
-    docker:
-      - image: circleci/python:3.7.4
-    working_directory: /tmp/src/dmriprep
-    steps:
-      - checkout
-      - run:
-          name: Install libhdf5
-          command: |
-            sudo apt-get install pkg-config libhdf5-103 libhdf5-dev
-      - run:
-          name: Start virtual environment
-          command: |
-            python -m venv /tmp/sdist
-            source /tmp/sdist/bin/activate
-            python -m pip install -U pip
-            python -m pip install "setuptools>=40.8.0" twine
-      - run:
-          name: Build dMRIPrep
-          command: |
-            source /tmp/sdist/bin/activate
-            THISVERSION=$( python get_version.py )
-            THISVERSION=${THISVERSION%.dirty*}
-            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
-            echo "${CIRCLE_TAG:-$THISVERSION}" > dmriprep/VERSION
-            python setup.py sdist
-            pip wheel --no-deps -w dist/ .
-      - store_artifacts:
-          path: /tmp/src/dmriprep/dist
-      - run:
-          name: Check sdist distribution
-          command: |
-            source /tmp/sdist/bin/activate
-            THISVERSION=$( python get_version.py )
-            THISVERSION=${THISVERSION%.dirty*}
-            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
-            twine check dist/dmriprep*.tar.gz
-            pip install dist/dmriprep*.tar.gz
-            which dmriprep | grep sdist\\/bin
-            INSTALLED_VERSION=$(dmriprep --version)
-            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
-            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
-            echo "VERSION: \"$THISVERSION\""
-            echo "INSTALLED: \"$INSTALLED_VERSION\""
-            test "$INSTALLED_VERSION" = "$THISVERSION"
-      - run:
-          name: Check wheel distribution
-          command: |
-            python -m venv /tmp/wheel
-            source /tmp/wheel/bin/activate
-            python -m pip install -U pip
-            python -m pip install "setuptools>=40.8.0" twine
-            THISVERSION=$( python get_version.py )
-            THISVERSION=${THISVERSION%.dirty*}
-            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
-            twine check dist/dmriprep*.whl
-            pip install dist/dmriprep*.whl
-            which dmriprep | grep wheel\\/bin
-            INSTALLED_VERSION=$(dmriprep --version)
-            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
-            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
-            echo "VERSION: \"$THISVERSION\""
-            echo "INSTALLED: \"$INSTALLED_VERSION\""
-            test "$INSTALLED_VERSION" = "$THISVERSION"
-      - store_artifacts:
-          path: /tmp/src/dmriprep/dist
-
-  deploy_pypi:
-    docker:
-      - image: circleci/python:3.7.4
-    working_directory: /tmp/src/dmriprep
-    steps:
-      - checkout
-      - run:
-          name: Start virtual environment
-          command: |
-            python -m venv /tmp/sdist
-            source /tmp/sdist/bin/activate
-            python -m pip install -U pip
-            python -m pip install "setuptools>=40.8.0" wheel twine
-      - run:
-          name: Build dMRIPrep
-          command: |
-            source /tmp/sdist/bin/activate
-            THISVERSION=$( python get_version.py )
-            THISVERSION=${THISVERSION%.dirty*}
-            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
-            echo "${CIRCLE_TAG:-$THISVERSION}" > dmriprep/VERSION
-            python setup.py sdist
-            pip wheel --no-deps -w dist/ .
-      - run:
-          name: Upload packages to PyPI
-          command: |
-            source /tmp/sdist/bin/activate
-            twine upload dist/dmriprep*
-
-  deployable:
-    docker:
-      - image: busybox:latest
-    steps:
-      - run: echo Deploying!
+          path: /tmp/data/reports
 
   build_docs:
     docker:
-      - image: python:3.7.4
+      - image: python:3.12
     environment:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects
@@ -712,11 +429,155 @@ jobs:
   deploy_docs_master:
     <<: *docs
 
+  deploy_docker_patches:
+    <<: *machine_defaults
+    working_directory: *src
+    steps:
+      - run:
+          name: Check whether image should be deployed to Docker Hub
+          command: |
+            if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
+              echo "Nothing to deploy for $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME."
+              circleci step halt
+            fi
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run:
+          name: Deploy to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            # Format: docker/[<version-like>+]<tag> -> nipreps/dmriprep:<tag>
+            # <version-like>+<tag> guides setuptools_scm to get the right major/minor
+            docker tag nipreps/dmriprep nipreps/dmriprep:${CIRCLE_BRANCH##*[/+]}
+            docker push nipreps/dmriprep:${CIRCLE_BRANCH##*[/+]}
+
+  deploy_docker:
+    <<: *machine_defaults
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run:
+          name: Deploy to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+              docker tag nipreps/dmriprep nipreps/dmriprep:unstable
+              docker push nipreps/dmriprep:unstable
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker push nipreps/dmriprep:latest
+                docker tag nipreps/dmriprep nipreps/dmriprep:$CIRCLE_TAG
+                docker push nipreps/dmriprep:$CIRCLE_TAG
+              fi
+            fi
+
+  test_deploy_pypi:
+    <<: *python_defaults
+    steps:
+      - checkout
+      - run:
+          name: Update build tools
+          command: pip install --upgrade build twine hatch
+      - run:
+          name: Build dMRIPrep
+          command: python -m build
+      - run:
+          name: Twine check dmriprep
+          command: twine check dist/*
+      - run:
+          name: Pre-run hatch version
+          command: hatch version
+      - store_artifacts:
+          path: /tmp/src/dmriprep/dist
+      - run:
+          name: Check sdist distribution
+          command: |
+            THISVERSION=$( hatch version )
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            virtualenv --python=python sdist
+            source sdist/bin/activate
+            python -m pip install --upgrade pip
+            python -m pip install dist/dmriprep*.tar.gz
+            which dmriprep | grep sdist\\/bin
+            INSTALLED_VERSION=$(dmriprep --version)
+            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "INSTALLED: \"$INSTALLED_VERSION\""
+            test "$INSTALLED_VERSION" = "$THISVERSION"
+      - run:
+          name: Check wheel distribution
+          command: |
+            THISVERSION=$( hatch version )
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            virtualenv --python=python wheel
+            source wheel/bin/activate
+            python -m pip install dist/dmriprep*.whl
+            which dmriprep | grep wheel\\/bin
+            INSTALLED_VERSION=$(dmriprep --version)
+            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"dMRIPrep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "INSTALLED: \"$INSTALLED_VERSION\""
+            test "$INSTALLED_VERSION" = "$THISVERSION"
+      - run:
+          name: Build dmriprep-docker
+          command: python -m build wrapper
+      - run:
+          name: Twine check wrapper
+          command: twine check wrapper/dist/*
+      - store_artifacts:
+          path: /tmp/src/dmriprep/wrapper/dist
+
+  deploy_pypi:
+    <<: *python_defaults
+    steps:
+      - checkout
+      - run:
+          name: Update build tools
+          command: pip install --upgrade build twine
+      - run:
+          name: Build dMRIPrep
+          command: python -m build
+      - run:
+          name: Build dmriprep-docker
+          command: python -m build wrapper/
+      - run:
+          name: Upload packages to PyPI
+          command: python -m twine upload dist/dmriprep* wrapper/dist/dmriprep*
+
+  deployable:
+    docker:
+      - image: busybox:latest
+    steps:
+      - run: echo Deploying!
+
 workflows:
   version: 2
   build_test_deploy:
     jobs:
       - build:
+          context:
+            - nipreps-common
           filters:
             branches:
               ignore:
@@ -734,31 +595,10 @@ workflows:
             tags:
               only: /.*/
 
-      - ds000206:
-          requires:
-            - build
-            - get_data
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-                - /tests?\/.*/
-                - /docker\/.*/
-            tags:
-              only: /.*/
-      - ds001771:
-          requires:
-            - build
-            - get_data
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-                - /tests?\/.*/
-                - /docker\/.*/
-            tags:
-              only: /.*/
+
       - test_deploy_pypi:
+          context:
+            - nipreps-common
           filters:
             branches:
               only:
@@ -767,43 +607,24 @@ workflows:
             tags:
               only: /.*/
 
-      - deploy_docker_patches:
+      - test_pytest:
+          context:
+            - nipreps-common
           requires:
             - build
           filters:
             branches:
-              only: /docker\/.*/
-
-      - deployable:
-          requires:
-            - build
-            - build_docs
-            - test_deploy_pypi
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /.*/
-
-      - deploy_docker:
-          requires:
-            - deployable
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /.*/
-
-      - deploy_pypi:
-          requires:
-            - deployable
-          filters:
-            branches:
-              ignore: /.*/
+              ignore:
+                - /docs?\/.*/
+                - /ds001771\/.*/
+                - /ds000206\/.*/
+                - /docker\/.*/
             tags:
               only: /.*/
 
       - build_docs:
+          context:
+            - nipreps-common
           filters:
             branches:
               ignore:
@@ -814,6 +635,8 @@ workflows:
               only: /.*/
 
       - deploy_docs_master:
+          context:
+            - nipreps-common
           requires:
             - build_docs
             - test_deploy_pypi
@@ -824,6 +647,48 @@ workflows:
               ignore: /.*/
 
       - deploy_docs_tag:
+          requires:
+            - deployable
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+
+
+      - deploy_docker_patches:
+          context:
+            - nipreps-common
+          requires:
+            - build
+          filters:
+            branches:
+              only: /docker\/.*/
+
+      - deployable:
+          requires:
+            - test_deploy_pypi
+            - test_pytest
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/
+
+      - deploy_docker:
+          context:
+            - nipreps-common
+          requires:
+            - deployable
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/
+
+      - deploy_pypi:
+          context:
+            - nipreps-common
           requires:
             - deployable
           filters:
