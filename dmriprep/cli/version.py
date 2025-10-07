@@ -74,7 +74,7 @@ def check_latest():
     if latest is not None:
         try:
             cachefile.write_text(
-                "|".join(("%s" % latest, datetime.now().strftime(DATE_FMT)))
+                "|".join((f"{latest}", datetime.now().strftime(DATE_FMT)))
             )
         except Exception:
             pass

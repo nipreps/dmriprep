@@ -123,7 +123,7 @@ class SubjectSummary(SummaryInterface):
 
         t2w_seg = ""
         if self.inputs.t2w:
-            t2w_seg = "(+ {:d} T2-weighted)".format(len(self.inputs.t2w))
+            t2w_seg = f"(+ {len(self.inputs.t2w)} T2-weighted)"
 
         dwi_files = self.inputs.dwi if isdefined(self.inputs.dwi) else []
         dwi_files = [s[0] if isinstance(s, list) else s for s in dwi_files]

@@ -74,7 +74,7 @@ def build_workflow(config_file, retval):
         from pkg_resources import resource_filename as pkgrf
 
         build_log.log(
-            25, "Running --reports-only on participants %s", ", ".join(subject_list)
+            25, f"Running --reports-only on participants {', '.join(subject_list)}",
         )
         retval["return_code"] = generate_reports(
             subject_list,
@@ -86,42 +86,28 @@ def build_workflow(config_file, retval):
         return retval
 
     # Build main workflow
-    INIT_MSG = """
-    Running dMRIPrep version {version}:
-      * BIDS dataset path: {bids_dir}.
+    INIT_MSG = f"""
+    Running dMRIPrep version {config.environment.version}:
+      * BIDS dataset path: {config.execution.bids_dir}.
       * Participant list: {subject_list}.
-      * Run identifier: {uuid}.
-      * Output spaces: {spaces}.
-    """.format
-    build_log.log(
-        25,
-        INIT_MSG(
-            version=config.environment.version,
-            bids_dir=config.execution.bids_dir,
-            subject_list=subject_list,
-            uuid=config.execution.run_uuid,
-            spaces=config.execution.output_spaces,
-        ),
-    )
+      * Run identifier: {config.execution.run_uuid}.
+      * Output spaces: {config.execution.output_spaces}.
+    """
+    build_log.log(25, INIT_MSG)
 
     retval["workflow"] = init_dmriprep_wf()
 
     # Check workflow for missing commands
     missing = check_deps(retval["workflow"])
     if missing:
-        build_log.critical(
-            "Cannot run dMRIPrep. Missing dependencies:%s",
-            "\n\t* %s".join(
-                ["{} (Interface: {})".format(cmd, iface) for iface, cmd in missing]
-            ),
-        )
+        deps_list = "\n".join([f"\t* {cmd} (Interface: {iface})" for iface, cmd in missing])
+        build_log.critical(f"Cannot run dMRIPrep. Missing dependencies:\n{deps_list}")
         retval["return_code"] = 127  # 127 == command not found.
         return retval
 
     config.to_filename(config_file)
     build_log.info(
-        "dMRIPrep workflow graph with %d nodes built successfully.",
-        len(retval["workflow"]._get_all_nodes()),
+        f"dMRIPrep workflow graph with {len(retval['workflow']._get_all_nodes())} nodes built successfully."
     )
     retval["return_code"] = 0
     return retval
@@ -135,7 +121,7 @@ def build_boilerplate(config_file, workflow):
     logs_path = config.execution.output_dir / "dmriprep" / "logs"
     boilerplate = workflow.visit_desc()
     citation_files = {
-        ext: logs_path / ("CITATION.%s" % ext) for ext in ("bib", "tex", "md", "html")
+        ext: logs_path / (f"CITATION.{[ext for ext in ('bib', 'tex', 'md', 'html')]}")
     }
 
     if boilerplate:
@@ -176,7 +162,7 @@ def build_boilerplate(config_file, workflow):
             check_call(cmd, timeout=10)
         except (FileNotFoundError, CalledProcessError, TimeoutExpired):
             config.loggers.cli.warning(
-                "Could not generate CITATION.html file:\n%s", " ".join(cmd)
+                f"Could not generate CITATION.html file:\n{' '.join(cmd)}"
             )
 
         # Generate LaTex file resolving citations
@@ -197,7 +183,7 @@ def build_boilerplate(config_file, workflow):
             check_call(cmd, timeout=10)
         except (FileNotFoundError, CalledProcessError, TimeoutExpired):
             config.loggers.cli.warning(
-                "Could not generate CITATION.tex file:\n%s", " ".join(cmd)
+                f"Could not generate CITATION.tex file:\n{' '.join(cmd)}"
             )
         else:
             copyfile(pkgrf("dmriprep", "data/boilerplate.bib"), citation_files["bib"])

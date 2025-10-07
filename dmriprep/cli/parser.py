@@ -74,9 +74,7 @@ def _build_parser():
     )
 
     parser = ArgumentParser(
-        description="dMRIPrep: dMRI PREProcessing workflows v{}".format(
-            config.environment.version
-        ),
+        description=f"dMRIPrep: dMRI PREProcessing workflows v{config.environment.version}",
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     PathExists = partial(_path_exists, parser=parser)
@@ -224,7 +222,7 @@ def _build_parser():
         "--output-spaces",
         nargs="*",
         action=OutputReferencesAction,
-        help="""\
+        help=f"""\
 Standard and non-standard spaces to resample anatomical and diffusion images to. \
 Standard spaces may be specified by the form \
 ``<SPACE>[:cohort-<label>][:res-<resolution>][...]``, where ``<SPACE>`` is \
@@ -236,8 +234,7 @@ is ``--output-spaces run`` - the original space and sampling grid of the origina
 Important to note, the ``res-*`` modifier does not define the resolution used for \
 the spatial normalization. To generate no DWI outputs (if that is intended for some reason), \
 use this option without specifying any spatial references. For further details, please check out \
-https://www.nipreps.org/dmriprep/en/%s/spaces.html"""
-        % (currentv.base_version if is_release else "latest"),
+https://www.nipreps.org/dmriprep/en/{currentv.base_version if is_release else "latest"}/spaces.html"""
     )
     g_conf.add_argument(
         "--dwi2t1w-init",
@@ -388,11 +385,10 @@ is discouraged.""",
     latest = check_latest()
     if latest is not None and currentv < latest:
         print(
-            """\
-You are using dMRIPrep-%s, and a newer version of dMRIPrep is available: %s.
+            f"""\
+You are using dMRIPrep-{currentv}, and a newer version of dMRIPrep is available: {latest}.
 Please check out our documentation about how and when to upgrade:
-https://dmriprep.readthedocs.io/en/latest/faq.html#upgrading"""
-            % (currentv, latest),
+https://dmriprep.readthedocs.io/en/latest/faq.html#upgrading""",
             file=sys.stderr,
         )
 
@@ -400,12 +396,11 @@ https://dmriprep.readthedocs.io/en/latest/faq.html#upgrading"""
     if _blist[0]:
         _reason = _blist[1] or "unknown"
         print(
-            """\
-WARNING: Version %s of dMRIPrep (current) has been FLAGGED
-(reason: %s).
+            f"""\
+WARNING: Version {config.environment.version} of dMRIPrep (current) has been FLAGGED
+(reason: {_reason}).
 That means some severe flaw was found in it and we strongly
-discourage its usage."""
-            % (config.environment.version, _reason),
+discourage its usage.""",
             file=sys.stderr,
         )
 
@@ -459,10 +454,8 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     # This may need to be revisited if people try to use batch plugins
     if 1 < config.nipype.nprocs < config.nipype.omp_nthreads:
         build_log.warning(
-            "Per-process threads (--omp-nthreads=%d) exceed total "
-            "threads (--nthreads/--n_cpus=%d)",
-            config.nipype.omp_nthreads,
-            config.nipype.nprocs,
+            f"Per-process threads (--omp-nthreads={config.nipype.omp_nthreads}) exceed total "
+            f"threads (--nthreads/--n_cpus={config.nipype.nprocs})",
         )
 
     bids_dir = config.execution.bids_dir
@@ -477,20 +470,18 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     if opts.clean_workdir and work_dir.exists():
         from niworkflows.utils.misc import clean_directory
 
-        build_log.log("Clearing previous dMRIPrep working directory: %s", work_dir)
+        build_log.log(f"Clearing previous dMRIPrep working directory: {work_dir}")
         if not clean_directory(work_dir):
             build_log.warning(
-                "Could not clear all contents of working directory: %s", work_dir
+                f"Could not clear all contents of working directory: {work_dir}"
             )
 
     # Ensure input and output folders are not the same
     if output_dir == bids_dir:
+        ver = version.split("+")[0]
         parser.error(
             "The selected output folder is the same as the input BIDS folder. "
-            "Please modify the output path (suggestion: %s)."
-            % bids_dir
-            / "derivatives"
-            / ("dmriprep-%s" % version.split("+")[0])
+            f'Please modify the output path (suggestion: {bids_dir / 'derivatives' / f'dmriprep-{ver}'}).'
         )
 
     if bids_dir in work_dir.parents:
@@ -529,7 +520,7 @@ license file at several paths, in this order: 1) command line argument ``--fs-li
     if missing_subjects:
         parser.error(
             "One or more participant labels were not found in the BIDS directory: "
-            "%s." % ", ".join(missing_subjects)
+            f"{', '.join(missing_subjects)}."
         )
 
     config.execution.participant_label = sorted(participant_label)

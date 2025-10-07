@@ -96,7 +96,7 @@ def write_derivative_description(bids_dir, deriv_dir):
 
     if "DatasetDOI" in orig_desc:
         desc["SourceDatasetsURLs"] = [
-            "https://doi.org/{}".format(orig_desc["DatasetDOI"])
+            f"https://doi.org/{orig_desc['DatasetDOI']}"
         ]
     if "License" in orig_desc:
         desc["License"] = orig_desc["License"]
@@ -183,7 +183,7 @@ def validate_input_dir(exec_env, bids_dir, participant_label):
         ignored_subs = all_subs.difference(selected_subs)
         if ignored_subs:
             for sub in ignored_subs:
-                validator_config_dict["ignoredFiles"].append("/sub-%s/**" % sub)
+                validator_config_dict["ignoredFiles"].append(f"/sub-{sub}/**")
     with tempfile.NamedTemporaryFile("w+") as temp:
         temp.write(json.dumps(validator_config_dict))
         temp.flush()

@@ -295,10 +295,10 @@ class DiffusionGradientTable:
             )
         elif filetype.lower() == "fsl":
             self.generate_vecval()
-            np.savetxt("%s.bvec" % filename, self.bvecs.T, fmt="%.6f")
-            np.savetxt("%s.bval" % filename, self.bvals, fmt="%.6f")
+            np.savetxt(f"{filename}.bvec", self.bvecs.T, fmt="%.6f")
+            np.savetxt(f"{filename}.bval", self.bvals, fmt="%.6f")
         else:
-            raise ValueError('Unknown filetype "%s"' % filetype)
+            raise ValueError(f'Unknown filetype "{filetype}"')
 
 
 def normalize_gradients(
