@@ -107,3 +107,6 @@ ENV/
 
 #kubernetes stuff
 kubernetes/jobs/
+# pixi environments
+.pixi/*
+!.pixi/config.toml

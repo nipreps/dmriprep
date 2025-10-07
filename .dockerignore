@@ -12,43 +12,16 @@ dmriprep.egg-info/**/*
 dmriprep.egg-info
 .eggs/**/*
 .eggs
+
+.pixi
+.tox
+
+# python distribution
 .pytest_cache/**/*
 .pytest_cache
 .ipynb_checkpoints/**/*
 .ipynb_checkpoints
 
-
-# housekeeping tools
-.maintenance/**/*
-.maintenance
-get_version.py
-tox.ini
-
-# pip installs
-src/**/*
-src/
-
 # git
 .gitignore
-.git/**/*
-.git
-.github/**/*
-.github
 .mailmap
-
-# other
-work/**/*
-work
-out/**/*
-out/
-
-# CI, etc.
-.circleci
-.circleci/**/*
-.codecov.yml
-.coveragerc
-.pep8speaks.yml
-.travis.yml
-.zenodo.json
-
-.afq
