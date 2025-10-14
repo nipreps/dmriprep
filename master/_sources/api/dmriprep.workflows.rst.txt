@@ -10,6 +10,7 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 1
 
    dmriprep.workflows.dwi
 
@@ -17,5 +18,6 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 1
 
    dmriprep.workflows.base

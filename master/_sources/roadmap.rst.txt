@@ -118,8 +118,8 @@ Version 0.9 (May, 2021)
   - Plan for benchmarking experiments (`#121 <https://github.com/nipreps/dmriprep/issues/121>`__)
   - Start with addressing issues as they are reported
 
-Version 1.0 (Targetted for September 2021)
-------------------------------------------
+Version 1.0 (Targeted for September 2021)
+-----------------------------------------
 Wrap-up evaluation Phase II with the first stable release of *dMRIPrep*.
 
 Long-term plans

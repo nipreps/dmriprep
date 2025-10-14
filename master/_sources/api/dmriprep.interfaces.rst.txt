@@ -10,7 +10,9 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 1
 
+   dmriprep.interfaces.bids
    dmriprep.interfaces.images
    dmriprep.interfaces.reports
    dmriprep.interfaces.vectors

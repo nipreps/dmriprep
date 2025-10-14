@@ -10,6 +10,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 1
 
    dmriprep.workflows.dwi.base
    dmriprep.workflows.dwi.eddy

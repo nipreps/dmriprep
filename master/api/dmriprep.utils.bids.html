@@ -1,97 +1,48 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>dmriprep.utils.bids module &mdash; dmriprep 0.5.0 documentation</title>
-  
+  <title>dmriprep.utils.bids module &mdash; dmriprep 25.0.0.dev105 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8c49f4fe"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="dmriprep.utils.images module" href="dmriprep.utils.images.html" />
     <link rel="prev" title="dmriprep.utils package" href="dmriprep.utils.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> dmriprep
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            dmriprep
           </a>
-
-          
-            
-            
-              <div class="version">
-                0.5.0
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
@@ -115,171 +66,98 @@
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Development road-map</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">dmriprep</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
-        
-          <li><a href="dmriprep.utils.html">dmriprep.utils package</a> &raquo;</li>
-        
-      <li>dmriprep.utils.bids module</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Library API (application program interface)</a></li>
+          <li class="breadcrumb-item"><a href="dmriprep.utils.html">dmriprep.utils package</a></li>
+      <li class="breadcrumb-item active">dmriprep.utils.bids module</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/api/dmriprep.utils.bids.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-
-
-
-
-
-<section id="module-dmriprep.utils.bids">
-<span id="dmriprep-utils-bids-module"></span><h1>dmriprep.utils.bids module<a class="headerlink" href="#module-dmriprep.utils.bids" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="module-dmriprep.utils.bids">
+<span id="dmriprep-utils-bids-module"></span><h1>dmriprep.utils.bids module<a class="headerlink" href="#module-dmriprep.utils.bids" title="Link to this heading"></a></h1>
 <p>Utilities to handle BIDS inputs.</p>
-<dl class="function">
-<dt id="dmriprep.utils.bids.collect_data">
-<code class="sig-prename descclassname">dmriprep.utils.bids.</code><code class="sig-name descname">collect_data</code><span class="sig-paren">(</span><em class="sig-param">bids_dir</em>, <em class="sig-param">participant_label</em>, <em class="sig-param">bids_validate=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.bids.collect_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Replacement for niworkflows’ version.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.bids.collect_derivatives">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.bids.</span></span><span class="sig-name descname"><span class="pre">collect_derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">derivatives_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldmap_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/5a5afc79ed0f0d4dd3253916864c73330692d9b9/dmriprep/utils/bids.py#L50-L88"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.bids.collect_derivatives" title="Link to this definition"></a></dt>
+<dd><p>Gather existing derivatives and compose a cache.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="dmriprep.utils.bids.validate_input_dir">
-<code class="sig-prename descclassname">dmriprep.utils.bids.</code><code class="sig-name descname">validate_input_dir</code><span class="sig-paren">(</span><em class="sig-param">exec_env</em>, <em class="sig-param">bids_dir</em>, <em class="sig-param">participant_label</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.bids.validate_input_dir" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.bids.extract_entities">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.bids.</span></span><span class="sig-name descname"><span class="pre">extract_entities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_list</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/5a5afc79ed0f0d4dd3253916864c73330692d9b9/dmriprep/utils/bids.py#L91-L122"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.bids.extract_entities" title="Link to this definition"></a></dt>
+<dd><p>Return a dictionary of common entities given a list of files.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">extract_entities</span><span class="p">(</span><span class="s2">&quot;sub-01/anat/sub-01_T1w.nii.gz&quot;</span><span class="p">)</span>
+<span class="go">{&#39;subject&#39;: &#39;01&#39;, &#39;suffix&#39;: &#39;T1w&#39;, &#39;datatype&#39;: &#39;anat&#39;, &#39;extension&#39;: &#39;.nii.gz&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extract_entities</span><span class="p">([</span><span class="s2">&quot;sub-01/anat/sub-01_T1w.nii.gz&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">{&#39;subject&#39;: &#39;01&#39;, &#39;suffix&#39;: &#39;T1w&#39;, &#39;datatype&#39;: &#39;anat&#39;, &#39;extension&#39;: &#39;.nii.gz&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extract_entities</span><span class="p">([</span><span class="s2">&quot;sub-01/anat/sub-01_run-1_T1w.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="s2">&quot;sub-01/anat/sub-01_run-2_T1w.nii.gz&quot;</span><span class="p">])</span>
+<span class="go">{&#39;subject&#39;: &#39;01&#39;, &#39;run&#39;: [1, 2], &#39;suffix&#39;: &#39;T1w&#39;, &#39;datatype&#39;: &#39;anat&#39;, &#39;extension&#39;: &#39;.nii.gz&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.bids.validate_input_dir">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.bids.</span></span><span class="sig-name descname"><span class="pre">validate_input_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exec_env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">need_T1w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/5a5afc79ed0f0d4dd3253916864c73330692d9b9/dmriprep/utils/bids.py#L169-L252"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.bids.validate_input_dir" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="dmriprep.utils.bids.write_derivative_description">
-<code class="sig-prename descclassname">dmriprep.utils.bids.</code><code class="sig-name descname">write_derivative_description</code><span class="sig-paren">(</span><em class="sig-param">bids_dir</em>, <em class="sig-param">deriv_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.utils.bids.write_derivative_description" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.bids.write_derivative_description">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.bids.</span></span><span class="sig-name descname"><span class="pre">write_derivative_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deriv_dir</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/5a5afc79ed0f0d4dd3253916864c73330692d9b9/dmriprep/utils/bids.py#L125-L166"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.bids.write_derivative_description" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="dmriprep.utils.images.html" class="btn btn-neutral float-right" title="dmriprep.utils.images module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="dmriprep.utils.html" class="btn btn-neutral float-left" title="dmriprep.utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dmriprep.utils.images.html" class="btn btn-neutral float-right" title="dmriprep.utils.images module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019, The dMRIPrep developers.
-
-    </p>
+    <p>&#169; Copyright The NiPreps Developers.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-        <span class="fa fa-book"> Other Versions</span>
-        v: master
-        <span class="fa fa-caret-down"></span>
-    </span>
-    <div class="rst-other-versions">
-        <dl>
-            <dt>Tags</dt>
-            <dd><a href="../../0.2.1/api/dmriprep.utils.bids.html">0.2.1</a></dd>
-            <dd><a href="../../0.2.2/api/dmriprep.utils.bids.html">0.2.2</a></dd>
-            <dd><a href="../../0.3.0/api/dmriprep.utils.bids.html">0.3.0</a></dd>
-            <dd><a href="../../0.4.0/api/dmriprep.utils.bids.html">0.4.0</a></dd>
-            <dd><a href="../../0.5.0/api/dmriprep.utils.bids.html">0.5.0</a></dd>
-            <dd><a href="../../0.5.0rc0/api/dmriprep.utils.bids.html">0.5.0rc0</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="dmriprep.utils.bids.html">master</a></dd>
-        </dl>
-    </div>
-</div>
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,104 +1,58 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>dmriprep.interfaces.images module &mdash; dmriprep 0.5.0 documentation</title>
-  
+  <title>dmriprep.interfaces.images module &mdash; dmriprep 25.0.0.dev105 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8c49f4fe"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="dmriprep.interfaces.reports module" href="dmriprep.interfaces.reports.html" />
-    <link rel="prev" title="dmriprep.interfaces package" href="dmriprep.interfaces.html" /> 
+    <link rel="prev" title="dmriprep.interfaces.bids module" href="dmriprep.interfaces.bids.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> dmriprep
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            dmriprep
           </a>
-
-          
-            
-            
-              <div class="version">
-                0.5.0
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="dmriprep.config.html">dmriprep.config package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="dmriprep.interfaces.html">dmriprep.interfaces package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dmriprep.interfaces.html#dmriprep.interfaces.BIDSDataGrabber"><code class="docutils literal notranslate"><span class="pre">BIDSDataGrabber</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dmriprep.interfaces.html#dmriprep.interfaces.DerivativesDataSink"><code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code></a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="dmriprep.interfaces.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.bids.html">dmriprep.interfaces.bids module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">dmriprep.interfaces.images module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.reports.html">dmriprep.interfaces.reports module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.vectors.html">dmriprep.interfaces.vectors module</a></li>
@@ -114,88 +68,39 @@
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Development road-map</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">dmriprep</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
-        
-          <li><a href="dmriprep.interfaces.html">dmriprep.interfaces package</a> &raquo;</li>
-        
-      <li>dmriprep.interfaces.images module</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Library API (application program interface)</a></li>
+          <li class="breadcrumb-item"><a href="dmriprep.interfaces.html">dmriprep.interfaces package</a></li>
+      <li class="breadcrumb-item active">dmriprep.interfaces.images module</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/api/dmriprep.interfaces.images.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-
-
-
-
-
-<section id="module-dmriprep.interfaces.images">
-<span id="dmriprep-interfaces-images-module"></span><h1>dmriprep.interfaces.images module<a class="headerlink" href="#module-dmriprep.interfaces.images" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="module-dmriprep.interfaces.images">
+<span id="dmriprep-interfaces-images-module"></span><h1>dmriprep.interfaces.images module<a class="headerlink" href="#module-dmriprep.interfaces.images" title="Link to this heading"></a></h1>
 <p>Image tools interfaces.</p>
-<dl class="class">
-<dt id="dmriprep.interfaces.images.ExtractB0">
-<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.images.</code><code class="sig-name descname">ExtractB0</code><span class="sig-paren">(</span><em class="sig-param">from_file=None</em>, <em class="sig-param">resource_monitor=None</em>, <em class="sig-param">**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.images.ExtractB0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="dmriprep.interfaces.images.ExtractB0">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.images.</span></span><span class="sig-name descname"><span class="pre">ExtractB0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/5a5afc79ed0f0d4dd3253916864c73330692d9b9/dmriprep/interfaces/images.py#L50-L79"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.images.ExtractB0" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Extract all b=0 volumes from a dwi series.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
@@ -206,22 +111,22 @@
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Mandatory Inputs</dt>
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>b0_ixs</strong> (<em>a list of items which are an integer</em>) – Index of b0s.</p></li>
 <li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Dwi file.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Outputs</dt>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output b0 file.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="class">
-<dt id="dmriprep.interfaces.images.RescaleB0">
-<em class="property">class </em><code class="sig-prename descclassname">dmriprep.interfaces.images.</code><code class="sig-name descname">RescaleB0</code><span class="sig-paren">(</span><em class="sig-param">from_file=None</em>, <em class="sig-param">resource_monitor=None</em>, <em class="sig-param">**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#dmriprep.interfaces.images.RescaleB0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="dmriprep.interfaces.images.RescaleB0">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.images.</span></span><span class="sig-name descname"><span class="pre">RescaleB0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/5a5afc79ed0f0d4dd3253916864c73330692d9b9/dmriprep/interfaces/images.py#L93-L128"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.images.RescaleB0" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Rescale the b0 volumes to deal with average signal decay over time.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
@@ -232,13 +137,13 @@
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Mandatory Inputs</dt>
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – B0s file.</p></li>
 <li><p><strong>mask_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Mask file.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Outputs</dt>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>out_b0s</strong> (<em>a pathlike object or string representing an existing file</em>) – Series of rescaled b0 volumes.</p></li>
 <li><p><strong>out_ref</strong> (<em>a pathlike object or string representing an existing file</em>) – One average b0 file.</p></li>
@@ -252,73 +157,33 @@
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dmriprep.interfaces.bids.html" class="btn btn-neutral float-left" title="dmriprep.interfaces.bids module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="dmriprep.interfaces.reports.html" class="btn btn-neutral float-right" title="dmriprep.interfaces.reports module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="dmriprep.interfaces.html" class="btn btn-neutral float-left" title="dmriprep.interfaces package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright Copyright 2019, The dMRIPrep developers.
-
-    </p>
+    <p>&#169; Copyright The NiPreps Developers.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-        <span class="fa fa-book"> Other Versions</span>
-        v: master
-        <span class="fa fa-caret-down"></span>
-    </span>
-    <div class="rst-other-versions">
-        <dl>
-            <dt>Tags</dt>
-            <dd><a href="../../0.2.1/index.html">0.2.1</a></dd>
-            <dd><a href="../../0.2.2/api/dmriprep.interfaces.images.html">0.2.2</a></dd>
-            <dd><a href="../../0.3.0/api/dmriprep.interfaces.images.html">0.3.0</a></dd>
-            <dd><a href="../../0.4.0/api/dmriprep.interfaces.images.html">0.4.0</a></dd>
-            <dd><a href="../../0.5.0/api/dmriprep.interfaces.images.html">0.5.0</a></dd>
-            <dd><a href="../../0.5.0rc0/api/dmriprep.interfaces.images.html">0.5.0rc0</a></dd>
-        </dl>
-        <dl>
-            <dt>Branches</dt>
-            <dd><a href="dmriprep.interfaces.images.html">master</a></dd>
-        </dl>
-    </div>
-</div>
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

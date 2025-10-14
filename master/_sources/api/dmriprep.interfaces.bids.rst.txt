@@ -1,0 +1,7 @@
+dmriprep.interfaces.bids module
+===============================
+
+.. automodule:: dmriprep.interfaces.bids
+   :members:
+   :undoc-members:
+   :show-inheritance:
