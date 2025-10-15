@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.config package &mdash; dmriprep 25.0.0.dev119 documentation</title>
+  <title>dmriprep.config package &mdash; dmriprep 25.0.0.dev124 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=37640d12"></script>
+      <script src="../_static/documentation_options.js?v=e1aed06f"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -69,7 +69,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#dmriprep.config.execution"><code class="docutils literal notranslate"><span class="pre">execution</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.execution.anat_derivatives"><code class="docutils literal notranslate"><span class="pre">execution.anat_derivatives</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.execution.bids_database_dir"><code class="docutils literal notranslate"><span class="pre">execution.bids_database_dir</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.execution.bids_description_hash"><code class="docutils literal notranslate"><span class="pre">execution.bids_description_hash</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.execution.bids_dir"><code class="docutils literal notranslate"><span class="pre">execution.bids_dir</span></code></a></li>
@@ -141,8 +140,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#dmriprep.config.to_filename"><code class="docutils literal notranslate"><span class="pre">to_filename()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dmriprep.config.workflow"><code class="docutils literal notranslate"><span class="pre">workflow</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.anat_only"><code class="docutils literal notranslate"><span class="pre">workflow.anat_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.cifti_output"><code class="docutils literal notranslate"><span class="pre">workflow.cifti_output</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.dwi2anat_dof"><code class="docutils literal notranslate"><span class="pre">workflow.dwi2anat_dof</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.dwi2anat_init"><code class="docutils literal notranslate"><span class="pre">workflow.dwi2anat_init</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.fallback_total_readout_time"><code class="docutils literal notranslate"><span class="pre">workflow.fallback_total_readout_time</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.fmap_bspline"><code class="docutils literal notranslate"><span class="pre">workflow.fmap_bspline</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.fmap_demean"><code class="docutils literal notranslate"><span class="pre">workflow.fmap_demean</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dmriprep.config.workflow.force"><code class="docutils literal notranslate"><span class="pre">workflow.force</span></code></a></li>
@@ -277,17 +278,17 @@ using the <a class="reference internal" href="#dmriprep.config.load" title="dmri
 <h2>Configuration sections<a class="headerlink" href="#configuration-sections" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config._Config">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">_Config</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L182-L236"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config._Config" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">_Config</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L182-L241"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config._Config" title="Link to this definition"></a></dt>
 <dd><p>An abstract class forbidding instantiation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config._Config.get">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L220-L236"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config._Config.get" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L220-L241"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config._Config.get" title="Link to this definition"></a></dt>
 <dd><p>Return defined settings.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config._Config.load">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L191-L218"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config._Config.load" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L191-L218"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config._Config.load" title="Link to this definition"></a></dt>
 <dd><p>Store settings from a dictionary.</p>
 </dd></dl>
 
@@ -295,7 +296,7 @@ using the <a class="reference internal" href="#dmriprep.config.load" title="dmri
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">environment</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L239-L270"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">environment</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L244-L275"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Read-only options regarding the platform and environment.</p>
 <p>Crawls runtime descriptive settings (e.g., default FreeSurfer license,
 execution environment, nipype and <em>dMRIPrep</em> versions, etc.).
@@ -324,7 +325,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">free_mem</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10.9</span></em></dt>
+<span class="sig-name descname"><span class="pre">free_mem</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10.4</span></em></dt>
 <dd><p>Free memory at start.</p>
 </dd></dl>
 
@@ -354,7 +355,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'25.0.0.dev119+gb4582ed78.d20251014'</span></em></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'25.0.0.dev124+g3ade63ac9.d20251015'</span></em></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -362,14 +363,8 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">execution</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L351-L503"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">execution</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L356-L505"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Configure run-level settings.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">anat_derivatives</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
-<dd><p>A path where anatomical derivatives are found to fast-track <em>sMRIPrep</em>.</p>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">bids_database_dir</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
@@ -438,7 +433,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L433-L503"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L435-L505"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Create a new BIDS Layout accessible with <a class="reference internal" href="#dmriprep.config.execution.layout" title="dmriprep.config.execution.layout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">layout</span></code></a>.</p>
 </dd></dl>
 
@@ -517,7 +512,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">run_uuid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'20251014-223222_97e42cf4-b740-4621-82d6-10684e6f051f'</span></em></dt>
+<span class="sig-name descname"><span class="pre">run_uuid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'20251015-092001_f834c986-5865-448e-b8cc-4e9485b6aaf4'</span></em></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -555,12 +550,18 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">workflow</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L517-L565"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">workflow</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L519-L572"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Configure the particular execution graph of this workflow.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">anat_only</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em></dt>
 <dd><p>Execute the anatomical preprocessing only.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cifti_output</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>Generate HCP Grayordinates, accepts either <code class="docutils literal notranslate"><span class="pre">'91k'</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">'170k'</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -575,6 +576,13 @@ the command line) as spatial references for outputs.</p>
 <dd><p>Method of initial DWI to anatomical coregistration. If <cite>auto</cite>, a T2w image is used
 if available, otherwise the T1w image. <cite>t1w</cite> forces use of the T1w, <cite>t2w</cite> forces use of
 the T2w, and <cite>header</cite> uses the DWI header information without an initial registration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">fallback_total_readout_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>Infer the total readout time if unavailable from authoritative metadata.
+This may be a number or the string “estimated”.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -683,7 +691,7 @@ in the absence of any alternatives.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">nipype</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L273-L348"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">nipype</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L278-L353"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Nipype settings.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
@@ -699,13 +707,13 @@ in the absence of any alternatives.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_plugin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L301-L317"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_plugin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L306-L322"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Format a dictionary for Nipype consumption.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L319-L348"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L324-L353"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Set NiPype configurations.</p>
 </dd></dl>
 
@@ -785,7 +793,7 @@ graph is built across processes.</p>
 <h2>Logging<a class="headerlink" href="#logging" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">loggers</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L568-L607"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">loggers</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L575-L614"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Keep loggers easily accessible (see <a class="reference internal" href="#dmriprep.config.loggers.init" title="dmriprep.config.loggers.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py">
@@ -801,7 +809,7 @@ graph is built across processes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L585-L607"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L592-L614"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a></dt>
 <dd><p>Set the log level, initialize all loggers into <a class="reference internal" href="#dmriprep.config.loggers" title="dmriprep.config.loggers"><code class="xref py py-class docutils literal notranslate"><span class="pre">loggers</span></code></a>.</p>
 <blockquote>
 <div><ul class="simple">
@@ -848,13 +856,13 @@ store/load processes (e.g., from/to <a class="reference external" href="https://
 </section>
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.dumps">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">dumps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L720-L729"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.dumps" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">dumps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L727-L736"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.dumps" title="Link to this definition"></a></dt>
 <dd><p>Format config into toml.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config.environment">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">environment</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L239-L270"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.environment" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">environment</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L244-L275"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.environment" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.config._Config" title="dmriprep.config._Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Config</span></code></a></p>
 <p>Read-only options regarding the platform and environment.</p>
 <p>Crawls runtime descriptive settings (e.g., default FreeSurfer license,
@@ -884,7 +892,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dmriprep.config.environment.free_mem">
-<span class="sig-name descname"><span class="pre">free_mem</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10.9</span></em><a class="headerlink" href="#dmriprep.config.environment.free_mem" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">free_mem</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10.4</span></em><a class="headerlink" href="#dmriprep.config.environment.free_mem" title="Link to this definition"></a></dt>
 <dd><p>Free memory at start.</p>
 </dd></dl>
 
@@ -914,7 +922,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dmriprep.config.environment.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'25.0.0.dev119+gb4582ed78.d20251014'</span></em><a class="headerlink" href="#dmriprep.config.environment.version" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'25.0.0.dev124+g3ade63ac9.d20251015'</span></em><a class="headerlink" href="#dmriprep.config.environment.version" title="Link to this definition"></a></dt>
 <dd><p><em>dMRIPrep</em>’s version.</p>
 </dd></dl>
 
@@ -922,15 +930,9 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config.execution">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">execution</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L351-L503"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.execution" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">execution</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L356-L505"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.execution" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.config._Config" title="dmriprep.config._Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Config</span></code></a></p>
 <p>Configure run-level settings.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="dmriprep.config.execution.anat_derivatives">
-<span class="sig-name descname"><span class="pre">anat_derivatives</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dmriprep.config.execution.anat_derivatives" title="Link to this definition"></a></dt>
-<dd><p>A path where anatomical derivatives are found to fast-track <em>sMRIPrep</em>.</p>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dmriprep.config.execution.bids_database_dir">
 <span class="sig-name descname"><span class="pre">bids_database_dir</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dmriprep.config.execution.bids_database_dir" title="Link to this definition"></a></dt>
@@ -999,7 +1001,7 @@ opt-out using the <code class="docutils literal notranslate"><span class="pre">-
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config.execution.init">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L433-L503"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.execution.init" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L435-L505"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.execution.init" title="Link to this definition"></a></dt>
 <dd><p>Create a new BIDS Layout accessible with <a class="reference internal" href="#dmriprep.config.execution.layout" title="dmriprep.config.execution.layout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">layout</span></code></a>.</p>
 </dd></dl>
 
@@ -1078,7 +1080,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dmriprep.config.execution.run_uuid">
-<span class="sig-name descname"><span class="pre">run_uuid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'20251014-223222_97e42cf4-b740-4621-82d6-10684e6f051f'</span></em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_uuid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'20251015-092001_f834c986-5865-448e-b8cc-4e9485b6aaf4'</span></em><a class="headerlink" href="#dmriprep.config.execution.run_uuid" title="Link to this definition"></a></dt>
 <dd><p>Unique identifier of this particular run.</p>
 </dd></dl>
 
@@ -1116,7 +1118,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.from_dict">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L649-L671"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.from_dict" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L656-L678"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.from_dict" title="Link to this definition"></a></dt>
 <dd><p>Read settings from a flat dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1131,19 +1133,19 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.get">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L704-L717"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.get" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L711-L724"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.get" title="Link to this definition"></a></dt>
 <dd><p>Get config as a dict.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.init_spaces">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">init_spaces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L738-L752"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.init_spaces" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">init_spaces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L745-L759"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.init_spaces" title="Link to this definition"></a></dt>
 <dd><p>Initialize the <a class="reference internal" href="#dmriprep.config.workflow.spaces" title="dmriprep.config.workflow.spaces"><code class="xref py py-attr docutils literal notranslate"><span class="pre">spaces</span></code></a> setting.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.load">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L674-L701"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.load" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L681-L708"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.load" title="Link to this definition"></a></dt>
 <dd><p>Load settings from file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1158,7 +1160,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config.loggers">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">loggers</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L568-L607"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.loggers" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">loggers</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L575-L614"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.loggers" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Keep loggers easily accessible (see <a class="reference internal" href="#dmriprep.config.loggers.init" title="dmriprep.config.loggers.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>).</p>
 <dl class="py attribute">
@@ -1175,7 +1177,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config.loggers.init">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L585-L607"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.loggers.init" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L592-L614"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.loggers.init" title="Link to this definition"></a></dt>
 <dd><p>Set the log level, initialize all loggers into <a class="reference internal" href="#dmriprep.config.loggers" title="dmriprep.config.loggers"><code class="xref py py-class docutils literal notranslate"><span class="pre">loggers</span></code></a>.</p>
 <blockquote>
 <div><ul class="simple">
@@ -1208,7 +1210,7 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config.nipype">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">nipype</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L273-L348"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.nipype" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">nipype</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L278-L353"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.nipype" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.config._Config" title="dmriprep.config._Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Config</span></code></a></p>
 <p>Nipype settings.</p>
 <dl class="py attribute">
@@ -1225,13 +1227,13 @@ the command line) as spatial references for outputs.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config.nipype.get_plugin">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_plugin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L301-L317"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.nipype.get_plugin" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_plugin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L306-L322"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.nipype.get_plugin" title="Link to this definition"></a></dt>
 <dd><p>Format a dictionary for Nipype consumption.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config.nipype.init">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L319-L348"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.nipype.init" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L324-L353"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.nipype.init" title="Link to this definition"></a></dt>
 <dd><p>Set NiPype configurations.</p>
 </dd></dl>
 
@@ -1288,13 +1290,13 @@ parameterizations over 32 characters will be replaced by their hash.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.redirect_warnings">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">redirect_warnings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineno</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L119-L122"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.redirect_warnings" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">redirect_warnings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineno</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L119-L122"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.redirect_warnings" title="Link to this definition"></a></dt>
 <dd><p>Redirect other warnings.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config.seeds">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">seeds</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L610-L630"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.seeds" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">seeds</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L617-L637"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.seeds" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.config._Config" title="dmriprep.config._Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Config</span></code></a></p>
 <p>Initialize the PRNG and track random seed assignments</p>
 <dl class="py attribute">
@@ -1305,7 +1307,7 @@ parameterizations over 32 characters will be replaced by their hash.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dmriprep.config.seeds.init">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L621-L630"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.seeds.init" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L628-L637"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.seeds.init" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1324,19 +1326,25 @@ parameterizations over 32 characters will be replaced by their hash.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.config.to_filename">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">to_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L732-L735"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.to_filename" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">to_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L739-L742"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.to_filename" title="Link to this definition"></a></dt>
 <dd><p>Write settings to file.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.config.workflow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">workflow</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/b4582ed782fdd1719eacf7cb5f036c7c43576f86/dmriprep/config/__init__.py#L517-L565"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.workflow" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.config.</span></span><span class="sig-name descname"><span class="pre">workflow</span></span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/config/__init__.py#L519-L572"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.config.workflow" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dmriprep.config._Config" title="dmriprep.config._Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Config</span></code></a></p>
 <p>Configure the particular execution graph of this workflow.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dmriprep.config.workflow.anat_only">
 <span class="sig-name descname"><span class="pre">anat_only</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#dmriprep.config.workflow.anat_only" title="Link to this definition"></a></dt>
 <dd><p>Execute the anatomical preprocessing only.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dmriprep.config.workflow.cifti_output">
+<span class="sig-name descname"><span class="pre">cifti_output</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dmriprep.config.workflow.cifti_output" title="Link to this definition"></a></dt>
+<dd><p>Generate HCP Grayordinates, accepts either <code class="docutils literal notranslate"><span class="pre">'91k'</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">'170k'</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1351,6 +1359,13 @@ parameterizations over 32 characters will be replaced by their hash.</p>
 <dd><p>Method of initial DWI to anatomical coregistration. If <cite>auto</cite>, a T2w image is used
 if available, otherwise the T1w image. <cite>t1w</cite> forces use of the T1w, <cite>t2w</cite> forces use of
 the T2w, and <cite>header</cite> uses the DWI header information without an initial registration.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dmriprep.config.workflow.fallback_total_readout_time">
+<span class="sig-name descname"><span class="pre">fallback_total_readout_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dmriprep.config.workflow.fallback_total_readout_time" title="Link to this definition"></a></dt>
+<dd><p>Infer the total readout time if unavailable from authoritative metadata.
+This may be a number or the string “estimated”.</p>
 </dd></dl>
 
 <dl class="py attribute">
