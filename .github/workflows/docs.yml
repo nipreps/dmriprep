@@ -104,7 +104,33 @@ jobs:
               if ref_name and (site / ref_name).is_dir() and ref_name not in heads:
                   heads.insert(0, ref_name)
 
-          manifest = {'tags': tags, 'heads': heads}
+          repository = os.environ.get('GITHUB_REPOSITORY', 'nipreps/dmriprep')
+          try:
+              owner, repo_name = repository.split('/', 1)
+          except ValueError:
+              owner, repo_name = 'nipreps', 'dmriprep'
+
+          base_url = f"https://{owner}.github.io/{repo_name}/"
+
+          def format_entry(identifier: str) -> dict:
+              return {
+                  'version': identifier,
+                  'name': identifier,
+                  'url': f"{base_url}{identifier}/",
+              }
+
+          head_entries = [format_entry(head) for head in heads]
+          tag_entries = [format_entry(tag) for tag in tags]
+          head_versions = {entry['version'] for entry in head_entries}
+
+          manifest = {
+              'heads': head_entries,
+              'tags': tag_entries,
+              'versions': head_entries + [entry for entry in tag_entries if entry['version'] not in head_versions],
+              'downloads': [],
+              'subprojects': [],
+          }
+
           (site / 'versions.json').write_text(json.dumps(manifest, indent=2) + '\n')
           PY
 
