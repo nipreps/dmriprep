@@ -127,35 +127,16 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-switcher_config = {
-    'json_url': 'https://nipreps.github.io/dmriprep/versions.json',
-    'version_match': version,
-}
-
-html_theme_options = {'version_selector': True}
+html_theme_options: dict[str, object] = {}
 
 html_context = globals().get('html_context', {})
-
-try:  # noqa: SIM105 - availability depends on the docs environment
-    import sphinx_rtd_theme  # type: ignore[import-not-found]
-except ImportError:  # pragma: no cover - handled gracefully at runtime
-    sphinx_rtd_theme = None
-
-if sphinx_rtd_theme is not None:
-    theme_version = Version(getattr(sphinx_rtd_theme, '__version__', '0'))
-    if theme_version >= Version('1.3.0'):
-        html_theme_options['switcher'] = switcher_config
-
-if 'switcher' not in html_theme_options:
-    # Older versions of sphinx_rtd_theme do not expose the ``switcher``
-    # theme option. Populate the template context instead so the JSON
-    # manifest remains available without triggering warnings.
-    html_context['switcher'] = switcher_config
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_js_files = ['js/version-selector.js']
 
 # Ensure the versions manifest is published alongside the built documentation.
 html_extra_path = ['_static/versions.json']
