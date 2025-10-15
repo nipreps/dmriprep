@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.utils.images module &mdash; dmriprep 25.0.0.dev124 documentation</title>
+  <title>dmriprep.utils.images module &mdash; dmriprep 25.0.0.dev126 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
@@ -14,9 +14,10 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e1aed06f"></script>
+      <script src="../_static/documentation_options.js?v=722ede1c"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -97,20 +98,212 @@
 <p>Utilities to handle images.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.extract_b0">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">extract_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/utils/images.py#L30-L42"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.extract_b0" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">extract_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L30-L67"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.extract_b0" title="Link to this definition"></a></dt>
 <dd><p>Extract the <em>b0</em> volumes from a DWI dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>str</em>) – DWI NIfTI file.</p></li>
+<li><p><strong>b0_ixs</strong> (<em>list</em>) – List of B0 indices in <cite>in_file</cite>.</p></li>
+<li><p><strong>out_path</strong> (<em>str</em>) – Optionally specify an output path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_path</strong> – 4D NIfTI file consisting of B0’s.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b0_ixs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;bval&#39;</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi.nii.gz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_path</span> <span class="o">=</span> <span class="n">extract_b0</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">b0_ixs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dmriprep.utils.images.median">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/utils/images.py#L68-L84"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.median" title="Link to this definition"></a></dt>
-<dd><p>Average a 4D dataset across the last dimension using median.</p>
+<dt class="sig sig-object py" id="dmriprep.utils.images.get_list_data">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">get_list_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L180-L200"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.get_list_data" title="Link to this definition"></a></dt>
+<dd><p>Load 3D volumes from a list of file paths into a 4D array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_list</strong> (<em>str</em>) – A list of file paths to 3D NIFTI images.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nibabel image object</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_files</span> <span class="o">=</span> <span class="n">save_4d_to_3d</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_files</span><span class="p">)</span> <span class="o">==</span> <span class="n">get_list_data</span><span class="p">(</span><span class="n">out_files</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.images.match_transforms">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">match_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dwi_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L203-L266"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.match_transforms" title="Link to this definition"></a></dt>
+<dd><p>Arrange the order of a list of transforms.</p>
+<p>This is a helper function for <abbr title="Eddy-currents and Motion Correction">EMC</abbr>.
+Sorts the input list of affine transforms  to correspond with that of
+each individual dwi volume file, accounting for the indices of <span class="math notranslate nohighlight">\(b = 0\)</span> volumes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwi_files</strong> (<em>list</em>) – A list of file paths to 3D diffusion-weighted NIFTI volumes.</p></li>
+<li><p><strong>transforms</strong> (<em>list</em>) – A list of ndarrays.</p></li>
+<li><p><strong>b0_ixs</strong> (<em>list</em>) – List of B0 indices.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nearest_affines</strong> – A list of affine file paths that correspond to each of the split
+dwi volumes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dmriprep.utils.vectors</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiffusionGradientTable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dwi_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check</span> <span class="o">=</span> <span class="n">DiffusionGradientTable</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">dwi_file</span><span class="o">=</span><span class="n">dwi_file</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">bvecs</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.bvec&quot;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">bvals</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.bval&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">generate_rasb</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Conform to the orientation of the image:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">affines</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">check</span><span class="o">.</span><span class="n">gradients</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">aff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">affines</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">aff_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;aff_</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s1">.npy&#39;</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">aff_file</span><span class="p">,</span> <span class="n">aff</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">transforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aff_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dwi_files</span> <span class="o">=</span> <span class="n">save_4d_to_3d</span><span class="p">(</span><span class="n">dwi_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b0_ixs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">check</span><span class="o">.</span><span class="n">bvals</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">50</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[:</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nearest_affines</span> <span class="o">=</span> <span class="n">match_transforms</span><span class="p">(</span><span class="n">dwi_files</span><span class="p">,</span> <span class="n">transforms</span><span class="p">,</span> <span class="n">b0_ixs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">sum</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nearest_affines</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">nearest_affines</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nearest_affines</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">dwi_files</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.rescale_b0">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">rescale_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/3ade63ac95a086d06fcf8bc0580bd063a422f5fd/dmriprep/utils/images.py#L45-L65"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.rescale_b0" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">rescale_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L70-L116"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.rescale_b0" title="Link to this definition"></a></dt>
 <dd><p>Rescale the input volumes using the median signal intensity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>str</em>) – A NIfTI file consisting of one or more B0’s.</p></li>
+<li><p><strong>mask_file</strong> (<em>str</em>) – A B0 mask NIFTI file.</p></li>
+<li><p><strong>out_path</strong> (<em>str</em>) – Optionally specify an output path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_path</strong> – A rescaled B0 NIFTI file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mask_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi_mask.nii.gz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi_b0.nii.gz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_path</span><span class="p">,</span> <span class="n">drifts</span> <span class="o">=</span> <span class="n">rescale_b0</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">mask_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.images.save_3d_to_4d">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">save_3d_to_4d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L304-L338"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.save_3d_to_4d" title="Link to this definition"></a></dt>
+<dd><p>Concatenate a list of 3D volumes into a 4D output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>in_files</strong> (<em>list</em>) – A list of file paths to 3D NIFTI images.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_file</strong> – A file path to a 4d NIFTI image of concatenated 3D volumes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">threeD_files</span> <span class="o">=</span> <span class="n">save_4d_to_3d</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_file</span> <span class="o">=</span> <span class="n">save_3d_to_4d</span><span class="p">(</span><span class="n">threeD_files</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">threeD_files</span><span class="p">)</span> <span class="o">==</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.images.save_4d_to_3d">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">save_4d_to_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L269-L301"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.save_4d_to_3d" title="Link to this definition"></a></dt>
+<dd><p>Split a 4D dataset along the last dimension into multiple 3D volumes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>in_file</strong> (<em>str</em>) – DWI NIfTI file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_files</strong> – A list of file paths to 3d NIFTI images.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_files</span> <span class="o">=</span> <span class="n">save_4d_to_3d</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_files</span><span class="p">)</span> <span class="o">==</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dmriprep.utils.images.summarize_images">
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">summarize_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path=None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/utils/images.py#L119-L177"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.summarize_images" title="Link to this definition"></a></dt>
+<dd><p>Summarize a 4D dataset across the last dimension using a
+callable method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>str</em>) – A NIfTI file consisting of one or more 3D images.</p></li>
+<li><p><strong>method</strong> (<em>callable</em>) – A numpy function such as <cite>np.mean</cite> or <cite>np.median</cite>.</p></li>
+<li><p><strong>dtype</strong> (<em>str</em>) – Optioally specify a datatype (e.g. ‘float32’).</p></li>
+<li><p><strong>out_path</strong> (<em>str</em>) – Optionally specify an output path for <cite>out_path</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_path</strong> – A 3D NIFTI image file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dipy_datadir</span> <span class="o">/</span> <span class="s2">&quot;HARDI193.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Median case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_path</span> <span class="o">=</span> <span class="n">summarize_images</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Mean case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_path</span> <span class="o">=</span> <span class="n">summarize_images</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
