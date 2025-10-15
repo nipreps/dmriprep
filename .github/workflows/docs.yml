@@ -70,6 +70,44 @@ jobs:
           mkdir -p "${dest}"
           rsync -a docs/_build/html/ "${dest}/"
 
+      - name: Update versions manifest
+        if: github.repository == 'nipreps/dmriprep'
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          python <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          site = pathlib.Path('site')
+          site.mkdir(parents=True, exist_ok=True)
+
+          tag_output = subprocess.run(
+              ['git', 'tag', '--sort=-v:refname'],
+              check=True,
+              capture_output=True,
+              text=True,
+          ).stdout.split()
+          tags = [tag for tag in tag_output if (site / tag).is_dir()]
+
+          heads = []
+          for candidate in ('master', 'main', 'latest', 'stable'):
+              candidate_path = site / candidate
+              if candidate_path.is_dir() and candidate not in heads:
+                  heads.append(candidate)
+
+          if os.environ.get('REF_TYPE') == 'branch':
+              ref_name = os.environ.get('REF_NAME')
+              if ref_name and (site / ref_name).is_dir() and ref_name not in heads:
+                  heads.insert(0, ref_name)
+
+          manifest = {'tags': tags, 'heads': heads}
+          (site / 'versions.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          PY
+
       - name: Check for site changes
         if: github.repository == 'nipreps/dmriprep'
         id: site_changes
