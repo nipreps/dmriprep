@@ -76,63 +76,7 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
           REF_TYPE: ${{ github.ref_type }}
         run: |
-          python <<'PY'
-          import json
-          import os
-          import pathlib
-          import subprocess
-
-          site = pathlib.Path('site')
-          site.mkdir(parents=True, exist_ok=True)
-
-          tag_output = subprocess.run(
-              ['git', 'tag', '--sort=-v:refname'],
-              check=True,
-              capture_output=True,
-              text=True,
-          ).stdout.split()
-          tags = [tag for tag in tag_output if (site / tag).is_dir()]
-
-          heads = []
-          for candidate in ('master', 'main', 'latest', 'stable'):
-              candidate_path = site / candidate
-              if candidate_path.is_dir() and candidate not in heads:
-                  heads.append(candidate)
-
-          if os.environ.get('REF_TYPE') == 'branch':
-              ref_name = os.environ.get('REF_NAME')
-              if ref_name and (site / ref_name).is_dir() and ref_name not in heads:
-                  heads.insert(0, ref_name)
-
-          repository = os.environ.get('GITHUB_REPOSITORY', 'nipreps/dmriprep')
-          try:
-              owner, repo_name = repository.split('/', 1)
-          except ValueError:
-              owner, repo_name = 'nipreps', 'dmriprep'
-
-          base_url = f"https://{owner}.github.io/{repo_name}/"
-
-          def format_entry(identifier: str) -> dict:
-              return {
-                  'version': identifier,
-                  'name': identifier,
-                  'url': f"{base_url}{identifier}/",
-              }
-
-          head_entries = [format_entry(head) for head in heads]
-          tag_entries = [format_entry(tag) for tag in tags]
-          head_versions = {entry['version'] for entry in head_entries}
-
-          manifest = {
-              'heads': head_entries,
-              'tags': tag_entries,
-              'versions': head_entries + [entry for entry in tag_entries if entry['version'] not in head_versions],
-              'downloads': [],
-              'subprojects': [],
-          }
-
-          (site / 'versions.json').write_text(json.dumps(manifest, indent=2) + '\n')
-          PY
+          python scripts/update_versions_manifest.py --site site
 
       - name: Check for site changes
         if: github.repository == 'nipreps/dmriprep'
