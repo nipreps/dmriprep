@@ -147,7 +147,12 @@
 
       var label = document.createElement('span');
       label.className = 'rst-current-version__label';
+      label.textContent = 'Other versions';
       current.appendChild(label);
+
+      var value = document.createElement('span');
+      value.className = 'rst-current-version__value';
+      current.appendChild(value);
 
       var toggleIcon = document.createElement('span');
       toggleIcon.className = 'fa fa-chevron-down rst-current-version__toggle';
@@ -235,6 +240,7 @@
 
     var currentControl = flyout.querySelector('.rst-current-version');
     var labelTarget = flyout.querySelector('.rst-current-version__label');
+    var valueTarget = flyout.querySelector('.rst-current-version__value');
     var listContainer = flyout.querySelector('.rst-other-versions');
     var definitionList = flyout.querySelector('.rst-other-versions__list');
 
@@ -324,8 +330,11 @@
     if (!headerLabel && entries.length) {
       headerLabel = entries[0].label;
     }
-    if (labelTarget && headerLabel) {
-      labelTarget.textContent = 'v: ' + headerLabel;
+    if (labelTarget) {
+      labelTarget.textContent = 'Other versions';
+    }
+    if (valueTarget) {
+      valueTarget.textContent = headerLabel ? 'v: ' + headerLabel : '';
     }
 
     while (definitionList && definitionList.firstChild) {

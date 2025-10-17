@@ -8,6 +8,7 @@
   font-family: "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
   z-index: 400;
   box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
 .rst-versions a {
@@ -41,6 +42,11 @@
 }
 
 .rst-versions .rst-current-version__label {
+  margin-left: 8px;
+  font-weight: 700;
+}
+
+.rst-versions .rst-current-version__value {
   margin-left: auto;
   font-weight: 700;
 }
