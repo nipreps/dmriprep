@@ -3,6 +3,20 @@
 
   var initialised = false;
 
+  function normaliseSlug(slug) {
+    if (!slug && slug !== 0) {
+      return null;
+    }
+    var value = String(slug).trim();
+    if (!value) {
+      return null;
+    }
+    if (/\.html?$/i.test(value)) {
+      return null;
+    }
+    return value;
+  }
+
   function getConfigFromAddon(event) {
     if (!event || !event.detail || typeof event.detail.data !== 'function') {
       return null;
@@ -24,26 +38,43 @@
     if (segments.length === 0) {
       return null;
     }
-    // When hosted on GitHub Pages the pattern is /<repo>/<version>/...
-    // Otherwise fall back to the first segment.
-    if (segments.length >= 2 && segments[0] === 'dmriprep') {
-      return segments[1];
+    var isGitHubPages = segments[0] === 'dmriprep';
+    var candidates = segments.filter(function (segment, index) {
+      if (/\.html?$/i.test(segment)) {
+        return false;
+      }
+      if (isGitHubPages && index === 0) {
+        return false;
+      }
+      return true;
+    });
+    if (isGitHubPages && candidates.length) {
+      return candidates[0] || null;
     }
-    return segments[segments.length - 2] || segments[segments.length - 1] || null;
+    if (candidates.length >= 2) {
+      return candidates[candidates.length - 2];
+    }
+    return candidates[candidates.length - 1] || null;
   }
 
   function getCurrentSlug() {
     var slug = null;
     if (window.READTHEDOCS_DATA && window.READTHEDOCS_DATA.version) {
-      slug = window.READTHEDOCS_DATA.version.slug;
+      slug =
+        window.READTHEDOCS_DATA.version.slug ||
+        window.READTHEDOCS_DATA.version.identifier ||
+        window.READTHEDOCS_DATA.version.version;
     }
     if (!slug && window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.VERSION) {
       slug = window.DOCUMENTATION_OPTIONS.VERSION;
     }
+    if (!slug && window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.RELEASE) {
+      slug = window.DOCUMENTATION_OPTIONS.RELEASE;
+    }
     if (!slug) {
       slug = getCurrentSlugFromLocation();
     }
-    return slug;
+    return normaliseSlug(slug);
   }
 
   function removeFallbackCurrentVersion(container) {
@@ -56,7 +87,11 @@
   function renderFallbackCurrentVersion(container, currentVersion) {
     var slug = null;
     if (currentVersion) {
-      slug = currentVersion.slug || currentVersion.version || currentVersion.name || null;
+      slug =
+        normaliseSlug(currentVersion.slug) ||
+        normaliseSlug(currentVersion.version) ||
+        normaliseSlug(currentVersion.name) ||
+        null;
     }
     if (!slug) {
       slug = getCurrentSlug();
@@ -110,11 +145,6 @@
       icon.setAttribute('aria-hidden', 'true');
       current.appendChild(icon);
 
-      var title = document.createElement('span');
-      title.className = 'rst-current-version__title';
-      title.textContent = 'Read the Docs';
-      current.appendChild(title);
-
       var label = document.createElement('span');
       label.className = 'rst-current-version__label';
       current.appendChild(label);
@@ -129,6 +159,7 @@
       listWrapper.setAttribute('role', 'list');
       listWrapper.setAttribute('aria-label', 'Available versions');
       listWrapper.hidden = true;
+      listWrapper.setAttribute('aria-hidden', 'true');
 
       var definitionList = document.createElement('dl');
       definitionList.className = 'rst-other-versions__list';
@@ -157,7 +188,13 @@
       var toggleFlyout = function (forceOpen) {
         var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !flyout.classList.contains('rst-open');
         flyout.classList.toggle('rst-open', shouldOpen);
-        listWrapper.hidden = !shouldOpen;
+        if (shouldOpen) {
+          listWrapper.hidden = false;
+          listWrapper.removeAttribute('aria-hidden');
+        } else {
+          listWrapper.hidden = true;
+          listWrapper.setAttribute('aria-hidden', 'true');
+        }
         current.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
       };
 
@@ -198,7 +235,11 @@
     var slug = null;
     var currentUrl = null;
     if (currentVersion) {
-      slug = currentVersion.slug || currentVersion.version || currentVersion.name || null;
+      slug =
+        normaliseSlug(currentVersion.slug) ||
+        normaliseSlug(currentVersion.version) ||
+        normaliseSlug(currentVersion.name) ||
+        null;
       currentUrl = currentVersion.url || null;
     }
     if (!slug) {
@@ -210,8 +251,11 @@
         if (!entry || !entry.url) {
           return null;
         }
-        var entrySlug = entry.slug || entry.version || entry.name;
-        var entryName = entry.name || entry.version || entrySlug;
+        var entrySlug =
+          normaliseSlug(entry.slug) ||
+          normaliseSlug(entry.version) ||
+          normaliseSlug(entry.name);
+        var entryName = entry.name || entry.version || entry.slug || entrySlug;
         if (!entrySlug || !entryName) {
           return null;
         }
@@ -256,8 +300,25 @@
       activeEntry = { slug: slug, label: slug, url: null, active: true };
     }
 
-    var headerLabel = (activeEntry && activeEntry.label) || slug || entries[0].label;
-    if (labelTarget) {
+    var headerLabel = null;
+    if (activeEntry) {
+      headerLabel = activeEntry.label || activeEntry.name || activeEntry.version || activeEntry.slug;
+    }
+    if (!headerLabel && currentVersion) {
+      headerLabel =
+        currentVersion.label ||
+        currentVersion.name ||
+        currentVersion.version ||
+        currentVersion.slug ||
+        null;
+    }
+    if (!headerLabel && slug) {
+      headerLabel = slug;
+    }
+    if (!headerLabel && entries.length) {
+      headerLabel = entries[0].label;
+    }
+    if (labelTarget && headerLabel) {
       labelTarget.textContent = 'v: ' + headerLabel;
     }
 
@@ -298,7 +359,14 @@
     }
 
     if (listContainer) {
-      listContainer.hidden = !flyout.classList.contains('rst-open');
+      var expanded = flyout.classList.contains('rst-open');
+      if (expanded) {
+        listContainer.hidden = false;
+        listContainer.removeAttribute('aria-hidden');
+      } else {
+        listContainer.hidden = true;
+        listContainer.setAttribute('aria-hidden', 'true');
+      }
     }
 
     if (currentControl) {
@@ -337,7 +405,8 @@
     if (!url) {
       return null;
     }
-    var slug = entry.slug || entry.version || entry.name;
+    var rawSlug = entry.slug || entry.version || entry.name;
+    var slug = normaliseSlug(rawSlug) || rawSlug;
     return {
       slug: slug,
       url: url,
@@ -382,9 +451,10 @@
       return uniqueBySlug(
         legacyLists.map(function (entry) {
           if (typeof entry === 'string') {
+            var stringSlug = normaliseSlug(entry) || entry;
             return {
-              slug: entry,
-              version: entry,
+              slug: stringSlug,
+              version: stringSlug,
               name: entry,
               url: options.baseUrl.replace(/\/?$/, '/') + entry.replace(/^\/+/, '') + '/',
             };

@@ -15,21 +15,19 @@
   text-decoration: none;
 }
 
+
 .rst-versions .rst-current-version {
   padding: 12px;
   background-color: #272525;
-  display: block;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 90%;
   cursor: pointer;
   color: #27ae60;
   line-height: 1.6;
-}
-
-.rst-versions .rst-current-version::after {
-  content: "";
-  display: table;
-  clear: both;
+  text-align: left;
 }
 
 .rst-versions .rst-current-version:focus {
@@ -38,23 +36,17 @@
 }
 
 .rst-versions .rst-current-version .fa-book {
-  float: left;
   color: #fcfcfc;
-  margin-right: 8px;
-}
-
-.rst-versions .rst-current-version__title {
-  float: left;
-  font-weight: 700;
-  color: #fcfcfc;
+  flex: 0 0 auto;
 }
 
 .rst-versions .rst-current-version__label {
-  margin-left: 8px;
+  margin-left: auto;
+  font-weight: 700;
 }
 
 .rst-versions .rst-current-version__toggle {
-  margin-left: 8px;
+  margin-left: 4px;
   transition: transform 0.2s ease-in-out;
 }
 
