@@ -62,6 +62,10 @@
   background-color: #1f1d1d;
 }
 
+.rst-versions .rst-other-versions[hidden] {
+  display: none !important;
+}
+
 .rst-versions.rst-open .rst-other-versions {
   display: block;
 }

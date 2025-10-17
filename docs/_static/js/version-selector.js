@@ -160,6 +160,7 @@
       listWrapper.setAttribute('aria-label', 'Available versions');
       listWrapper.hidden = true;
       listWrapper.setAttribute('aria-hidden', 'true');
+      listWrapper.style.display = 'none';
 
       var definitionList = document.createElement('dl');
       definitionList.className = 'rst-other-versions__list';
@@ -187,12 +188,17 @@
 
       var toggleFlyout = function (forceOpen) {
         var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !flyout.classList.contains('rst-open');
+        if (!shouldOpen && listWrapper.contains(document.activeElement)) {
+          current.focus();
+        }
         flyout.classList.toggle('rst-open', shouldOpen);
         if (shouldOpen) {
           listWrapper.hidden = false;
+          listWrapper.style.display = 'block';
           listWrapper.removeAttribute('aria-hidden');
         } else {
           listWrapper.hidden = true;
+          listWrapper.style.display = 'none';
           listWrapper.setAttribute('aria-hidden', 'true');
         }
         current.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
@@ -360,11 +366,18 @@
 
     if (listContainer) {
       var expanded = flyout.classList.contains('rst-open');
+      if (!expanded && listContainer.contains(document.activeElement)) {
+        if (currentControl) {
+          currentControl.focus();
+        }
+      }
       if (expanded) {
         listContainer.hidden = false;
+        listContainer.style.display = 'block';
         listContainer.removeAttribute('aria-hidden');
       } else {
         listContainer.hidden = true;
+        listContainer.style.display = 'none';
         listContainer.setAttribute('aria-hidden', 'true');
       }
     }
