@@ -53,8 +53,7 @@
     return option;
   }
 
-  function renderCurrentVersion(container, currentVersion, options) {
-    options = options || {};
+  function renderCurrentVersion(container, currentVersion) {
     var slug = null;
     if (currentVersion) {
       slug = currentVersion.slug || currentVersion.version || currentVersion.name || null;
@@ -66,52 +65,30 @@
       return;
     }
 
-    var preferSpan = !!options.useSpan;
-    var isSwitchContainer = !!options.insideSwitch;
-    var desiredTagName = preferSpan ? 'span' : 'div';
     var target = container.querySelector('.dmriprep-current-version');
-    if (target && target.tagName.toLowerCase() !== desiredTagName) {
-      target.parentNode.removeChild(target);
-      target = null;
-    }
     if (!target) {
-      target = document.createElement(desiredTagName);
-      target.className = preferSpan
-        ? 'dmriprep-current-version'
-        : 'version dmriprep-current-version';
-      if (isSwitchContainer || preferSpan) {
-        container.appendChild(target);
+      target = document.createElement('div');
+      target.className = 'version dmriprep-current-version';
+      var searchForm = container.querySelector('form');
+      if (searchForm && searchForm.parentNode === container) {
+        container.insertBefore(target, searchForm);
       } else {
-        var searchForm = container.querySelector('form');
-        if (searchForm && searchForm.parentNode === container) {
-          container.insertBefore(target, searchForm);
-        } else {
-          container.appendChild(target);
-        }
+        container.appendChild(target);
       }
     }
     target.textContent = slug;
   }
 
   function renderSelector(options, currentVersion) {
-    options = Array.isArray(options) ? options : [];
-    var searchContainer = document.querySelector('.wy-side-nav-search');
-    if (!searchContainer) {
+    var container = document.querySelector('.wy-side-nav-search');
+    if (!container) {
       console.warn('dmriprep: unable to locate sidebar container for version selector');
       return;
     }
 
-    var switchContainer = searchContainer.querySelector('.switch-menus .version-switch');
-    var container = switchContainer || searchContainer;
-    var hasDropdown = options.length > 0;
-
-    renderCurrentVersion(container, currentVersion, {
-      insideSwitch: !!switchContainer,
-      useSpan: !!switchContainer && !hasDropdown,
-    });
+    renderCurrentVersion(container, currentVersion);
 
     if (!options.length) {
-      initialised = true;
       return;
     }
 
