@@ -26,7 +26,7 @@
   gap: 8px;
   font-size: 90%;
   cursor: pointer;
-  color: #27ae60;
+  color: #fcfcfc;
   line-height: 1.6;
   text-align: left;
 }
@@ -44,11 +44,13 @@
 .rst-versions .rst-current-version__label {
   margin-left: 8px;
   font-weight: 700;
+  color: #fcfcfc;
 }
 
 .rst-versions .rst-current-version__value {
   margin-left: auto;
   font-weight: 700;
+  color: #27ae60;
 }
 
 .rst-versions .rst-current-version__toggle {
@@ -66,6 +68,14 @@
   color: #b3b3b3;
   display: none;
   background-color: #1f1d1d;
+  max-height: 55vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.rst-versions .rst-other-versions::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .rst-versions .rst-other-versions[hidden] {
