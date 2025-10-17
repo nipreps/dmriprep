@@ -11,6 +11,10 @@
   overflow: hidden;
 }
 
+.rst-versions::-webkit-scrollbar {
+  display: none;
+}
+
 .rst-versions a {
   color: #2980b9;
   text-decoration: none;
@@ -124,6 +128,29 @@
 .rst-versions .rst-other-versions span.current {
   background: #27ae60;
   color: #ffffff;
+}
+
+.dmriprep-version-banner {
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border-left: 4px solid #f0b37e;
+  background-color: #fff6e5;
+  color: #4c4a42;
+  font-size: 90%;
+  line-height: 1.5;
+  border-radius: 2px;
+}
+
+.dmriprep-version-banner a {
+  color: #2c7be5;
+  font-weight: 600;
+}
+
+.dmriprep-version-banner__title {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-right: 0.35em;
+  color: #b24d00;
 }
 
 @media screen and (max-width: 768px) {

@@ -2,6 +2,173 @@
   'use strict';
 
   var initialised = false;
+  var versionBannerId = 'dmriprep-version-banner';
+
+  function parseVersionString(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    var raw = String(value).trim();
+    if (!raw) {
+      return null;
+    }
+    var normalized = raw.replace(/^v/i, '');
+    var main = normalized;
+    var suffix = '';
+    var hyphenIndex = normalized.indexOf('-');
+    if (hyphenIndex !== -1) {
+      main = normalized.slice(0, hyphenIndex);
+      suffix = normalized.slice(hyphenIndex + 1);
+    }
+    var directSuffix = main.match(/^(\d+(?:\.\d+)*)([a-z]+)(\d*)$/i);
+    if (directSuffix) {
+      main = directSuffix[1];
+      suffix = directSuffix[2] + (directSuffix[3] || '');
+    } else if (!suffix) {
+      var trailingSuffix = normalized.match(/^(\d+(?:\.\d+)*)([a-z]+)(\d*)$/i);
+      if (trailingSuffix) {
+        main = trailingSuffix[1];
+        suffix = trailingSuffix[2] + (trailingSuffix[3] || '');
+      }
+    }
+    if (!/^\d+(?:\.\d+)*$/.test(main)) {
+      return null;
+    }
+    var segments = main.split('.').map(function (part) {
+      var parsed = parseInt(part, 10);
+      return isNaN(parsed) ? 0 : parsed;
+    });
+    var prereleaseLabel = null;
+    var prereleaseNumber = null;
+    if (suffix) {
+      var suffixMatch = suffix.match(/^([a-z]+)(\d*)$/i);
+      if (suffixMatch) {
+        prereleaseLabel = suffixMatch[1].toLowerCase();
+        prereleaseNumber = suffixMatch[2] ? parseInt(suffixMatch[2], 10) : 0;
+      } else {
+        prereleaseLabel = suffix.toLowerCase();
+      }
+    }
+    return {
+      segments: segments,
+      prerelease: prereleaseLabel,
+      prereleaseNumber: prereleaseNumber,
+      original: raw,
+    };
+  }
+
+  function prereleaseWeight(label) {
+    if (!label) {
+      return 6;
+    }
+    var normalized = label.toLowerCase();
+    if (normalized === 'post' || normalized === 'rev') {
+      return 7;
+    }
+    if (normalized === 'dev') {
+      return 0;
+    }
+    if (normalized === 'a' || normalized === 'alpha') {
+      return 1;
+    }
+    if (normalized === 'b' || normalized === 'beta') {
+      return 2;
+    }
+    if (normalized === 'rc' || normalized === 'c' || normalized === 'candidate') {
+      return 3;
+    }
+    if (normalized === 'final') {
+      return 5;
+    }
+    return 4;
+  }
+
+  function compareParsedVersions(a, b) {
+    if (!a && !b) {
+      return 0;
+    }
+    if (!a) {
+      return -1;
+    }
+    if (!b) {
+      return 1;
+    }
+    var maxLength = Math.max(a.segments.length, b.segments.length);
+    for (var index = 0; index < maxLength; index += 1) {
+      var aSegment = index < a.segments.length ? a.segments[index] : 0;
+      var bSegment = index < b.segments.length ? b.segments[index] : 0;
+      if (aSegment !== bSegment) {
+        return aSegment - bSegment;
+      }
+    }
+    var aWeight = prereleaseWeight(a.prerelease);
+    var bWeight = prereleaseWeight(b.prerelease);
+    if (aWeight !== bWeight) {
+      return aWeight - bWeight;
+    }
+    var aNumber = a.prereleaseNumber || 0;
+    var bNumber = b.prereleaseNumber || 0;
+    if (aNumber !== bNumber) {
+      return aNumber - bNumber;
+    }
+    return 0;
+  }
+
+  function compareVersionStrings(a, b) {
+    if (a === b) {
+      return 0;
+    }
+    var parsedA = parseVersionString(a);
+    var parsedB = parseVersionString(b);
+    if (!parsedA || !parsedB) {
+      if (a === undefined || a === null) {
+        return -1;
+      }
+      if (b === undefined || b === null) {
+        return 1;
+      }
+      if (a > b) {
+        return 1;
+      }
+      if (a < b) {
+        return -1;
+      }
+      return 0;
+    }
+    var comparison = compareParsedVersions(parsedA, parsedB);
+    if (comparison !== 0) {
+      return comparison;
+    }
+    return 0;
+  }
+
+  function isLikelyVersionSlug(value) {
+    if (!value && value !== 0) {
+      return false;
+    }
+    var stringValue = String(value).trim();
+    if (!stringValue) {
+      return false;
+    }
+    if (/latest/i.test(stringValue)) {
+      return false;
+    }
+    return /^(?:\d+\.)*\d+(?:[a-z]+\d*)?$/i.test(stringValue.replace(/^v/i, ''));
+  }
+
+  function isTaggedEntry(entry) {
+    if (!entry) {
+      return false;
+    }
+    if (entry.kind === 'tag' || entry.kind === 'release') {
+      return true;
+    }
+    if (entry.kind === 'branch' || entry.kind === 'head') {
+      return false;
+    }
+    var candidate = entry.slug || entry.version || entry.label || entry.name;
+    return isLikelyVersionSlug(candidate);
+  }
 
   function normaliseSlug(slug) {
     if (!slug && slug !== 0) {
@@ -113,6 +280,138 @@
       }
     }
     target.textContent = slug;
+  }
+
+  function findLatestTaggedEntry(entries) {
+    if (!entries || !entries.length) {
+      return null;
+    }
+    var latest = null;
+    entries.forEach(function (entry) {
+      if (!entry || !isTaggedEntry(entry)) {
+        return;
+      }
+      var slug = entry.slug || entry.version || entry.label || entry.name;
+      if (slug && String(slug).toLowerCase() === 'latest') {
+        return;
+      }
+      if (!latest) {
+        latest = entry;
+        return;
+      }
+      var entryKey = entry.version || entry.slug || entry.label || entry.name;
+      var latestKey = latest.version || latest.slug || latest.label || latest.name;
+      if (compareVersionStrings(entryKey, latestKey) > 0) {
+        latest = entry;
+      }
+    });
+    return latest;
+  }
+
+  function findLatestAlias(entries, latestTagged) {
+    if (!entries || !entries.length) {
+      return null;
+    }
+    var alias = null;
+    entries.forEach(function (entry) {
+      if (!entry) {
+        return;
+      }
+      var slug = entry.slug || entry.version || entry.label || entry.name;
+      if (!slug || String(slug).toLowerCase() !== 'latest') {
+        return;
+      }
+      if (!alias) {
+        alias = entry;
+        return;
+      }
+      if (latestTagged && entry.url && latestTagged.url && entry.url === latestTagged.url) {
+        alias = entry;
+      }
+    });
+    return alias;
+  }
+
+  function removeVersionBanner() {
+    var existing = document.getElementById(versionBannerId);
+    if (existing && existing.parentNode) {
+      existing.parentNode.removeChild(existing);
+    }
+  }
+
+  function updateVersionBanner(latestTagged, currentEntry, aliasEntry) {
+    if (!latestTagged || !currentEntry) {
+      removeVersionBanner();
+      return;
+    }
+    var currentSlug = currentEntry.slug || currentEntry.version || currentEntry.label || currentEntry.name;
+    if (!currentSlug) {
+      removeVersionBanner();
+      return;
+    }
+    var normalizedSlug = String(currentSlug).toLowerCase();
+    if (normalizedSlug === 'latest') {
+      removeVersionBanner();
+      return;
+    }
+    if (!isTaggedEntry(currentEntry)) {
+      removeVersionBanner();
+      return;
+    }
+    var currentKey = currentEntry.version || currentEntry.slug || currentEntry.label || currentEntry.name;
+    var latestKey = latestTagged.version || latestTagged.slug || latestTagged.label || latestTagged.name;
+    if (compareVersionStrings(currentKey, latestKey) >= 0) {
+      removeVersionBanner();
+      return;
+    }
+    var container =
+      document.querySelector('.wy-nav-content .rst-content') ||
+      document.querySelector('.wy-nav-content');
+    if (!container) {
+      removeVersionBanner();
+      return;
+    }
+    var banner = document.getElementById(versionBannerId);
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = versionBannerId;
+      banner.className = 'dmriprep-version-banner';
+      banner.setAttribute('role', 'region');
+      banner.setAttribute('aria-live', 'polite');
+    }
+    if (banner.parentNode !== container) {
+      container.insertBefore(banner, container.firstChild || null);
+    } else if (banner !== container.firstChild) {
+      container.insertBefore(banner, container.firstChild);
+    }
+    while (banner.firstChild) {
+      banner.removeChild(banner.firstChild);
+    }
+    var title = document.createElement('span');
+    title.className = 'dmriprep-version-banner__title';
+    title.textContent = 'Note';
+    banner.appendChild(title);
+    banner.appendChild(document.createTextNode(': You are viewing the documentation for '));
+
+    var currentLabel = currentEntry.label || currentEntry.name || currentEntry.version || currentEntry.slug;
+    var currentStrong = document.createElement('strong');
+    currentStrong.textContent = currentLabel;
+    banner.appendChild(currentStrong);
+    banner.appendChild(document.createTextNode(', which is not the latest release. '));
+
+    var latestLabel = latestTagged.label || latestTagged.name || latestTagged.version || latestTagged.slug;
+    var latestLink = (aliasEntry && aliasEntry.url) || latestTagged.url || null;
+    if (latestLink) {
+      var link = document.createElement('a');
+      link.href = latestLink;
+      link.textContent = 'View the latest (' + latestLabel + ')';
+      banner.appendChild(link);
+    } else {
+      var latestText = document.createElement('strong');
+      latestText.textContent = 'Latest: ' + latestLabel;
+      banner.appendChild(latestText);
+    }
+    banner.appendChild(document.createTextNode('.'));
   }
 
   function renderFlyout(container, versions, currentVersion) {
@@ -260,29 +559,44 @@
 
     var entries = versions
       .map(function (entry) {
-        if (!entry || !entry.url) {
+        if (!entry) {
           return null;
         }
         var entrySlug =
           normaliseSlug(entry.slug) ||
           normaliseSlug(entry.version) ||
           normaliseSlug(entry.name);
-        var entryName = entry.name || entry.version || entry.slug || entrySlug;
-        if (!entrySlug || !entryName) {
+        if (!entrySlug) {
           return null;
+        }
+        var entryLabel = entry.label || entry.name || entry.version || entrySlug;
+        if (!entryLabel) {
+          return null;
+        }
+        var entryUrl = null;
+        if (entry.urls && entry.urls.documentation) {
+          entryUrl = entry.urls.documentation;
+        } else if (entry.url) {
+          entryUrl = entry.url;
+        }
+        var kind = entry.kind || entry.type || entry.category || null;
+        if (kind === 'branch') {
+          kind = 'head';
         }
         return {
           slug: entrySlug,
           version: entry.version || entrySlug,
-          name: entry.name || entryName,
-          label: entryName,
-          url: entry.url,
+          name: entry.name || entryLabel,
+          label: entryLabel,
+          url: entryUrl || null,
+          kind: kind,
           active: false,
         };
       })
       .filter(Boolean);
 
     if (!entries.length) {
+      removeVersionBanner();
       return false;
     }
 
@@ -309,7 +623,19 @@
     });
 
     if (!activeEntry && slug) {
-      activeEntry = { slug: slug, label: slug, url: null, active: true };
+      var fallbackKind = (currentVersion && currentVersion.kind) || null;
+      if (!fallbackKind && currentVersion && isTaggedEntry(currentVersion)) {
+        fallbackKind = 'tag';
+      }
+      activeEntry = {
+        slug: slug,
+        version: slug,
+        name: slug,
+        label: slug,
+        url: null,
+        kind: fallbackKind,
+        active: true,
+      };
     }
 
     var headerLabel = null;
@@ -391,6 +717,34 @@
       }
     }
 
+    var bannerCurrent = activeEntry;
+    if (!bannerCurrent && currentVersion) {
+      bannerCurrent = {
+        slug: currentVersion.slug || slug || null,
+        version: currentVersion.version || currentVersion.slug || slug || null,
+        name:
+          currentVersion.name ||
+          currentVersion.label ||
+          currentVersion.version ||
+          currentVersion.slug ||
+          slug ||
+          null,
+        label:
+          currentVersion.label ||
+          currentVersion.name ||
+          currentVersion.version ||
+          currentVersion.slug ||
+          slug ||
+          null,
+        url: currentVersion.url || null,
+        kind: currentVersion.kind || null,
+      };
+    }
+
+    var latestTagged = findLatestTaggedEntry(entries);
+    var latestAlias = findLatestAlias(entries, latestTagged);
+    updateVersionBanner(latestTagged, bannerCurrent, latestAlias);
+
     if (currentControl) {
       currentControl.setAttribute('aria-expanded', flyout.classList.contains('rst-open') ? 'true' : 'false');
     }
@@ -414,26 +768,64 @@
       removeFallbackCurrentVersion(container);
     } else {
       renderFallbackCurrentVersion(container, currentVersion);
+      removeVersionBanner();
     }
 
     initialised = true;
   }
 
-  function mapEntry(entry) {
-    if (!entry) {
+  function mapEntry(entry, fallbackKind, options) {
+    if (entry === null || entry === undefined) {
       return null;
     }
-    var url = entry.urls ? entry.urls.documentation : entry.url;
-    if (!url) {
+    options = options || {};
+    if (typeof entry === 'string') {
+      var stringSlug = normaliseSlug(entry) || entry;
+      if (!stringSlug) {
+        return null;
+      }
+      var derivedUrl = null;
+      if (options.baseUrl) {
+        derivedUrl = options.baseUrl.replace(/\/?$/, '/') + stringSlug.replace(/^\/+/, '') + '/';
+      }
+      return {
+        slug: stringSlug,
+        version: stringSlug,
+        name: entry,
+        label: entry,
+        url: derivedUrl,
+        kind: fallbackKind || null,
+      };
+    }
+    if (typeof entry !== 'object') {
       return null;
     }
-    var rawSlug = entry.slug || entry.version || entry.name;
+    var entryUrl = null;
+    if (entry.urls && entry.urls.documentation) {
+      entryUrl = entry.urls.documentation;
+    } else if (entry.url) {
+      entryUrl = entry.url;
+    }
+    var rawSlug = entry.slug || entry.version || entry.name || entry.identifier;
     var slug = normaliseSlug(rawSlug) || rawSlug;
+    if (!slug) {
+      return null;
+    }
+    if (!entryUrl && options.baseUrl) {
+      entryUrl = options.baseUrl.replace(/\/?$/, '/') + slug.replace(/^\/+/, '') + '/';
+    }
+    var label = entry.label || entry.name || entry.version || slug;
+    var kind = entry.kind || entry.type || entry.category || fallbackKind || null;
+    if (kind === 'branch') {
+      kind = 'head';
+    }
     return {
       slug: slug,
-      url: url,
       version: entry.version || slug,
-      name: entry.name || slug || entry.version,
+      name: entry.name || label,
+      label: label,
+      url: entryUrl || null,
+      kind: kind,
     };
   }
 
@@ -456,47 +848,48 @@
     if (!data) {
       return [];
     }
+    options = options || {};
+    var collected = [];
+
+    function addList(list, assumedKind) {
+      if (!Array.isArray(list) || !list.length) {
+        return;
+      }
+      list.forEach(function (entry) {
+        var inferredKind = assumedKind;
+        if (entry && typeof entry === 'object') {
+          inferredKind = entry.kind || entry.type || entry.category || inferredKind;
+        }
+        var mapped = mapEntry(entry, inferredKind, options);
+        if (mapped) {
+          collected.push(mapped);
+        }
+      });
+    }
+
     if (Array.isArray(data)) {
-      return uniqueBySlug(data.map(mapEntry));
+      addList(data, null);
+    } else if (typeof data === 'object') {
+      if (Array.isArray(data.versions)) {
+        addList(data.versions, null);
+      } else if (data.versions && typeof data.versions === 'object') {
+        addList(data.versions.active, null);
+        addList(data.versions.tags, 'tag');
+        addList(data.versions.releases, 'tag');
+        addList(data.versions.branches, 'head');
+      }
+      addList(data.active, null);
+      addList(data.inactive, null);
+      addList(data.tags, 'tag');
+      addList(data.releases, 'tag');
+      addList(data.branches, 'head');
+      addList(data.heads, 'head');
     }
-    if (data.versions) {
-      return normaliseVersions(data.versions.active || data.versions, options);
+
+    if (!collected.length) {
+      return [];
     }
-    var legacyLists = [];
-    if (data.heads) {
-      legacyLists = legacyLists.concat(data.heads);
-    }
-    if (data.tags) {
-      legacyLists = legacyLists.concat(data.tags);
-    }
-    if (legacyLists.length && options && options.baseUrl) {
-      return uniqueBySlug(
-        legacyLists.map(function (entry) {
-          if (typeof entry === 'string') {
-            var stringSlug = normaliseSlug(entry) || entry;
-            return {
-              slug: stringSlug,
-              version: stringSlug,
-              name: entry,
-              url: options.baseUrl.replace(/\/?$/, '/') + entry.replace(/^\/+/, '') + '/',
-            };
-          }
-          if (entry && typeof entry === 'object') {
-            if (!entry.url && options.baseUrl) {
-              var slug = entry.slug || entry.version || entry.name;
-              if (slug) {
-                entry = Object.assign({}, entry, {
-                  url: options.baseUrl.replace(/\/?$/, '/') + slug.replace(/^\/+/, '') + '/',
-                });
-              }
-            }
-            return mapEntry(entry);
-          }
-          return null;
-        })
-      );
-    }
-    return [];
+    return uniqueBySlug(collected);
   }
 
   function deriveCurrentVersionFromList(versions) {
@@ -637,7 +1030,7 @@
       } else {
         console.warn('dmriprep: unable to determine base URL for legacy manifest entries');
       }
-      var versions = normaliseVersions(manifest.versions || manifest, {
+      var versions = normaliseVersions(manifest, {
         baseUrl: baseUrl,
       });
       var resolvedCurrent = deriveCurrentVersionFromList(versions);
