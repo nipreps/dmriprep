@@ -127,7 +127,10 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options: dict[str, object] = {}
+html_theme_options: dict[str, object] = {
+    'flyout_display': 'attached',
+    'version_selector': True,
+}
 
 html_context = globals().get('html_context', {})
 
