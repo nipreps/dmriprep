@@ -46,7 +46,14 @@
     return slug;
   }
 
-  function renderCurrentVersion(container, currentVersion) {
+  function removeFallbackCurrentVersion(container) {
+    var existing = container.querySelector('.dmriprep-current-version');
+    if (existing && existing.parentNode === container) {
+      container.removeChild(existing);
+    }
+  }
+
+  function renderFallbackCurrentVersion(container, currentVersion) {
     var slug = null;
     if (currentVersion) {
       slug = currentVersion.slug || currentVersion.version || currentVersion.name || null;
@@ -55,6 +62,7 @@
       slug = getCurrentSlug();
     }
     if (!slug) {
+      removeFallbackCurrentVersion(container);
       return;
     }
 
@@ -78,16 +86,114 @@
       return false;
     }
 
-    var flyout = parent.querySelector('readthedocs-flyout');
+    var existingFlyoutComponent = parent.querySelector('readthedocs-flyout');
+    if (existingFlyoutComponent && existingFlyoutComponent.parentNode === parent) {
+      parent.removeChild(existingFlyoutComponent);
+    }
+
+    var flyout = parent.querySelector('.dmriprep-version-flyout');
     if (!flyout) {
-      flyout = document.createElement('readthedocs-flyout');
-      flyout.setAttribute('position', 'bottom-left');
+      flyout = document.createElement('div');
+      flyout.className = 'dmriprep-version-flyout rst-versions shift-up';
+      flyout.setAttribute('role', 'note');
+      flyout.setAttribute('aria-label', 'versions');
+
+      var current = document.createElement('span');
+      current.className = 'rst-current-version';
+      current.setAttribute('role', 'button');
+      current.setAttribute('tabindex', '0');
+      current.setAttribute('aria-haspopup', 'true');
+      current.setAttribute('aria-expanded', 'false');
+
+      var icon = document.createElement('span');
+      icon.className = 'fa fa-book';
+      icon.setAttribute('aria-hidden', 'true');
+      current.appendChild(icon);
+
+      var title = document.createElement('span');
+      title.className = 'rst-current-version__title';
+      title.textContent = 'Read the Docs';
+      current.appendChild(title);
+
+      var label = document.createElement('span');
+      label.className = 'rst-current-version__label';
+      current.appendChild(label);
+
+      var toggleIcon = document.createElement('span');
+      toggleIcon.className = 'fa fa-chevron-down rst-current-version__toggle';
+      toggleIcon.setAttribute('aria-hidden', 'true');
+      current.appendChild(toggleIcon);
+
+      var listWrapper = document.createElement('div');
+      listWrapper.className = 'rst-other-versions';
+      listWrapper.setAttribute('role', 'list');
+      listWrapper.setAttribute('aria-label', 'Available versions');
+      listWrapper.hidden = true;
+
+      var definitionList = document.createElement('dl');
+      definitionList.className = 'rst-other-versions__list';
+      definitionList.setAttribute('role', 'presentation');
+      listWrapper.appendChild(definitionList);
+
+      flyout.appendChild(current);
+      flyout.appendChild(listWrapper);
+
+      var listId = 'dmriprep-version-list';
+      var uniqueId = listId;
+      var suffix = 1;
+      while (document.getElementById(uniqueId)) {
+        uniqueId = listId + '-' + suffix;
+        suffix += 1;
+      }
+      listWrapper.id = uniqueId;
+      current.setAttribute('aria-controls', uniqueId);
+
       if (container.nextSibling) {
         parent.insertBefore(flyout, container.nextSibling);
       } else {
         parent.appendChild(flyout);
       }
+
+      var toggleFlyout = function (forceOpen) {
+        var shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !flyout.classList.contains('rst-open');
+        flyout.classList.toggle('rst-open', shouldOpen);
+        listWrapper.hidden = !shouldOpen;
+        current.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+      };
+
+      current.addEventListener('click', function (event) {
+        event.preventDefault();
+        toggleFlyout();
+      });
+
+      current.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleFlyout();
+        } else if (event.key === 'Escape') {
+          toggleFlyout(false);
+          current.focus();
+        }
+      });
+
+      flyout.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          toggleFlyout(false);
+          current.focus();
+        }
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!flyout.contains(event.target)) {
+          toggleFlyout(false);
+        }
+      });
     }
+
+    var currentControl = flyout.querySelector('.rst-current-version');
+    var labelTarget = flyout.querySelector('.rst-current-version__label');
+    var listContainer = flyout.querySelector('.rst-other-versions');
+    var definitionList = flyout.querySelector('.rst-other-versions__list');
 
     var slug = null;
     var currentUrl = null;
@@ -109,21 +215,13 @@
         if (!entrySlug || !entryName) {
           return null;
         }
-        var active = false;
-        if (slug) {
-          active = entry.slug === slug || entry.version === slug || entry.name === slug;
-        }
-        if (!active && currentUrl && entry.url === currentUrl) {
-          active = true;
-        }
-        if (!active && entry.url && window.location.href.indexOf(entry.url) === 0) {
-          active = true;
-        }
         return {
           slug: entrySlug,
+          version: entry.version || entrySlug,
+          name: entry.name || entryName,
           label: entryName,
           url: entry.url,
-          active: active,
+          active: false,
         };
       })
       .filter(Boolean);
@@ -132,23 +230,79 @@
       return false;
     }
 
-    var applyVersions = function (target) {
-      target.versions = entries;
-    };
+    var activeEntry = null;
+    entries.forEach(function (entry) {
+      var isActive = false;
+      if (slug) {
+        isActive =
+          entry.slug === slug ||
+          entry.version === slug ||
+          entry.label === slug ||
+          (entry.name && entry.name === slug);
+      }
+      if (!isActive && currentUrl && entry.url === currentUrl) {
+        isActive = true;
+      }
+      if (!isActive && entry.url && window.location.href.indexOf(entry.url) === 0) {
+        isActive = true;
+      }
+      entry.active = isActive;
+      if (isActive) {
+        activeEntry = entry;
+      }
+    });
 
-    if (window.customElements && typeof window.customElements.whenDefined === 'function') {
-      window.customElements.whenDefined('readthedocs-flyout').then(function () {
-        applyVersions(flyout);
-      });
+    if (!activeEntry && slug) {
+      activeEntry = { slug: slug, label: slug, url: null, active: true };
     }
 
-    if (!window.customElements || window.customElements.get('readthedocs-flyout')) {
-      applyVersions(flyout);
+    var headerLabel = (activeEntry && activeEntry.label) || slug || entries[0].label;
+    if (labelTarget) {
+      labelTarget.textContent = 'v: ' + headerLabel;
+    }
+
+    while (definitionList && definitionList.firstChild) {
+      definitionList.removeChild(definitionList.firstChild);
+    }
+
+    if (definitionList) {
+      var versionsTitle = document.createElement('dt');
+      versionsTitle.textContent = 'Versions';
+      definitionList.appendChild(versionsTitle);
+
+      entries.forEach(function (entry) {
+        var item = document.createElement('dd');
+        item.setAttribute('role', 'listitem');
+        var target = null;
+        if (entry.url) {
+          target = document.createElement('a');
+          target.href = entry.url;
+        } else {
+          target = document.createElement('span');
+        }
+        target.textContent = entry.label;
+        if (entry.active) {
+          target.classList.add('current');
+          if (entry.url) {
+            target.setAttribute('aria-current', 'page');
+          }
+        }
+        item.appendChild(target);
+        definitionList.appendChild(item);
+      });
     }
 
     var legacyDropdown = container.querySelector('.dmriprep-version-selector');
     if (legacyDropdown && legacyDropdown.parentNode === container) {
       container.removeChild(legacyDropdown);
+    }
+
+    if (listContainer) {
+      listContainer.hidden = !flyout.classList.contains('rst-open');
+    }
+
+    if (currentControl) {
+      currentControl.setAttribute('aria-expanded', flyout.classList.contains('rst-open') ? 'true' : 'false');
     }
 
     return true;
@@ -161,13 +315,16 @@
       return;
     }
 
-    renderCurrentVersion(container, currentVersion);
-
-    if (!options.length) {
-      return;
+    var rendered = false;
+    if (options.length) {
+      rendered = renderFlyout(container, options, currentVersion);
     }
 
-    renderFlyout(container, options, currentVersion);
+    if (rendered) {
+      removeFallbackCurrentVersion(container);
+    } else {
+      renderFallbackCurrentVersion(container, currentVersion);
+    }
 
     initialised = true;
   }

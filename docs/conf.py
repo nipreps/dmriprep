@@ -127,10 +127,7 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options: dict[str, object] = {
-    'flyout_display': 'attached',
-    'version_selector': True,
-}
+html_theme_options: dict[str, object] = {}
 
 html_context = globals().get('html_context', {})
 
@@ -140,6 +137,8 @@ html_context = globals().get('html_context', {})
 html_static_path = ['_static']
 
 html_js_files = ['js/version-selector.js']
+
+html_css_files = ['css/version-flyout.css']
 
 # Ensure the versions manifest is published alongside the built documentation.
 html_extra_path = ['_static/versions.json']

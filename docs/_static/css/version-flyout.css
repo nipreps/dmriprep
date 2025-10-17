@@ -1,0 +1,132 @@
+.rst-versions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  color: #fcfcfc;
+  background: #1f1d1d;
+  font-family: "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+  z-index: 400;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.rst-versions a {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.rst-versions .rst-current-version {
+  padding: 12px;
+  background-color: #272525;
+  display: block;
+  text-align: right;
+  font-size: 90%;
+  cursor: pointer;
+  color: #27ae60;
+  line-height: 1.6;
+}
+
+.rst-versions .rst-current-version::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.rst-versions .rst-current-version:focus {
+  outline: 2px solid #27ae60;
+  outline-offset: 2px;
+}
+
+.rst-versions .rst-current-version .fa-book {
+  float: left;
+  color: #fcfcfc;
+  margin-right: 8px;
+}
+
+.rst-versions .rst-current-version__title {
+  float: left;
+  font-weight: 700;
+  color: #fcfcfc;
+}
+
+.rst-versions .rst-current-version__label {
+  margin-left: 8px;
+}
+
+.rst-versions .rst-current-version__toggle {
+  margin-left: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.rst-versions.rst-open .rst-current-version__toggle {
+  transform: rotate(180deg);
+}
+
+.rst-versions .rst-other-versions {
+  font-size: 90%;
+  padding: 12px;
+  color: #b3b3b3;
+  display: none;
+  background-color: #1f1d1d;
+}
+
+.rst-versions.rst-open .rst-other-versions {
+  display: block;
+}
+
+.rst-versions .rst-other-versions dl {
+  margin: 0;
+}
+
+.rst-versions .rst-other-versions dt {
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
+.rst-versions .rst-other-versions dd {
+  display: inline-block;
+  margin: 0 12px 6px 0;
+}
+
+.rst-versions .rst-other-versions a,
+.rst-versions .rst-other-versions span.current {
+  display: inline-block;
+  padding: 6px 8px;
+  border-radius: 3px;
+}
+
+.rst-versions .rst-other-versions a {
+  color: #fcfcfc;
+}
+
+.rst-versions .rst-other-versions a:hover,
+.rst-versions .rst-other-versions a:focus {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.rst-versions .rst-other-versions a.current,
+.rst-versions .rst-other-versions span.current {
+  background: #27ae60;
+  color: #ffffff;
+}
+
+@media screen and (max-width: 768px) {
+  .rst-versions {
+    width: 85%;
+    display: none;
+  }
+
+  .rst-versions.shift-up {
+    display: block;
+  }
+}
+
+@media print {
+  .rst-versions {
+    display: none;
+  }
+}
