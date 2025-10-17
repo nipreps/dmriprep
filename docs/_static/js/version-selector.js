@@ -53,31 +53,75 @@
     return option;
   }
 
-  function renderSelector(options, currentVersion) {
-    if (initialised || !options.length) {
+  function renderCurrentVersion(container, currentVersion) {
+    var slug = null;
+    if (currentVersion) {
+      slug = currentVersion.slug || currentVersion.version || currentVersion.name || null;
+    }
+    if (!slug) {
+      slug = getCurrentSlug();
+    }
+    if (!slug) {
       return;
     }
+
+    var target = container.querySelector('.dmriprep-current-version');
+    if (!target) {
+      target = document.createElement('div');
+      target.className = 'version dmriprep-current-version';
+      var searchForm = container.querySelector('form');
+      if (searchForm && searchForm.parentNode === container) {
+        container.insertBefore(target, searchForm);
+      } else {
+        container.appendChild(target);
+      }
+    }
+    target.textContent = slug;
+  }
+
+  function renderSelector(options, currentVersion) {
     var container = document.querySelector('.wy-side-nav-search');
     if (!container) {
       console.warn('dmriprep: unable to locate sidebar container for version selector');
       return;
     }
 
-    var wrapper = document.createElement('div');
-    wrapper.className = 'dmriprep-version-selector';
+    renderCurrentVersion(container, currentVersion);
 
-    var label = document.createElement('label');
-    label.textContent = 'Versions';
-    label.setAttribute('for', 'dmriprep-version-select');
+    if (!options.length) {
+      return;
+    }
 
-    var select = document.createElement('select');
-    select.id = 'dmriprep-version-select';
-    select.addEventListener('change', function (event) {
-      var target = event.target;
-      if (target && target.value) {
-        window.location.href = target.value;
+    var wrapper = container.querySelector('.dmriprep-version-selector');
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.className = 'dmriprep-version-selector';
+    }
+
+    var label = wrapper.querySelector('label');
+    if (!label) {
+      label = document.createElement('label');
+      label.textContent = 'Versions';
+      label.setAttribute('for', 'dmriprep-version-select');
+      wrapper.appendChild(label);
+    }
+
+    var select = wrapper.querySelector('#dmriprep-version-select');
+    if (!select) {
+      select = document.createElement('select');
+      select.id = 'dmriprep-version-select';
+      select.addEventListener('change', function (event) {
+        var target = event.target;
+        if (target && target.value) {
+          window.location.href = target.value;
+        }
+      });
+      wrapper.appendChild(select);
+    } else {
+      while (select.firstChild) {
+        select.removeChild(select.firstChild);
       }
-    });
+    }
 
     options.forEach(function (optionData) {
       var option = buildOption(optionData);
@@ -97,10 +141,9 @@
       select.appendChild(option);
     });
 
-    wrapper.appendChild(label);
-    wrapper.appendChild(select);
-
-    container.appendChild(wrapper);
+    if (wrapper.parentNode !== container) {
+      container.appendChild(wrapper);
+    }
     initialised = true;
   }
 
@@ -136,7 +179,7 @@
     });
   }
 
-  function normaliseVersions(data) {
+  function normaliseVersions(data, options) {
     if (!data) {
       return [];
     }
@@ -144,7 +187,40 @@
       return uniqueBySlug(data.map(mapEntry));
     }
     if (data.versions) {
-      return normaliseVersions(data.versions.active || data.versions);
+      return normaliseVersions(data.versions.active || data.versions, options);
+    }
+    var legacyLists = [];
+    if (data.heads) {
+      legacyLists = legacyLists.concat(data.heads);
+    }
+    if (data.tags) {
+      legacyLists = legacyLists.concat(data.tags);
+    }
+    if (legacyLists.length && options && options.baseUrl) {
+      return uniqueBySlug(
+        legacyLists.map(function (entry) {
+          if (typeof entry === 'string') {
+            return {
+              slug: entry,
+              version: entry,
+              name: entry,
+              url: options.baseUrl.replace(/\/?$/, '/') + entry.replace(/^\/+/, '') + '/',
+            };
+          }
+          if (entry && typeof entry === 'object') {
+            if (!entry.url && options.baseUrl) {
+              var slug = entry.slug || entry.version || entry.name;
+              if (slug) {
+                entry = Object.assign({}, entry, {
+                  url: options.baseUrl.replace(/\/?$/, '/') + slug.replace(/^\/+/, '') + '/',
+                });
+              }
+            }
+            return mapEntry(entry);
+          }
+          return null;
+        })
+      );
     }
     return [];
   }
@@ -202,6 +278,53 @@
     return base + '_static/versions.json';
   }
 
+  function deriveBaseUrl(manifestUrl, currentVersion) {
+    if (!manifestUrl) {
+      return null;
+    }
+    try {
+      var resolved = new URL(manifestUrl, window.location.href);
+      var href = resolved.href;
+      var withoutStatic = href.replace(/_static\/versions\.json[^#?]*$/, '');
+      if (currentVersion && currentVersion.slug) {
+        var slugPattern = new RegExp(
+          currentVersion.slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\/?$'
+        );
+        if (slugPattern.test(withoutStatic)) {
+          var trimmed = withoutStatic.replace(slugPattern, '');
+          if (trimmed.slice(-1) !== '/') {
+            trimmed += '/';
+          }
+          return trimmed;
+        }
+      }
+      var lastSlash = withoutStatic.lastIndexOf('/', withoutStatic.length - 2);
+      if (lastSlash !== -1) {
+        return withoutStatic.slice(0, lastSlash + 1);
+      }
+      if (withoutStatic.slice(-1) !== '/') {
+        withoutStatic += '/';
+      }
+      return withoutStatic;
+    } catch (error) {
+      console.warn('dmriprep: unable to derive base URL from manifest location', error);
+    }
+    var slug = (currentVersion && currentVersion.slug) || getCurrentSlug();
+    if (slug) {
+      var path = window.location.pathname || '';
+      var slugIndex = path.indexOf('/' + slug + '/');
+      if (slugIndex !== -1) {
+        var prefix = path.slice(0, slugIndex + 1);
+        var origin = window.location.origin || '';
+        if (prefix.slice(-1) !== '/') {
+          prefix += '/';
+        }
+        return origin + prefix;
+      }
+    }
+    return null;
+  }
+
   function bootstrapWithAddon(event) {
     var config = getConfigFromAddon(event);
     if (!config) {
@@ -210,7 +333,11 @@
     var versions = normaliseVersions({ versions: config.versions });
     var current = mapEntry(config.versions && config.versions.current);
     if (!versions.length) {
-      return false;
+      if (current) {
+        versions = [current];
+      } else {
+        return false;
+      }
     }
     renderSelector(versions, current);
     return true;
@@ -221,13 +348,37 @@
       return;
     }
     var manifestUrl = resolveManifestUrl();
+    var currentVersion = null;
+    var slug = getCurrentSlug();
+    if (slug) {
+      currentVersion = { slug: slug };
+    }
     fetchManifest(manifestUrl).then(function (manifest) {
       if (!manifest) {
         return;
       }
-      var versions = normaliseVersions(manifest.versions || manifest);
-      var current = deriveCurrentVersionFromList(versions);
-      renderSelector(versions, current);
+      var baseUrl = deriveBaseUrl(manifestUrl, currentVersion);
+      if (baseUrl) {
+        console.debug('dmriprep: derived documentation base URL', baseUrl);
+      } else {
+        console.warn('dmriprep: unable to determine base URL for legacy manifest entries');
+      }
+      var versions = normaliseVersions(manifest.versions || manifest, {
+        baseUrl: baseUrl,
+      });
+      var resolvedCurrent = deriveCurrentVersionFromList(versions);
+      if (resolvedCurrent) {
+        currentVersion = resolvedCurrent;
+      }
+      if (!versions.length && currentVersion) {
+        versions = [currentVersion];
+      }
+      renderSelector(versions, currentVersion);
+      if (versions.length) {
+        console.debug('dmriprep: loaded versions manifest', versions);
+      } else {
+        console.warn('dmriprep: versions manifest did not include any entries');
+      }
     });
   }
 

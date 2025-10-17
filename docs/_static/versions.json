@@ -1,17 +1,120 @@
 {
-  "tags": [
-    "0.5.0",
-    "0.5.0rc0",
-    "0.4.0",
-    "0.3.0",
-    "0.2.2",
-    "0.2.1",
-    "0.2.0",
-    "0.1.1",
-    "0.1.1a0",
-    "0.1.0"
-  ],
   "heads": [
-    "master"
-  ]
+    {
+      "version": "master",
+      "name": "master",
+      "url": "https://nipreps.github.io/dmriprep/master/"
+    }
+  ],
+  "tags": [
+    {
+      "version": "0.5.0",
+      "name": "0.5.0",
+      "url": "https://nipreps.github.io/dmriprep/0.5.0/"
+    },
+    {
+      "version": "0.5.0rc0",
+      "name": "0.5.0rc0",
+      "url": "https://nipreps.github.io/dmriprep/0.5.0rc0/"
+    },
+    {
+      "version": "0.4.0",
+      "name": "0.4.0",
+      "url": "https://nipreps.github.io/dmriprep/0.4.0/"
+    },
+    {
+      "version": "0.3.0",
+      "name": "0.3.0",
+      "url": "https://nipreps.github.io/dmriprep/0.3.0/"
+    },
+    {
+      "version": "0.2.2",
+      "name": "0.2.2",
+      "url": "https://nipreps.github.io/dmriprep/0.2.2/"
+    },
+    {
+      "version": "0.2.1",
+      "name": "0.2.1",
+      "url": "https://nipreps.github.io/dmriprep/0.2.1/"
+    },
+    {
+      "version": "0.2.0",
+      "name": "0.2.0",
+      "url": "https://nipreps.github.io/dmriprep/0.2.0/"
+    },
+    {
+      "version": "0.1.1",
+      "name": "0.1.1",
+      "url": "https://nipreps.github.io/dmriprep/0.1.1/"
+    },
+    {
+      "version": "0.1.1a0",
+      "name": "0.1.1a0",
+      "url": "https://nipreps.github.io/dmriprep/0.1.1a0/"
+    },
+    {
+      "version": "0.1.0",
+      "name": "0.1.0",
+      "url": "https://nipreps.github.io/dmriprep/0.1.0/"
+    }
+  ],
+  "versions": [
+    {
+      "version": "master",
+      "name": "master",
+      "url": "https://nipreps.github.io/dmriprep/master/"
+    },
+    {
+      "version": "0.5.0",
+      "name": "0.5.0",
+      "url": "https://nipreps.github.io/dmriprep/0.5.0/"
+    },
+    {
+      "version": "0.5.0rc0",
+      "name": "0.5.0rc0",
+      "url": "https://nipreps.github.io/dmriprep/0.5.0rc0/"
+    },
+    {
+      "version": "0.4.0",
+      "name": "0.4.0",
+      "url": "https://nipreps.github.io/dmriprep/0.4.0/"
+    },
+    {
+      "version": "0.3.0",
+      "name": "0.3.0",
+      "url": "https://nipreps.github.io/dmriprep/0.3.0/"
+    },
+    {
+      "version": "0.2.2",
+      "name": "0.2.2",
+      "url": "https://nipreps.github.io/dmriprep/0.2.2/"
+    },
+    {
+      "version": "0.2.1",
+      "name": "0.2.1",
+      "url": "https://nipreps.github.io/dmriprep/0.2.1/"
+    },
+    {
+      "version": "0.2.0",
+      "name": "0.2.0",
+      "url": "https://nipreps.github.io/dmriprep/0.2.0/"
+    },
+    {
+      "version": "0.1.1",
+      "name": "0.1.1",
+      "url": "https://nipreps.github.io/dmriprep/0.1.1/"
+    },
+    {
+      "version": "0.1.1a0",
+      "name": "0.1.1a0",
+      "url": "https://nipreps.github.io/dmriprep/0.1.1a0/"
+    },
+    {
+      "version": "0.1.0",
+      "name": "0.1.0",
+      "url": "https://nipreps.github.io/dmriprep/0.1.0/"
+    }
+  ],
+  "downloads": [],
+  "subprojects": []
 }
