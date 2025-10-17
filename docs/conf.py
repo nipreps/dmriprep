@@ -138,6 +138,8 @@ html_static_path = ['_static']
 
 html_js_files = ['js/version-selector.js']
 
+html_css_files = ['css/version-flyout.css']
+
 # Ensure the versions manifest is published alongside the built documentation.
 html_extra_path = ['_static/versions.json']
 

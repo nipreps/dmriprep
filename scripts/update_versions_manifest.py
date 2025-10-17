@@ -9,6 +9,8 @@ import pathlib
 import subprocess
 from typing import Iterable, List, Sequence
 
+from versions import slug_from_tag
+
 DEFAULT_HEAD_CANDIDATES: Sequence[str] = ("master", "main", "latest", "stable")
 
 
@@ -24,8 +26,17 @@ def read_git_tags() -> List[str]:
 
 
 def discover_tags(site: pathlib.Path, candidates: Iterable[str]) -> List[str]:
-    """Filter tags that have a rendered documentation directory."""
-    return [candidate for candidate in candidates if (site / candidate).is_dir()]
+    """Return release slugs that have a rendered documentation directory."""
+    slugs: List[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        slug = slug_from_tag(candidate)
+        if not slug or slug in seen:
+            continue
+        if (site / slug).is_dir():
+            slugs.append(slug)
+            seen.add(slug)
+    return slugs
 
 
 def discover_heads(
@@ -63,12 +74,16 @@ def derive_base_url(repository: str | None) -> str:
     return f"https://{owner}.github.io/{repo_name}/"
 
 
-def format_entry(identifier: str, base_url: str) -> dict[str, str]:
-    return {
+def format_entry(identifier: str, base_url: str, *, kind: str | None = None) -> dict[str, str]:
+    entry = {
         "version": identifier,
         "name": identifier,
+        "slug": identifier,
         "url": f"{base_url}{identifier}/",
     }
+    if kind:
+        entry["kind"] = kind
+    return entry
 
 
 def build_manifest(
@@ -84,8 +99,8 @@ def build_manifest(
     heads = discover_heads(site, ref_name, ref_type)
     base_url = derive_base_url(repository)
 
-    head_entries = [format_entry(head, base_url) for head in heads]
-    tag_entries = [format_entry(tag, base_url) for tag in tags]
+    head_entries = [format_entry(head, base_url, kind="head") for head in heads]
+    tag_entries = [format_entry(tag, base_url, kind="tag") for tag in tags]
     head_versions = {entry["version"] for entry in head_entries}
 
     return {
