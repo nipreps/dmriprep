@@ -46,13 +46,6 @@
     return slug;
   }
 
-  function buildOption(version) {
-    var option = document.createElement('option');
-    option.value = version.url;
-    option.textContent = version.slug || version.name || version.version;
-    return option;
-  }
-
   function renderCurrentVersion(container, currentVersion) {
     var slug = null;
     if (currentVersion) {
@@ -79,66 +72,7 @@
     target.textContent = slug;
   }
 
-  function renderDropdown(container, versions, currentVersion) {
-    var wrapper = container.querySelector('.dmriprep-version-selector');
-    if (!wrapper) {
-      wrapper = document.createElement('div');
-      wrapper.className = 'dmriprep-version-selector';
-    }
-
-    var label = wrapper.querySelector('label');
-    if (!label) {
-      label = document.createElement('label');
-      label.textContent = 'Versions';
-      label.setAttribute('for', 'dmriprep-version-select');
-      wrapper.appendChild(label);
-    }
-
-    var select = wrapper.querySelector('#dmriprep-version-select');
-    if (!select) {
-      select = document.createElement('select');
-      select.id = 'dmriprep-version-select';
-      select.addEventListener('change', function (event) {
-        var target = event.target;
-        if (target && target.value) {
-          window.location.href = target.value;
-        }
-      });
-      wrapper.appendChild(select);
-    } else {
-      while (select.firstChild) {
-        select.removeChild(select.firstChild);
-      }
-    }
-
-    versions.forEach(function (optionData) {
-      var option = buildOption(optionData);
-      if (currentVersion) {
-        if (currentVersion.url && optionData.url && currentVersion.url === optionData.url) {
-          option.selected = true;
-        } else {
-          var slug = currentVersion.slug || currentVersion.version || currentVersion.name;
-          var matchesSlug = slug && (optionData.slug === slug || optionData.version === slug);
-          var matchesUrl = currentVersion.url && optionData.url && currentVersion.url.indexOf(optionData.url) === 0;
-          var matchesLocation = optionData.url && window.location.href.indexOf(optionData.url) === 0;
-          if (matchesSlug || matchesUrl || matchesLocation) {
-            option.selected = true;
-          }
-        }
-      }
-      select.appendChild(option);
-    });
-
-    if (wrapper.parentNode !== container) {
-      container.appendChild(wrapper);
-    }
-  }
-
   function renderFlyout(container, versions, currentVersion) {
-    if (!window.customElements || !customElements.get('readthedocs-flyout')) {
-      return false;
-    }
-
     var parent = container.parentNode;
     if (!parent) {
       return false;
@@ -198,12 +132,25 @@
       return false;
     }
 
-    flyout.versions = entries;
+    var applyVersions = function (target) {
+      target.versions = entries;
+    };
 
-    var dropdown = container.querySelector('.dmriprep-version-selector');
-    if (dropdown && dropdown.parentNode === container) {
-      container.removeChild(dropdown);
+    if (window.customElements && typeof window.customElements.whenDefined === 'function') {
+      window.customElements.whenDefined('readthedocs-flyout').then(function () {
+        applyVersions(flyout);
+      });
     }
+
+    if (!window.customElements || window.customElements.get('readthedocs-flyout')) {
+      applyVersions(flyout);
+    }
+
+    var legacyDropdown = container.querySelector('.dmriprep-version-selector');
+    if (legacyDropdown && legacyDropdown.parentNode === container) {
+      container.removeChild(legacyDropdown);
+    }
+
     return true;
   }
 
@@ -220,9 +167,7 @@
       return;
     }
 
-    if (!renderFlyout(container, options, currentVersion)) {
-      renderDropdown(container, options, currentVersion);
-    }
+    renderFlyout(container, options, currentVersion);
 
     initialised = true;
   }
