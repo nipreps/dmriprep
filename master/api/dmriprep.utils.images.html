@@ -6,15 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.utils.images module &mdash; dmriprep 25.0.0.dev147 documentation</title>
+  <title>dmriprep.utils.images module &mdash; dmriprep 25.0.0.dev150 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/version.css?v=9df4e968" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=5787bddc"></script>
+      <script src="../_static/documentation_options.js?v=f8c1fd55"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -30,6 +31,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+  
 
           
           
@@ -43,6 +45,11 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+  
+  
+  <div class="wy-side-nav-version">25.0.0.dev150</div>
+
+
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
@@ -98,7 +105,7 @@
 <p>Utilities to handle images.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.extract_b0">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">extract_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L30-L67"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.extract_b0" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">extract_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L30-L67"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.extract_b0" title="Link to this definition"></a></dt>
 <dd><p>Extract the <em>b0</em> volumes from a DWI dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -127,7 +134,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.get_list_data">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">get_list_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L180-L200"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.get_list_data" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">get_list_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L180-L200"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.get_list_data" title="Link to this definition"></a></dt>
 <dd><p>Load 3D volumes from a list of file paths into a 4D array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -148,7 +155,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.match_transforms">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">match_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dwi_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L203-L266"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.match_transforms" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">match_transforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dwi_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0_ixs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L203-L266"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.match_transforms" title="Link to this definition"></a></dt>
 <dd><p>Arrange the order of a list of transforms.</p>
 <p>This is a helper function for <abbr title="Eddy-currents and Motion Correction">EMC</abbr>.
 Sorts the input list of affine transforms  to correspond with that of
@@ -196,7 +203,7 @@ dwi volumes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.rescale_b0">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">rescale_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L70-L116"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.rescale_b0" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">rescale_b0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L70-L116"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.rescale_b0" title="Link to this definition"></a></dt>
 <dd><p>Rescale the input volumes using the median signal intensity.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -225,7 +232,7 @@ dwi volumes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.save_3d_to_4d">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">save_3d_to_4d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L304-L338"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.save_3d_to_4d" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">save_3d_to_4d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L304-L338"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.save_3d_to_4d" title="Link to this definition"></a></dt>
 <dd><p>Concatenate a list of 3D volumes into a 4D output.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -250,7 +257,7 @@ dwi volumes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.save_4d_to_3d">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">save_4d_to_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L269-L301"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.save_4d_to_3d" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">save_4d_to_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L269-L301"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.save_4d_to_3d" title="Link to this definition"></a></dt>
 <dd><p>Split a 4D dataset along the last dimension into multiple 3D volumes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -274,7 +281,7 @@ dwi volumes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.utils.images.summarize_images">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">summarize_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path=None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/a6adabc2d18965abbb02849b029aeedc51a0d743/dmriprep/utils/images.py#L119-L177"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.summarize_images" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.utils.images.</span></span><span class="sig-name descname"><span class="pre">summarize_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method=&lt;function</span> <span class="pre">median&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path=None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/21254d2838692df688a331504bd2ef70d7b305d6/dmriprep/utils/images.py#L119-L177"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.utils.images.summarize_images" title="Link to this definition"></a></dt>
 <dd><p>Summarize a 4D dataset across the last dimension using a
 callable method.</p>
 <dl class="field-list simple">
