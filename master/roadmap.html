@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Development road-map &mdash; dmriprep 25.0.0.dev126 documentation</title>
+  <title>Development road-map &mdash; dmriprep 25.0.0.dev145 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/github_style.css?v=1093691d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=722ede1c"></script>
+      <script src="_static/documentation_options.js?v=c407b3af"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -51,11 +51,11 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development road-map</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-4-before-end-of-2020">Version 0.4 (Before end of 2020)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-5-january-2021">Version 0.5 (January, 2021)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-6-february-2021">Version 0.6 (February, 2021)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-7-march-2021">Version 0.7 (March, 2021)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-8-april-2021">Version 0.8 (April, 2021)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-0-9-may-2021">Version 0.9 (May, 2021)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#version-1-0-targeted-for-september-2021">Version 1.0 (Targeted for September 2021)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-6-december-2021">Version 0.6 (December, 2021)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-7-january-2022">Version 0.7 (January, 2022)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-8-april-2022">Version 0.8 (April, 2022)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-may-2022">Version 0.9 (May, 2022)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-0-targeted-for-september-2022">Version 1.0 (Targeted for September 2022)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#long-term-plans">Long-term plans</a></li>
 </ul>
 </li>
@@ -123,6 +123,42 @@ and left in place for researchers who prefer this option.</p>
 </ul>
 </div></blockquote>
 </li>
+<li><p>First draft of ISBI 2021 tutorial:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Accept the design for our ISBI 2021 tutorial and document it on the notebooks repo.</p></li>
+<li><p>First draft</p></li>
+<li><p>Start development</p></li>
+<li><p>Plan for supporting Derek and Ariel in taking the head-motion correction to the finish line.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+<p># Finalize the development of ISBI 2021 tutorial (April 2021)</p>
+</section>
+<section id="version-0-6-december-2021">
+<h2>Version 0.6 (December, 2021)<a class="headerlink" href="#version-0-6-december-2021" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Head motion correction.</p>
+<blockquote>
+<div><p>A SHOREline-based approach, ported from QSIPREP. In cases where the data are
+“shelled”, 3dSHORE will be used as the diffusion model. If the data are
+single-shell, we will use SFM as the diffusion model.
+Development is undergoing at the <cite>eddymotion project
+&lt;https://github.com/nipreps/eddymotion&gt;__</cite>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Integrate B<sub>0</sub> field maps <a class="reference external" href="https://github.com/nipreps/eddymotion/issues/42">#42</a>.</p></li>
+<li><p>Add base integration and unit tests <a class="reference external" href="https://github.com/nipreps/eddymotion/issues/40">#40</a>.</p></li>
+<li><p>Implementation of a Gaussian Process <a class="reference external" href="https://github.com/nipreps/eddymotion/issues/53">#53</a>.</p></li>
+<li><p>FiberFox tests (head-motion) <a class="reference external" href="https://github.com/nipreps/eddymotion/issues/46">#46</a>.</p></li>
+<li><p>FiberFox tests (eddy) <a class="reference external" href="https://github.com/nipreps/eddymotion/issues/47">#47</a>.</p></li>
+<li><p>FiberFox tests (both) <a class="reference external" href="https://github.com/nipreps/eddymotion/issues/48">#48</a>.</p></li>
+<li><p>ISMRM’22 abstract (10 November 2021 at 03:59 UTC)</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
 <li><p>Framewise-displacement (or equivalent) calculation</p>
 <blockquote>
 <div><p>We will identify volumes that are outliers in terms of head-motion, or other
@@ -139,28 +175,6 @@ within the white-matter mask instead.</p>
 <li><p><a class="reference external" href="https://github.com/nipreps/dmriprep/pull/73">#73</a></p></li>
 <li><p><a class="reference external" href="https://github.com/nipreps/dmriprep/pull/129">#129</a></p></li>
 </ul>
-</div></blockquote>
-</li>
-<li><p>First draft of ISBI 2021 tutorial:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Accept the design for our ISBI 2021 tutorial and document it on the notebooks repo.</p></li>
-<li><p>First draft</p></li>
-<li><p>Start development</p></li>
-<li><p>Plan for supporting Derek and Ariel in taking the head-motion correction to the finish line.</p></li>
-</ul>
-</div></blockquote>
-</li>
-</ol>
-</section>
-<section id="version-0-6-february-2021">
-<h2>Version 0.6 (February, 2021)<a class="headerlink" href="#version-0-6-february-2021" title="Link to this heading"></a></h2>
-<ol class="arabic">
-<li><p>Head motion correction.</p>
-<blockquote>
-<div><p>A SHOREline-based approach, ported from QSIPREP. In cases where the data are
-“shelled”, 3dSHORE will be used as the diffusion model. If the data are
-single-shell, we will use SFM as the diffusion model.</p>
 </div></blockquote>
 </li>
 <li><p><span class="math notranslate nohighlight">\(B_1\)</span> inhomogeneity correction</p>
@@ -182,10 +196,9 @@ a flag, or else, generate both conversions always.</p></li>
 </div></blockquote>
 </li>
 </ol>
-<p># Continue with the development of ISBI 2021 tutorial</p>
 </section>
-<section id="version-0-7-march-2021">
-<h2>Version 0.7 (March, 2021)<a class="headerlink" href="#version-0-7-march-2021" title="Link to this heading"></a></h2>
+<section id="version-0-7-january-2022">
+<h2>Version 0.7 (January, 2022)<a class="headerlink" href="#version-0-7-january-2022" title="Link to this heading"></a></h2>
 <p>The <em>noisy month</em>. This is not a musical event, but a development cycle where we will
 focus on the implementation of steps addressing noise in DWI:</p>
 <ol class="arabic">
@@ -202,16 +215,15 @@ are in place (i.e., component-based above), and ordering of steps.</p></li>
 <li><p>Rician bias modeling.</p></li>
 <li><p>DWI carpet-plot and confounds collation.</p></li>
 <li><p>Testing Phase I execution</p></li>
-<li><p>Final release of the ISBI 2021 tutorial</p></li>
 </ol>
 </section>
-<section id="version-0-8-april-2021">
-<h2>Version 0.8 (April, 2021)<a class="headerlink" href="#version-0-8-april-2021" title="Link to this heading"></a></h2>
+<section id="version-0-8-april-2022">
+<h2>Version 0.8 (April, 2022)<a class="headerlink" href="#version-0-8-april-2022" title="Link to this heading"></a></h2>
 <p>This release will only address bugfixes conducive to finishing evaluation Phase I,
 which should conform a pretty solid ensemble ready for premiere in ISMRM 2021.</p>
 </section>
-<section id="version-0-9-may-2021">
-<h2>Version 0.9 (May, 2021)<a class="headerlink" href="#version-0-9-may-2021" title="Link to this heading"></a></h2>
+<section id="version-0-9-may-2022">
+<h2>Version 0.9 (May, 2022)<a class="headerlink" href="#version-0-9-may-2022" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>First official presentation at ISMRM 2021 (should the abstract be accepted)</p></li>
 <li><p>Evaluation Phase II starts.</p></li>
@@ -224,8 +236,8 @@ which should conform a pretty solid ensemble ready for premiere in ISMRM 2021.</
 </ul>
 </div></blockquote>
 </section>
-<section id="version-1-0-targeted-for-september-2021">
-<h2>Version 1.0 (Targeted for September 2021)<a class="headerlink" href="#version-1-0-targeted-for-september-2021" title="Link to this heading"></a></h2>
+<section id="version-1-0-targeted-for-september-2022">
+<h2>Version 1.0 (Targeted for September 2022)<a class="headerlink" href="#version-1-0-targeted-for-september-2022" title="Link to this heading"></a></h2>
 <p>Wrap-up evaluation Phase II with the first stable release of <em>dMRIPrep</em>.</p>
 </section>
 <section id="long-term-plans">

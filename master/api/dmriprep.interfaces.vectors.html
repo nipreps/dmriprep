@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.interfaces.vectors module &mdash; dmriprep 25.0.0.dev126 documentation</title>
+  <title>dmriprep.interfaces.vectors module &mdash; dmriprep 25.0.0.dev145 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
@@ -14,7 +14,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=722ede1c"></script>
+      <script src="../_static/documentation_options.js?v=c407b3af"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -99,7 +99,7 @@
 <p>Handling the gradient table.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.interfaces.vectors.CheckGradientTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.vectors.</span></span><span class="sig-name descname"><span class="pre">CheckGradientTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/f95af27c1db2d3157286e47288851b87f28868f4/dmriprep/interfaces/vectors.py#L61-L123"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.vectors.CheckGradientTable" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.vectors.</span></span><span class="sig-name descname"><span class="pre">CheckGradientTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/0907f456e971e106b6710d9b48eb793b27e3bb9d/dmriprep/interfaces/vectors.py#L64-L139"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.vectors.CheckGradientTable" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Ensure the correctness of the gradient table.</p>
 <p class="rubric">Example</p>
@@ -111,6 +111,10 @@
 <span class="go">(0.0, 0.0, 0.0)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">full_sphere</span>
 <span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">num_shells</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">shell_dist</span>
+<span class="go">{0: 12, 1200: 32, 2500: 61}</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check</span> <span class="o">=</span> <span class="n">CheckGradientTable</span><span class="p">(</span>
@@ -121,6 +125,10 @@
 <span class="go">(0.0, 0.0, 0.0)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">full_sphere</span>
 <span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">num_shells</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">shell_dist</span>
+<span class="go">{0: 12, 1200: 32, 2500: 61}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">newrasb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">check</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_rasb</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">oldrasb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">/</span> <span class="s1">&#39;dwi.tsv&#39;</span><span class="p">),</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">newrasb</span><span class="p">,</span> <span class="n">oldrasb</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1.e-3</span><span class="p">)</span>
@@ -134,6 +142,7 @@
 <dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>b0_threshold</strong> (<em>a float</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">50</span></code>)</p></li>
+<li><p><strong>b_mag</strong> (<em>an integer or None</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
 <li><p><strong>b_scale</strong> (<em>a boolean</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
 <li><p><strong>bvec_norm_epsilon</strong> (<em>a float</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>)</p></li>
 <li><p><strong>in_bval</strong> (<em>a pathlike object or string representing an existing file</em>) – Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">in_rasb</span></code>.</p></li>
@@ -146,10 +155,12 @@
 <li><p><strong>b0_ixs</strong> (<em>a list of items which are an integer</em>)</p></li>
 <li><p><strong>b0_mask</strong> (<em>a list of items which are a boolean</em>)</p></li>
 <li><p><strong>full_sphere</strong> (<em>a boolean</em>)</p></li>
+<li><p><strong>num_shells</strong> (<em>an integer</em>)</p></li>
 <li><p><strong>out_bval</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
 <li><p><strong>out_bvec</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
 <li><p><strong>out_rasb</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
 <li><p><strong>pole</strong> (<em>a tuple of the form: (a float, a float, a float)</em>)</p></li>
+<li><p><strong>shell_dist</strong> (<em>a dictionary with keys which are any value and with values which are any value</em>)</p></li>
 </ul>
 </dd>
 </dl>
