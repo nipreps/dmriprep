@@ -57,18 +57,13 @@ jobs:
           mkdir -p site/master
           rsync -a --delete docs/_build/html/ site/master/
 
-      - name: Deploy tagged documentation
+      - name: Archive tagged documentation
         if: github.repository == 'nipreps/dmriprep' && github.ref_type == 'tag'
         env:
           REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
-          dest="site/${REF_NAME}"
-          if [ -e "${dest}" ]; then
-            echo "Documentation for ${REF_NAME} already exists"
-            exit 1
-          fi
-          mkdir -p "${dest}"
-          rsync -a docs/_build/html/ "${dest}/"
+          python scripts/archive_docs_release.py --site site --build docs/_build/html
 
       - name: Update versions manifest
         if: github.repository == 'nipreps/dmriprep'
