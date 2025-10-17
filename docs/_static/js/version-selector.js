@@ -53,7 +53,8 @@
     return option;
   }
 
-  function renderCurrentVersion(container, currentVersion) {
+  function renderCurrentVersion(container, currentVersion, options) {
+    options = options || {};
     var slug = null;
     if (currentVersion) {
       slug = currentVersion.slug || currentVersion.version || currentVersion.name || null;
@@ -65,30 +66,52 @@
       return;
     }
 
+    var preferSpan = !!options.useSpan;
+    var isSwitchContainer = !!options.insideSwitch;
+    var desiredTagName = preferSpan ? 'span' : 'div';
     var target = container.querySelector('.dmriprep-current-version');
+    if (target && target.tagName.toLowerCase() !== desiredTagName) {
+      target.parentNode.removeChild(target);
+      target = null;
+    }
     if (!target) {
-      target = document.createElement('div');
-      target.className = 'version dmriprep-current-version';
-      var searchForm = container.querySelector('form');
-      if (searchForm && searchForm.parentNode === container) {
-        container.insertBefore(target, searchForm);
-      } else {
+      target = document.createElement(desiredTagName);
+      target.className = preferSpan
+        ? 'dmriprep-current-version'
+        : 'version dmriprep-current-version';
+      if (isSwitchContainer || preferSpan) {
         container.appendChild(target);
+      } else {
+        var searchForm = container.querySelector('form');
+        if (searchForm && searchForm.parentNode === container) {
+          container.insertBefore(target, searchForm);
+        } else {
+          container.appendChild(target);
+        }
       }
     }
     target.textContent = slug;
   }
 
   function renderSelector(options, currentVersion) {
-    var container = document.querySelector('.wy-side-nav-search');
-    if (!container) {
+    options = Array.isArray(options) ? options : [];
+    var searchContainer = document.querySelector('.wy-side-nav-search');
+    if (!searchContainer) {
       console.warn('dmriprep: unable to locate sidebar container for version selector');
       return;
     }
 
-    renderCurrentVersion(container, currentVersion);
+    var switchContainer = searchContainer.querySelector('.switch-menus .version-switch');
+    var container = switchContainer || searchContainer;
+    var hasDropdown = options.length > 0;
+
+    renderCurrentVersion(container, currentVersion, {
+      insideSwitch: !!switchContainer,
+      useSpan: !!switchContainer && !hasDropdown,
+    });
 
     if (!options.length) {
+      initialised = true;
       return;
     }
 

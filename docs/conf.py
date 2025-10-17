@@ -137,6 +137,7 @@ html_context = globals().get('html_context', {})
 html_static_path = ['_static']
 
 html_js_files = ['js/version-selector.js']
+html_css_files = ['css/version-selector.css']
 
 # Ensure the versions manifest is published alongside the built documentation.
 html_extra_path = ['_static/versions.json']
