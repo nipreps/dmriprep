@@ -1,0 +1,7 @@
+dmriprep.workflows.dwi.resampling module
+========================================
+
+.. automodule:: dmriprep.workflows.dwi.resampling
+   :members:
+   :undoc-members:
+   :show-inheritance:

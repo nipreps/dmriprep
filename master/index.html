@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dMRIPrep &mdash; dmriprep 25.0.0.dev152 documentation</title>
+  <title>dMRIPrep &mdash; dmriprep 26.0.0.dev180 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/github_style.css?v=1093691d" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=6b41f326"></script>
+      <script src="_static/documentation_options.js?v=a5a68870"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -46,7 +46,7 @@
 </div>
   
   
-  <div class="wy-side-nav-version">25.0.0.dev152</div>
+  <div class="wy-side-nav-version">26.0.0.dev180</div>
 
 
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
@@ -121,6 +121,35 @@ becomes available.</p>
 <p>dMRIPrep performs basic preprocessing steps such as head-motion correction,
 susceptibility-derived distortion correction, eddy current correction, etc.
 providing outputs that can be easily submitted to a variety of diffusion models.</p>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h2>
+<p>dMRIPrep uses <a class="reference external" href="https://pixi.sh">pixi</a> for environment management on Linux.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install pixi</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://pixi.sh/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+
+<span class="c1"># Set up development environment</span>
+pixi<span class="w"> </span>install
+
+<span class="c1"># Run tests</span>
+pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># Check code style</span>
+pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>lint
+</pre></div>
+</div>
+<p>On platforms other than <code class="docutils literal notranslate"><span class="pre">linux-64</span></code>, the recommended development setup is
+<a class="reference external" href="https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html">micromamba</a>
+with an existing <code class="docutils literal notranslate"><span class="pre">dmriprep</span></code> environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>micromamba<span class="w"> </span>activate<span class="w"> </span>dmriprep
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,test]&quot;</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest
+</pre></div>
+</div>
+<p>If micromamba is not available, you can still use pip directly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,test]&quot;</span>
+</pre></div>
+</div>
 </section>
 <section id="getting-involved">
 <h2>Getting involved<a class="headerlink" href="#getting-involved" title="Link to this heading"></a></h2>

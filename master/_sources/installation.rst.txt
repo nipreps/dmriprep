@@ -113,6 +113,13 @@ On a functional Python 3.7 (or above) environment with ``pip`` installed,
 
     $ python -m pip install dmriprep
 
+On platforms other than ``linux-64``, the recommended manual setup is
+to use ``micromamba`` with an environment named ``dmriprep``:
+::
+
+    $ micromamba activate dmriprep
+    $ python -m pip install -e ".[dev,test]"
+
 Check your installation with the ``--version`` argument ::
 
     $ dmriprep --version

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.workflows.dwi.base module &mdash; dmriprep 25.0.0.dev152 documentation</title>
+  <title>dmriprep.workflows.dwi.base module &mdash; dmriprep 26.0.0.dev180 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
@@ -15,10 +15,9 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=6b41f326"></script>
+      <script src="../_static/documentation_options.js?v=a5a68870"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -47,7 +46,7 @@
 </div>
   
   
-  <div class="wy-side-nav-version">25.0.0.dev152</div>
+  <div class="wy-side-nav-version">26.0.0.dev180</div>
 
 
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
@@ -104,8 +103,17 @@
 <p>Orchestrating the dMRI-preprocessing workflow.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.workflows.dwi.base.init_dwi_wf">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.workflows.dwi.base.</span></span><span class="sig-name descname"><span class="pre">init_dwi_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dwi_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precomputed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldmap_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacobian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dwi_vols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/bf0475bd98eb6bd599560474245978f067ffc099/dmriprep/workflows/dwi/base.py#L36-L480"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_wf" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.workflows.dwi.base.</span></span><span class="sig-name descname"><span class="pre">init_dwi_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dwi_series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precomputed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fieldmap_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jacobian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dwi_vols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/6f562b18605f82d217fa4ac2f9f8adefca903538/dmriprep/workflows/dwi/base.py#L36-L384"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.workflows.dwi.base.init_dwi_wf" title="Link to this definition"></a></dt>
 <dd><p>Build a preprocessing workflow for one DWI run.</p>
+<p>This workflow follows the fit/transform architecture, where:</p>
+<ul class="simple">
+<li><p><strong>Fit stage</strong> (<code class="docutils literal notranslate"><span class="pre">--level</span> <span class="pre">minimal</span></code>): Estimates all transforms without applying them,
+including head motion correction, eddy current correction, susceptibility
+distortion correction, and coregistration to anatomical space.</p></li>
+<li><p><strong>Transform stage</strong> (<code class="docutils literal notranslate"><span class="pre">--level</span> <span class="pre">resampling</span></code> or <code class="docutils literal notranslate"><span class="pre">--level</span> <span class="pre">full</span></code>): Composes all
+estimated transforms and applies them in a single interpolation step to
+minimize blurring.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -113,35 +121,43 @@
 <li><p><strong>precomputed</strong> – Dictionary containing precomputed derivatives to reuse, if possible.</p></li>
 <li><p><strong>fieldmap_id</strong> – ID of the fieldmap to use to correct this DWI series. If <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>,
 no correction will be applied.</p></li>
+<li><p><strong>jacobian</strong> – Whether to apply Jacobian modulation during SDC.</p></li>
+<li><p><strong>min_dwi_vols</strong> – Minimum number of volumes required to process.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Inputs<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>dwi_file</strong> – dwi NIfTI file</p></li>
-<li><p><strong>in_bvec</strong> – File path of the b-vectors</p></li>
-<li><p><strong>in_bval</strong> – File path of the b-values</p></li>
-<li><p><strong>metadata</strong> – dwi metadata</p></li>
-<li><p><strong>fmap</strong> – File path of the fieldmap</p></li>
-<li><p><strong>fmap_ref</strong> – File path of the fieldmap reference</p></li>
-<li><p><strong>fmap_coeff</strong> – File path of the fieldmap coefficients</p></li>
-<li><p><strong>fmap_mask</strong> – File path of the fieldmap mask</p></li>
-<li><p><strong>fmap_id</strong> – The BIDS modality label of the fieldmap being used</p></li>
+<li><p><strong>t1w_preproc</strong> – Preprocessed T1w image.</p></li>
+<li><p><strong>t1w_mask</strong> – Brain mask in T1w space.</p></li>
+<li><p><strong>t1w_dseg</strong> – Tissue segmentation in T1w space.</p></li>
+<li><p><strong>t1w_tpms</strong> – Tissue probability maps.</p></li>
+<li><p><strong>subjects_dir</strong> – FreeSurfer subjects directory.</p></li>
+<li><p><strong>subject_id</strong> – FreeSurfer subject ID.</p></li>
+<li><p><strong>fsnative2t1w_xfm</strong> – Transform from FreeSurfer native to T1w space.</p></li>
+<li><p><strong>fmap, fmap_ref, fmap_coeff, fmap_mask</strong> – Fieldmap-related inputs.</p></li>
+<li><p><strong>fmap_id</strong> – Fieldmap estimator ID.</p></li>
+<li><p><strong>sdc_method</strong> – SDC method identifier.</p></li>
+<li><p><strong>anat2std_xfm</strong> – Anatomical to standard space transform(s).</p></li>
+<li><p><strong>std_t1w, std_mask</strong> – Standard space reference and mask.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Outputs<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><em>dwi_reference</em> – A 3D <span class="math notranslate nohighlight">\(b = 0\)</span> reference, before susceptibility distortion correction.</p></li>
-<li><p><em>dwi_mask</em> – A 3D, binary mask of the <code class="docutils literal notranslate"><span class="pre">dwi_reference</span></code> above.</p></li>
-<li><p><em>gradients_rasb</em> – A <em>RASb</em> (RAS+ coordinates, scaled b-values, normalized b-vectors, BIDS-compatible)
-gradient table.</p></li>
+<li><p><em>hmc_dwiref</em> – 3D b=0 reference for motion correction.</p></li>
+<li><p><em>coreg_dwiref</em> – SDC-corrected reference for coregistration.</p></li>
+<li><p><em>dwi_mask</em> – Brain mask in DWI space.</p></li>
+<li><p><em>motion_xfm</em> – Per-volume motion transforms.</p></li>
+<li><p><em>dwiref2anat_xfm</em> – DWI-to-anatomical coregistration.</p></li>
+<li><p><em>dwi_preproc</em> – Preprocessed DWI (if level &gt; minimal).</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_dwi_derivatives_wf" title="dmriprep.workflows.dwi.outputs.init_dwi_derivatives_wf"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_dwi_derivatives_wf()</span></code></a></p></li>
-<li><p><a class="reference internal" href="dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_reportlets_wf" title="dmriprep.workflows.dwi.outputs.init_reportlets_wf"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_reportlets_wf()</span></code></a></p></li>
+<li><p><a class="reference internal" href="dmriprep.workflows.dwi.fit.html#dmriprep.workflows.dwi.fit.init_dwi_fit_wf" title="dmriprep.workflows.dwi.fit.init_dwi_fit_wf"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_dwi_fit_wf()</span></code></a></p></li>
+<li><p><a class="reference internal" href="dmriprep.workflows.dwi.resampling.html#dmriprep.workflows.dwi.resampling.init_dwi_native_wf" title="dmriprep.workflows.dwi.resampling.init_dwi_native_wf"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_dwi_native_wf()</span></code></a></p></li>
+<li><p><a class="reference internal" href="dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_dwi_fit_derivatives_wf" title="dmriprep.workflows.dwi.outputs.init_dwi_fit_derivatives_wf"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_dwi_fit_derivatives_wf()</span></code></a></p></li>
 </ul>
 </div>
 </dd></dl>

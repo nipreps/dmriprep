@@ -1,0 +1,238 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dmriprep.interfaces.nifreeze module &mdash; dmriprep 26.0.0.dev180 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/version.css?v=9df4e968" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a5a68870"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmriprep.interfaces.reports module" href="dmriprep.interfaces.reports.html" />
+    <link rel="prev" title="dmriprep.interfaces.images module" href="dmriprep.interfaces.images.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+  
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            dmriprep
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+  
+  
+  <div class="wy-side-nav-version">26.0.0.dev180</div>
+
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.config.html">dmriprep.config package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="dmriprep.interfaces.html">dmriprep.interfaces package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dmriprep.interfaces.html#dmriprep.interfaces.BIDSDataGrabber"><code class="docutils literal notranslate"><span class="pre">BIDSDataGrabber</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dmriprep.interfaces.html#dmriprep.interfaces.DerivativesDataSink"><code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code></a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="dmriprep.interfaces.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.bids.html">dmriprep.interfaces.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.images.html">dmriprep.interfaces.images module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dmriprep.interfaces.nifreeze module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.reports.html">dmriprep.interfaces.reports module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dmriprep.interfaces.vectors.html">dmriprep.interfaces.vectors module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.utils.html">dmriprep.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dmriprep.workflows.html">dmriprep.workflows package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">What’s new?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Development road-map</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">dmriprep</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">Library API (application program interface)</a></li>
+          <li class="breadcrumb-item"><a href="dmriprep.interfaces.html">dmriprep.interfaces package</a></li>
+      <li class="breadcrumb-item active">dmriprep.interfaces.nifreeze module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/dmriprep.interfaces.nifreeze.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-dmriprep.interfaces.nifreeze">
+<span id="dmriprep-interfaces-nifreeze-module"></span><h1>dmriprep.interfaces.nifreeze module<a class="headerlink" href="#module-dmriprep.interfaces.nifreeze" title="Link to this heading"></a></h1>
+<p>Nipype interfaces for NiFreeze (motion and eddy-current estimation).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="dmriprep.interfaces.nifreeze.ExtractTransforms">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">ExtractTransforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/6f562b18605f82d217fa4ac2f9f8adefca903538/dmriprep/interfaces/nifreeze.py#L160-L212"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.ExtractTransforms" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Extract and convert transforms from NiFreeze HDF5 output.</p>
+<p>Converts NiFreeze’s internal transform representation to standard
+neuroimaging formats (ITK, FSL, AFNI) for BIDS derivative output
+and downstream processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – HDF5 file from NiFreeze estimation.</p>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>output_format</strong> (<em>‘itk’ or ‘fsl’ or ‘afni’</em>) – Output transform format.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">itk</span></code>)</p></li>
+<li><p><strong>reference</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference image for transform header.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eddy_xfm</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Per-volume eddy current transforms.</p></li>
+<li><p><strong>motion_params</strong> (<em>a pathlike object or string representing an existing file</em>) – Motion parameters TSV file.</p></li>
+<li><p><strong>motion_xfm</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Per-volume motion transforms.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dmriprep.interfaces.nifreeze.NiFreezeEstimate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">NiFreezeEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/6f562b18605f82d217fa4ac2f9f8adefca903538/dmriprep/interfaces/nifreeze.py#L64-L139"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.NiFreezeEstimate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Estimate head motion and eddy-current distortions using NiFreeze.</p>
+<p>This interface wraps NiFreeze’s estimation pipeline, which uses
+leave-one-out cross-validation with diffusion models (DTI, DKI, GP)
+to predict each volume and estimate motion/distortion by registering
+predicted to actual volumes.</p>
+<p>The transforms are stored but not applied, following the fit/transform
+architecture pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bval_file</strong> (<em>a pathlike object or string representing an existing file</em>) – B-values file.</p></li>
+<li><p><strong>bvec_file</strong> (<em>a pathlike object or string representing an existing file</em>) – B-vectors file.</p></li>
+<li><p><strong>dwi_file</strong> (<em>a pathlike object or string representing an existing file</em>) – DWI NIfTI file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>b0_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Pre-computed b=0 reference image.</p></li>
+<li><p><strong>b0_threshold</strong> (<em>a float</em>) – Threshold for b=0 volumes.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">50.0</span></code>)</p></li>
+<li><p><strong>brainmask</strong> (<em>a pathlike object or string representing an existing file</em>) – Brain mask in DWI space.</p></li>
+<li><p><strong>model</strong> (<em>‘DTI’ or ‘DKI’ or ‘GP’ or ‘average’</em>) – Diffusion model for leave-one-out prediction.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">DTI</span></code>)</p></li>
+<li><p><strong>n_threads</strong> (<em>an integer</em>) – Number of parallel threads.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bzero</strong> (<em>a pathlike object or string representing an existing file</em>) – Estimated b=0 reference.</p></li>
+<li><p><strong>motion_affines</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Per-volume motion transforms.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – HDF5 file with estimated transforms.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dmriprep.interfaces.nifreeze.RotateBVecs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">RotateBVecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/6f562b18605f82d217fa4ac2f9f8adefca903538/dmriprep/interfaces/nifreeze.py#L230-L284"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.RotateBVecs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Rotate b-vectors based on motion correction transforms.</p>
+<p>Extracts the rotation component from each affine transform and
+applies it to the corresponding b-vector. This is necessary to
+maintain consistency between gradient directions and the
+reoriented image data after motion correction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_bval</strong> (<em>a pathlike object or string representing an existing file</em>) – Original b-values file.</p></li>
+<li><p><strong>in_bvec</strong> (<em>a pathlike object or string representing an existing file</em>) – Original b-vectors file.</p></li>
+<li><p><strong>transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Per-volume affine transforms.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>b0_threshold</strong> (<em>a float</em>) – Threshold for b=0 volumes.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">50.0</span></code>)</p>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_bvec</strong> (<em>a pathlike object or string representing an existing file</em>) – Rotated b-vectors file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dmriprep.interfaces.images.html" class="btn btn-neutral float-left" title="dmriprep.interfaces.images module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dmriprep.interfaces.reports.html" class="btn btn-neutral float-right" title="dmriprep.interfaces.reports module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

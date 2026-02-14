@@ -1,0 +1,7 @@
+dmriprep.workflows.dwi.registration module
+==========================================
+
+.. automodule:: dmriprep.workflows.dwi.registration
+   :members:
+   :undoc-members:
+   :show-inheritance:

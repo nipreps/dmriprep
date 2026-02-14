@@ -1,0 +1,7 @@
+dmriprep.workflows.dwi.fit module
+=================================
+
+.. automodule:: dmriprep.workflows.dwi.fit
+   :members:
+   :undoc-members:
+   :show-inheritance:

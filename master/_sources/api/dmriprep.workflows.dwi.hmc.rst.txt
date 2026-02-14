@@ -1,0 +1,7 @@
+dmriprep.workflows.dwi.hmc module
+=================================
+
+.. automodule:: dmriprep.workflows.dwi.hmc
+   :members:
+   :undoc-members:
+   :show-inheritance:

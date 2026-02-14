@@ -14,5 +14,6 @@ Submodules
 
    dmriprep.interfaces.bids
    dmriprep.interfaces.images
+   dmriprep.interfaces.nifreeze
    dmriprep.interfaces.reports
    dmriprep.interfaces.vectors

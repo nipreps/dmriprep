@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Library API (application program interface) &mdash; dmriprep 25.0.0.dev152 documentation</title>
+  <title>Library API (application program interface) &mdash; dmriprep 26.0.0.dev180 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/github_style.css?v=1093691d" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=6b41f326"></script>
+      <script src="_static/documentation_options.js?v=a5a68870"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -47,7 +47,7 @@
 </div>
   
   
-  <div class="wy-side-nav-version">25.0.0.dev152</div>
+  <div class="wy-side-nav-version">26.0.0.dev180</div>
 
 
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
@@ -236,6 +236,12 @@
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.interfaces.images.html#dmriprep.interfaces.images.RescaleB0"><code class="docutils literal notranslate"><span class="pre">RescaleB0</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="api/dmriprep.interfaces.nifreeze.html">dmriprep.interfaces.nifreeze module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.interfaces.nifreeze.html#dmriprep.interfaces.nifreeze.ExtractTransforms"><code class="docutils literal notranslate"><span class="pre">ExtractTransforms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.interfaces.nifreeze.html#dmriprep.interfaces.nifreeze.NiFreezeEstimate"><code class="docutils literal notranslate"><span class="pre">NiFreezeEstimate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.interfaces.nifreeze.html#dmriprep.interfaces.nifreeze.RotateBVecs"><code class="docutils literal notranslate"><span class="pre">RotateBVecs</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="api/dmriprep.interfaces.reports.html">dmriprep.interfaces.reports module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.interfaces.reports.html#dmriprep.interfaces.reports.AboutSummary"><code class="docutils literal notranslate"><span class="pre">AboutSummary</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.interfaces.reports.html#dmriprep.interfaces.reports.DiffusionSummary"><code class="docutils literal notranslate"><span class="pre">DiffusionSummary</span></code></a></li>
@@ -255,6 +261,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/dmriprep.utils.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/dmriprep.utils.bids.html">dmriprep.utils.bids module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.utils.bids.html#dmriprep.utils.bids.collect_derivatives"><code class="docutils literal notranslate"><span class="pre">collect_derivatives()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.utils.bids.html#dmriprep.utils.bids.collect_fieldmaps"><code class="docutils literal notranslate"><span class="pre">collect_fieldmaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.utils.bids.html#dmriprep.utils.bids.extract_entities"><code class="docutils literal notranslate"><span class="pre">extract_entities()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.utils.bids.html#dmriprep.utils.bids.validate_input_dir"><code class="docutils literal notranslate"><span class="pre">validate_input_dir()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.utils.bids.html#dmriprep.utils.bids.write_bidsignore"><code class="docutils literal notranslate"><span class="pre">write_bidsignore()</span></code></a></li>
@@ -308,6 +315,17 @@
 <li class="toctree-l1"><a class="reference internal" href="api/dmriprep.workflows.html">dmriprep.workflows package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/dmriprep.workflows.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/dmriprep.workflows.dwi.html">dmriprep.workflows.dwi package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_derivatives_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_derivatives_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_fit_derivatives_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_fit_derivatives_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_fit_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_fit_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_hmc_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_hmc_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_native_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_native_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_preproc_derivatives_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_preproc_derivatives_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_reference_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_reference_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_reg_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_reg_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_std_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_std_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_dwi_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_wf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#dmriprep.workflows.dwi.init_reportlets_wf"><code class="docutils literal notranslate"><span class="pre">init_reportlets_wf()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/dmriprep.workflows.dwi.html#submodules">Submodules</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="api/dmriprep.workflows.dwi.base.html">dmriprep.workflows.dwi.base module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.base.html#dmriprep.workflows.dwi.base.init_dwi_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_wf()</span></code></a></li>
@@ -318,9 +336,32 @@
 <li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.eddy.html#dmriprep.workflows.dwi.eddy.init_eddy_wf"><code class="docutils literal notranslate"><span class="pre">init_eddy_wf()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="api/dmriprep.workflows.dwi.fit.html">dmriprep.workflows.dwi.fit module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.fit.html#dmriprep.workflows.dwi.fit.init_dwi_fit_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_fit_wf()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.fit.html#dmriprep.workflows.dwi.fit.init_dwi_reference_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_reference_wf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/dmriprep.workflows.dwi.hmc.html">dmriprep.workflows.dwi.hmc module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.hmc.html#dmriprep.workflows.dwi.hmc.init_dwi_hmc_flirt_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_hmc_flirt_wf()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.hmc.html#dmriprep.workflows.dwi.hmc.init_dwi_hmc_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_hmc_wf()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="api/dmriprep.workflows.dwi.outputs.html">dmriprep.workflows.dwi.outputs module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_dwi_derivatives_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_derivatives_wf()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_dwi_fit_derivatives_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_fit_derivatives_wf()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_dwi_preproc_derivatives_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_preproc_derivatives_wf()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.outputs.html#dmriprep.workflows.dwi.outputs.init_reportlets_wf"><code class="docutils literal notranslate"><span class="pre">init_reportlets_wf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/dmriprep.workflows.dwi.registration.html">dmriprep.workflows.dwi.registration module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.registration.html#dmriprep.workflows.dwi.registration.init_dwi_reg_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_reg_wf()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.registration.html#dmriprep.workflows.dwi.registration.init_dwi_t2w_reg_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_t2w_reg_wf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="api/dmriprep.workflows.dwi.resampling.html">dmriprep.workflows.dwi.resampling module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.resampling.html#dmriprep.workflows.dwi.resampling.ResampleDWISeries"><code class="docutils literal notranslate"><span class="pre">ResampleDWISeries</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.resampling.html#dmriprep.workflows.dwi.resampling.init_dwi_native_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_native_wf()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="api/dmriprep.workflows.dwi.resampling.html#dmriprep.workflows.dwi.resampling.init_dwi_std_wf"><code class="docutils literal notranslate"><span class="pre">init_dwi_std_wf()</span></code></a></li>
 </ul>
 </li>
 </ul>

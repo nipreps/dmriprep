@@ -1,0 +1,7 @@
+dmriprep.interfaces.nifreeze module
+===================================
+
+.. automodule:: dmriprep.interfaces.nifreeze
+   :members:
+   :undoc-members:
+   :show-inheritance:
