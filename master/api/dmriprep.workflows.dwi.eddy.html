@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.workflows.dwi.eddy module &mdash; dmriprep 26.0.0.dev182 documentation</title>
+  <title>dmriprep.workflows.dwi.eddy module &mdash; dmriprep 26.0.0.dev183 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=36268603"></script>
+      <script src="../_static/documentation_options.js?v=925e021a"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -46,7 +46,7 @@
 </div>
   
   
-  <div class="wy-side-nav-version">26.0.0.dev182</div>
+  <div class="wy-side-nav-version">26.0.0.dev183</div>
 
 
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
@@ -103,7 +103,7 @@
 <p>Eddy-currents and head-motion estimation/correction.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.workflows.dwi.eddy.gen_eddy_textfiles">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.workflows.dwi.eddy.</span></span><span class="sig-name descname"><span class="pre">gen_eddy_textfiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/85d51a8cbefe4c13595035e474a5f67068849f04/dmriprep/workflows/dwi/eddy.py#L30-L89"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.workflows.dwi.eddy.gen_eddy_textfiles" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.workflows.dwi.eddy.</span></span><span class="sig-name descname"><span class="pre">gen_eddy_textfiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/93833dd22c20b907b328d0faeb869ed232fabdb6/dmriprep/workflows/dwi/eddy.py#L30-L89"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.workflows.dwi.eddy.gen_eddy_textfiles" title="Link to this definition"></a></dt>
 <dd><p>Generate the acquisition-parameters and index files for FSL <code class="docutils literal notranslate"><span class="pre">eddy_openmp</span></code>.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">out_acqparams</span><span class="p">,</span> <span class="n">out_index</span> <span class="o">=</span> <span class="n">gen_eddy_textfiles</span><span class="p">(</span>
@@ -123,7 +123,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dmriprep.workflows.dwi.eddy.init_eddy_wf">
-<span class="sig-prename descclassname"><span class="pre">dmriprep.workflows.dwi.eddy.</span></span><span class="sig-name descname"><span class="pre">init_eddy_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eddy_wf'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/85d51a8cbefe4c13595035e474a5f67068849f04/dmriprep/workflows/dwi/eddy.py#L92-L177"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.workflows.dwi.eddy.init_eddy_wf" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dmriprep.workflows.dwi.eddy.</span></span><span class="sig-name descname"><span class="pre">init_eddy_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eddy_wf'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/93833dd22c20b907b328d0faeb869ed232fabdb6/dmriprep/workflows/dwi/eddy.py#L92-L177"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.workflows.dwi.eddy.init_eddy_wf" title="Link to this definition"></a></dt>
 <dd><p>Create a workflow for head-motion &amp; Eddy currents distortion estimation with FSL.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

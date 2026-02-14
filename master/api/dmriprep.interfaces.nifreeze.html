@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dmriprep.interfaces.nifreeze module &mdash; dmriprep 26.0.0.dev182 documentation</title>
+  <title>dmriprep.interfaces.nifreeze module &mdash; dmriprep 26.0.0.dev183 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=0745d1ac" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/github_style.css?v=1093691d" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=36268603"></script>
+      <script src="../_static/documentation_options.js?v=925e021a"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -46,7 +46,7 @@
 </div>
   
   
-  <div class="wy-side-nav-version">26.0.0.dev182</div>
+  <div class="wy-side-nav-version">26.0.0.dev183</div>
 
 
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
@@ -107,7 +107,7 @@
 <p>Nipype interfaces for NiFreeze (motion and eddy-current estimation).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.interfaces.nifreeze.ExtractTransforms">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">ExtractTransforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/85d51a8cbefe4c13595035e474a5f67068849f04/dmriprep/interfaces/nifreeze.py#L160-L212"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.ExtractTransforms" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">ExtractTransforms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/93833dd22c20b907b328d0faeb869ed232fabdb6/dmriprep/interfaces/nifreeze.py#L160-L212"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.ExtractTransforms" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Extract and convert transforms from NiFreeze HDF5 output.</p>
 <p>Converts NiFreeze’s internal transform representation to standard
@@ -136,7 +136,7 @@ and downstream processing.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.interfaces.nifreeze.NiFreezeEstimate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">NiFreezeEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/85d51a8cbefe4c13595035e474a5f67068849f04/dmriprep/interfaces/nifreeze.py#L64-L139"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.NiFreezeEstimate" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">NiFreezeEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/93833dd22c20b907b328d0faeb869ed232fabdb6/dmriprep/interfaces/nifreeze.py#L64-L139"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.NiFreezeEstimate" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Estimate head motion and eddy-current distortions using NiFreeze.</p>
 <p>This interface wraps NiFreeze’s estimation pipeline, which uses
@@ -177,7 +177,7 @@ architecture pattern.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dmriprep.interfaces.nifreeze.RotateBVecs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">RotateBVecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/85d51a8cbefe4c13595035e474a5f67068849f04/dmriprep/interfaces/nifreeze.py#L230-L284"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.RotateBVecs" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dmriprep.interfaces.nifreeze.</span></span><span class="sig-name descname"><span class="pre">RotateBVecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/nipreps/dmriprep/blob/93833dd22c20b907b328d0faeb869ed232fabdb6/dmriprep/interfaces/nifreeze.py#L230-L284"><span class="linkcode-link"><span class="pre">View</span> <span class="pre">on</span> <span class="pre">GitHub</span></span></a><a class="headerlink" href="#dmriprep.interfaces.nifreeze.RotateBVecs" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Rotate b-vectors based on motion correction transforms.</p>
 <p>Extracts the rotation component from each affine transform and
