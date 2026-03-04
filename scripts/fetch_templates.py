@@ -3,7 +3,7 @@
 Standalone script to facilitate caching of required TemplateFlow templates.
 
 To download and view how to use this script, run the following commands inside a terminal:
-1. wget https://raw.githubusercontent.com/nipreps/fmriprep/master/scripts/fetch_templates.py
+1. wget https://raw.githubusercontent.com/nipreps/dmriprep/master/scripts/fetch_templates.py
 2. python fetch_templates.py -h
 """
 
@@ -119,7 +119,7 @@ def fetch_all():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Helper script for pre-caching required templates to run fMRIPrep',
+        description='Helper script for pre-caching required templates to run dMRIPrep',
     )
     parser.add_argument(
         '--tf-dir',

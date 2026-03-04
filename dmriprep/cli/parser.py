@@ -539,7 +539,7 @@ https://www.nipreps.org/dmriprep/en/{currentv.base_version if is_release else 'l
         action='store_true',
         default=False,
         help='Clears working directory of contents. Use of this flag is not '
-        'recommended when running concurrent processes of fMRIPrep.',
+        'recommended when running concurrent processes of dMRIPrep.',
     )
     g_other.add_argument(
         '--resource-monitor',
@@ -688,7 +688,7 @@ inputs. Please, BEWARE OF THE RISKS TO THE CONSISTENCY of results when using var
 processing workflows across participants. To determine whether a participant has been run \
 through the shortcut pipeline (meaning, brain extraction was skipped), please check the \
 citation boilerplate. When reporting results with varying pipelines, please make sure you \
-mention this particular variant of fMRIPrep listing the participants for which it was \
+mention this particular variant of dMRIPrep listing the participants for which it was \
 applied."""
         )
 
