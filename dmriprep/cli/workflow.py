@@ -77,7 +77,7 @@ def build_workflow(config_file, retval):
         session_list = config.execution.session_label
         if not session_list:
             session_list = (
-                config.execution.bids_filters.get('bold', {}).get('session')
+                config.execution.bids_filters.get('dwi', {}).get('session')
                 if config.execution.bids_filters
                 else None
             )
